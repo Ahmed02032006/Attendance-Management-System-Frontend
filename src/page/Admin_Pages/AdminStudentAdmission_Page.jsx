@@ -1,0 +1,939 @@
+import React, { useEffect, useState } from 'react';
+import {
+  FiEye, FiCheck, FiX, FiChevronLeft, FiChevronRight,
+  FiSearch, FiPhone, FiMail, FiUser, FiCalendar,
+  FiHome, FiBriefcase, FiFileText, FiLink, FiPlus, FiEdit
+} from 'react-icons/fi';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  getAdmissionBySchoolId,
+  updateAdmissionStatus,
+} from '../../store/Admin-Slicer/Admin-Admission-Slicer';
+import { toast } from 'react-toastify';
+import AdmissionForm from './AdmissionForm';
+
+const AdminStudentAdmission_Page = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedApplication, setSelectedApplication] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingApplication, setEditingApplication] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [formErrors, setFormErrors] = useState({});
+  const applicationsPerPage = 10;
+
+  // =====================================
+
+  const [isAdmissionFormOpen, setIsAdmissionFormOpen] = useState(false);
+
+
+
+  // =====================================
+
+  const { admission } = useSelector((state) => state.adminAdmission);
+  const dispatch = useDispatch();
+  const schoolId = sessionStorage.getItem("currentSchoolId") || null;
+
+  useEffect(() => {
+    if (!schoolId) return;
+    dispatch(getAdmissionBySchoolId(schoolId));
+  }, [dispatch, schoolId]);
+
+  useEffect(() => {
+    if (admission) {
+      setAllApplications(admission);
+      setFilteredApplications(admission);
+      setApplicationsLoading(false);
+    }
+  }, [admission]);
+
+  const [allApplications, setAllApplications] = useState([]);
+  const [filteredApplications, setFilteredApplications] = useState([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(true);
+
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredApplications(allApplications);
+    } else {
+      const filtered = allApplications.filter(application =>
+        application.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        application.applicationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        application.parentOrGuardianName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        application.studentEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        application.phone.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredApplications(filtered);
+    }
+    setCurrentPage(1);
+  }, [searchTerm, allApplications]);
+
+  // Pagination logic
+  const indexOfLastApplication = currentPage * applicationsPerPage;
+  const indexOfFirstApplication = indexOfLastApplication - applicationsPerPage;
+  const currentApplications = filteredApplications?.slice(indexOfFirstApplication, indexOfLastApplication);
+  const totalPages = Math.ceil(filteredApplications?.length / applicationsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+
+  const openModal = (application) => {
+    setSelectedApplication(application);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedApplication(null);
+  };
+
+  const openEditModal = (application) => {
+    setEditingApplication({ ...application });
+    setIsEditModalOpen(true);
+    setFormErrors({});
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingApplication(null);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    console.log(editingApplication);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditingApplication(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  if (applicationsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-lg font-medium text-gray-700">Loading Admissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200">
+        <div className="px-6 py-[19px] flex items-center justify-between">
+          <h1 className="text-2xl font-medium text-gray-800">
+            Admin Student Admission Page
+          </h1>
+        </div>
+      </header>
+
+      <main className="p-6">
+        {/* Search and Add Button */}
+        <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="relative flex-grow max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiSearch className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search applications..."
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <button
+            onClick={() => setIsAdmissionFormOpen(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+          >
+            <FiPlus className="mr-2 h-4 w-4" />
+            New Admission
+          </button>
+        </div>
+
+        {/* Applications Table */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto hide-scrollbar">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Student
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Application ID
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Parent/Guardian
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Contact
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Applied Date
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Documents
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {currentApplications.length > 0 ? (
+                  currentApplications.map((application) => (
+                    <tr key={application._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-3.5 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 overflow-hidden border border-gray-300">
+                            {application.profilePictureUrl ? (
+                              <img
+                                src={application.profilePictureUrl}
+                                alt={application.studentName}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400">
+                                <FiUser className="h-5 w-5" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">{application.studentName}</div>
+                            <div className="text-sm text-gray-500">{application.grade}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm font-medium text-gray-500">
+                        {application.applicationId}
+                      </td>
+                      <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
+                        {application.parentOrGuardianName}
+                      </td>
+                      <td className="px-6 py-3.5 whitespace-nowrap">
+                        <div className="flex flex-col items-center">
+                          <div className="text-sm text-gray-500 flex items-center">
+                            <FiMail className="mr-1 h-4 w-4" />
+                            {application.studentEmail}
+                          </div>
+                          <div className="text-sm text-gray-500 flex items-center">
+                            <FiPhone className="mr-1 h-4 w-4" />
+                            {application.phone}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
+                        {formatDate(application.appliedDate)}
+                      </td>
+                      <td className="px-6 py-3.5 whitespace-nowrap text-center">
+                        <a
+                          href={application.documents?.[0]?.file || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block px-2 py-1 text-xs font-medium rounded-full"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link">
+                            <path d="M15 3h6v6" />
+                            <path d="M10 14 21 3" />
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                          </svg>
+                        </a>
+                      </td>
+                      <td className="px-6 py-3.5 whitespace-nowrap">
+                        <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${application.status === 'Approved'
+                          ? 'bg-green-100 text-green-800'
+                          : application.status === 'Rejected'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                          {application.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm font-medium">
+                        <div className="flex justify-center space-x-3">
+                          <button
+                            onClick={() => openModal(application)}
+                            className="text-sky-600 hover:text-sky-900"
+                            title="View Details"
+                          >
+                            <FiEye className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => openEditModal(application)}
+                            className="text-gray-600 hover:text-gray-900"
+                            title="Edit"
+                          >
+                            <FiEdit className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="px-6 py-4 text-center text-sm text-gray-500">
+                      No applications found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {filteredApplications?.length > 0 && (
+            <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <div className="mb-3 sm:mb-0">
+                <p className="text-sm text-gray-700">
+                  Showing <span className="font-medium">{indexOfFirstApplication + 1}</span> to{' '}
+                  <span className="font-medium">{Math.min(indexOfLastApplication, filteredApplications?.length)}</span> of{' '}
+                  <span className="font-medium">{filteredApplications?.length}</span> applications
+                </p>
+              </div>
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                >
+                  <FiChevronLeft className="h-4 w-4 mr-1" />
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                  <button
+                    key={number}
+                    onClick={() => paginate(number)}
+                    className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
+                      ? 'border-sky-600 bg-sky-600 text-white'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                      } rounded-md transition-colors`}
+                  >
+                    {number}
+                  </button>
+                ))}
+
+                <button
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                >
+                  <FiChevronRight className="h-4 w-4 ml-1" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Application Detail Modal */}
+      {isModalOpen && selectedApplication && (
+        <div className="fixed inset-0 overflow-y-auto z-50 bg-gray-500/65">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">
+                        Application Details: {selectedApplication.studentName}
+                      </h3>
+                      <button onClick={closeModal} className="text-gray-400 hover:text-gray-500">
+                        <span className="sr-only">Close</span>
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Student Information */}
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="text-md font-medium text-gray-900 mb-3 flex items-center">
+                          <FiUser className="mr-2 h-5 w-5 text-sky-500" />
+                          Student Information
+                        </h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Name:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.studentName}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Email:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.studentEmail}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Grade:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.grade}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Roll Number:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.rollNumber || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">DOB:</span>
+                            <span className="text-sm text-gray-900">{formatDate(selectedApplication.dob)}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Gender:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.gender || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Nationality:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.nationality || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Religion:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.religion || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Section:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.section || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Prev School:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.previousSchool || 'N/A'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Parent/Guardian Information */}
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="text-md font-medium text-gray-900 mb-3 flex items-center">
+                          <FiUser className="mr-2 h-5 w-5 text-sky-500" />
+                          Parent/Guardian Information
+                        </h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Name:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.parentOrGuardianName}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Relationship:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.relationship || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Relation Type:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.parentOrGuardianRelation || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Occupation:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.parentOrGuardianOccupation || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Email:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.contact || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Phone:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.phone}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Address:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.address || 'N/A'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Application Information */}
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="text-md font-medium text-gray-900 mb-3 flex items-center">
+                          <FiFileText className="mr-2 h-5 w-5 text-sky-500" />
+                          Application Information
+                        </h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Application ID:</span>
+                            <span className="text-sm text-gray-900">{selectedApplication.applicationId}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Applied Date:</span>
+                            <span className="text-sm text-gray-900">{formatDate(selectedApplication.appliedDate)}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-500 w-28">Status:</span>
+                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${selectedApplication.status === 'Approved'
+                              ? 'bg-green-100 border border-green-400 text-green-800'
+                              : selectedApplication.status === 'Rejected'
+                                ? 'bg-red-100 border border-red-400 text-red-800'
+                                : 'bg-yellow-100 border border-yellow-400 text-yellow-800'
+                              }`}>
+                              {selectedApplication.status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Documents */}
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="text-md font-medium text-gray-900 mb-3 flex items-center">
+                          <FiFileText className="mr-2 h-5 w-5 text-sky-500" />
+                          Required Documents
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedApplication.documents?.length > 0 ? (
+                            selectedApplication.documents.map((doc, index) => (
+                              <div key={index} className="flex items-center justify-between">
+                                <span className="text-sm text-gray-900">{doc.name}</span>
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${doc.status === 'Verified' ? 'bg-green-100 border border-green-400 text-green-800' :
+                                  doc.status === 'Missing' ? 'bg-red-100 border border-red-400 text-red-800' : 'bg-yellow-100 border border-yellow-400 text-yellow-800'
+                                  }`}>
+                                  {doc.status || 'Pending'}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-sm text-gray-500">No documents uploaded</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-sky-600 text-base font-medium text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={closeModal}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Application Modal */}
+      {isEditModalOpen && editingApplication && (
+        <div className="fixed inset-0 overflow-y-auto z-50 bg-gray-500/65">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0 ">
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">
+                        Edit Application: {editingApplication.studentName}
+                      </h3>
+                      <button onClick={closeEditModal} className="text-gray-400 hover:text-gray-500">
+                        <span className="sr-only">Close</span>
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="mt-4">
+                      <form onSubmit={handleEditSubmit}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Student Information */}
+                          <div className="space-y-4">
+                            <h4 className="text-md font-medium text-gray-900 flex items-center">
+                              <FiUser className="mr-2 h-5 w-5 text-sky-500" />
+                              Student Information
+                            </h4>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label htmlFor="studentName" className="block text-sm font-medium text-gray-700">
+                                  Student Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  id="studentName"
+                                  name="studentName"
+                                  className={`mt-1 block w-full border ${formErrors.studentName ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm`}
+                                  value={editingApplication.studentName}
+                                  onChange={handleInputChange}
+                                />
+                                {formErrors.studentName && (
+                                  <p className="mt-1 text-sm text-red-600">{formErrors.studentName}</p>
+                                )}
+                              </div>
+
+                              <div>
+                                <label htmlFor="studentEmail" className="block text-sm font-medium text-gray-700">
+                                  Student Email *
+                                </label>
+                                <input
+                                  type="email"
+                                  id="studentEmail"
+                                  name="studentEmail"
+                                  className={`mt-1 block w-full border ${formErrors.studentEmail ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm`}
+                                  value={editingApplication.studentEmail}
+                                  onChange={handleInputChange}
+                                />
+                                {formErrors.studentEmail && (
+                                  <p className="mt-1 text-sm text-red-600">{formErrors.studentEmail}</p>
+                                )}
+                              </div>
+
+                              <div>
+                                <label htmlFor="grade" className="block text-sm font-medium text-gray-700">
+                                  Grade *
+                                </label>
+                                <input
+                                  type="text"
+                                  id="grade"
+                                  name="grade"
+                                  className={`mt-1 block w-full border ${formErrors.grade ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm`}
+                                  value={editingApplication.grade}
+                                  onChange={handleInputChange}
+                                />
+                                {formErrors.grade && (
+                                  <p className="mt-1 text-sm text-red-600">{formErrors.grade}</p>
+                                )}
+                              </div>
+
+                              <div>
+                                <label htmlFor="dob" className="block text-sm font-medium text-gray-700">
+                                  Date of Birth
+                                </label>
+                                <input
+                                  type="date"
+                                  id="dob"
+                                  name="dob"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.dob?.split('T')[0] || ''}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              <div>
+                                <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+                                  Gender
+                                </label>
+                                <select
+                                  id="gender"
+                                  name="gender"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.gender}
+                                  onChange={handleInputChange}
+                                >
+                                  <option value="Male">Male</option>
+                                  <option value="Female">Female</option>
+                                  <option value="Other">Other</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label htmlFor="section" className="block text-sm font-medium text-gray-700">
+                                  Section
+                                </label>
+                                <input
+                                  type="text"
+                                  id="section"
+                                  name="section"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.section}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              <div>
+                                <label htmlFor="rollNumber" className="block text-sm font-medium text-gray-700">
+                                  Roll Number
+                                </label>
+                                <input
+                                  type="text"
+                                  id="rollNumber"
+                                  name="rollNumber"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.rollNumber}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              <div>
+                                <label htmlFor="nationality" className="block text-sm font-medium text-gray-700">
+                                  Nationality
+                                </label>
+                                <input
+                                  type="text"
+                                  id="nationality"
+                                  name="nationality"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.nationality}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              <div>
+                                <label htmlFor="religion" className="block text-sm font-medium text-gray-700">
+                                  Religion
+                                </label>
+                                <input
+                                  type="text"
+                                  id="religion"
+                                  name="religion"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.religion}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              <div>
+                                <label htmlFor="previousSchool" className="block text-sm font-medium text-gray-700">
+                                  Previous School
+                                </label>
+                                <input
+                                  type="text"
+                                  id="previousSchool"
+                                  name="previousSchool"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.previousSchool}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Parent/Guardian Information */}
+                          <div className="space-y-4">
+                            <h4 className="text-md font-medium text-gray-900 flex items-center">
+                              <FiUser className="mr-2 h-5 w-5 text-sky-500" />
+                              Parent/Guardian Information
+                            </h4>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label htmlFor="parentOrGuardianName" className="block text-sm font-medium text-gray-700">
+                                  Parent/Guardian Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  id="parentOrGuardianName"
+                                  name="parentOrGuardianName"
+                                  className={`mt-1 block w-full border ${formErrors.parentOrGuardianName ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm`}
+                                  value={editingApplication.parentOrGuardianName}
+                                  onChange={handleInputChange}
+                                />
+                                {formErrors.parentOrGuardianName && (
+                                  <p className="mt-1 text-sm text-red-600">{formErrors.parentOrGuardianName}</p>
+                                )}
+                              </div>
+
+                              <div>
+                                <label htmlFor="parentOrGuardianOccupation" className="block text-sm font-medium text-gray-700">
+                                  Occupation
+                                </label>
+                                <input
+                                  type="text"
+                                  id="parentOrGuardianOccupation"
+                                  name="parentOrGuardianOccupation"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.parentOrGuardianOccupation}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              <div>
+                                <label htmlFor="parentOrGuardianRelation" className="block text-sm font-medium text-gray-700">
+                                  Relation
+                                </label>
+                                <select
+                                  id="parentOrGuardianRelation"
+                                  name="parentOrGuardianRelation"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.parentOrGuardianRelation}
+                                  onChange={handleInputChange}
+                                >
+                                  <option value="Father">Father</option>
+                                  <option value="Mother">Mother</option>
+                                  <option value="Guardian">Guardian</option>
+                                  <option value="Other">Other</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label htmlFor="contact" className="block text-sm font-medium text-gray-700">
+                                  Parent Email
+                                </label>
+                                <input
+                                  type="email"
+                                  id="contact"
+                                  name="contact"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.contact}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              <div>
+                                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                                  Phone *
+                                </label>
+                                <input
+                                  type="text"
+                                  id="phone"
+                                  name="phone"
+                                  className={`mt-1 block w-full border ${formErrors.phone ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm`}
+                                  value={editingApplication.phone}
+                                  onChange={handleInputChange}
+                                />
+                                {formErrors.phone && (
+                                  <p className="mt-1 text-sm text-red-600">{formErrors.phone}</p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div>
+                              <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                                Address
+                              </label>
+                              <textarea
+                                id="address"
+                                name="address"
+                                rows={3}
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                value={editingApplication.address}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Application Information */}
+                          <div className="space-y-4">
+                            <h4 className="text-md font-medium text-gray-900 flex items-center">
+                              <FiFileText className="mr-2 h-5 w-5 text-sky-500" />
+                              Application Information
+                            </h4>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label htmlFor="applicationId" className="block text-sm font-medium text-gray-700">
+                                  Application ID
+                                </label>
+                                <input
+                                  type="text"
+                                  id="applicationId"
+                                  name="applicationId"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 cursor-not-allowed sm:text-sm"
+                                  value={editingApplication.applicationId}
+                                  readOnly
+                                />
+                              </div>
+
+                              <div>
+                                <label htmlFor="appliedDate" className="block text-sm font-medium text-gray-700">
+                                  Applied Date
+                                </label>
+                                <input
+                                  type="text"
+                                  id="appliedDate"
+                                  name="appliedDate"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 cursor-not-allowed sm:text-sm"
+                                  value={formatDate(editingApplication.appliedDate)}
+                                  readOnly
+                                />
+                              </div>
+
+                              <div>
+                                <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                                  Status
+                                </label>
+                                <select
+                                  id="status"
+                                  name="status"
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                                  value={editingApplication.status}
+                                  onChange={handleInputChange}
+                                >
+                                  <option value="Pending">Pending</option>
+                                  <option value="Approved">Approved</option>
+                                  <option value="Rejected">Rejected</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end space-x-3">
+                          <button
+                            type="button"
+                            onClick={closeEditModal}
+                            className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+                          >
+                            Save Changes
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Admission Form Modal */}
+      {isAdmissionFormOpen && (
+        <div className="fixed inset-0 overflow-y-auto z-50 bg-gray-500/65">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">
+                        New Student Admission
+                      </h3>
+                      <button
+                        onClick={() => setIsAdmissionFormOpen(false)}
+                        className="text-gray-400 hover:text-gray-500"
+                      >
+                        <span className="sr-only">Close</span>
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="mt-4">
+                      <AdmissionForm
+                        onSuccess={() => {
+                          setIsAdmissionFormOpen(false);
+                          dispatch(getAdmissionBySchoolId(schoolId)); // Refresh the list
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+export default AdminStudentAdmission_Page;
