@@ -158,15 +158,6 @@ const AdminDashboardLayout = () => {
       ]
     },
     {
-      name: "ManageUsers",
-      icon: User,
-      label: "Other Users",
-      path: "/admin/otherUsers",
-      subItems: [
-        { label: "Manage Users", path: "/admin/otherUsers/manage" },
-      ]
-    },
-    {
       name: "Academic",
       icon: BookOpen,
       label: "Academic",

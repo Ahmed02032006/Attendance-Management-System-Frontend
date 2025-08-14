@@ -224,8 +224,8 @@ const SuperAdminDashboardLayout = () => {
                     <FaUserShield className="text-sm" />
                   </div>
                   <div className="flex flex-col leading-tight">
-                    <span className="text-sm font-medium text-slate-900">{user.userName}</span>
-                    <span className="text-[11px] text-slate-500">{user.userRole == "Super_Admin" ? "Super Admin" : "Unknown"}</span>
+                    <span className="text-sm font-medium text-slate-900">{user?.userName}</span>
+                    <span className="text-[11px] text-slate-500">{user?.userRole == "Super_Admin" ? "Super Admin" : "Unknown"}</span>
                   </div>
                 </div>
                 <button

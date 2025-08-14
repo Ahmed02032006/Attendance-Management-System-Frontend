@@ -63,6 +63,7 @@ import ParentChildren_Page from './page/Parent_Pages/ParentChildren_Page';
 import ParentAttendance_Page from './page/Parent_Pages/ParentAttendance_Page';
 import ParentPayment_Page from './page/Parent_Pages/ParentPayment_Page';
 import AdminManageParent_Page from './page/Admin_Pages/AdminManageParent_Page';
+import AdminManageUsers_Page from './page/Admin_Pages/AdminManageUsers_Page';
 
 const App = () => {
 
@@ -123,6 +124,10 @@ const App = () => {
           <Route path="parents">
             <Route index element={<AdminManageParent_Page />} />
             <Route path="manage" element={<AdminManageParent_Page />} />
+          </Route>
+          <Route path="otherUsers">
+            <Route index element={<AdminManageUsers_Page />} />
+            <Route path="manage" element={<AdminManageUsers_Page />} />
           </Route>
           <Route path="academic">
             <Route index element={<AdminAcademicClasses_Page />} />

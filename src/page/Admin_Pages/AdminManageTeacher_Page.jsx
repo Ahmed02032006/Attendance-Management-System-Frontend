@@ -12,6 +12,7 @@ import { FiChevronLeft, FiChevronRight, FiEdit, FiEye, FiTrash2, FiSearch, FiPlu
 import { createTeacher } from '../../store/Admin-Slicer/Admin-Teacher-Slicer';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { updateUserByEmail } from '../../store/Auth-Slicer/Auth-Slicer';
 
 const AdminManageTeacher_Page = () => {
   // Pagination state
@@ -165,11 +166,22 @@ const AdminManageTeacher_Page = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (showEditModal && selectedTeacher) {
       // Handle update
+
+      const updateData = {
+        userName: formData.teacherName,
+        newEmail: formData.teacherEmail,
+        userPassword: formData.teacherPassword,
+        profilePicture: imageUrl,
+        status: formData.status,
+      };
+
+      await dispatch(updateUserByEmail({ currentEmail: selectedTeacher.teacherEmail, updateData }));
+
       dispatch(updateTeacher({
         id: selectedTeacher._id,
         formData: { ...formData, teacherProfilePicture: imageUrl }
@@ -179,7 +191,6 @@ const AdminManageTeacher_Page = () => {
           setFormData(initialFormData);
           setImageUrl("");
           setShowEditModal(false);
-          dispatch(getTeachersBySchoolId(id));
         } else if (res.payload?.status === "Error") {
           toast.error(res.payload.message || "Teacher update failed.");
         }
@@ -189,14 +200,28 @@ const AdminManageTeacher_Page = () => {
         });
     } else {
       // Handle create
+
+      const createTeacherForm = {
+        userName: formData.teacherName,
+        userEmail: formData.teacherEmail,
+        userPassword: formData.teacherPassword,
+        userRole: "Teacher",
+        profilePicture: formData.teacherProfilePicture,
+        status: "Active",
+      };
+
       dispatch(createTeacher({ ...formData, teacherProfilePicture: imageUrl }))
-        .then((res) => {
+        .then(async (res) => {
           if (res.payload?.status === "Success") {
+            await axios.post(
+              "http://localhost:5000/api/v1/auth/dynamicRegisterUser/",
+              createTeacherForm
+            );
             toast.success('Teacher Created Successfully');
+            dispatch(getTeachersBySchoolId(id));
+            setShowAddTeacherModal(false);
             setFormData(initialFormData);
             setImageUrl("");
-            setShowAddTeacherModal(false);
-            dispatch(getTeachersBySchoolId(id));
           } else if (res.payload?.status === "Error") {
             toast.error(res.payload.message || "Teacher Creation failed.");
           }
@@ -608,36 +633,6 @@ const AdminManageTeacher_Page = () => {
                         </div>
                       </div>
 
-                      {/* Gender */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={() => toggleDropdown('teacherGender')}
-                            className={`flex items-center justify-between w-full px-3 py-2 text-sm border ${formData.teacherGender ? 'border-gray-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-1 focus:ring-sky-500 bg-white text-left`}
-                          >
-                            <span className={formData.teacherGender ? 'text-gray-800' : 'text-gray-400'}>
-                              {formData.teacherGender || 'Select Gender'}
-                            </span>
-                            <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${dropdownOpen.teacherGender ? 'transform rotate-180' : ''}`} />
-                          </button>
-                          {dropdownOpen.teacherGender && (
-                            <div className="absolute z-10 mt-1 w-full bg-white shadow-md rounded-md py-1 border border-gray-200 max-h-60 overflow-auto">
-                              {teacherGenderOptions.map(option => (
-                                <div
-                                  key={option}
-                                  onClick={() => handleSelect('teacherGender', option)}
-                                  className={`px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm ${formData.teacherGender === option ? 'bg-gray-50 text-sky-600' : 'text-gray-700'}`}
-                                >
-                                  {option}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
                       {/* Email */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
@@ -676,6 +671,37 @@ const AdminManageTeacher_Page = () => {
                           />
                         </div>
                       </div>
+
+                      {/* Gender */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => toggleDropdown('teacherGender')}
+                            className={`flex items-center justify-between w-full px-3 py-2 text-sm border ${formData.teacherGender ? 'border-gray-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-1 focus:ring-sky-500 bg-white text-left`}
+                          >
+                            <span className={formData.teacherGender ? 'text-gray-800' : 'text-gray-400'}>
+                              {formData.teacherGender || 'Select Gender'}
+                            </span>
+                            <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${dropdownOpen.teacherGender ? 'transform rotate-180' : ''}`} />
+                          </button>
+                          {dropdownOpen.teacherGender && (
+                            <div className="absolute z-10 mt-1 w-full bg-white shadow-md rounded-md py-1 border border-gray-200 max-h-60 overflow-auto">
+                              {teacherGenderOptions.map(option => (
+                                <div
+                                  key={option}
+                                  onClick={() => handleSelect('teacherGender', option)}
+                                  className={`px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm ${formData.teacherGender === option ? 'bg-gray-50 text-sky-600' : 'text-gray-700'}`}
+                                >
+                                  {option}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
                     </div>
 
                     {/* Professional Information */}

@@ -49,7 +49,7 @@ const SuperAdminDashboard_Page = () => {
       <main className="px-6 py-6">
         {/* Stats Cards */}
         {/* Modern Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
           {stats.map((stat, index) => (
             <div
               key={index}
@@ -89,7 +89,7 @@ const SuperAdminDashboard_Page = () => {
         </div>
 
         {/* Recent Activities and Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Activities */}
           <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-6">

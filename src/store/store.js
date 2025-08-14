@@ -10,6 +10,7 @@ import adminAdmissionReducer from "./Admin-Slicer/Admin-Admission-Slicer.js";
 import adminStudentReducer from "./Admin-Slicer/Admin-Student-Slicer.js";
 import adminParentReducer from "./Admin-Slicer/Admin-Parent-Slicer.js";
 import adminTimeTableReducer from "./Admin-Slicer/Admin-TimeTable-Slicer.js";
+import adminOtherUsersReducer from "./Admin-Slicer/Admin-OtherUser-Slicer.js";
 // ===== >
 import superAdminSchoolReducer from "./Super_Admin-Slicer/Super_Admin-Schools-Slicer.js";
 import superAdminUserReducer from "./Super_Admin-Slicer/Super_Admin-Users-Slicer.js";
@@ -26,6 +27,7 @@ const store = configureStore({
     adminStudent: adminStudentReducer,
     adminParent: adminParentReducer,
     adminTimeTable: adminTimeTableReducer,
+    adminOtherUsers: adminOtherUsersReducer,
     // ===== >
     superAdminSchool: superAdminSchoolReducer,
     superAdminUser: superAdminUserReducer,

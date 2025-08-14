@@ -378,12 +378,12 @@ const AdminAcademicTimeTable_Page = () => {
           ) : (
             !isLoading && (
               <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
-                <FiClock className="mx-auto h-12 w-12 text-gray-400" />
+                <FiClock className="mx-auto h-8 w-8 text-gray-400" />
                 <h3 className="mt-2 text-lg font-medium text-gray-900">No timetables found</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   Get started by creating a new timetable
                 </p>
-                <div className="mt-6">
+                {/* <div className="mt-6">
                   <button
                     onClick={openNewModal}
                     className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
@@ -391,7 +391,7 @@ const AdminAcademicTimeTable_Page = () => {
                     <FiPlus className="-ml-1 mr-2 h-5 w-5" />
                     Create New Timetable
                   </button>
-                </div>
+                </div> */}
               </div>
             )
           )}

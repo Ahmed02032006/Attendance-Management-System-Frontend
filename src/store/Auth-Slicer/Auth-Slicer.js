@@ -106,23 +106,22 @@ export const checkAuthUser = createAsyncThunk(
   }
 );
 
-export const getAllUsers = createAsyncThunk(
-  "auth/getAllUsers",
-  async (_, { rejectWithValue }) => {
+export const updateUserByEmail = createAsyncThunk(
+  'users/updateUserByEmail',
+  async ({ currentEmail, updateData }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        "http://localhost:5000/api/v1/auth/allUsers",
+      const response = await axios.put(
+        `http://localhost:5000/api/v1/auth/editUserDetails/${currentEmail}`,
+        updateData,
         {
           withCredentials: true,
-          headers: {
-            "Cache-Control": "no-cache, must-revalidate, proxy-revalidate",
-          }
         }
       );
-
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(
+        error.response?.data || { message: 'Something went wrong' }
+      );
     }
   }
 );
@@ -211,12 +210,6 @@ const authSlicer = createSlice({
       .addCase(logOutUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-      }).addCase(getAllUsers.pending, (state) => {
-      })
-      .addCase(getAllUsers.fulfilled, (state, action) => {
-        state.allUsers = action.payload;
-      })
-      .addCase(getAllUsers.rejected, (state, action) => {
       });
   },
 });
