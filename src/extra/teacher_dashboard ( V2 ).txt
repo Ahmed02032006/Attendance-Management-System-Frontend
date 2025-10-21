@@ -1,69 +1,85 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React, { useState } from 'react'
 import HeaderComponent from '../../components/HeaderComponent'
-import {
-  FiBook,
-  FiBarChart2,
-  FiEye,
-  FiArrowRight,
-  FiUsers,
-  FiTrendingUp,
-  FiChevronLeft,
-  FiChevronRight
-} from 'react-icons/fi'
-import { toast } from 'react-toastify'
-import {
-  getDashboardSubjects,
-  getDashboardAttendance,
-  clearDashboard
-} from '../../store/Teacher-Slicer/Dashboard-Slicer.js'
+import { FiBook, FiBarChart2, FiEye, FiArrowRight, FiUsers, FiTrendingUp, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 
 const TeacherDashboard_Page = () => {
-  const dispatch = useDispatch()
-  const {
-    dashboardSubjects,
-    dashboardAttendance,
-    isLoading
-  } = useSelector((state) => state.teacherDashboard)
+  const subjects = [
+    { id: 1, name: 'Mathematics', code: 'MATH101', students: 30, color: 'bg-blue-500' },
+    { id: 2, name: 'Physics', code: 'PHY201', students: 28, color: 'bg-green-500' },
+    { id: 3, name: 'Chemistry', code: 'CHEM301', students: 27, color: 'bg-purple-500' },
+    { id: 4, name: 'Biology', code: 'BIO401', students: 29, color: 'bg-orange-500' },
+    { id: 5, name: 'Computer Science', code: 'CS501', students: 28, color: 'bg-red-500' }
+  ]
 
-  const [selectedSubject, setSelectedSubject] = useState(null)
-  const [currentDate, setCurrentDate] = useState('')
+  const attendanceData = {
+    1: { 
+      // Mathematics
+      '2024-01-15': [
+        { id: 1, studentName: 'John Doe', rollNo: '25FA-001-CE', time: '10:05 AM' },
+        { id: 2, studentName: 'Jane Smith', rollNo: '25FA-002-CE', time: '10:07 AM' },
+        { id: 3, studentName: 'Mike Johnson', rollNo: '25FA-003-CE', time: '10:10 AM' },
+        { id: 4, studentName: 'Sarah Wilson', rollNo: '25FA-004-CE', time: '10:12 AM' },
+        { id: 5, studentName: 'David Brown', rollNo: '25FA-005-CE', time: '10:15 AM' },
+        { id: 6, studentName: 'Emily Davis', rollNo: '25FA-006-CE', time: '10:18 AM' },
+        { id: 7, studentName: 'Michael Wilson', rollNo: '25FA-007-CE', time: '10:20 AM' },
+        { id: 8, studentName: 'Sarah Johnson', rollNo: '25FA-008-CE', time: '10:22 AM' },
+        { id: 9, studentName: 'Robert Miller', rollNo: '25FA-009-CE', time: '10:25 AM' },
+        { id: 10, studentName: 'Lisa Anderson', rollNo: '25FA-010-CE', time: '10:28 AM' },
+        { id: 11, studentName: 'James Taylor', rollNo: '25FA-011-CE', time: '10:30 AM' },
+        { id: 12, studentName: 'Jennifer Lee', rollNo: '25FA-012-CE', time: '10:32 AM' }
+      ],
+      '2024-01-14': [
+        { id: 13, studentName: 'John Doe', rollNo: '25FA-001-CE', time: '10:03 AM' },
+        { id: 14, studentName: 'Jane Smith', rollNo: '25FA-002-CE', time: '10:08 AM' },
+        { id: 15, studentName: 'Robert Brown', rollNo: '25FA-005-CE', time: '10:11 AM' },
+        { id: 16, studentName: 'Emily Davis', rollNo: '25FA-006-CE', time: '10:13 AM' },
+        { id: 17, studentName: 'Michael Wilson', rollNo: '25FA-007-CE', time: '10:16 AM' }
+      ],
+      '2024-01-12': [
+        { id: 18, studentName: 'John Doe', rollNo: '25FA-001-CE', time: '10:06 AM' },
+        { id: 19, studentName: 'Jane Smith', rollNo: '25FA-002-CE', time: '10:09 AM' },
+        { id: 20, studentName: 'Mike Johnson', rollNo: '25FA-003-CE', time: '10:15 AM' },
+        { id: 21, studentName: 'Sarah Wilson', rollNo: '25FA-004-CE', time: '10:18 AM' },
+        { id: 22, studentName: 'David Brown', rollNo: '25FA-005-CE', time: '10:21 AM' },
+        { id: 23, studentName: 'Emily Davis', rollNo: '25FA-006-CE', time: '10:24 AM' }
+      ]
+    },
+    2: { 
+      // Physics
+      '2024-01-15': [
+        { id: 24, studentName: 'John Doe', rollNo: '25FA-001-CE', time: '02:05 PM' },
+        { id: 25, studentName: 'Jane Smith', rollNo: '25FA-002-CE', time: '02:07 PM' },
+        { id: 26, studentName: 'Mike Johnson', rollNo: '25FA-003-CE', time: '02:10 PM' },
+        { id: 27, studentName: 'Sarah Wilson', rollNo: '25FA-004-CE', time: '02:12 PM' },
+        { id: 28, studentName: 'David Brown', rollNo: '25FA-005-CE', time: '02:15 PM' }
+      ],
+      '2024-01-14': [
+        { id: 29, studentName: 'John Doe', rollNo: '25FA-001-CE', time: '02:10 PM' },
+        { id: 30, studentName: 'Jane Smith', rollNo: '25FA-002-CE', time: '02:12 PM' },
+        { id: 31, studentName: 'Mike Johnson', rollNo: '25FA-003-CE', time: '02:15 PM' }
+      ]
+    },
+    3: { 
+      // Chemistry
+      '2024-01-12': [
+        { id: 32, studentName: 'John Doe', rollNo: '25FA-001-CE', time: '11:35 AM' },
+        { id: 33, studentName: 'Jane Smith', rollNo: '25FA-002-CE', time: '11:40 AM' },
+        { id: 34, studentName: 'Mike Johnson', rollNo: '25FA-003-CE', time: '11:42 AM' },
+        { id: 35, studentName: 'Sarah Wilson', rollNo: '25FA-004-CE', time: '11:45 AM' },
+        { id: 36, studentName: 'David Brown', rollNo: '25FA-005-CE', time: '11:48 AM' },
+        { id: 37, studentName: 'Emily Davis', rollNo: '25FA-006-CE', time: '11:50 AM' }
+      ]
+    }
+  }
+
+  const [selectedSubject, setSelectedSubject] = useState(subjects[0].id)
+  const [currentDate, setCurrentDate] = useState('2024-01-15')
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage] = useState(5)
 
-  const { user } = useSelector((state) => state.auth)
-
-  const userId = user?.id
-
-  // Fetch data on component mount
-  useEffect(() => {
-    dispatch(getDashboardSubjects(userId)).unwrap()
-
-    dispatch(getDashboardAttendance(userId)).unwrap()
-    // Cleanup on unmount
-    return () => {
-      dispatch(clearDashboard())
-    }
-  }, [dispatch])
-
-  // Set initial selected subject when subjects are loaded
-  useEffect(() => {
-    if (dashboardSubjects.length > 0 && !selectedSubject) {
-      setSelectedSubject(dashboardSubjects[0].id)
-
-      // Set initial date to the latest available date for the first subject
-      const subjectAttendance = dashboardAttendance[dashboardSubjects[0].id]
-      if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
-        const latestDate = Object.keys(subjectAttendance).sort().reverse()[0]
-        setCurrentDate(latestDate)
-      }
-    }
-  }, [dashboardSubjects, selectedSubject, dashboardAttendance])
-
   // Get available dates for selected subject
   const getAvailableDates = () => {
-    if (!selectedSubject) return []
-    const subjectData = dashboardAttendance[selectedSubject]
+    const subjectData = attendanceData[selectedSubject]
     return subjectData ? Object.keys(subjectData).sort().reverse() : []
   }
 
@@ -72,13 +88,12 @@ const TeacherDashboard_Page = () => {
 
   // Get current attendance records
   const getCurrentAttendanceRecords = () => {
-    if (!selectedSubject) return []
-    const subjectData = dashboardAttendance[selectedSubject]
+    const subjectData = attendanceData[selectedSubject]
     return subjectData && subjectData[currentDate] ? subjectData[currentDate] : []
   }
 
   const currentAttendanceRecords = getCurrentAttendanceRecords()
-  const selectedSubjectData = dashboardSubjects.find(subject => subject.id === selectedSubject)
+  const selectedSubjectData = subjects.find(subject => subject.id === selectedSubject)
 
   // Pagination logic
   const indexOfLastRecord = currentPage * recordsPerPage
@@ -106,59 +121,24 @@ const TeacherDashboard_Page = () => {
     const currentIndex = availableDates.indexOf(currentDate)
     if (direction === 'prev' && currentIndex < availableDates.length - 1) {
       setCurrentDate(availableDates[currentIndex + 1])
-      setCurrentPage(1)
+      setCurrentPage(1) // Reset to first page when date changes
     } else if (direction === 'next' && currentIndex > 0) {
       setCurrentDate(availableDates[currentIndex - 1])
-      setCurrentPage(1)
+      setCurrentPage(1) // Reset to first page when date changes
     }
   }
 
-  // Handle subject selection
-  const handleSubjectSelect = (subjectId) => {
-    setSelectedSubject(subjectId)
-    setCurrentPage(1)
-
-    // Set to latest date for the selected subject
-    const subjectAttendance = dashboardAttendance[subjectId]
-    if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
-      const latestDate = Object.keys(subjectAttendance).sort().reverse()[0]
-      setCurrentDate(latestDate)
-    } else {
-      setCurrentDate('')
-    }
-  }
-
-  // Reset pagination when subject or date changes
-  useEffect(() => {
+  // Reset pagination when subject changes
+  React.useEffect(() => {
     setCurrentPage(1)
   }, [selectedSubject, currentDate])
-
-  // Color mapping for subjects (you can modify this based on your needs)
-  const getSubjectColor = (index) => {
-    const colors = [
-      'bg-blue-500', 'bg-green-500', 'bg-purple-500',
-      'bg-orange-500', 'bg-red-500', 'bg-indigo-500',
-      'bg-pink-500', 'bg-teal-500', 'bg-cyan-500', 'bg-amber-500'
-    ]
-    return colors[index % colors.length]
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-lg font-medium text-gray-700">Loading Stats...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderComponent heading={"Teacher Dashboard"} subHeading={"Overview of your teaching activities"} role='admin' />
 
       <div className="container max-w-full mx-auto p-6">
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Subjects */}
           <div className="lg:col-span-1">
@@ -166,75 +146,69 @@ const TeacherDashboard_Page = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">My Subjects</h3>
-                {/* <button className="text-sky-600 hover:text-sky-700 text-sm font-medium flex items-center">
+                <button className="text-sky-600 hover:text-sky-700 text-sm font-medium flex items-center">
                   View All
-                </button> */}
+                </button>
               </div>
-
-              {dashboardSubjects.length === 0 ? (
-                <div className="text-center py-8">
-                  <FiBook className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-500 text-lg font-medium">No subjects found</p>
-                  <p className="text-gray-400 text-sm mt-1">
-                    You are not assigned to any subjects yet
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {dashboardSubjects.map((subject, index) => (
-                    <div
-                      key={subject.id}
-                      className={`flex items-center justify-between p-3 rounded-lg transition-all cursor-pointer ${selectedSubject === subject.id
-                        ? 'bg-sky-50 border border-sky-200'
+              <div className="space-y-3">
+                {subjects.map((subject) => (
+                  <div 
+                    key={subject.id} 
+                    className={`flex items-center justify-between p-3 rounded-lg transition-all cursor-pointer ${
+                      selectedSubject === subject.id 
+                        ? 'bg-sky-50 border border-sky-200' 
                         : 'hover:bg-gray-50 border border-transparent'
-                        }`}
-                      onClick={() => handleSubjectSelect(subject.id)}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-10 h-10 rounded-lg ${getSubjectColor(index)} flex items-center justify-center`}>
-                          <span className="text-white font-semibold text-sm">
-                            {subject.name?.charAt(0) || 'S'}
-                          </span>
-                        </div>
-                        <div>
-                          <p
-                            className={`text-xs font-medium truncate w-[145px] whitespace-nowrap overflow-hidden text-ellipsis ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
-                              }`}
-                            title={subject.name}
-                          >
-                            {subject.name}
-                          </p>
-
-                          <p className="text-xs text-gray-500">{subject.code}</p>
-                        </div>
+                    }`}
+                    onClick={() => {
+                      setSelectedSubject(subject.id)
+                      // Reset to latest date when subject changes
+                      const subjectDates = Object.keys(attendanceData[subject.id] || {}).sort().reverse()
+                      setCurrentDate(subjectDates[0] || '')
+                    }}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 rounded-lg ${subject.color} flex items-center justify-center`}>
+                        <span className="text-white font-semibold text-sm">
+                          {subject.name.charAt(0)}
+                        </span>
                       </div>
-                      <div className="text-right">
-                        <p className={`text-sm font-medium ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
-                          }`}>
-                          {subject.students || 0}
+                      <div>
+                        <p className={`text-sm font-medium ${
+                          selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                        }`}>
+                          {subject.name}
                         </p>
-                        <p className="text-xs text-gray-500">students</p>
+                        <p className="text-xs text-gray-500">{subject.code}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                    <div className="text-right">
+                      <p className={`text-sm font-medium ${
+                        selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                      }`}>
+                        {subject.students}
+                      </p>
+                      <p className="text-xs text-gray-500">students</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Right Column - Attendance Records */}
           <div className="lg:col-span-2 space-y-6">
             {/* Date Navigation */}
-            {availableDates.length > 0 && selectedSubject && (
+            {availableDates.length > 0 && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-center justify-between">
                   <button
                     onClick={() => navigateDate('prev')}
                     disabled={currentDateIndex >= availableDates.length - 1}
-                    className={`p-2 rounded-lg transition-colors ${currentDateIndex >= availableDates.length - 1
-                      ? 'text-gray-300 cursor-not-allowed'
-                      : 'text-gray-600 hover:bg-gray-100'
-                      }`}
+                    className={`p-2 rounded-lg transition-colors ${
+                      currentDateIndex >= availableDates.length - 1
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
                   >
                     <FiChevronLeft className="h-5 w-5" />
                   </button>
@@ -251,10 +225,11 @@ const TeacherDashboard_Page = () => {
                   <button
                     onClick={() => navigateDate('next')}
                     disabled={currentDateIndex <= 0}
-                    className={`p-2 rounded-lg transition-colors ${currentDateIndex <= 0
-                      ? 'text-gray-300 cursor-not-allowed'
-                      : 'text-gray-600 hover:bg-gray-100'
-                      }`}
+                    className={`p-2 rounded-lg transition-colors ${
+                      currentDateIndex <= 0
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
                   >
                     <FiChevronRight className="h-5 w-5" />
                   </button>
@@ -267,19 +242,12 @@ const TeacherDashboard_Page = () => {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Attendance Records</h3>
-                  {selectedSubject && (
-                    <div className="text-sm text-gray-500">
-                      {currentAttendanceRecords.length} students
-                    </div>
-                  )}
-                </div>
-
-                {!selectedSubject ? (
-                  <div className="text-center py-8">
-                    <FiEye className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-500 text-lg font-medium">Select a subject to view attendance</p>
+                  <div className="text-sm text-gray-500">
+                    {currentAttendanceRecords.length} students
                   </div>
-                ) : currentRecords.length > 0 ? (
+                </div>
+                
+                {currentRecords.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead>
@@ -317,7 +285,7 @@ const TeacherDashboard_Page = () => {
                     <FiEye className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                     <p className="text-gray-500 text-lg font-medium">No attendance records found</p>
                     <p className="text-gray-400 text-sm mt-1">
-                      {availableDates.length === 0
+                      {availableDates.length === 0 
                         ? `No attendance data available for ${selectedSubjectData?.name}`
                         : `No records for ${formatDate(currentDate)}`
                       }
@@ -412,6 +380,7 @@ const TeacherDashboard_Page = () => {
                 </div>
               )}
             </div>
+
           </div>
         </div>
       </div>

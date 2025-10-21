@@ -11,7 +11,7 @@ const RegisterPage = () => {
     userEmail: '',
     userPassword: '',
     confirmPassword: '',
-    userRole: 'Admin',
+    userRole: 'Teacher',
   });
 
   const handleInputChange = (e) => {
@@ -151,7 +151,6 @@ const RegisterPage = () => {
             name="terms"
             type="checkbox"
             className="mt-0.5 h-4 w-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500"
-
           />
           <label htmlFor="terms" className="ml-3 text-gray-700">
             I agree to the{' '}

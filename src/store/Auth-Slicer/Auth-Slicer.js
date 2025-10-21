@@ -3,11 +3,11 @@ import axios from "axios";
 
 const initialState = {
   isAuthenticated: false,
-  allUsers: null,
   user: null,
   isLoading: false,
-  isInitialAuthCheckComplete: false, // Add this flag
+  isInitialAuthCheckComplete: false,
   isError: false,
+  errorMessage: null, // Added missing property
 };
 
 export const registerUser = createAsyncThunk(
@@ -15,27 +15,7 @@ export const registerUser = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/auth/register/",
-        formData
-      );
-
-      if (response.status !== 200) {
-        return rejectWithValue(response.data);
-      }
-
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const dynamicRegisterUser = createAsyncThunk(
-  "auth/dynamicRegisterUser",
-  async (formData, { rejectWithValue }) => {
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/v1/auth/dynamicRegisterUser/",
+        "https://attendance-management-system-backen.vercel.app/api/v1/auth/register/",
         formData
       );
 
@@ -55,7 +35,7 @@ export const loginUser = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/auth/login/",
+        "https://attendance-management-system-backen.vercel.app/api/v1/auth/login/",
         formData,
         { withCredentials: true }
       );
@@ -76,7 +56,7 @@ export const logOutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/auth/logout/",
+        "https://attendance-management-system-backen.vercel.app/api/v1/auth/logout/",
         {},
         { withCredentials: true }
       );
@@ -93,35 +73,26 @@ export const logOutUser = createAsyncThunk(
 );
 
 export const checkAuthUser = createAsyncThunk(
-  "http://localhost:5173/auth/check-auth",
-  async () => {
-    const response = await axios.get("http://localhost:5000/api/v1/auth/check-auth/", {
-      withCredentials: true,
-      headers: {
-        "Cache-Control": "no-cache, must-revalidate, proxy-revalidate",
-      },
-    });
-
-    return response.data;
-  }
-);
-
-export const updateUserByEmail = createAsyncThunk(
-  'users/updateUserByEmail',
-  async ({ currentEmail, updateData }, { rejectWithValue }) => {
-    try {
-      const response = await axios.put(
-        `http://localhost:5000/api/v1/auth/editUserDetails/${currentEmail}`,
-        updateData,
+  "auth/checkAuth",
+  async (_, { rejectWithValue }) => {
+    try { // Added try-catch block
+      const response = await axios.get(
+        "https://attendance-management-system-backen.vercel.app/api/v1/auth/check-auth/", 
         {
           withCredentials: true,
+          headers: {
+            "Cache-Control": "no-cache, must-revalidate, proxy-revalidate",
+          },
         }
       );
+
+      if (response.status !== 200) {
+        return rejectWithValue(response.data);
+      }
+
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data || { message: 'Something went wrong' }
-      );
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -129,7 +100,13 @@ export const updateUserByEmail = createAsyncThunk(
 const authSlicer = createSlice({
   name: "auth",
   initialState: initialState,
-  reducers: {},
+  reducers: {
+    // Optional: Add a clearError reducer if needed
+    clearError: (state) => {
+      state.isError = false;
+      state.errorMessage = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(registerUser.pending, (state) => {
@@ -148,30 +125,17 @@ const authSlicer = createSlice({
         state.isError = true;
         state.errorMessage = action.payload?.message || "An error occurred";
       })
-      .addCase(dynamicRegisterUser.pending, (state) => {
+      .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.isError = false;
         state.errorMessage = null;
-      })
-      .addCase(dynamicRegisterUser.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isAuthenticated = false;
-        state.user = null;
-      })
-      .addCase(dynamicRegisterUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isAuthenticated = false;
-        state.isError = true;
-        state.errorMessage = action.payload?.message || "An error occurred";
-      })
-      .addCase(loginUser.pending, (state) => {
-        state.isLoading = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action?.payload.success ? action.payload.user : null;
         state.isError = false;
+        state.errorMessage = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -182,17 +146,21 @@ const authSlicer = createSlice({
       })
       .addCase(checkAuthUser.pending, (state) => {
         state.isLoading = true;
+        state.isError = false;
+        state.errorMessage = null;
       })
       .addCase(checkAuthUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isInitialAuthCheckComplete = true; // Set this flag
+        state.isInitialAuthCheckComplete = true;
         state.isAuthenticated = true;
+        console.log(action?.payload);
         state.user = action?.payload.success ? action.payload.user : null;
         state.isError = false;
+        state.errorMessage = null;
       })
       .addCase(checkAuthUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.isInitialAuthCheckComplete = true; // Set this flag even on failure
+        state.isInitialAuthCheckComplete = true;
         state.isAuthenticated = false;
         state.user = null;
         state.isError = true;
@@ -206,12 +174,15 @@ const authSlicer = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.isError = false;
+        state.errorMessage = null;
       })
       .addCase(logOutUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
+        state.errorMessage = action.payload?.message || "An error occurred";
       });
   },
 });
 
-export default authSlicer.reducer;
+export const { clearError } = authSlicer.actions;
+export default authSlicer.reducer; 

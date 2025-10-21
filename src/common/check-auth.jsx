@@ -22,7 +22,7 @@ const CheckAuth = ({ isAuthenticated, user, isInitialAuthCheckComplete, children
       return <Navigate to="/auth/login" />;
     } else {
       if (userRole === "Super_Admin") {
-        return <Navigate to="/superAdmin" />;
+        return <Navigate to="/superAdmin/dashboard" />;
       } else if (userRole === "Admin") {
         return <Navigate to="/admin/onboarding" />;
       } else if (userRole === "Principal") {
@@ -50,7 +50,7 @@ const CheckAuth = ({ isAuthenticated, user, isInitialAuthCheckComplete, children
       location.pathname.includes("/auth/register"))
   ) {
     if (userRole === "Super_Admin") {
-      return <Navigate to="/superAdmin" />;
+      return <Navigate to="/superAdmin/dashboard" />;
     } else if (userRole === "Admin") {
       return <Navigate to="/admin/onboarding" />;
     } else if (userRole === "Principal") {
@@ -80,7 +80,7 @@ const CheckAuth = ({ isAuthenticated, user, isInitialAuthCheckComplete, children
   if (isAuthenticated) {
     // Super Admin can only access super admin routes
     if (userRole === "Super_Admin" && !location.pathname.includes("superAdmin")) {
-      return <Navigate to="/superAdmin" />;
+      return <Navigate to="/superAdmin/dashboard" />;
     }
 
     // Admin can only access admin routes
