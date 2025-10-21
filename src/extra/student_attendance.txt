@@ -79,13 +79,7 @@ const StudentAttendance_Page = () => {
       // Simulate API call to submit attendance
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // In real application, you would make an API call here
-      console.log('Attendance submitted:', {
-        ...formData,
-        subject: qrData.subject,
-        timestamp: new Date().toISOString()
-      });
-
+      
       toast.success('Attendance submitted successfully!');
       
       // Reset form after successful submission

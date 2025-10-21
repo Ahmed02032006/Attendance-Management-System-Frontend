@@ -11,7 +11,6 @@ const ForgotPasswordPage = () => {
 
   const handleForgotPasswordSubmit = (e) => {
     e.preventDefault();
-    console.log('Forgot Password Email:', email);
     // You can add your API call here to send the reset link.
   };
 

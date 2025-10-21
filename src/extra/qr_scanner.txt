@@ -58,12 +58,6 @@ const QRScanner_Page = () => {
       const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
       
       if (qrCode) {
-        console.log('QR Code Details:', {
-          data: qrCode.data,
-          location: qrCode.location,
-          chunks: qrCode.chunks
-        });
-        
         try {
           const qrData = JSON.parse(qrCode.data);
           toast.success('QR Code scanned successfully!');
@@ -99,7 +93,6 @@ const QRScanner_Page = () => {
       scanInterval.current = setInterval(scanQRCode, 500);
       
     } catch (error) {
-      console.error('Error accessing camera:', error);
       toast.error('Cannot access camera. Please check permissions.');
       setIsScanning(false);
     }
@@ -136,12 +129,7 @@ const QRScanner_Page = () => {
     const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
 
     if (qrCode) {
-      console.log('Live QR Code Details:', {
-        data: qrCode.data,
-        location: qrCode.location,
-        chunks: qrCode.chunks
-      });
-
+     
       stopCameraScan();
       
       try {

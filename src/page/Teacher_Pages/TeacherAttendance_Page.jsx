@@ -128,7 +128,6 @@ const TeacherAttendance_Page = () => {
 
       // toast.success('Attendance data exported successfully!');
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
       toast.error('Failed to export data');
     }
   };
@@ -307,7 +306,6 @@ const TeacherAttendance_Page = () => {
   //     img.src = url;
 
   //   } catch (error) {
-  //     console.error('Error downloading QR code:', error);
   //     toast.error('Failed to download QR code');
   //   }
   // };

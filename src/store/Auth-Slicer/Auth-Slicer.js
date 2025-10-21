@@ -153,7 +153,6 @@ const authSlicer = createSlice({
         state.isLoading = false;
         state.isInitialAuthCheckComplete = true;
         state.isAuthenticated = true;
-        console.log(action?.payload);
         state.user = action?.payload.success ? action.payload.user : null;
         state.isError = false;
         state.errorMessage = null;

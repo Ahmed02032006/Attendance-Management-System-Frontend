@@ -132,7 +132,6 @@ const StudentAttendance_Page = () => {
           }
         })
         .catch((error) => {
-          console.log(error);
         });
 
     } catch (error) {

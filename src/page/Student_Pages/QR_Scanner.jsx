@@ -86,7 +86,6 @@ const QRScanner_Page = () => {
       scanInterval.current = setInterval(scanQRCode, 500);
 
     } catch (error) {
-      console.error('Error accessing camera:', error);
       toast.error('Cannot access camera. Please check permissions.');
       setIsScanning(false);
     }
@@ -123,12 +122,6 @@ const QRScanner_Page = () => {
     const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
 
     if (qrCode) {
-      console.log('Live QR Code Details:', {
-        data: qrCode.data,
-        location: qrCode.location,
-        chunks: qrCode.chunks
-      });
-
       stopCameraScan();
 
       try {
@@ -199,7 +192,7 @@ const QRScanner_Page = () => {
                       autoPlay
                       playsInline
                       muted
-                      className="w-full h-48 object-cover rounded-lg"
+                      className="w-full h-80 object-cover rounded-lg"
                     />
                     {/* Scanning overlay */}
                     <div className="absolute inset-0 border-2 border-green-400 rounded-lg animate-pulse"></div>

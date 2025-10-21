@@ -156,12 +156,6 @@ const TeacherAttendance_Page = () => {
     // Get subject name from subjectsData array
     const subjectName = subjectsData.find(s => s.id === attendanceForm.subject)?.name || 'Unknown Subject';
 
-    console.log('Creating attendance:', {
-      subject: attendanceForm.subject,
-      code: attendanceForm.uniqueCode,
-      subjectName: subjectName
-    });
-
     handleGenerateQR();
   };
 
@@ -284,7 +278,6 @@ const TeacherAttendance_Page = () => {
       img.src = url;
 
     } catch (error) {
-      console.error('Error downloading QR code:', error);
       toast.error('Failed to download QR code');
     }
   };
