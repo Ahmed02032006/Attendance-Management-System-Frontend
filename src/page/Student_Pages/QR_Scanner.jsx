@@ -86,34 +86,6 @@ const QRScanner_Page = () => {
     });
   };
 
-  // Enhanced QR code scanning with better image processing
-  const scanImageForQR = (imageElement) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Set canvas size to image size
-    canvas.width = imageElement.width;
-    canvas.height = imageElement.height;
-    
-    // Draw image on canvas
-    ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
-    
-    // Get image data with better quality
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    
-    // Try multiple scan approaches
-    let qrCode = jsQR(imageData.data, imageData.width, imageData.height);
-    
-    // If no QR found, try with different thresholds
-    if (!qrCode) {
-      // Convert to grayscale and adjust contrast
-      const grayscaleData = enhanceImageContrast(imageData);
-      qrCode = jsQR(grayscaleData, imageData.width, imageData.height);
-    }
-    
-    return qrCode;
-  };
-
   // Image enhancement for better QR detection
   const enhanceImageContrast = (imageData) => {
     const data = imageData.data;
@@ -133,58 +105,6 @@ const QRScanner_Page = () => {
     }
     
     return newData;
-  };
-
-  // Handle QR code scanning from image upload
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select a valid image file');
-      return;
-    }
-
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-
-    img.onload = () => {
-      try {
-        const qrCode = scanImageForQR(img);
-
-        if (qrCode) {
-          console.log('QR Code detected:', qrCode.data);
-          
-          try {
-            const parsedData = parseQRData(qrCode.data);
-            toast.success('QR Code scanned successfully!');
-            navigateToAttendancePage(parsedData);
-          } catch (parseError) {
-            console.error('Error parsing QR data:', parseError);
-            toast.error('Invalid QR code format');
-          }
-        } else {
-          toast.error('No QR code found in the image. Please try another image.');
-        }
-      } catch (error) {
-        console.error('Error scanning QR code:', error);
-        toast.error('Error scanning QR code');
-      } finally {
-        URL.revokeObjectURL(url);
-        // Reset file input
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      }
-    };
-
-    img.onerror = () => {
-      toast.error('Error loading image');
-      URL.revokeObjectURL(url);
-    };
-
-    img.src = url;
   };
 
   // Start camera for live scanning with better error handling
@@ -394,37 +314,6 @@ const QRScanner_Page = () => {
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="flex items-center my-6">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
-            <div className="flex-grow border-t border-gray-300"></div>
-          </div>
-
-          {/* Upload QR Image */}
-          <div className="mb-6">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
-              <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <p className="mt-2 text-sm text-gray-600">Upload QR Code Image</p>
-              <p className="text-xs text-gray-500">JPG, PNG, GIF supported</p>
-
-              <label className="mt-3 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 cursor-pointer">
-                <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                Choose Image
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </div>
         </div>
 
         {/* Instructions */}
@@ -438,14 +327,14 @@ const QRScanner_Page = () => {
         </div>
 
         {/* Troubleshooting */}
-        <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
+        {/* <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
           <h3 className="text-sm font-medium text-orange-800 mb-2">Troubleshooting:</h3>
           <ul className="text-sm text-orange-700 space-y-1">
             <li>• If scanning fails, try uploading an image instead</li>
             <li>• Ensure QR code is clear and not blurry</li>
             <li>• Check camera permissions in browser settings</li>
           </ul>
-        </div>
+        </div> */}
       </div>
     </div>
   );
