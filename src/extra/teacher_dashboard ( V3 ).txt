@@ -30,7 +30,6 @@ const TeacherDashboard_Page = () => {
   const [currentDate, setCurrentDate] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage] = useState(5)
-  const [dataLoaded, setDataLoaded] = useState(false)
 
   const { user } = useSelector((state) => state.auth)
 
@@ -38,32 +37,18 @@ const TeacherDashboard_Page = () => {
 
   // Fetch data on component mount
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setDataLoaded(false)
-        await Promise.all([
-          dispatch(getDashboardSubjects(userId)).unwrap(),
-          dispatch(getDashboardAttendance(userId)).unwrap()
-        ])
-        setDataLoaded(true)
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error)
-        setDataLoaded(true) // Set to true even on error to stop loading
-        toast.error('Failed to load dashboard data')
-      }
-    }
+    dispatch(getDashboardSubjects(userId)).unwrap()
 
-    fetchData()
-
+    dispatch(getDashboardAttendance(userId)).unwrap()
     // Cleanup on unmount
     return () => {
       dispatch(clearDashboard())
     }
-  }, [dispatch, userId])
+  }, [dispatch])
 
   // Set initial selected subject when subjects are loaded
   useEffect(() => {
-    if (dashboardSubjects.length > 0 && !selectedSubject && dataLoaded) {
+    if (dashboardSubjects.length > 0 && !selectedSubject) {
       setSelectedSubject(dashboardSubjects[0].id)
 
       // Set initial date to the latest available date for the first subject
@@ -73,7 +58,7 @@ const TeacherDashboard_Page = () => {
         setCurrentDate(latestDate)
       }
     }
-  }, [dashboardSubjects, selectedSubject, dashboardAttendance, dataLoaded])
+  }, [dashboardSubjects, selectedSubject, dashboardAttendance])
 
   // Get available dates for selected subject
   const getAvailableDates = () => {
@@ -158,14 +143,12 @@ const TeacherDashboard_Page = () => {
     return colors[index % colors.length]
   }
 
-  // Show loader when data is still loading
-  if (isLoading || !dataLoaded) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-lg font-medium text-gray-700">Loading Dashboard...</p>
-          <p className="text-sm text-gray-500 mt-2">Please wait while we fetch your data</p>
+          <p className="mt-4 text-lg font-medium text-gray-700">Loading Stats...</p>
         </div>
       </div>
     );

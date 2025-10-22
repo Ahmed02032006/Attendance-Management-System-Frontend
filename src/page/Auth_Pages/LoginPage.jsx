@@ -97,9 +97,9 @@ const LoginPage = () => {
             />
             <span className="text-gray-700">Remember me</span>
           </label>
-          <Link to="/auth/forgotPassword" className="text-sky-600 hover:underline">
+          {/* <Link to="/auth/forgotPassword" className="text-sky-600 hover:underline">
             Forgot password?
-          </Link>
+          </Link> */}
         </div>
 
         {/* Submit */}

@@ -9,7 +9,6 @@ const TeacherDashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
-  const [showInactiveModal, setShowInactiveModal] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,26 +17,6 @@ const TeacherDashboardLayout = () => {
   const { user } = useSelector(
     (state) => state.auth
   );
-
-  // Format email to show ... after @
-  const formatEmail = (email) => {
-    if (!email) return '';
-    const atIndex = email.indexOf('@');
-    if (atIndex === -1) return email;
-    
-    const username = email.substring(0, atIndex);
-    const domain = email.substring(atIndex);
-    
-    // Show first 3 characters of username + ... + @ + domain
-    return `${username.substring(0, 3)}...${domain}`;
-  };
-
-  // Check if user is inactive and show modal
-  useEffect(() => {
-    if (user?.status === 'Inactive') {
-      setShowInactiveModal(true);
-    }
-  }, [user]);
 
   const tabs = [
     {
@@ -103,46 +82,10 @@ const TeacherDashboardLayout = () => {
       .catch((err) => {
         toast.error(err.message || "Logout failed");
       });
-  };
-
-  const handleCloseInactiveModal = () => {
-    setShowInactiveModal(false);
-    // Optionally, you can log out the user when they close the modal
-    handleOnLogOut({ preventDefault: () => {} });
-  };
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      {/* Inactive User Modal */}
-      {showInactiveModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md mx-4">
-            <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                <X className="h-6 w-6 text-red-600" />
-              </div>
-              <h3 className="mt-3 text-lg font-medium text-gray-900">Account Inactive</h3>
-              <div className="mt-2">
-                <p className="text-sm text-gray-500">
-                  You are not able to view your portal because your account has been marked as inactive by the administrator.
-                </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Please contact the administration for more information.
-                </p>
-              </div>
-              <div className="mt-4">
-                <button
-                  onClick={handleCloseInactiveModal}
-                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                >
-                  OK
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Mobile menu button */}
       <div className="md:hidden fixed top-4 right-4 z-50">
         <button
@@ -294,9 +237,7 @@ const TeacherDashboardLayout = () => {
                   </div>
                   <div className="flex flex-col leading-tight">
                     <span className="text-[13px] font-medium text-slate-900">{user.userName}</span>
-                    <span className="text-[11px] text-slate-500" title={user.userEmail}>
-                      {formatEmail(user.userEmail)}
-                    </span>
+                    <span className="text-[11px] text-slate-500">{user.userEmail}</span>
                   </div>
                 </div>
                 <button
