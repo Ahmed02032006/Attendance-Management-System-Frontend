@@ -89,24 +89,41 @@ const StudentAttendance_Page = () => {
     }));
   };
 
-  const getCanvasFingerprint = () => {
+  const getUniqueDeviceFingerprint = () => {
+    const components = [];
+
+    // 1. Canvas with random elements
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-
     canvas.width = 200;
     canvas.height = 50;
 
-    // Draw text with specific properties
-    ctx.textBaseline = 'top';
+    // Draw with some randomness
+    const randomSeed = Date.now() % 1000;
+    ctx.textBaseline = 'alphabetic';
     ctx.font = '14px Arial';
-    ctx.fillStyle = '#f60';
-    ctx.fillRect(125, 1, 62, 20);
-    ctx.fillStyle = '#069';
-    ctx.fillText('Browser Fingerprint', 2, 15);
-    ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
-    ctx.fillText('Browser Fingerprint', 4, 17);
 
-    return canvas.toDataURL();
+    // Different text for each device
+    ctx.fillText(`DeviceID:${randomSeed}📱${navigator.hardwareConcurrency}`, 10, 20);
+    ctx.fillText(`Screen:${screen.width}x${screen.height}`, 10, 40);
+
+    const canvasData = canvas.toDataURL();
+
+    // 2. Combine with hardware info
+    const hardwareInfo = `${navigator.hardwareConcurrency}_${screen.width}_${screen.height}_${window.devicePixelRatio}`;
+
+    // 3. Create final fingerprint
+    const combined = canvasData + '|' + hardwareInfo;
+
+    // Create a shorter hash
+    let hash = 0;
+    for (let i = 0; i < combined.length; i++) {
+      const char = combined.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+
+    return Math.abs(hash).toString(36).substring(0, 20);
   };
 
   const handleSubmit = async (e) => {
@@ -122,8 +139,7 @@ const StudentAttendance_Page = () => {
       return;
     }
 
-    const canvasFingerprint = getCanvasFingerprint();
-    const canvasHash = btoa(canvasFingerprint).substring(0, 50);
+    const deviceFingerprint = getUniqueDeviceFingerprint();
 
     setIsSubmitting(true);
 
@@ -136,7 +152,7 @@ const StudentAttendance_Page = () => {
         subjectId: qrData.subject,
         time: currentTime,
         date: qrData.attendanceDate,
-        ipAddress: canvasHash,
+        ipAddress: deviceFingerprint,
       };
 
       dispatch(createAttendance(AttendanceData))
