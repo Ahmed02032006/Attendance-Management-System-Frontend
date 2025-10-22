@@ -106,9 +106,8 @@ const TeacherDashboardLayout = () => {
   };
 
   const handleCloseInactiveModal = () => {
+    dispatch(logOutUser())
     setShowInactiveModal(false);
-    // Optionally, you can log out the user when they close the modal
-    handleOnLogOut({ preventDefault: () => {} });
   };
 
   return (
