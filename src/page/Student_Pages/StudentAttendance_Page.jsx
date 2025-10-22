@@ -214,7 +214,7 @@ const StudentAttendance_Page = () => {
         subjectId: qrData.subject,
         time: currentTime,
         date: qrData.attendanceDate,
-        deviceFingerprint: deviceFingerprint,
+        ipAddress: deviceFingerprint,
       };
 
       dispatch(createAttendance(AttendanceData))
@@ -232,7 +232,6 @@ const StudentAttendance_Page = () => {
           }
         })
         .catch((error) => {
-          toast.error('Failed to submit attendance. Please try again.');
         });
 
     } catch (error) {
