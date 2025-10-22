@@ -90,40 +90,102 @@ const StudentAttendance_Page = () => {
   };
 
   const getUniqueDeviceFingerprint = () => {
+    // Check if fingerprint already exists in localStorage
+    const storedFingerprint = localStorage.getItem('deviceFingerprint');
+    if (storedFingerprint) {
+      return storedFingerprint;
+    }
+
     const components = [];
 
-    // 1. Canvas with random elements
+    // 1. Canvas fingerprint (consistent)
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     canvas.width = 200;
     canvas.height = 50;
 
-    // Draw with some randomness
-    const randomSeed = Date.now() % 1000;
+    // Use consistent text without timestamps
     ctx.textBaseline = 'alphabetic';
     ctx.font = '14px Arial';
+    ctx.fillText('DeviceFingerprint📱💻🖥️', 10, 20);
+    ctx.fillText(`Hardware:${navigator.hardwareConcurrency}`, 10, 40);
 
-    // Different text for each device
-    ctx.fillText(`DeviceID:${randomSeed}📱${navigator.hardwareConcurrency}`, 10, 20);
-    ctx.fillText(`Screen:${screen.width}x${screen.height}`, 10, 40);
+    // Add some geometric shapes for more consistency
+    ctx.fillRect(150, 10, 30, 30);
+    ctx.beginPath();
+    ctx.arc(180, 35, 10, 0, Math.PI * 2);
+    ctx.fill();
 
     const canvasData = canvas.toDataURL();
 
-    // 2. Combine with hardware info
-    const hardwareInfo = `${navigator.hardwareConcurrency}_${screen.width}_${screen.height}_${window.devicePixelRatio}`;
+    // 2. WebGL fingerprint (more consistent)
+    let webglFingerprint = 'webgl_not_supported';
+    try {
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (gl) {
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        if (debugInfo) {
+          const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+          const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+          webglFingerprint = `${vendor}|${renderer}`;
+        } else {
+          webglFingerprint = gl.getParameter(gl.VERSION) + '|' + gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
+        }
+      }
+    } catch (e) {
+      webglFingerprint = 'webgl_error';
+    }
 
-    // 3. Create final fingerprint
-    const combined = canvasData + '|' + hardwareInfo;
+    // 3. Combine multiple consistent properties
+    const hardwareInfo = [
+      navigator.hardwareConcurrency || 'unknown',
+      screen.width,
+      screen.height,
+      window.devicePixelRatio,
+      navigator.platform,
+      navigator.language,
+      navigator.userAgent.length // Use length for consistency
+    ].join('_');
 
-    // Create a shorter hash
+    // 4. Audio context fingerprint (very consistent)
+    let audioFingerprint = 'audio_not_supported';
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const analyser = audioContext.createAnalyser();
+      oscillator.connect(analyser);
+      analyser.connect(audioContext.destination);
+      oscillator.start();
+      audioContext.close();
+      audioFingerprint = 'audio_supported';
+    } catch (e) {
+      audioFingerprint = 'audio_error';
+    }
+
+    // 5. Create final fingerprint from all components
+    const combined = [
+      canvasData,
+      webglFingerprint,
+      hardwareInfo,
+      audioFingerprint,
+      navigator.plugins.length,
+      navigator.maxTouchPoints || 0
+    ].join('||');
+
+    // 6. Create consistent hash
     let hash = 0;
     for (let i = 0; i < combined.length; i++) {
       const char = combined.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
+      hash = hash & hash;
     }
 
-    return Math.abs(hash).toString(36).substring(0, 20);
+    const fingerprint = Math.abs(hash).toString(36).substring(0, 20);
+
+    // Store in localStorage for future consistency
+    localStorage.setItem('deviceFingerprint', fingerprint);
+
+    return fingerprint;
   };
 
   const handleSubmit = async (e) => {
@@ -152,7 +214,7 @@ const StudentAttendance_Page = () => {
         subjectId: qrData.subject,
         time: currentTime,
         date: qrData.attendanceDate,
-        ipAddress: deviceFingerprint,
+        deviceFingerprint: deviceFingerprint,
       };
 
       dispatch(createAttendance(AttendanceData))
@@ -170,6 +232,7 @@ const StudentAttendance_Page = () => {
           }
         })
         .catch((error) => {
+          toast.error('Failed to submit attendance. Please try again.');
         });
 
     } catch (error) {
