@@ -89,6 +89,26 @@ const StudentAttendance_Page = () => {
     }));
   };
 
+  const getCanvasFingerprint = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = 200;
+    canvas.height = 50;
+
+    // Draw text with specific properties
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillStyle = '#f60';
+    ctx.fillRect(125, 1, 62, 20);
+    ctx.fillStyle = '#069';
+    ctx.fillText('Browser Fingerprint', 2, 15);
+    ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+    ctx.fillText('Browser Fingerprint', 4, 17);
+
+    return canvas.toDataURL();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -102,10 +122,12 @@ const StudentAttendance_Page = () => {
       return;
     }
 
+    const canvasFingerprint = getCanvasFingerprint();
+    const canvasHash = btoa(canvasFingerprint).substring(0, 50);
+
     setIsSubmitting(true);
 
     try {
-      
       const currentTime = formatTime();
 
       const AttendanceData = {
@@ -114,7 +136,7 @@ const StudentAttendance_Page = () => {
         subjectId: qrData.subject,
         time: currentTime,
         date: qrData.attendanceDate,
-        ipAddress: ipAddress
+        ipAddress: canvasHash,
       };
 
       dispatch(createAttendance(AttendanceData))
