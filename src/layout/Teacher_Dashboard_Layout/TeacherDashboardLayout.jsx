@@ -106,14 +106,16 @@ const TeacherDashboardLayout = () => {
   };
 
   const handleCloseInactiveModal = () => {
-    dispatch(logOutUser())
     setShowInactiveModal(false);
+    // Log out the user immediately when they close the modal
+    handleOnLogOut({ preventDefault: () => {} });
   };
 
-  return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Inactive User Modal */}
-      {showInactiveModal && (
+  // If user is inactive, don't render any dashboard content
+  if (user?.status === 'Inactive') {
+    return (
+      <div className="flex min-h-screen bg-slate-50 items-center justify-center">
+        {/* Inactive User Modal - Always show when user is inactive */}
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md mx-4">
             <div className="text-center">
@@ -140,8 +142,12 @@ const TeacherDashboardLayout = () => {
             </div>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
+  return (
+    <div className="flex min-h-screen bg-slate-50">
       {/* Mobile menu button */}
       <div className="md:hidden fixed top-4 right-4 z-50">
         <button
