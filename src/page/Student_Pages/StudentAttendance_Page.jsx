@@ -89,9 +89,9 @@ const StudentAttendance_Page = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    // Capitalize the value for studentName and rollNo fields
+    // Capitalize studentName and rollNo fields
     const processedValue = (name === 'studentName' || name === 'rollNo') 
-      ? capitalizeText(value) 
+      ? capitalizeText(value)
       : value;
     
     setFormData(prev => ({
@@ -307,7 +307,7 @@ const StudentAttendance_Page = () => {
                 value={formData.studentName}
                 onChange={handleInputChange}
                 placeholder="Enter your full name"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors uppercase placeholder:normal-case"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors uppercase"
                 required
                 style={{ textTransform: 'uppercase' }}
               />
@@ -325,7 +325,7 @@ const StudentAttendance_Page = () => {
                 value={formData.rollNo}
                 onChange={handleInputChange}
                 placeholder="Enter your roll number"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors uppercase placeholder:normal-case"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors uppercase"
                 required
                 style={{ textTransform: 'uppercase' }}
               />
