@@ -87,14 +87,21 @@ const TeacherAttendance_Page = () => {
 
   const currentAttendanceRecords = getCurrentAttendanceRecords();
 
-  // Extract numeric part from roll number for sorting
+  // Extract numeric part from roll number for sorting (specifically for format like 25FA-009-CE)
   const extractNumericFromRollNo = (rollNo) => {
     if (!rollNo) return 0;
     
-    // Try to find numeric sequences in the roll number
+    // For format like "25FA-009-CE", extract the middle numeric part
+    const parts = rollNo.split('-');
+    if (parts.length >= 2) {
+      const numericPart = parts[1]; // This should be "009", "005", "015", etc.
+      const numericValue = parseInt(numericPart, 10);
+      return isNaN(numericValue) ? 0 : numericValue;
+    }
+    
+    // Fallback: try to find any numeric sequences
     const numericMatches = rollNo.match(/\d+/g);
     if (numericMatches && numericMatches.length > 0) {
-      // Use the first numeric sequence found
       return parseInt(numericMatches[0], 10);
     }
     
@@ -141,10 +148,6 @@ const TeacherAttendance_Page = () => {
         case 'studentName':
           aValue = a.studentName?.toLowerCase() || '';
           bValue = b.studentName?.toLowerCase() || '';
-          break;
-        case 'subject':
-          aValue = a.subject?.toLowerCase() || '';
-          bValue = b.subject?.toLowerCase() || '';
           break;
         default:
           return 0;
@@ -600,15 +603,8 @@ const TeacherAttendance_Page = () => {
                           {getSortIcon('time')}
                         </div>
                       </th>
-                      <th 
-                        scope="col" 
-                        className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                        onClick={() => handleSort('subject')}
-                      >
-                        <div className="flex items-center justify-center space-x-1">
-                          <span>Subject</span>
-                          {getSortIcon('subject')}
-                        </div>
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Subject
                       </th>
                       {/* <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
