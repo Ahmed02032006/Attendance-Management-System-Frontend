@@ -165,7 +165,6 @@ const TeacherDashboard_Page = () => {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="mt-4 text-lg font-medium text-gray-700">Loading Dashboard...</p>
-          {/* <p className="text-sm text-gray-500 mt-2">Please wait while we fetch your data</p> */}
         </div>
       </div>
     );
@@ -175,29 +174,26 @@ const TeacherDashboard_Page = () => {
     <div className="min-h-screen bg-gray-50">
       <HeaderComponent heading={"Teacher Dashboard"} subHeading={"Overview of your teaching activities"} role='admin' />
 
-      <div className="container max-w-full mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="container max-w-full mx-auto p-4 sm:p-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
           {/* Left Column - Subjects */}
-          <div className="lg:col-span-1">
+          <div className="xl:col-span-1">
             {/* My Subjects */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">My Subjects</h3>
-                {/* <button className="text-sky-600 hover:text-sky-700 text-sm font-medium flex items-center">
-                  View All
-                </button> */}
               </div>
 
               {dashboardSubjects.length === 0 ? (
-                <div className="text-center py-8">
-                  <FiBook className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-500 text-lg font-medium">No subjects found</p>
-                  <p className="text-gray-400 text-sm mt-1">
+                <div className="text-center py-6 sm:py-8">
+                  <FiBook className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
+                  <p className="text-gray-500 text-base sm:text-lg font-medium">No subjects found</p>
+                  <p className="text-gray-400 text-xs sm:text-sm mt-1">
                     You are not assigned to any subjects yet
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {dashboardSubjects.map((subject, index) => (
                     <div
                       key={subject.id}
@@ -207,25 +203,24 @@ const TeacherDashboard_Page = () => {
                         }`}
                       onClick={() => handleSubjectSelect(subject.id)}
                     >
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-10 h-10 rounded-lg ${getSubjectColor(index)} flex items-center justify-center`}>
-                          <span className="text-white font-semibold text-sm">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${getSubjectColor(index)} flex items-center justify-center flex-shrink-0`}>
+                          <span className="text-white font-semibold text-xs sm:text-sm">
                             {subject.name?.charAt(0) || 'S'}
                           </span>
                         </div>
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <p
-                            className={`text-xs font-medium truncate w-[145px] whitespace-nowrap overflow-hidden text-ellipsis ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                            className={`text-xs font-medium truncate ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
                               }`}
                             title={subject.name}
                           >
                             {subject.name}
                           </p>
-
-                          <p className="text-xs text-gray-500">{subject.code}</p>
+                          <p className="text-xs text-gray-500 truncate">{subject.code}</p>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex-shrink-0 ml-2">
                         <p className={`text-sm font-medium ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
                           }`}>
                           {subject.students || 0}
@@ -240,27 +235,27 @@ const TeacherDashboard_Page = () => {
           </div>
 
           {/* Right Column - Attendance Records */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="xl:col-span-2 space-y-4 sm:space-y-6">
             {/* Date Navigation */}
             {availableDates.length > 0 && selectedSubject && (
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between">
+              <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+                <div className="flex items-center justify-between space-x-4">
                   <button
                     onClick={() => navigateDate('prev')}
                     disabled={currentDateIndex >= availableDates.length - 1}
-                    className={`p-2 rounded-lg transition-colors ${currentDateIndex >= availableDates.length - 1
+                    className={`p-2 rounded-lg transition-colors flex-shrink-0 ${currentDateIndex >= availableDates.length - 1
                       ? 'text-gray-300 cursor-not-allowed'
                       : 'text-gray-600 hover:bg-gray-100'
                       }`}
                   >
-                    <FiChevronLeft className="h-5 w-5" />
+                    <FiChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
 
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                  <div className="text-center flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
                       {formatDate(currentDate)}
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">
                       {selectedSubjectData?.name} • {currentAttendanceRecords.length} students present
                     </p>
                   </div>
@@ -268,12 +263,12 @@ const TeacherDashboard_Page = () => {
                   <button
                     onClick={() => navigateDate('next')}
                     disabled={currentDateIndex <= 0}
-                    className={`p-2 rounded-lg transition-colors ${currentDateIndex <= 0
+                    className={`p-2 rounded-lg transition-colors flex-shrink-0 ${currentDateIndex <= 0
                       ? 'text-gray-300 cursor-not-allowed'
                       : 'text-gray-600 hover:bg-gray-100'
                       }`}
                   >
-                    <FiChevronRight className="h-5 w-5" />
+                    <FiChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
                 </div>
               </div>
@@ -281,7 +276,7 @@ const TeacherDashboard_Page = () => {
 
             {/* Attendance Records Table */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Attendance Records</h3>
                   {selectedSubject && (
@@ -292,22 +287,22 @@ const TeacherDashboard_Page = () => {
                 </div>
 
                 {!selectedSubject ? (
-                  <div className="text-center py-8">
-                    <FiEye className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-500 text-lg font-medium">Select a subject to view attendance</p>
+                  <div className="text-center py-6 sm:py-8">
+                    <FiEye className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
+                    <p className="text-gray-500 text-base sm:text-lg font-medium">Select a subject to view attendance</p>
                   </div>
                 ) : currentRecords.length > 0 ? (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead>
                         <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Student Name
                           </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Roll No.
                           </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Time
                           </th>
                         </tr>
@@ -315,13 +310,15 @@ const TeacherDashboard_Page = () => {
                       <tbody className="divide-y divide-gray-200">
                         {currentRecords.map((record) => (
                           <tr key={record.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">{record.studentName}</div>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
+                                {record.studentName}
+                              </div>
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-500">
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-center text-sm text-gray-500">
                               {record.rollNo}
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-500">
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-center text-sm text-gray-500">
                               {record.time}
                             </td>
                           </tr>
@@ -330,10 +327,10 @@ const TeacherDashboard_Page = () => {
                     </table>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <FiEye className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-500 text-lg font-medium">No attendance records found</p>
-                    <p className="text-gray-400 text-sm mt-1">
+                  <div className="text-center py-6 sm:py-8">
+                    <FiEye className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
+                    <p className="text-gray-500 text-base sm:text-lg font-medium">No attendance records found</p>
+                    <p className="text-gray-400 text-xs sm:text-sm mt-1">
                       {availableDates.length === 0
                         ? `No attendance data available for ${selectedSubjectData?.name}`
                         : `No records for ${formatDate(currentDate)}`
@@ -345,9 +342,9 @@ const TeacherDashboard_Page = () => {
 
               {/* Pagination */}
               {currentAttendanceRecords.length > recordsPerPage && (
-                <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 bg-gray-50">
-                  <div className="mb-3 sm:mb-0">
-                    <p className="text-sm text-gray-700">
+                <div className="px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 bg-gray-50">
+                  <div className="mb-2 sm:mb-0">
+                    <p className="text-xs sm:text-sm text-gray-700">
                       Showing <span className="font-medium">{indexOfFirstRecord + 1}</span> to{' '}
                       <span className="font-medium">{Math.min(indexOfLastRecord, currentAttendanceRecords.length)}</span> of{' '}
                       <span className="font-medium">{currentAttendanceRecords.length}</span> students
@@ -357,17 +354,17 @@ const TeacherDashboard_Page = () => {
                     <button
                       onClick={prevPage}
                       disabled={currentPage === 1}
-                      className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                      className="px-2 sm:px-3 py-1.5 border border-gray-300 rounded-md text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
                     >
-                      <FiChevronLeft className="h-4 w-4 mr-1" />
+                      <FiChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                     </button>
 
-                    {totalPages <= 6 ? (
+                    {totalPages <= 4 ? (
                       Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
                         <button
                           key={number}
                           onClick={() => paginate(number)}
-                          className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
+                          className={`px-2.5 sm:px-3.5 py-1.5 border text-xs sm:text-sm font-medium ${currentPage === number
                             ? 'border-sky-600 bg-sky-600 text-white'
                             : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                             } rounded-md transition-colors`}
@@ -377,28 +374,26 @@ const TeacherDashboard_Page = () => {
                       ))
                     ) : (
                       <>
-                        {currentPage > 3 && (
+                        {currentPage > 2 && (
                           <button
                             onClick={() => paginate(1)}
-                            className="px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-md transition-colors"
+                            className="px-2.5 sm:px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-medium rounded-md transition-colors"
                           >
                             1
                           </button>
                         )}
-                        {currentPage > 4 && <span className="px-2 text-gray-500">...</span>}
+                        {currentPage > 3 && <span className="px-1 sm:px-2 text-gray-500">...</span>}
                         {[
-                          currentPage - 2,
                           currentPage - 1,
                           currentPage,
-                          currentPage + 1,
-                          currentPage + 2
+                          currentPage + 1
                         ]
                           .filter(num => num > 0 && num <= totalPages)
                           .map(number => (
                             <button
                               key={number}
                               onClick={() => paginate(number)}
-                              className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
+                              className={`px-2.5 sm:px-3.5 py-1.5 border text-xs sm:text-sm font-medium ${currentPage === number
                                 ? 'border-sky-600 bg-sky-600 text-white'
                                 : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                                 } rounded-md transition-colors`}
@@ -406,11 +401,11 @@ const TeacherDashboard_Page = () => {
                               {number}
                             </button>
                           ))}
-                        {currentPage < totalPages - 3 && <span className="px-2 text-gray-500">...</span>}
-                        {currentPage < totalPages - 2 && (
+                        {currentPage < totalPages - 2 && <span className="px-1 sm:px-2 text-gray-500">...</span>}
+                        {currentPage < totalPages - 1 && (
                           <button
                             onClick={() => paginate(totalPages)}
-                            className="px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-md transition-colors"
+                            className="px-2.5 sm:px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-medium rounded-md transition-colors"
                           >
                             {totalPages}
                           </button>
@@ -421,9 +416,9 @@ const TeacherDashboard_Page = () => {
                     <button
                       onClick={nextPage}
                       disabled={currentPage === totalPages}
-                      className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                      className="px-2 sm:px-3 py-1.5 border border-gray-300 rounded-md text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
                     >
-                      <FiChevronRight className="h-4 w-4 ml-1" />
+                      <FiChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
                     </button>
                   </div>
                 </div>
