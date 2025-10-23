@@ -89,103 +89,126 @@ const StudentAttendance_Page = () => {
     }));
   };
 
-  const getUniqueDeviceFingerprint = () => {
-    // Check if fingerprint already exists in localStorage
-    const storedFingerprint = localStorage.getItem('deviceFingerprint');
-    if (storedFingerprint) {
-      return storedFingerprint;
-    }
-
+  const getUniqueDeviceFingerprint = async () => {
     const components = [];
 
-    // 1. Canvas fingerprint (consistent)
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 200;
-    canvas.height = 50;
-
-    // Use consistent text without timestamps
-    ctx.textBaseline = 'alphabetic';
-    ctx.font = '14px Arial';
-    ctx.fillText('DeviceFingerprint📱💻🖥️', 10, 20);
-    ctx.fillText(`Hardware:${navigator.hardwareConcurrency}`, 10, 40);
-
-    // Add some geometric shapes for more consistency
-    ctx.fillRect(150, 10, 30, 30);
-    ctx.beginPath();
-    ctx.arc(180, 35, 10, 0, Math.PI * 2);
-    ctx.fill();
-
-    const canvasData = canvas.toDataURL();
-
-    // 2. WebGL fingerprint (more consistent)
-    let webglFingerprint = 'webgl_not_supported';
     try {
+      // 1. Enhanced Canvas Fingerprinting with more variations
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 300;
+      canvas.height = 100;
+
+      // More complex drawing with random elements
+      const randomSeed = Math.random() * 10000;
+      ctx.textBaseline = 'alphabetic';
+      ctx.font = '14px "Arial", "Helvetica", sans-serif';
+
+      // Add more device-specific properties
+      ctx.fillText(`Device:${navigator.hardwareConcurrency}📱${screen.colorDepth}`, 10, 20);
+      ctx.fillText(`Screen:${screen.width}x${screen.height}@${window.devicePixelRatio}`, 10, 40);
+      ctx.fillText(`Time:${Date.now()}`, 10, 60);
+
+      // Add some random shapes and gradients
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, `rgba(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255},0.7)`);
+      gradient.addColorStop(1, `rgba(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255},0.3)`);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(150, 10, 80, 30);
+
+      const canvasData = canvas.toDataURL();
+
+      // 2. WebGL Fingerprinting (more reliable)
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      let webglData = '';
       if (gl) {
         const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
         if (debugInfo) {
-          const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-          const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-          webglFingerprint = `${vendor}|${renderer}`;
-        } else {
-          webglFingerprint = gl.getParameter(gl.VERSION) + '|' + gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
+          webglData = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) +
+            gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
         }
       }
-    } catch (e) {
-      webglFingerprint = 'webgl_error';
+
+      // 3. Audio Context Fingerprinting
+      let audioFingerprint = '';
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const analyser = audioContext.createAnalyser();
+        oscillator.connect(analyser);
+        analyser.connect(audioContext.destination);
+        oscillator.start();
+
+        const data = new Float32Array(analyser.frequencyBinCount);
+        analyser.getFloatFrequencyData(data);
+        audioFingerprint = data.join(',');
+
+        oscillator.stop();
+        audioContext.close();
+      } catch (audioError) {
+        audioFingerprint = 'audio_not_supported';
+      }
+
+      // 4. More Device Properties
+      const deviceProps = {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        languages: navigator.languages?.join(','),
+        platform: navigator.platform,
+        hardwareConcurrency: navigator.hardwareConcurrency,
+        deviceMemory: navigator.deviceMemory || 'unknown',
+        screen: `${screen.width}x${screen.height}`,
+        colorDepth: screen.colorDepth,
+        pixelRatio: window.devicePixelRatio,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        touchSupport: navigator.maxTouchPoints > 0
+      };
+
+      // 5. Combine all components with more entropy
+      const combined = [
+        canvasData,
+        webglData,
+        audioFingerprint,
+        JSON.stringify(deviceProps),
+        Date.now().toString(),
+        Math.random().toString(36).substring(2),
+        performance.now().toString()
+      ].join('|');
+
+      // 6. Better hashing function
+      let hash = 0;
+      for (let i = 0; i < combined.length; i++) {
+        const char = combined.charCodeAt(i);
+        hash = ((hash << 7) - hash) + char;
+        hash = hash & 0x7FFFFFFF; // Ensure positive 32-bit integer
+      }
+
+      // 7. Add timestamp and random component
+      const timestamp = Date.now().toString(36);
+      const randomComponent = Math.random().toString(36).substring(2, 8);
+
+      return `${hash.toString(36)}${timestamp}${randomComponent}`.substring(0, 32);
+
+    } catch (error) {
+      // Fallback fingerprint
+      const fallback = [
+        navigator.userAgent,
+        navigator.hardwareConcurrency,
+        screen.width,
+        screen.height,
+        Date.now(),
+        Math.random()
+      ].join('|');
+
+      let hash = 0;
+      for (let i = 0; i < fallback.length; i++) {
+        const char = fallback.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & 0x7FFFFFFF;
+      }
+
+      return `fallback_${hash.toString(36)}${Date.now().toString(36)}`.substring(0, 32);
     }
-
-    // 3. Combine multiple consistent properties
-    const hardwareInfo = [
-      navigator.hardwareConcurrency || 'unknown',
-      screen.width,
-      screen.height,
-      window.devicePixelRatio,
-      navigator.platform,
-      navigator.language,
-      navigator.userAgent.length // Use length for consistency
-    ].join('_');
-
-    // 4. Audio context fingerprint (very consistent)
-    let audioFingerprint = 'audio_not_supported';
-    try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const analyser = audioContext.createAnalyser();
-      oscillator.connect(analyser);
-      analyser.connect(audioContext.destination);
-      oscillator.start();
-      audioContext.close();
-      audioFingerprint = 'audio_supported';
-    } catch (e) {
-      audioFingerprint = 'audio_error';
-    }
-
-    // 5. Create final fingerprint from all components
-    const combined = [
-      canvasData,
-      webglFingerprint,
-      hardwareInfo,
-      audioFingerprint,
-      navigator.plugins.length,
-      navigator.maxTouchPoints || 0
-    ].join('||');
-
-    // 6. Create consistent hash
-    let hash = 0;
-    for (let i = 0; i < combined.length; i++) {
-      const char = combined.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-
-    const fingerprint = Math.abs(hash).toString(36).substring(0, 20);
-
-    // Store in localStorage for future consistency
-    localStorage.setItem('deviceFingerprint', fingerprint);
-
-    return fingerprint;
   };
 
   const handleSubmit = async (e) => {
@@ -201,7 +224,7 @@ const StudentAttendance_Page = () => {
       return;
     }
 
-    const deviceFingerprint = getUniqueDeviceFingerprint();
+    const deviceFingerprint = await getUniqueDeviceFingerprint();
 
     setIsSubmitting(true);
 
