@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'react-toastify'
-import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown } from 'react-icons/fi'
+import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
   createAttendance,
@@ -24,7 +24,9 @@ const TeacherAttendance_Page = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [attendanceToDelete, setAttendanceToDelete] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [attendanceForm, setAttendanceForm] = useState({
     subject: '',
@@ -270,18 +272,27 @@ const TeacherAttendance_Page = () => {
     setShowQRModal(true);
   };
 
-  // const handleDeleteAttendance = async (attendanceId) => {
-  //   if (!window.confirm('Are you sure you want to delete this attendance record?')) {
-  //     return;
-  //   }
+  // Handle delete attendance
+  const handleDeleteClick = (attendanceId) => {
+    setAttendanceToDelete(attendanceId);
+    setShowDeleteModal(true);
+  };
 
-  //   try {
-  //     await dispatch(deleteAttendance(attendanceId)).unwrap();
-  //     toast.success('Attendance record deleted successfully!');
-  //   } catch (error) {
-  //     toast.error(error.message || 'Failed to delete attendance record');
-  //   }
-  // };
+  const handleConfirmDelete = () => {
+    if (attendanceToDelete) {
+      console.log('Deleting attendance record with ID:', attendanceToDelete);
+      // Here you can dispatch the delete action
+      // dispatch(deleteAttendance(attendanceToDelete)).unwrap();
+      toast.success(`Attendance record with ID ${attendanceToDelete} would be deleted`);
+    }
+    setShowDeleteModal(false);
+    setAttendanceToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setAttendanceToDelete(null);
+  };
 
   const navigateDate = (direction) => {
     const newDate = new Date(currentDate);
@@ -356,68 +367,6 @@ const TeacherAttendance_Page = () => {
     setCurrentPage(1);
   }, [searchTerm]);
 
-  // Add this function to download the QR code
-  // const downloadQRCode = () => {
-  //   const svgElement = document.getElementById('qr-code-svg');
-  //   if (!svgElement) {
-  //     toast.error('QR code not found');
-  //     return;
-  //   }
-
-  //   try {
-  //     // Get SVG as string
-  //     const svgString = new XMLSerializer().serializeToString(svgElement);
-
-  //     // Create canvas element
-  //     const canvas = document.createElement('canvas');
-  //     const ctx = canvas.getContext('2d');
-  //     const img = new Image();
-
-  //     // Set canvas size
-  //     canvas.width = 300;
-  //     canvas.height = 300;
-
-  //     // Create PNG image from SVG
-  //     const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-  //     const url = URL.createObjectURL(svgBlob);
-
-  //     img.onload = () => {
-  //       // Draw image on canvas
-  //       ctx.fillStyle = '#FFFFFF';
-  //       ctx.fillRect(0, 0, canvas.width, canvas.height);
-  //       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-  //       // Create download link
-  //       const pngUrl = canvas.toDataURL('image/png');
-  //       const downloadLink = document.createElement('a');
-  //       downloadLink.href = pngUrl;
-  //       downloadLink.download = `attendance-qr-${attendanceForm.uniqueCode}-${subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name.replace(/\s+/g, '-').toLowerCase()}.png`;
-
-  //       // Trigger download
-  //       document.body.appendChild(downloadLink);
-  //       downloadLink.click();
-  //       document.body.removeChild(downloadLink);
-
-  //       // Clean up
-  //       URL.revokeObjectURL(url);
-
-  //       // toast.success('QR code downloaded successfully!');
-  //     };
-
-  //     img.onerror = () => {
-  //       toast.error('Failed to generate QR code image');
-  //       URL.revokeObjectURL(url);
-  //     };
-
-  //     img.src = url;
-
-  //   } catch (error) {
-  //     toast.error('Failed to download QR code');
-  //   }
-  // };
-
-  // =====================================================================================
-
   // Helper functions for student attendance data
   const getStudentPreviousAttendance = (student) => {
     if (!student || !selectedSubject) return [];
@@ -467,8 +416,6 @@ const TeacherAttendance_Page = () => {
     if (total === 0) return 0;
     return Math.round((present / total) * 100);
   };
-
-  // =====================================================================================
 
   // Loading state
   if (isLoading) {
@@ -606,9 +553,9 @@ const TeacherAttendance_Page = () => {
                       <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Subject
                       </th>
-                      {/* <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
-                      </th> */}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -634,24 +581,22 @@ const TeacherAttendance_Page = () => {
                           <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
                             {student.subject}
                           </td>
-                          {/* <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm">
+                          <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm">
                             <div className="flex justify-center space-x-2">
                               <button
-                                onClick={() => handleDeleteAttendance(student.id)}
-                                className="text-red-600 hover:text-red-800 transition-colors"
-                                title="Delete attendance"
+                                onClick={() => handleDeleteClick(student.id)}
+                                className="text-red-600 hover:text-red-800 transition-colors p-1 rounded hover:bg-red-50"
+                                title="Delete attendance record"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
+                                <FiTrash2 className="w-4 h-4" />
                               </button>
                             </div>
-                          </td> */}
+                          </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
+                        <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
                           {searchTerm ? "No matching students found" : "No attendance records found for " + formatDisplayDate(currentDate)}
                         </td>
                       </tr>
@@ -720,7 +665,7 @@ const TeacherAttendance_Page = () => {
                                 } rounded-md transition-colors`}
                             >
                               {number}
-                        </button>
+                            </button>
                           ))}
                         {currentPage < totalPages - 3 && <span className="px-2 text-gray-500">...</span>}
                         {currentPage < totalPages - 2 && (
@@ -901,14 +846,6 @@ const TeacherAttendance_Page = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
-              {/* <button
-                onClick={downloadQRCode}
-                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-green-700 font-medium transition-colors flex items-center justify-center space-x-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-              </button> */}
             </div>
             <div className="p-6 flex flex-col items-center">
               <div className="w-64 h-64 bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2" id="qr-code-container">
@@ -921,24 +858,8 @@ const TeacherAttendance_Page = () => {
                   fgColor="#000000"
                   id="qr-code-svg"
                   minVersion={1}
-                  // imageSettings={{
-                  //   src: "https://repository-images.githubusercontent.com/266040586/ea7a9500-cd19-11ea-9ec9-c7a5474b81af",
-                  //   x: undefined,
-                  //   y: undefined,
-                  //   height: 20,
-                  //   width: 20,
-                  //   opacity: 1,
-                  //   excavate: true,
-                  // }}
                 />
               </div>
-
-              {/* <div className="text-center mb-4">
-                <p className="text-sm font-medium text-gray-700">
-                  Subject: {subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name}
-                </p>
-                <p className="text-sm text-gray-600">Code: {attendanceForm.uniqueCode}</p>
-              </div> */}
 
               <p className="text-sm text-gray-600 text-center">
                 Students can scan this QR code to mark their attendance
@@ -950,6 +871,44 @@ const TeacherAttendance_Page = () => {
                 className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Confirm Deletion</h3>
+            </div>
+            <div className="p-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <FiTrash2 className="w-6 h-6 text-red-600" />
+                </div>
+              </div>
+              <p className="text-center text-gray-700 mb-2">
+                Are you sure you want to delete this attendance record?
+              </p>
+              <p className="text-center text-sm text-gray-500">
+                This action cannot be undone.
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={handleCancelDelete}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+              >
+                No, Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors"
+              >
+                Yes, Delete
               </button>
             </div>
           </div>
