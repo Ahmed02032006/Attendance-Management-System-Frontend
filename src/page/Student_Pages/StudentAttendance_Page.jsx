@@ -217,53 +217,96 @@ const StudentAttendance_Page = () => {
   const getUniqueDeviceFingerprint = () => {
     const components = [];
 
-    // 1. Canvas with random elements
+    // 1. Canvas fingerprint (consistent for same device/browser)
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     canvas.width = 200;
     canvas.height = 50;
 
-    // Draw with some randomness
-    const randomSeed = Date.now() % 1000;
+    // Use consistent text without timestamps
     ctx.textBaseline = 'alphabetic';
     ctx.font = '14px Arial';
-
-    // Different text for each device
-    ctx.fillText(`DeviceID:${randomSeed}📱${navigator.hardwareConcurrency}`, 10, 20);
+    ctx.fillText('DeviceFingerprint📱✨', 10, 20);
     ctx.fillText(`Screen:${screen.width}x${screen.height}`, 10, 40);
+
+    // Add some browser-specific rendering
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = 'rgb(255,0,255)';
+    ctx.beginPath();
+    ctx.arc(50, 25, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgb(0,255,255)';
+    ctx.beginPath();
+    ctx.arc(60, 25, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgb(255,255,0)';
+    ctx.beginPath();
+    ctx.arc(55, 35, 10, 0, Math.PI * 2);
+    ctx.fill();
 
     const canvasData = canvas.toDataURL();
 
-    // 2. Combine with hardware info
-    const hardwareInfo = `${navigator.hardwareConcurrency}_${screen.width}_${screen.height}_${window.devicePixelRatio}`;
+    // 2. Combine multiple stable device characteristics
+    const deviceInfo = {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      languages: navigator.languages ? navigator.languages.join(',') : '',
+      hardwareConcurrency: navigator.hardwareConcurrency,
+      maxTouchPoints: navigator.maxTouchPoints,
+      platform: navigator.platform,
+      deviceMemory: navigator.deviceMemory || 'unknown',
+      screen: `${screen.width}x${screen.height}`,
+      colorDepth: screen.colorDepth,
+      pixelRatio: window.devicePixelRatio,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      // Canvas fingerprint
+      canvas: canvasData.substring(0, 100) // Use first 100 chars of canvas data
+    };
 
-    // 3. Create final fingerprint
-    const combined = canvasData + '|' + hardwareInfo;
+    // 3. Create a stable string from all components
+    const stableString = Object.values(deviceInfo).join('|');
 
-    // Create a shorter hash
+    // 4. Better hash function
     let hash = 0;
-    for (let i = 0; i < combined.length; i++) {
-      const char = combined.charCodeAt(i);
+    for (let i = 0; i < stableString.length; i++) {
+      const char = stableString.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // Convert to 32bit integer
     }
 
-    return Math.abs(hash).toString(36).substring(0, 20);
+    return `device_${Math.abs(hash).toString(36)}`;
   };
 
+  // Optional: Store the fingerprint in localStorage to ensure consistency
+  const getStableDeviceFingerprint = () => {
+    const STORAGE_KEY = 'device_fingerprint';
+
+    // Check if we already have a fingerprint stored
+    const storedFingerprint = localStorage.getItem(STORAGE_KEY);
+    if (storedFingerprint) {
+      return storedFingerprint;
+    }
+
+    // Generate new fingerprint and store it
+    const newFingerprint = getUniqueDeviceFingerprint();
+    localStorage.setItem(STORAGE_KEY, newFingerprint);
+    return newFingerprint;
+  };
+
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!formData.studentName.trim() || !formData.rollNo.trim() || !formData.uniqueCode.trim()) {
       toast.error('Please fill all fields');
       return;
     }
-
+    
     if (!qrData) {
       toast.error('Invalid attendance session');
       return;
     }
-
+    
     // If location is required but not available, try to get it again
     if (qrData.teacherLocation && !studentLocation) {
       try {
@@ -274,7 +317,7 @@ const StudentAttendance_Page = () => {
         return;
       }
     }
-
+    
     // Verify location if teacher location is available in QR data
     if (qrData.teacherLocation && studentLocation) {
       const isWithinRadius = verifyLocation(
@@ -282,14 +325,16 @@ const StudentAttendance_Page = () => {
         studentLocation,
         qrData.locationRadius || 200
       );
-
+      
       if (!isWithinRadius) {
         toast.error('You are not within the allowed attendance area. Please move closer to the teacher.');
         return;
       }
     }
-
-    const deviceFingerprint = getUniqueDeviceFingerprint();
+    
+    // In your handleSubmit function, use:
+    const deviceFingerprint = getStableDeviceFingerprint();
+    // const deviceFingerprint = getUniqueDeviceFingerprint();
 
     setIsSubmitting(true);
 
