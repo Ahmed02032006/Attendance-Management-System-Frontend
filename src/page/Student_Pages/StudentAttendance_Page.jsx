@@ -33,6 +33,7 @@ const StudentAttendance_Page = () => {
   const [studentLocation, setStudentLocation] = useState(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationError, setLocationError] = useState('');
+  const [locationAttempted, setLocationAttempted] = useState(false);
 
   const locationHook = useLocation();
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const StudentAttendance_Page = () => {
     });
   };
 
+  // Get student's current location - Auto-trigger when QR data is available
   const getStudentLocation = () => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -56,6 +58,7 @@ const StudentAttendance_Page = () => {
 
       setIsGettingLocation(true);
       setLocationError('');
+      setLocationAttempted(true);
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -74,10 +77,10 @@ const StudentAttendance_Page = () => {
           let errorMessage = '';
           switch (error.code) {
             case error.PERMISSION_DENIED:
-              errorMessage = 'Location access denied. Please enable location services to mark attendance.';
+              errorMessage = 'Location access denied. Please enable location services in your browser settings and refresh the page.';
               break;
             case error.POSITION_UNAVAILABLE:
-              errorMessage = 'Location information unavailable. Please check your connection.';
+              errorMessage = 'Location information unavailable. Please check your connection and try again.';
               break;
             case error.TIMEOUT:
               errorMessage = 'Location request timed out. Please try again.';
@@ -97,6 +100,16 @@ const StudentAttendance_Page = () => {
       );
     });
   };
+
+  // Auto-request location when QR data is loaded and requires location
+  useEffect(() => {
+    if (qrData && qrData.teacherLocation && !studentLocation && !locationAttempted) {
+      console.log('Auto-requesting location for attendance...');
+      getStudentLocation().catch(error => {
+        console.log('Auto-location request failed:', error.message);
+      });
+    }
+  }, [qrData, studentLocation, locationAttempted]);
 
   const verifyLocation = (teacherLoc, studentLoc, allowedRadius = 200) => {
     if (!teacherLoc || !studentLoc) {
@@ -136,6 +149,11 @@ const StudentAttendance_Page = () => {
           uniqueCode: parsedData.code,
           ipAddress
         }));
+        
+        // Reset location state when new QR data is loaded
+        setLocationAttempted(false);
+        setStudentLocation(null);
+        setLocationError('');
       } catch (error) {
         toast.error('Invalid QR code data');
         navigate('/');
@@ -157,6 +175,11 @@ const StudentAttendance_Page = () => {
           ...prev,
           uniqueCode: code,
         }));
+        
+        // Reset location state when new QR data is loaded
+        setLocationAttempted(false);
+        setStudentLocation(null);
+        setLocationError('');
       } else {
         toast.error('No attendance code found');
         navigate('/');
@@ -179,6 +202,16 @@ const StudentAttendance_Page = () => {
       ...prev,
       [name]: processedValue
     }));
+  };
+
+  // Manual location retry function
+  const handleRetryLocation = async () => {
+    try {
+      await getStudentLocation();
+      toast.success('Location retrieved successfully!');
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   const getUniqueDeviceFingerprint = async () => {
@@ -305,18 +338,22 @@ const StudentAttendance_Page = () => {
       return;
     }
 
-    let studentLoc;
-    try {
-      studentLoc = await getStudentLocation();
-    } catch (error) {
-      toast.error(error.message);
-      return;
+    // If location is required but not available, try to get it again
+    if (qrData.teacherLocation && !studentLocation) {
+      try {
+        await getStudentLocation();
+        // Continue with submission after getting location
+      } catch (error) {
+        toast.error('Location access required for attendance');
+        return;
+      }
     }
 
-    if (qrData.teacherLocation) {
+    // Verify location if teacher location is available in QR data
+    if (qrData.teacherLocation && studentLocation) {
       const isWithinRadius = verifyLocation(
         qrData.teacherLocation,
-        studentLoc,
+        studentLocation,
         qrData.locationRadius || 200
       );
 
@@ -340,14 +377,14 @@ const StudentAttendance_Page = () => {
         time: currentTime,
         date: qrData.attendanceDate,
         ipAddress: deviceFingerprint,
-        studentLocation: studentLoc,
+        studentLocation: studentLocation,
         teacherLocation: qrData.teacherLocation,
-        distance: qrData.teacherLocation ? 
+        distance: qrData.teacherLocation && studentLocation ? 
           calculateDistance(
             qrData.teacherLocation.latitude,
             qrData.teacherLocation.longitude,
-            studentLoc.latitude,
-            studentLoc.longitude
+            studentLocation.latitude,
+            studentLocation.longitude
           ) : null
       };
 
@@ -376,6 +413,21 @@ const StudentAttendance_Page = () => {
     }
   };
 
+  // Check if submit button should be enabled
+  const isSubmitEnabled = () => {
+    if (!qrData) return false;
+    
+    const fieldsFilled = formData.studentName.trim() && formData.rollNo.trim() && formData.uniqueCode.trim();
+    
+    // If location is required, check if we have it
+    if (qrData.teacherLocation) {
+      return fieldsFilled && studentLocation && !isGettingLocation;
+    }
+    
+    // If no location required, just check fields
+    return fieldsFilled;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container max-w-2xl mx-auto p-2">
@@ -398,46 +450,75 @@ const StudentAttendance_Page = () => {
             </div>
           </div>
 
+          {/* Location Status */}
           {qrData?.teacherLocation && (
             <div className="px-6 pt-4">
               <div className={`p-3 rounded-lg border ${
                 studentLocation 
                   ? 'bg-green-50 border-green-200' 
+                  : locationError
+                  ? 'bg-red-50 border-red-200'
                   : 'bg-yellow-50 border-yellow-200'
               }`}>
-                <div className="flex items-center">
-                  {isGettingLocation ? (
-                    <>
-                      <div className="w-4 h-4 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-                      <span className="text-sm text-gray-700">Getting your location...</span>
-                    </>
-                  ) : studentLocation ? (
-                    <>
-                      <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-sm text-green-700">Location ready for verification</span>
-                    </>
-                  ) : locationError ? (
-                    <>
-                      <svg className="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-sm text-red-700">{locationError}</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                      <span className="text-sm text-yellow-700">Location access required for attendance</span>
-                    </>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    {isGettingLocation ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-sky-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                        <span className="text-sm text-gray-700">Getting your location...</span>
+                      </>
+                    ) : studentLocation ? (
+                      <>
+                        <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm text-green-700">Location ready for verification</span>
+                      </>
+                    ) : locationError ? (
+                      <>
+                        <svg className="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                          <span className="text-sm text-red-700 block">{locationError}</span>
+                          <button 
+                            onClick={handleRetryLocation}
+                            className="text-xs text-sky-600 hover:text-sky-800 mt-1 font-medium"
+                          >
+                            Retry Location Access
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span className="text-sm text-yellow-700">Requesting location access...</span>
+                      </>
+                    )}
+                  </div>
+                  
+                  {locationError && (
+                    <button 
+                      onClick={handleRetryLocation}
+                      className="text-xs bg-sky-600 text-white px-3 py-1 rounded hover:bg-sky-700 transition-colors"
+                    >
+                      Retry
+                    </button>
                   )}
                 </div>
+                
+                {studentLocation && (
+                  <div className="mt-2 text-xs text-gray-600">
+                    <p>Accuracy: ±{studentLocation.accuracy?.toFixed(1) || 'Unknown'} meters</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
+          {/* Attendance Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div>
               <label htmlFor="studentName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -491,7 +572,7 @@ const StudentAttendance_Page = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 type="submit"
-                disabled={isSubmitting || !qrData || (qrData?.teacherLocation && !studentLocation)}
+                disabled={!isSubmitEnabled() || isSubmitting}
                 className="flex-1 bg-sky-600 text-white py-3 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {isSubmitting ? (
@@ -500,7 +581,7 @@ const StudentAttendance_Page = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Verifying Location...
+                    {qrData?.teacherLocation ? 'Verifying Location...' : 'Submitting...'}
                   </span>
                 ) : (
                   `Submit Attendance`
@@ -509,15 +590,34 @@ const StudentAttendance_Page = () => {
             </div>
           </form>
 
+          {/* Instructions */}
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Instructions:</h3>
             <ul className="text-[12px] text-gray-600 space-y-1">
               <li>• Fill in your full name and roll number accurately</li>
-              <li>• Enable location services when prompted</li>
-              <li>• You must be within 200 meters of the teacher</li>
+              {qrData?.teacherLocation && (
+                <>
+                  <li>• <strong>Location access will be automatically requested</strong></li>
+                  <li>• You must allow location access when prompted by your browser</li>
+                  <li>• You must be within 200 meters of the teacher</li>
+                </>
+              )}
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
             </ul>
+            
+            {qrData?.teacherLocation && locationError && (
+              <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded">
+                <p className="text-xs text-orange-700">
+                  <strong>Location Help:</strong> If location access is blocked, check your browser permissions:
+                </p>
+                <ul className="text-xs text-orange-600 mt-1 ml-4 list-disc">
+                  <li>Look for the location icon (📍) in your browser's address bar</li>
+                  <li>Click it and select "Allow" for location access</li>
+                  <li>Refresh the page after allowing permissions</li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>
