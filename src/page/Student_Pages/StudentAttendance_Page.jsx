@@ -13,8 +13,8 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
   const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    Math.cos(φ1) * Math.cos(φ2) *
+    Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   return R * c;
@@ -124,7 +124,7 @@ const StudentAttendance_Page = () => {
     );
 
     console.log(`Distance from teacher: ${distance.toFixed(2)} meters`);
-    
+
     return distance <= allowedRadius;
   };
 
@@ -149,7 +149,7 @@ const StudentAttendance_Page = () => {
           uniqueCode: parsedData.code,
           ipAddress
         }));
-        
+
         // Reset location state when new QR data is loaded
         setLocationAttempted(false);
         setStudentLocation(null);
@@ -175,7 +175,7 @@ const StudentAttendance_Page = () => {
           ...prev,
           uniqueCode: code,
         }));
-        
+
         // Reset location state when new QR data is loaded
         setLocationAttempted(false);
         setStudentLocation(null);
@@ -193,11 +193,11 @@ const StudentAttendance_Page = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    const processedValue = (name === 'studentName' || name === 'rollNo') 
+
+    const processedValue = (name === 'studentName' || name === 'rollNo')
       ? capitalizeText(value)
       : value;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: processedValue
@@ -214,115 +214,41 @@ const StudentAttendance_Page = () => {
     }
   };
 
-  const getUniqueDeviceFingerprint = async () => {
+  const getUniqueDeviceFingerprint = () => {
     const components = [];
 
-    try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = 300;
-      canvas.height = 100;
+    // 1. Canvas with random elements
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 200;
+    canvas.height = 50;
 
-      const randomSeed = Math.random() * 10000;
-      ctx.textBaseline = 'alphabetic';
-      ctx.font = '14px "Arial", "Helvetica", sans-serif';
+    // Draw with some randomness
+    const randomSeed = Date.now() % 1000;
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = '14px Arial';
 
-      ctx.fillText(`Device:${navigator.hardwareConcurrency}📱${screen.colorDepth}`, 10, 20);
-      ctx.fillText(`Screen:${screen.width}x${screen.height}@${window.devicePixelRatio}`, 10, 40);
-      ctx.fillText(`Time:${Date.now()}`, 10, 60);
+    // Different text for each device
+    ctx.fillText(`DeviceID:${randomSeed}📱${navigator.hardwareConcurrency}`, 10, 20);
+    ctx.fillText(`Screen:${screen.width}x${screen.height}`, 10, 40);
 
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, `rgba(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255},0.7)`);
-      gradient.addColorStop(1, `rgba(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255},0.3)`);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(150, 10, 80, 30);
+    const canvasData = canvas.toDataURL();
 
-      const canvasData = canvas.toDataURL();
+    // 2. Combine with hardware info
+    const hardwareInfo = `${navigator.hardwareConcurrency}_${screen.width}_${screen.height}_${window.devicePixelRatio}`;
 
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      let webglData = '';
-      if (gl) {
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        if (debugInfo) {
-          webglData = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) +
-            gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-        }
-      }
+    // 3. Create final fingerprint
+    const combined = canvasData + '|' + hardwareInfo;
 
-      let audioFingerprint = '';
-      try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const analyser = audioContext.createAnalyser();
-        oscillator.connect(analyser);
-        analyser.connect(audioContext.destination);
-        oscillator.start();
-
-        const data = new Float32Array(analyser.frequencyBinCount);
-        analyser.getFloatFrequencyData(data);
-        audioFingerprint = data.join(',');
-
-        oscillator.stop();
-        audioContext.close();
-      } catch (audioError) {
-        audioFingerprint = 'audio_not_supported';
-      }
-
-      const deviceProps = {
-        userAgent: navigator.userAgent,
-        language: navigator.language,
-        languages: navigator.languages?.join(','),
-        platform: navigator.platform,
-        hardwareConcurrency: navigator.hardwareConcurrency,
-        deviceMemory: navigator.deviceMemory || 'unknown',
-        screen: `${screen.width}x${screen.height}`,
-        colorDepth: screen.colorDepth,
-        pixelRatio: window.devicePixelRatio,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        touchSupport: navigator.maxTouchPoints > 0
-      };
-
-      const combined = [
-        canvasData,
-        webglData,
-        audioFingerprint,
-        JSON.stringify(deviceProps),
-        Date.now().toString(),
-        Math.random().toString(36).substring(2),
-        performance.now().toString()
-      ].join('|');
-
-      let hash = 0;
-      for (let i = 0; i < combined.length; i++) {
-        const char = combined.charCodeAt(i);
-        hash = ((hash << 7) - hash) + char;
-        hash = hash & 0x7FFFFFFF;
-      }
-
-      const timestamp = Date.now().toString(36);
-      const randomComponent = Math.random().toString(36).substring(2, 8);
-
-      return `${hash.toString(36)}${timestamp}${randomComponent}`.substring(0, 32);
-
-    } catch (error) {
-      const fallback = [
-        navigator.userAgent,
-        navigator.hardwareConcurrency,
-        screen.width,
-        screen.height,
-        Date.now(),
-        Math.random()
-      ].join('|');
-
-      let hash = 0;
-      for (let i = 0; i < fallback.length; i++) {
-        const char = fallback.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & 0x7FFFFFFF;
-      }
-
-      return `fallback_${hash.toString(36)}${Date.now().toString(36)}`.substring(0, 32);
+    // Create a shorter hash
+    let hash = 0;
+    for (let i = 0; i < combined.length; i++) {
+      const char = combined.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
     }
+
+    return Math.abs(hash).toString(36).substring(0, 20);
   };
 
   const handleSubmit = async (e) => {
@@ -363,7 +289,7 @@ const StudentAttendance_Page = () => {
       }
     }
 
-    const deviceFingerprint = await getUniqueDeviceFingerprint();
+    const deviceFingerprint = getUniqueDeviceFingerprint();
 
     setIsSubmitting(true);
 
@@ -379,7 +305,7 @@ const StudentAttendance_Page = () => {
         ipAddress: deviceFingerprint,
         studentLocation: studentLocation,
         teacherLocation: qrData.teacherLocation,
-        distance: qrData.teacherLocation && studentLocation ? 
+        distance: qrData.teacherLocation && studentLocation ?
           calculateDistance(
             qrData.teacherLocation.latitude,
             qrData.teacherLocation.longitude,
@@ -416,14 +342,14 @@ const StudentAttendance_Page = () => {
   // Check if submit button should be enabled
   const isSubmitEnabled = () => {
     if (!qrData) return false;
-    
+
     const fieldsFilled = formData.studentName.trim() && formData.rollNo.trim() && formData.uniqueCode.trim();
-    
+
     // If location is required, check if we have it
     if (qrData.teacherLocation) {
       return fieldsFilled && studentLocation && !isGettingLocation;
     }
-    
+
     // If no location required, just check fields
     return fieldsFilled;
   };
@@ -453,13 +379,12 @@ const StudentAttendance_Page = () => {
           {/* Location Status */}
           {qrData?.teacherLocation && (
             <div className="px-6 pt-4">
-              <div className={`p-3 rounded-lg border ${
-                studentLocation 
-                  ? 'bg-green-50 border-green-200' 
+              <div className={`p-3 rounded-lg border ${studentLocation
+                  ? 'bg-green-50 border-green-200'
                   : locationError
-                  ? 'bg-red-50 border-red-200'
-                  : 'bg-yellow-50 border-yellow-200'
-              }`}>
+                    ? 'bg-red-50 border-red-200'
+                    : 'bg-yellow-50 border-yellow-200'
+                }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     {isGettingLocation ? (
@@ -481,7 +406,7 @@ const StudentAttendance_Page = () => {
                         </svg>
                         <div>
                           <span className="text-sm text-red-700 block">{locationError}</span>
-                          <button 
+                          <button
                             onClick={handleRetryLocation}
                             className="text-xs text-sky-600 hover:text-sky-800 mt-1 font-medium"
                           >
@@ -498,9 +423,9 @@ const StudentAttendance_Page = () => {
                       </>
                     )}
                   </div>
-                  
+
                   {locationError && (
-                    <button 
+                    <button
                       onClick={handleRetryLocation}
                       className="text-xs bg-sky-600 text-white px-3 py-1 rounded hover:bg-sky-700 transition-colors"
                     >
@@ -508,7 +433,7 @@ const StudentAttendance_Page = () => {
                     </button>
                   )}
                 </div>
-                
+
                 {studentLocation && (
                   <div className="mt-2 text-xs text-gray-600">
                     <p>Accuracy: ±{studentLocation.accuracy?.toFixed(1) || 'Unknown'} meters</p>
@@ -605,7 +530,7 @@ const StudentAttendance_Page = () => {
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
             </ul>
-            
+
             {qrData?.teacherLocation && locationError && (
               <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded">
                 <p className="text-xs text-orange-700">
