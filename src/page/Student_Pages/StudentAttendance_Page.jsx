@@ -380,10 +380,10 @@ const StudentAttendance_Page = () => {
           {qrData?.teacherLocation && (
             <div className="px-6 pt-4">
               <div className={`p-3 rounded-lg border ${studentLocation
-                  ? 'bg-green-50 border-green-200'
-                  : locationError
-                    ? 'bg-red-50 border-red-200'
-                    : 'bg-yellow-50 border-yellow-200'
+                ? 'bg-green-50 border-green-200'
+                : locationError
+                  ? 'bg-red-50 border-red-200'
+                  : 'bg-yellow-50 border-yellow-200'
                 }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
