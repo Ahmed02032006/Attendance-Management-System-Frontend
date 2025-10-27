@@ -12,6 +12,21 @@ import {
   clearAttendance
 } from '../../store/Teacher-Slicer/Attendance-Slicer.js'
 
+// Encryption function for QR data
+const encryptQRData = (data, secretKey) => {
+  try {
+    const jsonString = JSON.stringify(data);
+    let encrypted = '';
+    for (let i = 0; i < jsonString.length; i++) {
+      encrypted += String.fromCharCode(jsonString.charCodeAt(i) ^ secretKey.charCodeAt(i % secretKey.length));
+    }
+    return btoa(encrypted);
+  } catch (error) {
+    console.error('Encryption error:', error);
+    return null;
+  }
+};
+
 const TeacherAttendance_Page = () => {
   const dispatch = useDispatch()
   const {
@@ -32,47 +47,92 @@ const TeacherAttendance_Page = () => {
     subject: '',
     uniqueCode: ''
   });
+  const [teacherLocation, setTeacherLocation] = useState(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
   
-  // Sorting states
   const [sortConfig, setSortConfig] = useState({
     key: null,
-    direction: 'asc' // 'asc' or 'desc'
+    direction: 'asc'
   });
 
   const { user } = useSelector((state) => state.auth)
-
   const userId = user?.id
 
-  // Fetch subjects with attendance on component mount
+  const encryptionKey = process.env.REACT_APP_QR_ENCRYPTION_KEY || 'attendance-secret-key-2024';
+
   useEffect(() => {
     dispatch(getSubjectsWithAttendance(userId)).unwrap();
-    // Cleanup on unmount
     return () => {
       dispatch(clearAttendance())
     }
-  }, [dispatch])
+  }, [dispatch, userId])
 
-  // Set initial selected subject when data is loaded
   useEffect(() => {
     if (subjectsWithAttendance.length > 0 && !selectedSubject) {
       setSelectedSubject(subjectsWithAttendance[0].id)
     }
   }, [subjectsWithAttendance, selectedSubject])
 
-  // Format date to YYYY-MM-DD
+  const getTeacherLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by this browser.'));
+        return;
+      }
+
+      setIsGettingLocation(true);
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            timestamp: new Date().toISOString()
+          };
+          setTeacherLocation(location);
+          setIsGettingLocation(false);
+          resolve(location);
+        },
+        (error) => {
+          setIsGettingLocation(false);
+          let errorMessage = 'Failed to get location: ';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage += 'Location access denied by user.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage += 'Location information unavailable.';
+              break;
+            case error.TIMEOUT:
+              errorMessage += 'Location request timed out.';
+              break;
+            default:
+              errorMessage += 'Unknown error occurred.';
+              break;
+          }
+          reject(new Error(errorMessage));
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
+        }
+      );
+    });
+  };
+
   const formatDate = (date) => {
     return date.toISOString().split('T')[0];
   };
 
-  // Get today's date for max date restriction
   const getTodayDate = () => {
     return new Date();
   };
 
-  // Check if a date is in the future
   const isFutureDate = (date) => {
     const today = getTodayDate();
     return date > today;
@@ -80,7 +140,6 @@ const TeacherAttendance_Page = () => {
 
   const currentDateString = formatDate(currentDate);
 
-  // Get current attendance records from Redux state
   const getCurrentAttendanceRecords = () => {
     if (!selectedSubject) return [];
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
@@ -89,49 +148,36 @@ const TeacherAttendance_Page = () => {
 
   const currentAttendanceRecords = getCurrentAttendanceRecords();
 
-  // Extract numeric part from roll number for sorting (specifically for format like 25FA-009-CE)
   const extractNumericFromRollNo = (rollNo) => {
     if (!rollNo) return 0;
-    
-    // For format like "25FA-009-CE", extract the middle numeric part
     const parts = rollNo.split('-');
     if (parts.length >= 2) {
-      const numericPart = parts[1]; // This should be "009", "005", "015", etc.
+      const numericPart = parts[1];
       const numericValue = parseInt(numericPart, 10);
       return isNaN(numericValue) ? 0 : numericValue;
     }
-    
-    // Fallback: try to find any numeric sequences
     const numericMatches = rollNo.match(/\d+/g);
     if (numericMatches && numericMatches.length > 0) {
       return parseInt(numericMatches[0], 10);
     }
-    
     return 0;
   };
 
-  // Convert time string to sortable format (minutes since midnight)
   const timeToSortableValue = (timeStr) => {
     if (!timeStr) return 0;
-    
     try {
-      // Handle time formats like "2:24 PM", "14:24", etc.
       let time = timeStr.trim().toUpperCase();
-      
-      // If it's already in 24-hour format
       if (time.includes('AM') || time.includes('PM')) {
         return new Date(`2000-01-01 ${time}`).getTime();
       } else {
-        // Assume 24-hour format
         const [hours, minutes] = time.split(':').map(Number);
-        return (hours * 60 + minutes) * 60000; // Convert to milliseconds
+        return (hours * 60 + minutes) * 60000;
       }
     } catch (error) {
       return 0;
     }
   };
 
-  // Sorting function
   const sortStudents = (students) => {
     if (!sortConfig.key) return students;
 
@@ -165,16 +211,14 @@ const TeacherAttendance_Page = () => {
     });
   };
 
-  // Handle sort request
   const handleSort = (key) => {
     setSortConfig(prevConfig => ({
       key,
       direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
     }));
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
   };
 
-  // Get sort icon
   const getSortIcon = (key) => {
     if (sortConfig.key !== key) {
       return <FiArrowUp className="w-3 h-3 opacity-30" />;
@@ -184,7 +228,6 @@ const TeacherAttendance_Page = () => {
       <FiArrowDown className="w-3 h-3" />;
   };
 
-  // Filter students based on search term
   const filteredStudents = sortStudents(
     currentAttendanceRecords.filter(student =>
       student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -193,7 +236,6 @@ const TeacherAttendance_Page = () => {
     )
   );
 
-  // Export to Excel function
   const exportToExcel = () => {
     if (filteredStudents.length === 0) {
       toast.error('No data to export');
@@ -201,7 +243,6 @@ const TeacherAttendance_Page = () => {
     }
 
     try {
-      // Create CSV content
       const headers = ['Student Name', 'Roll No', 'Time', 'Subject'];
       const csvContent = [
         headers.join(','),
@@ -215,7 +256,6 @@ const TeacherAttendance_Page = () => {
         )
       ].join('\n');
 
-      // Create blob and download
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
@@ -230,14 +270,11 @@ const TeacherAttendance_Page = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // toast.success('Attendance data exported successfully!');
     } catch (error) {
       toast.error('Failed to export data');
     }
   };
 
-  // Pagination logic
   const indexOfLastStudent = currentPage * studentsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
   const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
@@ -259,20 +296,32 @@ const TeacherAttendance_Page = () => {
     setSelectedSubject(subjectId);
     setShowSubjectModal(false);
     setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
-    setCurrentPage(1); // Reset to first page when subject changes
-    setSortConfig({ key: null, direction: 'asc' }); // Reset sorting
+    setCurrentPage(1);
+    setSortConfig({ key: null, direction: 'asc' });
   };
 
-  const handleGenerateQR = () => {
+  const handleGenerateQR = async () => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
       return;
     }
-    setShowCreateModal(false);
-    setShowQRModal(true);
+
+    try {
+      const location = await getTeacherLocation();
+      
+      if (!location) {
+        toast.error('Could not get your location. Please enable location services.');
+        return;
+      }
+
+      setShowCreateModal(false);
+      setShowQRModal(true);
+      
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
-  // Handle delete attendance
   const handleDeleteClick = (attendanceId) => {
     setAttendanceToDelete(attendanceId);
     setShowDeleteModal(true);
@@ -297,7 +346,6 @@ const TeacherAttendance_Page = () => {
     if (direction === 'prev') {
       newDate.setDate(newDate.getDate() - 1);
     } else {
-      // Only allow navigating to next date if it's not in the future
       newDate.setDate(newDate.getDate() + 1);
       if (isFutureDate(newDate)) {
         toast.error('Cannot select future dates');
@@ -305,8 +353,8 @@ const TeacherAttendance_Page = () => {
       }
     }
     setCurrentDate(newDate);
-    setCurrentPage(1); // Reset to first page when date changes
-    setSortConfig({ key: null, direction: 'asc' }); // Reset sorting
+    setCurrentPage(1);
+    setSortConfig({ key: null, direction: 'asc' });
   };
 
   const formatDisplayDate = (date) => {
@@ -318,7 +366,6 @@ const TeacherAttendance_Page = () => {
     });
   };
 
-  // Date picker handler
   const handleDateChange = (e) => {
     const newDate = new Date(e.target.value);
     if (isFutureDate(newDate)) {
@@ -326,11 +373,10 @@ const TeacherAttendance_Page = () => {
       return;
     }
     setCurrentDate(newDate);
-    setCurrentPage(1); // Reset to first page when date changes
-    setSortConfig({ key: null, direction: 'asc' }); // Reset sorting
+    setCurrentPage(1);
+    setSortConfig({ key: null, direction: 'asc' });
   };
 
-  // Generate QR code data
   const generateQRData = () => {
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date().toLocaleTimeString('en-US', {
@@ -340,32 +386,35 @@ const TeacherAttendance_Page = () => {
     });
     const currentDate = new Date().toISOString().split('T')[0];
 
-    return JSON.stringify({
+    const qrData = {
       type: 'attendance',
       subject: attendanceForm.subject,
       code: attendanceForm.uniqueCode,
       subjectName: subjectName,
       timestamp: new Date().toISOString(),
-      attendanceTime: currentTime, // Add this
-      attendanceDate: currentDate, // Add this
-      redirectUrl: `${window.location.origin}/student-attendance`
-    });
+      attendanceTime: currentTime,
+      attendanceDate: currentDate,
+      teacherLocation: teacherLocation,
+      locationRadius: 200,
+      redirectUrl: `${window.location.origin}/student-attendance`,
+      encrypted: true
+    };
+
+    const encryptedData = encryptQRData(qrData, encryptionKey);
+    return encryptedData;
   };
 
   const qrData = generateQRData();
 
-  // Handle student name click
   const handleStudentClick = (student) => {
     setSelectedStudent(student);
     setShowStudentModal(true);
   };
 
-  // Reset search and pagination when search term changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
-  // Helper functions for student attendance data
   const getStudentPreviousAttendance = (student) => {
     if (!student || !selectedSubject) return [];
 
@@ -374,7 +423,6 @@ const TeacherAttendance_Page = () => {
 
     const allAttendance = [];
 
-    // Get attendance records for all dates
     Object.entries(subject.attendance).forEach(([date, records]) => {
       const studentRecord = records.find(record =>
         record.rollNo === student.rollNo && record.studentName === student.studentName
@@ -388,7 +436,6 @@ const TeacherAttendance_Page = () => {
       }
     });
 
-    // Sort by date (newest first)
     return allAttendance.sort((a, b) => new Date(b.date) - new Date(a.date));
   };
 
@@ -415,7 +462,6 @@ const TeacherAttendance_Page = () => {
     return Math.round((present / total) * 100);
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -432,7 +478,6 @@ const TeacherAttendance_Page = () => {
       <HeaderComponent heading={"Teacher Attendance"} subHeading={"View and manage teacher attendance"} role='' />
 
       <div className="container max-w-full p-6">
-        {/* Date Navigation - Centered */}
         {selectedSubject && (
           <div className="flex justify-center items-center mb-8">
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-white rounded-lg border border-gray-200 px-6 py-4">
@@ -470,10 +515,8 @@ const TeacherAttendance_Page = () => {
           </div>
         )}
 
-        {/* Attendance Table Section */}
         {selectedSubject && (
           <div className="space-y-6">
-            {/* Search and Date Picker */}
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="relative max-w-md">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -489,16 +532,14 @@ const TeacherAttendance_Page = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                {/* Date Picker Input */}
                 <input
                   type="date"
                   value={formatDate(currentDate)}
                   onChange={handleDateChange}
-                  max={formatDate(getTodayDate())} // Disable future dates
+                  max={formatDate(getTodayDate())}
                   className="px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
                 />
 
-                {/* Export to Excel Button */}
                 <button
                   onClick={exportToExcel}
                   disabled={filteredStudents.length === 0}
@@ -512,7 +553,6 @@ const TeacherAttendance_Page = () => {
               </div>
             </div>
 
-            {/* Attendance Table */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto hide-scrollbar">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -691,7 +731,6 @@ const TeacherAttendance_Page = () => {
           </div>
         )}
 
-        {/* Create New Attendance Button - Bottom Right */}
         {selectedSubject && (
           <div className="fixed bottom-6 right-6 z-40">
             <button
@@ -707,7 +746,6 @@ const TeacherAttendance_Page = () => {
           </div>
         )}
 
-        {/* No Subject Selected State */}
         {!selectedSubject && !showSubjectModal && subjectsWithAttendance.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <div className="text-gray-400 mb-4">
@@ -726,7 +764,6 @@ const TeacherAttendance_Page = () => {
           </div>
         )}
 
-        {/* No Data State */}
         {subjectsWithAttendance.length === 0 && !isLoading && (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <div className="text-gray-400 mb-4">
@@ -746,7 +783,6 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-auto">
@@ -778,7 +814,6 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Create Attendance Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -838,7 +873,6 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* QR Code Modal */}
       {showQRModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
@@ -846,19 +880,36 @@ const TeacherAttendance_Page = () => {
               <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
             </div>
             <div className="p-6 flex flex-col items-center">
-              <div className="w-64 h-64 bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2" id="qr-code-container">
-                <QRCodeSVG
-                  value={qrData}
-                  size={250}
-                  level="L"
-                  includeMargin={true}
-                  bgColor="#FFFFFF"
-                  fgColor="#000000"
-                  id="qr-code-svg"
-                  minVersion={1}
-                />
-              </div>
-
+              {teacherLocation ? (
+                <>
+                  <div className="w-64 h-64 bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2">
+                    <QRCodeSVG
+                      value={qrData}
+                      size={250}
+                      level="L"
+                      includeMargin={true}
+                      bgColor="#FFFFFF"
+                      fgColor="#000000"
+                      id="qr-code-svg"
+                      minVersion={1}
+                    />
+                  </div>
+                  <div className="text-center mb-4">
+                    <p className="text-sm text-green-600 font-medium">
+                      ✓ Location captured successfully
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Students must be within 200 meters
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-sm text-gray-600">Getting your location...</p>
+                </div>
+              )}
+              
               <p className="text-sm text-gray-600 text-center">
                 Students can scan this QR code to mark their attendance
               </p>
@@ -875,7 +926,6 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -913,7 +963,6 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Student Details Modal */}
       {showStudentModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
@@ -929,7 +978,6 @@ const TeacherAttendance_Page = () => {
             <div className="p-6 max-h-[60vh] overflow-y-auto">
               {selectedStudent && (
                 <div className="space-y-6">
-                  {/* Student Basic Info */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
@@ -947,7 +995,6 @@ const TeacherAttendance_Page = () => {
                     </div>
                   </div>
 
-                  {/* Previous Attendance Records */}
                   <div>
                     <h4 className="text-md font-semibold text-gray-800 mb-4">Previous Attendance Records</h4>
 
@@ -1025,7 +1072,6 @@ const TeacherAttendance_Page = () => {
           </div>
         </div>
       )}
-
     </div>
   )
 }
