@@ -37,14 +37,14 @@ const QRScanner_Page = () => {
         // For mobile/tablet: Only allow Chrome
         if (!isChrome && !isEdge) {
           setIsSupportedDevice(false);
-          toast.error('Please use Google Chrome browser for better compatibility');
+          // toast.error('Please use Google Chrome browser for better compatibility');
           return false;
         }
       } else {
         // For desktop: Allow Chrome, Edge, Firefox, Safari
         if (!isChrome && !isEdge && !/Firefox|Safari/i.test(navigator.userAgent)) {
           setIsSupportedDevice(false);
-          toast.error('Please use a modern browser like Chrome, Edge, Firefox, or Safari');
+          // toast.error('Please use a modern browser like Chrome, Edge, Firefox, or Safari');
           return false;
         }
       }
@@ -52,7 +52,7 @@ const QRScanner_Page = () => {
       // Check if browser supports required APIs
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setIsSupportedDevice(false);
-        toast.error('Your browser does not support camera access');
+        // toast.error('Your browser does not support camera access');
         return false;
       }
 
