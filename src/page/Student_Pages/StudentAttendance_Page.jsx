@@ -48,16 +48,16 @@ const StudentAttendance_Page = () => {
 
     setDeviceType(device);
 
-    // Define your restrictions here
+    // Define your restrictions here - MOBILE ONLY
     const allowedConfigurations = [
       // Mobile devices - Chrome only
       { device: 'mobile', browser: 'chrome', allowed: true },
       
-      // Tablets - Chrome and Safari
+      // Tablets - Chrome and Safari (DISABLED)
       { device: 'tablet', browser: 'chrome', allowed: false },
       { device: 'tablet', browser: 'safari', allowed: false },
       
-      // Desktop/Laptop - Chrome, Firefox, Edge, Safari
+      // Desktop/Laptop - Chrome, Firefox, Edge, Safari (DISABLED)
       { device: 'desktop', browser: 'chrome', allowed: false },
       { device: 'desktop', browser: 'firefox', allowed: false },
       { device: 'desktop', browser: 'edge', allowed: false },
@@ -74,7 +74,7 @@ const StudentAttendance_Page = () => {
 
     // Check if current configuration is allowed
     const isAllowed = allowedConfigurations.some(config => 
-      config.device === device && config.browser === currentBrowser
+      config.device === device && config.browser === currentBrowser && config.allowed
     );
 
     setIsAllowedDevice(isAllowed);
@@ -102,7 +102,7 @@ const StudentAttendance_Page = () => {
     const detectionResult = detectDeviceAndBrowser();
     
     if (!detectionResult.isAllowed) {
-      toast.error(`This page is not supported on your device/browser. Detected: ${detectionResult.device} - ${detectionResult.browser}`);
+      toast.error(`This page is only accessible on mobile devices with Google Chrome.`);
     }
 
     const updateTime = () => {
@@ -298,7 +298,7 @@ const StudentAttendance_Page = () => {
     e.preventDefault();
 
     if (!isAllowedDevice) {
-      toast.error('This device/browser combination is not supported for attendance.');
+      toast.error('This page is only accessible on mobile devices with Google Chrome.');
       return;
     }
 
@@ -365,21 +365,29 @@ const StudentAttendance_Page = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Device/Browser Not Supported</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Mobile Device Required</h3>
           <p className="text-sm text-gray-600 mb-4">
-            This attendance system has specific device and browser requirements for security purposes.
+            This attendance system is designed specifically for mobile devices to ensure security and prevent misuse.
           </p>
           <div className="bg-gray-50 rounded-lg p-4 text-left">
-            <h4 className="font-medium text-gray-700 mb-2">Supported Configurations:</h4>
+            <h4 className="font-medium text-gray-700 mb-2">To access this page:</h4>
             <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Mobile devices: Google Chrome only</li>
-              <li>• Tablets: Google Chrome & Safari</li>
-              <li>• Desktop/Laptop: Chrome, Firefox, Edge, Safari</li>
+              <li>• Use a mobile phone (Android or iPhone)</li>
+              <li>• Open Google Chrome browser</li>
+              <li>• Scan the QR code with your mobile device</li>
             </ul>
           </div>
-          <p className="text-xs text-gray-500 mt-4">
-            Detected: {deviceType} - {navigator.userAgent.split(' ').find(agent => agent.includes('/')) || 'Unknown Browser'}
-          </p>
+          <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+            <p className="text-xs text-yellow-700">
+              <strong>Detected:</strong> {deviceType.charAt(0).toUpperCase() + deviceType.slice(1)} Device
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/')}
+            className="mt-4 bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-colors font-medium text-sm"
+          >
+            Return to Home
+          </button>
         </div>
       </div>
     </div>
@@ -406,8 +414,8 @@ const StudentAttendance_Page = () => {
                 )}
               </div>
               <div className="mt-2 sm:mt-0">
-                <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
-                  Device: {deviceType.charAt(0).toUpperCase() + deviceType.slice(1)}
+                <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200">
+                  ✓ Mobile Device Detected
                 </div>
               </div>
             </div>
@@ -497,7 +505,7 @@ const StudentAttendance_Page = () => {
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
               <li>• Click "Submit Attendance" to mark your presence</li>
-              <li>• Supported devices: Mobile (Chrome), Tablet (Chrome/Safari), Desktop (All major browsers)</li>
+              <li>• <strong>Mobile-only:</strong> This page is optimized for mobile devices</li>
             </ul>
           </div>
         </div>
