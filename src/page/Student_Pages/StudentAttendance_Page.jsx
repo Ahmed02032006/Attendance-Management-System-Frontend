@@ -23,16 +23,20 @@ const StudentAttendance_Page = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Device and browser detection
+  // Enhanced device and browser detection
   const detectDeviceAndBrowser = () => {
     const userAgent = navigator.userAgent.toLowerCase();
     
-    // Device detection
-    let device = '';
+    // Enhanced device detection
+    let device = 'desktop';
     const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
     const isTablet = /(tablet|ipad|playbook|silk)|(android(?!.*mobile))/i.test(userAgent);
     
-    if (isMobile) {
+    // More accurate mobile detection
+    const hasTouchPoints = navigator.maxTouchPoints > 1;
+    const isSmallScreen = window.innerWidth <= 768;
+    
+    if (isMobile && (hasTouchPoints || isSmallScreen)) {
       device = 'mobile';
     } else if (isTablet) {
       device = 'tablet';
@@ -40,49 +44,45 @@ const StudentAttendance_Page = () => {
       device = 'desktop';
     }
 
-    // Browser detection
-    const isChrome = /chrome|chromium|crios/i.test(userAgent);
-    const isFirefox = /firefox|fxios/i.test(userAgent);
-    const isSafari = /safari/i.test(userAgent) && !/chrome/i.test(userAgent);
-    const isEdge = /edg/i.test(userAgent);
+    // Enhanced browser detection
+    let browser = 'other';
+    
+    // Check for Chrome (including mobile Chrome)
+    if (/chrome|chromium|crios/i.test(userAgent) && !/edg|edge/i.test(userAgent)) {
+      browser = 'chrome';
+    } 
+    // Check for Safari (including mobile Safari)
+    else if (/safari/i.test(userAgent) && !/chrome|chromium|crios/i.test(userAgent)) {
+      browser = 'safari';
+    }
+    // Check for Firefox
+    else if (/firefox|fxios/i.test(userAgent)) {
+      browser = 'firefox';
+    }
+    // Check for Edge
+    else if (/edg|edge/i.test(userAgent)) {
+      browser = 'edge';
+    }
 
     setDeviceType(device);
 
-    // Define your restrictions here - MOBILE ONLY
-    const allowedConfigurations = [
-      // Mobile devices - Chrome only
-      { device: 'mobile', browser: 'chrome', allowed: true },
-      
-      // Tablets - Chrome and Safari (DISABLED)
-      { device: 'tablet', browser: 'chrome', allowed: false },
-      { device: 'tablet', browser: 'safari', allowed: false },
-      
-      // Desktop/Laptop - Chrome, Firefox, Edge, Safari (DISABLED)
-      { device: 'desktop', browser: 'chrome', allowed: false },
-      { device: 'desktop', browser: 'firefox', allowed: false },
-      { device: 'desktop', browser: 'edge', allowed: false },
-      { device: 'desktop', browser: 'safari', allowed: false }
-    ];
+    console.log('Device Detection:', {
+      device,
+      browser,
+      userAgent: navigator.userAgent,
+      screenWidth: window.innerWidth,
+      touchPoints: navigator.maxTouchPoints
+    });
 
-    // Determine current browser
-    let currentBrowser = '';
-    if (isChrome) currentBrowser = 'chrome';
-    else if (isFirefox) currentBrowser = 'firefox';
-    else if (isSafari) currentBrowser = 'safari';
-    else if (isEdge) currentBrowser = 'edge';
-    else currentBrowser = 'other';
-
-    // Check if current configuration is allowed
-    const isAllowed = allowedConfigurations.some(config => 
-      config.device === device && config.browser === currentBrowser && config.allowed
-    );
+    // STRICT MOBILE-ONLY RESTRICTION
+    // Only allow mobile devices - block everything else
+    const isAllowed = device === 'mobile';
 
     setIsAllowedDevice(isAllowed);
 
-    // Return detection results for debugging
     return {
       device,
-      browser: currentBrowser,
+      browser,
       isAllowed,
       userAgent: navigator.userAgent
     };
@@ -102,7 +102,11 @@ const StudentAttendance_Page = () => {
     const detectionResult = detectDeviceAndBrowser();
     
     if (!detectionResult.isAllowed) {
-      toast.error(`This page is only accessible on mobile devices with Google Chrome.`);
+      toast.error(`This page is only accessible on mobile devices.`);
+      // Immediately redirect if not mobile
+      setTimeout(() => {
+        navigate('/');
+      }, 3000);
     }
 
     const updateTime = () => {
@@ -113,7 +117,7 @@ const StudentAttendance_Page = () => {
     const interval = setInterval(updateTime, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (location.state?.qrData) {
@@ -173,8 +177,6 @@ const StudentAttendance_Page = () => {
   };
 
   const getUniqueDeviceFingerprint = async () => {
-    const components = [];
-
     try {
       // 1. Enhanced Canvas Fingerprinting with more variations
       const canvas = document.createElement('canvas');
@@ -183,7 +185,6 @@ const StudentAttendance_Page = () => {
       canvas.height = 100;
 
       // More complex drawing with random elements
-      const randomSeed = Math.random() * 10000;
       ctx.textBaseline = 'alphabetic';
       ctx.font = '14px "Arial", "Helvetica", sans-serif';
 
@@ -298,7 +299,7 @@ const StudentAttendance_Page = () => {
     e.preventDefault();
 
     if (!isAllowedDevice) {
-      toast.error('This page is only accessible on mobile devices with Google Chrome.');
+      toast.error('This page is only accessible on mobile devices.');
       return;
     }
 
@@ -326,8 +327,8 @@ const StudentAttendance_Page = () => {
         time: currentTime,
         date: qrData.attendanceDate,
         ipAddress: deviceFingerprint,
-        deviceType: deviceType, // Add device type to attendance data
-        userAgent: navigator.userAgent // Add user agent for reference
+        deviceType: deviceType,
+        userAgent: navigator.userAgent
       };
 
       dispatch(createAttendance(AttendanceData))
@@ -373,13 +374,17 @@ const StudentAttendance_Page = () => {
             <h4 className="font-medium text-gray-700 mb-2">To access this page:</h4>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>• Use a mobile phone (Android or iPhone)</li>
-              <li>• Open Google Chrome browser</li>
+              <li>• Open any browser on your mobile device</li>
               <li>• Scan the QR code with your mobile device</li>
+              <li>• Do not use laptops, tablets, or desktop computers</li>
             </ul>
           </div>
           <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
             <p className="text-xs text-yellow-700">
               <strong>Detected:</strong> {deviceType.charAt(0).toUpperCase() + deviceType.slice(1)} Device
+            </p>
+            <p className="text-xs text-yellow-700 mt-1">
+              <strong>Browser:</strong> {navigator.userAgent.match(/(chrome|safari|firefox|edge)\/?\s*(\d+)/i)?.[1] || 'Unknown'}
             </p>
           </div>
           <button
@@ -388,6 +393,9 @@ const StudentAttendance_Page = () => {
           >
             Return to Home
           </button>
+          <p className="text-xs text-gray-500 mt-3">
+            Redirecting to home page in 3 seconds...
+          </p>
         </div>
       </div>
     </div>
@@ -505,11 +513,10 @@ const StudentAttendance_Page = () => {
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
               <li>• Click "Submit Attendance" to mark your presence</li>
-              <li>• <strong>Mobile-only:</strong> This page is optimized for mobile devices</li>
+              <li>• <strong>Mobile-only:</strong> This page works only on mobile devices</li>
             </ul>
           </div>
         </div>
-
       </div>
     </div>
   );
