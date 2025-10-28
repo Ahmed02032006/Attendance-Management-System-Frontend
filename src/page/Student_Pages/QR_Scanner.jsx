@@ -7,12 +7,61 @@ const QRScanner_Page = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [cameraStream, setCameraStream] = useState(null);
   const [hasCameraPermission, setHasCameraPermission] = useState(true);
+  const [isSupportedDevice, setIsSupportedDevice] = useState(true);
+  const [deviceType, setDeviceType] = useState('mobile');
   const navigate = useNavigate();
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
   const scanInterval = useRef(null);
+
+  // Device detection and validation
+  useEffect(() => {
+    const checkDeviceCompatibility = () => {
+      // Detect device type
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isTablet = /iPad|Android/i.test(navigator.userAgent) && !/Mobile/i.test(navigator.userAgent);
+      
+      // Detect browser
+      const isChrome = /Chrome|CriOS/i.test(navigator.userAgent);
+      const isEdge = /Edg/i.test(navigator.userAgent);
+      
+      // Set device type
+      if (isMobile) setDeviceType('mobile');
+      else if (isTablet) setDeviceType('tablet');
+      else setDeviceType('desktop');
+
+      // Check compatibility
+      if (isMobile || isTablet) {
+        // For mobile/tablet: Only allow Chrome
+        if (!isChrome && !isEdge) {
+          setIsSupportedDevice(false);
+          toast.error('Please use Google Chrome browser for better compatibility');
+          return false;
+        }
+      } else {
+        // For desktop: Allow Chrome, Edge, Firefox, Safari
+        if (!isChrome && !isEdge && !/Firefox|Safari/i.test(navigator.userAgent)) {
+          setIsSupportedDevice(false);
+          toast.error('Please use a modern browser like Chrome, Edge, Firefox, or Safari');
+          return false;
+        }
+      }
+
+      // Check if browser supports required APIs
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setIsSupportedDevice(false);
+        toast.error('Your browser does not support camera access');
+        return false;
+      }
+
+      setIsSupportedDevice(true);
+      return true;
+    };
+
+    checkDeviceCompatibility();
+  }, []);
 
   // Enhanced QR data parsing
   const parseQRData = (qrDataString) => {
@@ -115,7 +164,7 @@ const QRScanner_Page = () => {
       
       const constraints = {
         video: { 
-          facingMode: 'environment',
+          facingMode: deviceType === 'mobile' ? 'environment' : 'user',
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -129,7 +178,7 @@ const QRScanner_Page = () => {
       // Wait for video to be ready
       videoRef.current.onloadedmetadata = () => {
         // Start scanning interval
-        scanInterval.current = setInterval(scanQRCode, 300); // Increased frequency
+        scanInterval.current = setInterval(scanQRCode, 300);
       };
 
     } catch (error) {
@@ -217,6 +266,59 @@ const QRScanner_Page = () => {
     }
   };
 
+  // Handle image upload for QR scanning
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      // Set canvas dimensions to image dimensions
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      // Draw image on canvas
+      context.drawImage(img, 0, 0, img.width, img.height);
+      
+      // Get image data
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      
+      // Scan for QR code
+      const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+      
+      if (qrCode) {
+        console.log('Uploaded QR Code detected:', qrCode.data);
+        
+        try {
+          const parsedData = parseQRData(qrCode.data);
+          toast.success('QR Code scanned successfully!');
+          navigateToAttendancePage(parsedData);
+        } catch (parseError) {
+          console.error('Error parsing QR data:', parseError);
+          toast.error('Invalid QR code format');
+        }
+      } else {
+        toast.error('No QR code found in the image. Please try with a clearer image.');
+      }
+      
+      // Clean up
+      URL.revokeObjectURL(url);
+    };
+    
+    img.onerror = () => {
+      toast.error('Error loading image. Please try again.');
+      URL.revokeObjectURL(url);
+    };
+    
+    img.src = url;
+    event.target.value = ''; // Reset file input
+  };
+
   // Clean up on component unmount
   useEffect(() => {
     return () => {
@@ -229,6 +331,49 @@ const QRScanner_Page = () => {
     };
   }, [cameraStream]);
 
+  // Unsupported device message
+  if (!isSupportedDevice) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 max-w-md mx-4">
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+              <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Browser Not Supported
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {deviceType === 'mobile' || deviceType === 'tablet' 
+                ? 'Please use Google Chrome browser on your mobile device for the best scanning experience.'
+                : 'Please use a modern browser like Chrome, Edge, Firefox, or Safari.'}
+            </p>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left">
+              <h3 className="text-sm font-medium text-yellow-800 mb-2">Recommended Browsers:</h3>
+              <ul className="text-sm text-yellow-700 space-y-1">
+                {deviceType === 'mobile' || deviceType === 'tablet' ? (
+                  <>
+                    <li>• Google Chrome</li>
+                    <li>• Microsoft Edge</li>
+                  </>
+                ) : (
+                  <>
+                    <li>• Google Chrome</li>
+                    <li>• Microsoft Edge</li>
+                    <li>• Mozilla Firefox</li>
+                    <li>• Apple Safari</li>
+                  </>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto max-w-md p-6">
@@ -236,6 +381,21 @@ const QRScanner_Page = () => {
           <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
             Attendance Scanner
           </h2>
+
+          {/* Device Type Indicator */}
+          <div className="mb-4 text-center">
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+              deviceType === 'mobile' 
+                ? 'bg-blue-100 text-blue-800'
+                : deviceType === 'tablet'
+                ? 'bg-purple-100 text-purple-800'
+                : 'bg-green-100 text-green-800'
+            }`}>
+              {deviceType === 'mobile' && '📱 Mobile Mode'}
+              {deviceType === 'tablet' && '📟 Tablet Mode'}
+              {deviceType === 'desktop' && '💻 Desktop Mode'}
+            </span>
+          </div>
 
           {/* Live Camera Scanner */}
           <div className="mb-6">
@@ -314,6 +474,34 @@ const QRScanner_Page = () => {
             </div>
           </div>
 
+          {/* Image Upload Option */}
+          <div className="mb-6">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="mt-2 text-sm text-gray-600">Upload QR Code Image</p>
+              <p className="text-xs text-gray-500">Supported formats: JPG, PNG</p>
+              
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+              >
+                <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Upload Image
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Instructions */}
@@ -323,18 +511,39 @@ const QRScanner_Page = () => {
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
             <li>• <strong>Image Upload:</strong> Upload a clear image of the QR code</li>
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
+            {deviceType === 'desktop' && (
+              <li>• <strong>Desktop:</strong> Use your webcam to scan QR codes</li>
+            )}
           </ul>
         </div>
 
-        {/* Troubleshooting */}
-        {/* <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-orange-800 mb-2">Troubleshooting:</h3>
-          <ul className="text-sm text-orange-700 space-y-1">
-            <li>• If scanning fails, try uploading an image instead</li>
-            <li>• Ensure QR code is clear and not blurry</li>
-            <li>• Check camera permissions in browser settings</li>
+        {/* Device-specific tips */}
+        <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-green-800 mb-2">Device Tips:</h3>
+          <ul className="text-sm text-green-700 space-y-1">
+            {deviceType === 'mobile' && (
+              <>
+                <li>• Use rear camera for better scanning</li>
+                <li>• Hold device steady while scanning</li>
+                <li>• Ensure good lighting conditions</li>
+              </>
+            )}
+            {deviceType === 'tablet' && (
+              <>
+                <li>• Use the camera with best quality</li>
+                <li>• Position tablet on stable surface if possible</li>
+                <li>• Zoom in on QR code if needed</li>
+              </>
+            )}
+            {deviceType === 'desktop' && (
+              <>
+                <li>• Use external webcam for better quality</li>
+                <li>• Ensure proper lighting on QR code</li>
+                <li>• Hold QR code steady in front of camera</li>
+              </>
+            )}
           </ul>
-        </div> */}
+        </div>
       </div>
     </div>
   );
