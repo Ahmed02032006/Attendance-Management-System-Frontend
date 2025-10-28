@@ -281,7 +281,7 @@ const TeacherAttendance_Page = () => {
   const handleConfirmDelete = () => {
     if (attendanceToDelete) {
       dispatch(deleteAttendance(attendanceToDelete)).unwrap();
-      toast.success(`Attendance record with ID ${attendanceToDelete} would be deleted`);
+      toast.success(`Attendance record deleted successfully`);
     }
     setShowDeleteModal(false);
     setAttendanceToDelete(null);

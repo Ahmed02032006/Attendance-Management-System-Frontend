@@ -382,21 +382,6 @@ const QRScanner_Page = () => {
             Attendance Scanner
           </h2>
 
-          {/* Device Type Indicator */}
-          <div className="mb-4 text-center">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-              deviceType === 'mobile' 
-                ? 'bg-blue-100 text-blue-800'
-                : deviceType === 'tablet'
-                ? 'bg-purple-100 text-purple-800'
-                : 'bg-green-100 text-green-800'
-            }`}>
-              {deviceType === 'mobile' && '📱 Mobile Mode'}
-              {deviceType === 'tablet' && '📟 Tablet Mode'}
-              {deviceType === 'desktop' && '💻 Desktop Mode'}
-            </span>
-          </div>
-
           {/* Live Camera Scanner */}
           <div className="mb-6">
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
@@ -474,34 +459,36 @@ const QRScanner_Page = () => {
             </div>
           </div>
 
-          {/* Image Upload Option */}
-          <div className="mb-6">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <p className="mt-2 text-sm text-gray-600">Upload QR Code Image</p>
-              <p className="text-xs text-gray-500">Supported formats: JPG, PNG</p>
-              
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                accept="image/*"
-                className="hidden"
-              />
-              
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
-              >
-                <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          {/* Image Upload Option - Only for Desktop */}
+          {deviceType === 'desktop' && (
+            <div className="mb-6">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                Upload Image
-              </button>
+                <p className="mt-2 text-sm text-gray-600">Upload QR Code Image</p>
+                <p className="text-xs text-gray-500">Supported formats: JPG, PNG</p>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+                >
+                  <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  Upload Image
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Instructions */}
@@ -509,39 +496,10 @@ const QRScanner_Page = () => {
           <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
           <ul className="text-sm text-sky-700 space-y-1">
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
-            <li>• <strong>Image Upload:</strong> Upload a clear image of the QR code</li>
+            {deviceType === 'desktop' && (
+              <li>• <strong>Image Upload:</strong> Upload a clear image of the QR code</li>
+            )}
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
-            {deviceType === 'desktop' && (
-              <li>• <strong>Desktop:</strong> Use your webcam to scan QR codes</li>
-            )}
-          </ul>
-        </div>
-
-        {/* Device-specific tips */}
-        <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-green-800 mb-2">Device Tips:</h3>
-          <ul className="text-sm text-green-700 space-y-1">
-            {deviceType === 'mobile' && (
-              <>
-                <li>• Use rear camera for better scanning</li>
-                <li>• Hold device steady while scanning</li>
-                <li>• Ensure good lighting conditions</li>
-              </>
-            )}
-            {deviceType === 'tablet' && (
-              <>
-                <li>• Use the camera with best quality</li>
-                <li>• Position tablet on stable surface if possible</li>
-                <li>• Zoom in on QR code if needed</li>
-              </>
-            )}
-            {deviceType === 'desktop' && (
-              <>
-                <li>• Use external webcam for better quality</li>
-                <li>• Ensure proper lighting on QR code</li>
-                <li>• Hold QR code steady in front of camera</li>
-              </>
-            )}
           </ul>
         </div>
       </div>
