@@ -15,10 +15,78 @@ const StudentAttendance_Page = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [qrData, setQrData] = useState(null);
   const [currentTime, setCurrentTime] = useState('');
+  const [isAllowedDevice, setIsAllowedDevice] = useState(true);
+  const [deviceType, setDeviceType] = useState('');
   const ipAddress = useIPAddress();
 
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Device and browser detection
+  const detectDeviceAndBrowser = () => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    // Device detection
+    let device = '';
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    const isTablet = /(tablet|ipad|playbook|silk)|(android(?!.*mobile))/i.test(userAgent);
+    
+    if (isMobile) {
+      device = 'mobile';
+    } else if (isTablet) {
+      device = 'tablet';
+    } else {
+      device = 'desktop';
+    }
+
+    // Browser detection
+    const isChrome = /chrome|chromium|crios/i.test(userAgent);
+    const isFirefox = /firefox|fxios/i.test(userAgent);
+    const isSafari = /safari/i.test(userAgent) && !/chrome/i.test(userAgent);
+    const isEdge = /edg/i.test(userAgent);
+
+    setDeviceType(device);
+
+    // Define your restrictions here
+    const allowedConfigurations = [
+      // Mobile devices - Chrome only
+      { device: 'mobile', browser: 'chrome', allowed: true },
+      
+      // Tablets - Chrome and Safari
+      { device: 'tablet', browser: 'chrome', allowed: false },
+      { device: 'tablet', browser: 'safari', allowed: false },
+      
+      // Desktop/Laptop - Chrome, Firefox, Edge, Safari
+      { device: 'desktop', browser: 'chrome', allowed: false },
+      { device: 'desktop', browser: 'firefox', allowed: false },
+      { device: 'desktop', browser: 'edge', allowed: false },
+      { device: 'desktop', browser: 'safari', allowed: false }
+    ];
+
+    // Determine current browser
+    let currentBrowser = '';
+    if (isChrome) currentBrowser = 'chrome';
+    else if (isFirefox) currentBrowser = 'firefox';
+    else if (isSafari) currentBrowser = 'safari';
+    else if (isEdge) currentBrowser = 'edge';
+    else currentBrowser = 'other';
+
+    // Check if current configuration is allowed
+    const isAllowed = allowedConfigurations.some(config => 
+      config.device === device && config.browser === currentBrowser
+    );
+
+    setIsAllowedDevice(isAllowed);
+
+    // Return detection results for debugging
+    return {
+      device,
+      browser: currentBrowser,
+      isAllowed,
+      userAgent: navigator.userAgent
+    };
+  };
 
   // Function to format time as "11:05 AM"
   const formatTime = (date = new Date()) => {
@@ -29,15 +97,19 @@ const StudentAttendance_Page = () => {
     });
   };
 
-  const dispatch = useDispatch()
-
   useEffect(() => {
+    // Check device and browser compatibility on component mount
+    const detectionResult = detectDeviceAndBrowser();
+    
+    if (!detectionResult.isAllowed) {
+      toast.error(`This page is not supported on your device/browser. Detected: ${detectionResult.device} - ${detectionResult.browser}`);
+    }
+
     const updateTime = () => {
       setCurrentTime(formatTime());
     };
 
     updateTime();
-
     const interval = setInterval(updateTime, 1000);
 
     return () => clearInterval(interval);
@@ -79,7 +151,7 @@ const StudentAttendance_Page = () => {
         navigate('/');
       }
     }
-  }, [location, navigate]);
+  }, [location, navigate, ipAddress]);
 
   // Function to capitalize input text
   const capitalizeText = (text) => {
@@ -225,6 +297,11 @@ const StudentAttendance_Page = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!isAllowedDevice) {
+      toast.error('This device/browser combination is not supported for attendance.');
+      return;
+    }
+
     if (!formData.studentName.trim() || !formData.rollNo.trim() || !formData.uniqueCode.trim()) {
       toast.error('Please fill all fields');
       return;
@@ -249,6 +326,8 @@ const StudentAttendance_Page = () => {
         time: currentTime,
         date: qrData.attendanceDate,
         ipAddress: deviceFingerprint,
+        deviceType: deviceType, // Add device type to attendance data
+        userAgent: navigator.userAgent // Add user agent for reference
       };
 
       dispatch(createAttendance(AttendanceData))
@@ -266,6 +345,7 @@ const StudentAttendance_Page = () => {
           }
         })
         .catch((error) => {
+          toast.error('Failed to submit attendance. Please try again.');
         });
 
     } catch (error) {
@@ -274,6 +354,41 @@ const StudentAttendance_Page = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Device restriction message component
+  const DeviceRestrictionMessage = () => (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg border border-gray-300 shadow-sm p-6 max-w-md w-full">
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+            <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Device/Browser Not Supported</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            This attendance system has specific device and browser requirements for security purposes.
+          </p>
+          <div className="bg-gray-50 rounded-lg p-4 text-left">
+            <h4 className="font-medium text-gray-700 mb-2">Supported Configurations:</h4>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Mobile devices: Google Chrome only</li>
+              <li>• Tablets: Google Chrome & Safari</li>
+              <li>• Desktop/Laptop: Chrome, Firefox, Edge, Safari</li>
+            </ul>
+          </div>
+          <p className="text-xs text-gray-500 mt-4">
+            Detected: {deviceType} - {navigator.userAgent.split(' ').find(agent => agent.includes('/')) || 'Unknown Browser'}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Return restricted view if device is not allowed
+  if (!isAllowedDevice) {
+    return <DeviceRestrictionMessage />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -289,6 +404,11 @@ const StudentAttendance_Page = () => {
                     <p><span className="font-medium">Subject Name:</span> <span className='border-b border-gray-400'>{qrData.subjectName}</span></p>
                   </div>
                 )}
+              </div>
+              <div className="mt-2 sm:mt-0">
+                <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
+                  Device: {deviceType.charAt(0).toUpperCase() + deviceType.slice(1)}
+                </div>
               </div>
             </div>
           </div>
@@ -377,6 +497,7 @@ const StudentAttendance_Page = () => {
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
               <li>• Click "Submit Attendance" to mark your presence</li>
+              <li>• Supported devices: Mobile (Chrome), Tablet (Chrome/Safari), Desktop (All major browsers)</li>
             </ul>
           </div>
         </div>
