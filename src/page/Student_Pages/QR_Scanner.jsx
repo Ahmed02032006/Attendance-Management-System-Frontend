@@ -25,7 +25,7 @@ const QRScanner_Page = () => {
       
       // Detect browser
       const isChrome = /Chrome|CriOS/i.test(navigator.userAgent);
-      const isEdge = /Edg/i.test(navigator.userAgent);
+      // const isEdge = /Edg/i.test(navigator.userAgent);
       
       // Set device type
       if (isMobile) setDeviceType('mobile');
@@ -35,14 +35,14 @@ const QRScanner_Page = () => {
       // Check compatibility
       if (isMobile || isTablet) {
         // For mobile/tablet: Only allow Chrome
-        if (!isChrome && !isEdge) {
+        if (!isChrome) {
           setIsSupportedDevice(false);
           // toast.error('Please use Google Chrome browser for better compatibility');
           return false;
         }
       } else {
         // For desktop: Allow Chrome, Edge, Firefox, Safari
-        if (!isChrome && !isEdge && !/Firefox|Safari/i.test(navigator.userAgent)) {
+        if (!isChrome && !/Firefox|Safari/i.test(navigator.userAgent)) {
           setIsSupportedDevice(false);
           // toast.error('Please use a modern browser like Chrome, Edge, Firefox, or Safari');
           return false;
