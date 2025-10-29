@@ -835,9 +835,6 @@ const TeacherAttendance_Page = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">Create New Attendance</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Location-based attendance (200m radius)
-              </p>
             </div>
             <div className="p-6 space-y-4">
               <div>
