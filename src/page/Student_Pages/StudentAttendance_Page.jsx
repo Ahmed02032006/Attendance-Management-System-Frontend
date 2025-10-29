@@ -16,26 +16,11 @@ const StudentAttendance_Page = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [qrData, setQrData] = useState(null);
   const [currentTime, setCurrentTime] = useState('');
-  const [fpAgent, setFpAgent] = useState(null);
   const ipAddress = useIPAddress();
 
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Initialize FingerprintJS agent
-  useEffect(() => {
-    const initializeFingerprint = async () => {
-      try {
-        // Load the agent at application start
-        const agent = await FingerprintJS.load();
-        setFpAgent(agent);
-      } catch (error) {
-        console.error('Failed to initialize FingerprintJS:', error);
-      }
-    };
-
-    initializeFingerprint();
-  }, []);
+  const dispatch = useDispatch();
 
   // Function to format time as "11:05 AM"
   const formatTime = (date = new Date()) => {
@@ -46,17 +31,13 @@ const StudentAttendance_Page = () => {
     });
   };
 
-  const dispatch = useDispatch()
-
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(formatTime());
     };
 
     updateTime();
-
     const interval = setInterval(updateTime, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -106,7 +87,6 @@ const StudentAttendance_Page = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    // Capitalize studentName and rollNo fields
     const processedValue = (name === 'studentName' || name === 'rollNo') 
       ? capitalizeText(value)
       : value;
@@ -117,40 +97,78 @@ const StudentAttendance_Page = () => {
     }));
   };
 
-  // Get device fingerprint using FingerprintJS
+  // Get or create persistent device fingerprint
   const getUniqueDeviceFingerprint = async () => {
     try {
-      if (!fpAgent) {
-        throw new Error('Fingerprint agent not initialized');
+      // Check if we already have a fingerprint in localStorage
+      const storedFingerprint = localStorage.getItem('deviceFingerprint');
+      
+      if (storedFingerprint) {
+        return storedFingerprint;
       }
 
-      // Get the visitor identifier
-      const result = await fpAgent.get();
+      // If no stored fingerprint, create a new persistent one
+      const agent = await FingerprintJS.load();
+      const result = await agent.get();
       
-      // Return the visitorId (this is the unique fingerprint)
-      return result.visitorId;
-    } catch (error) {
-      console.error('Error getting device fingerprint:', error);
-      
-      // Fallback: generate a basic fingerprint using available data
-      const fallbackData = [
-        navigator.userAgent,
-        navigator.language,
-        screen.width,
-        screen.height,
-        navigator.hardwareConcurrency,
-        new Date().getTime()
-      ].join('|');
-      
-      // Simple hash function for fallback
+      // Create a composite fingerprint that includes both visitorId and additional persistent data
+      const persistentData = {
+        visitorId: result.visitorId,
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        platform: navigator.platform,
+        hardwareConcurrency: navigator.hardwareConcurrency,
+        deviceMemory: navigator.deviceMemory,
+        screenResolution: `${screen.width}x${screen.height}`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
+
+      // Create a stable hash from the persistent data
+      const dataString = JSON.stringify(persistentData);
       let hash = 0;
-      for (let i = 0; i < fallbackData.length; i++) {
-        const char = fallbackData.charCodeAt(i);
+      for (let i = 0; i < dataString.length; i++) {
+        const char = dataString.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
         hash = hash & 0x7FFFFFFF;
       }
+
+      const fingerprint = `device_${hash.toString(36)}`;
       
-      return `fallback_${hash.toString(36)}`;
+      // Store in localStorage for persistence
+      localStorage.setItem('deviceFingerprint', fingerprint);
+      
+      return fingerprint;
+
+    } catch (error) {
+      console.error('Error getting device fingerprint:', error);
+      
+      // Fallback: try to use existing stored fingerprint or create basic one
+      const storedFingerprint = localStorage.getItem('deviceFingerprint');
+      if (storedFingerprint) {
+        return storedFingerprint;
+      }
+
+      // Create basic persistent fingerprint
+      const basicData = [
+        navigator.userAgent,
+        navigator.language,
+        navigator.platform,
+        screen.width,
+        screen.height,
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+      ].join('|');
+
+      let hash = 0;
+      for (let i = 0; i < basicData.length; i++) {
+        const char = basicData.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & 0x7FFFFFFF;
+      }
+
+      const basicFingerprint = `basic_${hash.toString(36)}`;
+      localStorage.setItem('deviceFingerprint', basicFingerprint);
+      
+      return basicFingerprint;
     }
   };
 
@@ -180,7 +198,7 @@ const StudentAttendance_Page = () => {
         subjectId: qrData.subject,
         time: currentTime,
         date: qrData.attendanceDate,
-        ipAddress: deviceFingerprint, // This now contains the FingerprintJS visitorId
+        ipAddress: deviceFingerprint,
       };
 
       dispatch(createAttendance(AttendanceData))
@@ -198,6 +216,7 @@ const StudentAttendance_Page = () => {
           }
         })
         .catch((error) => {
+          console.error('Attendance submission error:', error);
         });
 
     } catch (error) {
@@ -312,7 +331,6 @@ const StudentAttendance_Page = () => {
             </ul>
           </div>
         </div>
-
       </div>
     </div>
   );
