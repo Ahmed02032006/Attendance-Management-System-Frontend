@@ -254,88 +254,53 @@ const QRScanner_Page = () => {
   }, [cameraStream]);
 
   // Unsupported device message - Only show for non-mobile or non-Chrome browsers
-  if (!isSupportedDevice) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 max-w-md w-full">
-          <div className="text-center">
-            {/* Icon */}
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-6">
-              <svg className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-
-            {/* Title */}
-            <h2 className="text-2xl font-bold text-gray-800 mb-3">
-              Access Required
-            </h2>
-
-            {/* Description */}
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              For the best scanning experience, please open this page on a <span className="font-semibold text-blue-600">mobile device</span> using <span className="font-semibold text-green-600">Google Chrome</span>.
-            </p>
-
-            {/* Requirements Card */}
-            <div className="bg-gray-50 rounded-xl p-5 mb-6 border border-gray-200">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Requirements</h3>
-              <div className="space-y-3">
-                <div className="flex items-center text-sm text-gray-600">
-                  <div className="flex-shrink-0 h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                    <span className="text-blue-600 font-semibold">1</span>
-                  </div>
-                  <span>Mobile Device (Android or iOS)</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <div className="flex-shrink-0 h-8 w-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                    <span className="text-green-600 font-semibold">2</span>
-                  </div>
-                  <span>Google Chrome Browser</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <div className="flex-shrink-0 h-8 w-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                    <span className="text-purple-600 font-semibold">3</span>
-                  </div>
-                  <span>Camera Permission</span>
-                </div>
+if (!isSupportedDevice) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 max-w-sm w-full">
+        <div className="text-center">
+          {/* Icon */}
+          <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-blue-50 mb-6">
+            <svg className="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          </div>
+          
+          {/* Title */}
+          <h2 className="text-xl font-semibold text-gray-800 mb-3">
+            Mobile Chrome Required
+          </h2>
+          
+          {/* Description */}
+          <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+            This QR scanner works best on mobile devices with Google Chrome browser for optimal scanning experience.
+          </p>
+          
+          {/* Simple Requirements */}
+          <div className="bg-blue-50 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-center space-x-4 text-sm">
+              <div className="flex items-center text-gray-700">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                Mobile Device
+              </div>
+              <div className="flex items-center text-gray-700">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                Chrome Browser
               </div>
             </div>
+          </div>
 
-            {/* Download Buttons */}
-            <div className="space-y-3">
-              <a
-                href="https://play.google.com/store/apps/details?id=com.android.chrome"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-sm"
-              >
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 6.753l2.385 2.384-2.385 2.385V8.567zm3.367 10.367L12 12.208l10.186 10.187A.998.998 0 0122 22.008V1.992a1 1 0 01.609.92v18.086a1 1 0 01-.609.92z" />
-                </svg>
-                Get Chrome for Android
-              </a>
-              <a
-                href="https://apps.apple.com/app/chrome-web-browser/id535886823"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-white font-medium rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all shadow-sm"
-              >
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-                </svg>
-                Get Chrome for iPhone
-              </a>
-            </div>
-
-            {/* Help Text */}
-            <p className="text-xs text-gray-500 mt-6">
-              Already have Chrome? Open this page on your mobile device.
+          {/* Simple Instruction */}
+          <div className="text-center">
+            <p className="text-xs text-gray-500">
+              Please open this page on your mobile device using Chrome browser
             </p>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-gray-50">
