@@ -3,17 +3,17 @@ import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiEdit } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-import { 
-  getSubjectsByUser, 
-  createSubject, 
-  updateSubject, 
+import {
+  getSubjectsByUser,
+  createSubject,
+  updateSubject,
   deleteSubject,
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
   const dispatch = useDispatch()
   const { subjects, isLoading, currentSubject } = useSelector((state) => state.teacherSubject)
-  
+
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -44,14 +44,14 @@ const TeacherSubjects_Page = () => {
 
   // Filter subjects based on search and filter
   const filteredSubjects = subjects.filter(subject => {
-    const matchesSearch = 
+    const matchesSearch =
       subject.subjectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.subjectName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.subjectCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.semester?.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesFilter = statusFilter === 'All' || subject.status === statusFilter
-    
+
     return matchesSearch && matchesFilter
   })
 
@@ -71,7 +71,7 @@ const TeacherSubjects_Page = () => {
 
   const handleCreateSubject = async (e) => {
     e.preventDefault()
-    
+
     if (!subjectForm.subjectTitle || !subjectForm.subjectName || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
@@ -94,18 +94,18 @@ const TeacherSubjects_Page = () => {
 
   const handleEditSubject = async (e) => {
     e.preventDefault()
-    
+
     if (!subjectForm.subjectTitle || !subjectForm.subjectName || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
     }
 
     try {
-      await dispatch(updateSubject({ 
-        id: selectedSubject._id, 
-        formData: subjectForm 
+      await dispatch(updateSubject({
+        id: selectedSubject._id,
+        formData: subjectForm
       })).unwrap()
-      
+
       setShowEditModal(false)
       resetForm()
       toast.success('Subject updated successfully!')
@@ -172,7 +172,7 @@ const TeacherSubjects_Page = () => {
     })
   }
 
-  if(isLoading){
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
@@ -252,11 +252,10 @@ const TeacherSubjects_Page = () => {
                           {subject.semester}
                         </td>
                         <td className="px-6 py-3.5 whitespace-nowrap text-center">
-                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-                            subject.status === "Active"
+                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${subject.status === "Active"
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
-                          }`}>
+                            }`}>
                             {subject.status}
                           </span>
                         </td>
@@ -287,8 +286,8 @@ const TeacherSubjects_Page = () => {
                           <FiSearch className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                           <p className="text-lg font-medium">No subjects found</p>
                           <p className="mt-1">
-                            {searchTerm || statusFilter !== 'All' 
-                              ? 'Try adjusting your search or filter' 
+                            {searchTerm || statusFilter !== 'All'
+                              ? 'Try adjusting your search or filter'
                               : 'Get started by creating your first subject'
                             }
                           </p>
@@ -620,40 +619,73 @@ const TeacherSubjects_Page = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="p-6">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
-                <FiTrash2 className="h-6 w-6 text-red-600" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-200 scale-100 animate-scale-in">
+            {/* Header with Icon */}
+            <div className="p-8 pb-6">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto bg-red-50 rounded-full mb-4">
+                <FiTrash2 className="h-8 w-8 text-red-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 text-center mb-2">
+              <h3 className="text-xl font-semibold text-gray-900 text-center mb-2">
                 Delete Subject
               </h3>
-              <p className="text-gray-600 text-center mb-6">
-                Are you sure you want to delete <strong>"{selectedSubject?.subjectTitle}"</strong>? 
-                This action cannot be undone.
+              <p className="text-gray-600 text-center">
+                Are you sure you want to delete <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong>?
               </p>
-              <div className="flex justify-center space-x-3">
+            </div>
+
+            {/* Warning Section */}
+            <div className="px-8 pb-6">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-red-800">This action cannot be undone</p>
+                    <p className="text-sm text-red-700 mt-1">
+                      All associated data will be permanently removed from the system.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="px-8 py-6 bg-gray-50 rounded-b-2xl border-t border-gray-200">
+              <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="px-6 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
                   disabled={isLoading}
+                  className="px-6 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 font-medium transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteSubject}
-                  className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading}
+                  className="px-6 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2"
                 >
-                  {isLoading ? 'Deleting...' : 'Delete Subject'}
+                  {isLoading ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete Subject'
+                  )}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-      
+
     </div>
   )
 }
