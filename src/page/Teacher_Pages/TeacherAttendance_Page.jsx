@@ -983,9 +983,6 @@ const TeacherAttendance_Page = () => {
               <p className="text-center text-gray-700 mb-2">
                 Are you sure you want to delete this attendance record?
               </p>
-              <p className="text-center text-sm text-gray-500">
-                This action cannot be undone.
-              </p>
             </div>
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button
