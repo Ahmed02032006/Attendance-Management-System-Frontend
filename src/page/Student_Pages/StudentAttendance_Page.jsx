@@ -6,6 +6,20 @@ import { useDispatch } from 'react-redux';
 import { useIPAddress } from '../../hooks/useIPAddress';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
+// Helper function to calculate distance between two coordinates using Haversine formula
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distance = R * c; // Distance in kilometers
+  return distance * 1000; // Convert to meters
+};
+
 const StudentAttendance_Page = () => {
   const [formData, setFormData] = useState({
     studentName: '',
@@ -16,11 +30,15 @@ const StudentAttendance_Page = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [qrData, setQrData] = useState(null);
   const [currentTime, setCurrentTime] = useState('');
-  const ipAddress = useIPAddress();
+  const [studentLocation, setStudentLocation] = useState(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [locationError, setLocationError] = useState('');
+  const [isLocationVerified, setIsLocationVerified] = useState(false);
 
-  const location = useLocation();
+  const locationHook = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const ipAddress = useIPAddress();
 
   // Function to format time as "11:05 AM"
   const formatTime = (date = new Date()) => {
@@ -41,22 +59,108 @@ const StudentAttendance_Page = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Get student's current location
+  const getStudentLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by this browser'));
+        return;
+      }
+
+      setIsGettingLocation(true);
+      setLocationError('');
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            timestamp: new Date().toISOString()
+          };
+          setStudentLocation(location);
+          setIsGettingLocation(false);
+          resolve(location);
+        },
+        (error) => {
+          setIsGettingLocation(false);
+          let errorMessage = '';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = 'Location access denied. Please enable location services to mark attendance.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = 'Location information unavailable. Please check your connection.';
+              break;
+            case error.TIMEOUT:
+              errorMessage = 'Location request timed out. Please try again.';
+              break;
+            default:
+              errorMessage = 'Failed to get location. Please try again.';
+              break;
+          }
+          setLocationError(errorMessage);
+          reject(new Error(errorMessage));
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        }
+      );
+    });
+  };
+
+  // Verify if student is within required radius
+  const verifyLocation = (studentLoc, teacherLoc, radius = 200) => {
+    if (!studentLoc || !teacherLoc) {
+      return false;
+    }
+
+    const distance = calculateDistance(
+      studentLoc.latitude,
+      studentLoc.longitude,
+      teacherLoc.latitude,
+      teacherLoc.longitude
+    );
+
+    console.log(`Distance from teacher: ${distance.toFixed(2)} meters`);
+    return distance <= radius;
+  };
+
   useEffect(() => {
-    if (location.state?.qrData) {
+    if (locationHook.state?.qrData) {
       try {
-        const parsedData = JSON.parse(location.state.qrData);
+        const parsedData = JSON.parse(locationHook.state.qrData);
         setQrData(parsedData);
         setFormData(prev => ({
           ...prev,
           uniqueCode: parsedData.code,
           ipAddress
         }));
+
+        // Automatically get student location when QR data is loaded
+        if (parsedData.teacherLocation) {
+          getStudentLocation().then((studentLoc) => {
+            const isWithinRadius = verifyLocation(studentLoc, parsedData.teacherLocation, parsedData.locationRadius || 200);
+            setIsLocationVerified(isWithinRadius);
+            
+            if (!isWithinRadius) {
+              toast.error('You are not within the required distance from the teacher to mark attendance.');
+            } else {
+              toast.success('Location verified! You can now submit attendance.');
+            }
+          }).catch((error) => {
+            console.error('Failed to get student location:', error);
+            setIsLocationVerified(false);
+          });
+        }
       } catch (error) {
         toast.error('Invalid QR code data');
         navigate('/');
       }
     } else {
-      const urlParams = new URLSearchParams(location.search);
+      const urlParams = new URLSearchParams(locationHook.search);
       const code = urlParams.get('code');
       const subject = urlParams.get('subject');
       const subjectName = urlParams.get('subjectName');
@@ -77,7 +181,7 @@ const StudentAttendance_Page = () => {
         navigate('/');
       }
     }
-  }, [location, navigate]);
+  }, [locationHook, navigate]);
 
   // Function to capitalize input text
   const capitalizeText = (text) => {
@@ -100,18 +204,15 @@ const StudentAttendance_Page = () => {
   // Get or create persistent device fingerprint
   const getUniqueDeviceFingerprint = async () => {
     try {
-      // Check if we already have a fingerprint in localStorage
       const storedFingerprint = localStorage.getItem('deviceFingerprint');
       
       if (storedFingerprint) {
         return storedFingerprint;
       }
 
-      // If no stored fingerprint, create a new persistent one
       const agent = await FingerprintJS.load();
       const result = await agent.get();
       
-      // Create a composite fingerprint that includes both visitorId and additional persistent data
       const persistentData = {
         visitorId: result.visitorId,
         userAgent: navigator.userAgent,
@@ -123,7 +224,6 @@ const StudentAttendance_Page = () => {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
 
-      // Create a stable hash from the persistent data
       const dataString = JSON.stringify(persistentData);
       let hash = 0;
       for (let i = 0; i < dataString.length; i++) {
@@ -133,8 +233,6 @@ const StudentAttendance_Page = () => {
       }
 
       const fingerprint = `device_${hash.toString(36)}`;
-      
-      // Store in localStorage for persistence
       localStorage.setItem('deviceFingerprint', fingerprint);
       
       return fingerprint;
@@ -142,13 +240,11 @@ const StudentAttendance_Page = () => {
     } catch (error) {
       console.error('Error getting device fingerprint:', error);
       
-      // Fallback: try to use existing stored fingerprint or create basic one
       const storedFingerprint = localStorage.getItem('deviceFingerprint');
       if (storedFingerprint) {
         return storedFingerprint;
       }
 
-      // Create basic persistent fingerprint
       const basicData = [
         navigator.userAgent,
         navigator.language,
@@ -185,6 +281,23 @@ const StudentAttendance_Page = () => {
       return;
     }
 
+    // Verify location before submission
+    if (qrData.teacherLocation) {
+      try {
+        const studentLoc = await getStudentLocation();
+        const isWithinRadius = verifyLocation(studentLoc, qrData.teacherLocation, qrData.locationRadius || 200);
+        
+        if (!isWithinRadius) {
+          toast.error('You are not within the required distance from the teacher to mark attendance.');
+          return;
+        }
+        setIsLocationVerified(true);
+      } catch (error) {
+        toast.error('Failed to verify location. Please enable location services.');
+        return;
+      }
+    }
+
     const deviceFingerprint = await getUniqueDeviceFingerprint();
 
     setIsSubmitting(true);
@@ -199,6 +312,9 @@ const StudentAttendance_Page = () => {
         time: currentTime,
         date: qrData.attendanceDate,
         ipAddress: deviceFingerprint,
+        studentLocation: studentLocation, // Include student location in submission
+        teacherLocation: qrData.teacherLocation, // Include teacher location for reference
+        locationVerified: isLocationVerified
       };
 
       dispatch(createAttendance(AttendanceData))
@@ -226,6 +342,28 @@ const StudentAttendance_Page = () => {
     }
   };
 
+  // Manual location verification button
+  const handleVerifyLocation = async () => {
+    if (!qrData?.teacherLocation) {
+      toast.error('No location data found in QR code');
+      return;
+    }
+
+    try {
+      const studentLoc = await getStudentLocation();
+      const isWithinRadius = verifyLocation(studentLoc, qrData.teacherLocation, qrData.locationRadius || 200);
+      setIsLocationVerified(isWithinRadius);
+      
+      if (isWithinRadius) {
+        toast.success('Location verified! You can now submit attendance.');
+      } else {
+        toast.error(`You are too far from the teacher. Maximum allowed distance: ${qrData.locationRadius || 200}m`);
+      }
+    } catch (error) {
+      toast.error('Failed to verify location. Please enable location services.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container max-w-2xl mx-auto p-2">
@@ -238,11 +376,77 @@ const StudentAttendance_Page = () => {
                 {qrData && (
                   <div className="mt-0.5 text-xs text-gray-600 space-y-1">
                     <p><span className="font-medium">Subject Name:</span> <span className='border-b border-gray-400'>{qrData.subjectName}</span></p>
+                    {qrData.teacherLocation && (
+                      <p className="text-green-600 font-medium">
+                        ✓ Location-based attendance enabled
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
             </div>
           </div>
+
+          {/* Location Verification Section */}
+          {qrData?.teacherLocation && (
+            <div className="px-6 py-4 border-b border-gray-200 bg-blue-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-full ${isLocationVerified ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">
+                      Location Verification Required
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      {isLocationVerified 
+                        ? '✓ You are within the allowed distance'
+                        : 'Verify you are within 200m of the teacher'
+                      }
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleVerifyLocation}
+                  disabled={isGettingLocation}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  {isGettingLocation ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Checking...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      <span>Verify Location</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              
+              {locationError && (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-700">{locationError}</p>
+                </div>
+              )}
+
+              {studentLocation && !locationError && (
+                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
+                  <p className="text-sm text-green-700">
+                    Your location: {studentLocation.latitude.toFixed(6)}, {studentLocation.longitude.toFixed(6)}
+                    {isLocationVerified && ' ✓ Within range'}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Attendance Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -302,7 +506,7 @@ const StudentAttendance_Page = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 type="submit"
-                disabled={isSubmitting || !qrData}
+                disabled={isSubmitting || !qrData || (qrData?.teacherLocation && !isLocationVerified)}
                 className="flex-1 bg-sky-600 text-white py-3 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {isSubmitting ? (
@@ -318,6 +522,14 @@ const StudentAttendance_Page = () => {
                 )}
               </button>
             </div>
+
+            {qrData?.teacherLocation && !isLocationVerified && (
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <p className="text-sm text-yellow-700 text-center">
+                  Please verify your location before submitting attendance
+                </p>
+              </div>
+            )}
           </form>
 
           {/* Instructions */}
@@ -326,6 +538,9 @@ const StudentAttendance_Page = () => {
             <ul className="text-[12px] text-gray-600 space-y-1">
               <li>• Fill in your full name and roll number accurately</li>
               <li>• Double-check your details before submitting</li>
+              {qrData?.teacherLocation && (
+                <li>• Location verification required (within 200m of teacher)</li>
+              )}
               <li>• Your attendance time will be recorded automatically</li>
               <li>• Click "Submit Attendance" to mark your presence</li>
             </ul>

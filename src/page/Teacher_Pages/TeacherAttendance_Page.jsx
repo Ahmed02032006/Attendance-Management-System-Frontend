@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'react-toastify'
-import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2 } from 'react-icons/fi'
+import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2, FiMapPin } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
   createAttendance,
@@ -35,6 +35,8 @@ const TeacherAttendance_Page = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
+  const [teacherLocation, setTeacherLocation] = useState(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   
   // Sorting states
   const [sortConfig, setSortConfig] = useState({
@@ -43,7 +45,6 @@ const TeacherAttendance_Page = () => {
   });
 
   const { user } = useSelector((state) => state.auth)
-
   const userId = user?.id
 
   // Fetch subjects with attendance on component mount
@@ -61,6 +62,56 @@ const TeacherAttendance_Page = () => {
       setSelectedSubject(subjectsWithAttendance[0].id)
     }
   }, [subjectsWithAttendance, selectedSubject])
+
+  // Get teacher's current location
+  const getTeacherLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by this browser'));
+        return;
+      }
+
+      setIsGettingLocation(true);
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            timestamp: new Date().toISOString()
+          };
+          setTeacherLocation(location);
+          setIsGettingLocation(false);
+          resolve(location);
+        },
+        (error) => {
+          setIsGettingLocation(false);
+          let errorMessage = 'Failed to get location: ';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage += 'Location access denied by user';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage += 'Location information unavailable';
+              break;
+            case error.TIMEOUT:
+              errorMessage += 'Location request timed out';
+              break;
+            default:
+              errorMessage += 'Unknown error occurred';
+              break;
+          }
+          reject(new Error(errorMessage));
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    });
+  };
 
   // Format date to YYYY-MM-DD
   const formatDate = (date) => {
@@ -89,19 +140,17 @@ const TeacherAttendance_Page = () => {
 
   const currentAttendanceRecords = getCurrentAttendanceRecords();
 
-  // Extract numeric part from roll number for sorting (specifically for format like 25FA-009-CE)
+  // Extract numeric part from roll number for sorting
   const extractNumericFromRollNo = (rollNo) => {
     if (!rollNo) return 0;
     
-    // For format like "25FA-009-CE", extract the middle numeric part
     const parts = rollNo.split('-');
     if (parts.length >= 2) {
-      const numericPart = parts[1]; // This should be "009", "005", "015", etc.
+      const numericPart = parts[1];
       const numericValue = parseInt(numericPart, 10);
       return isNaN(numericValue) ? 0 : numericValue;
     }
     
-    // Fallback: try to find any numeric sequences
     const numericMatches = rollNo.match(/\d+/g);
     if (numericMatches && numericMatches.length > 0) {
       return parseInt(numericMatches[0], 10);
@@ -110,21 +159,18 @@ const TeacherAttendance_Page = () => {
     return 0;
   };
 
-  // Convert time string to sortable format (minutes since midnight)
+  // Convert time string to sortable format
   const timeToSortableValue = (timeStr) => {
     if (!timeStr) return 0;
     
     try {
-      // Handle time formats like "2:24 PM", "14:24", etc.
       let time = timeStr.trim().toUpperCase();
       
-      // If it's already in 24-hour format
       if (time.includes('AM') || time.includes('PM')) {
         return new Date(`2000-01-01 ${time}`).getTime();
       } else {
-        // Assume 24-hour format
         const [hours, minutes] = time.split(':').map(Number);
-        return (hours * 60 + minutes) * 60000; // Convert to milliseconds
+        return (hours * 60 + minutes) * 60000;
       }
     } catch (error) {
       return 0;
@@ -171,7 +217,7 @@ const TeacherAttendance_Page = () => {
       key,
       direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
     }));
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
   };
 
   // Get sort icon
@@ -201,7 +247,6 @@ const TeacherAttendance_Page = () => {
     }
 
     try {
-      // Create CSV content
       const headers = ['Student Name', 'Roll No', 'Time', 'Subject'];
       const csvContent = [
         headers.join(','),
@@ -215,7 +260,6 @@ const TeacherAttendance_Page = () => {
         )
       ].join('\n');
 
-      // Create blob and download
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
@@ -231,7 +275,6 @@ const TeacherAttendance_Page = () => {
       link.click();
       document.body.removeChild(link);
 
-      // toast.success('Attendance data exported successfully!');
     } catch (error) {
       toast.error('Failed to export data');
     }
@@ -259,17 +302,26 @@ const TeacherAttendance_Page = () => {
     setSelectedSubject(subjectId);
     setShowSubjectModal(false);
     setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
-    setCurrentPage(1); // Reset to first page when subject changes
-    setSortConfig({ key: null, direction: 'asc' }); // Reset sorting
+    setCurrentPage(1);
+    setSortConfig({ key: null, direction: 'asc' });
   };
 
-  const handleGenerateQR = () => {
+  const handleGenerateQR = async () => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
       return;
     }
-    setShowCreateModal(false);
-    setShowQRModal(true);
+
+    try {
+      // Get teacher's location before generating QR
+      const location = await getTeacherLocation();
+      toast.success('Location captured successfully!');
+      
+      setShowCreateModal(false);
+      setShowQRModal(true);
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   // Handle delete attendance
@@ -297,7 +349,6 @@ const TeacherAttendance_Page = () => {
     if (direction === 'prev') {
       newDate.setDate(newDate.getDate() - 1);
     } else {
-      // Only allow navigating to next date if it's not in the future
       newDate.setDate(newDate.getDate() + 1);
       if (isFutureDate(newDate)) {
         toast.error('Cannot select future dates');
@@ -305,8 +356,8 @@ const TeacherAttendance_Page = () => {
       }
     }
     setCurrentDate(newDate);
-    setCurrentPage(1); // Reset to first page when date changes
-    setSortConfig({ key: null, direction: 'asc' }); // Reset sorting
+    setCurrentPage(1);
+    setSortConfig({ key: null, direction: 'asc' });
   };
 
   const formatDisplayDate = (date) => {
@@ -326,11 +377,11 @@ const TeacherAttendance_Page = () => {
       return;
     }
     setCurrentDate(newDate);
-    setCurrentPage(1); // Reset to first page when date changes
-    setSortConfig({ key: null, direction: 'asc' }); // Reset sorting
+    setCurrentPage(1);
+    setSortConfig({ key: null, direction: 'asc' });
   };
 
-  // Generate QR code data
+  // Generate QR code data with location
   const generateQRData = () => {
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date().toLocaleTimeString('en-US', {
@@ -346,8 +397,10 @@ const TeacherAttendance_Page = () => {
       code: attendanceForm.uniqueCode,
       subjectName: subjectName,
       timestamp: new Date().toISOString(),
-      attendanceTime: currentTime, // Add this
-      attendanceDate: currentDate, // Add this
+      attendanceTime: currentTime,
+      attendanceDate: currentDate,
+      teacherLocation: teacherLocation, // Include teacher's location in QR data
+      locationRadius: 200, // 200 meters radius
       redirectUrl: `${window.location.origin}/student-attendance`
     });
   };
@@ -374,7 +427,6 @@ const TeacherAttendance_Page = () => {
 
     const allAttendance = [];
 
-    // Get attendance records for all dates
     Object.entries(subject.attendance).forEach(([date, records]) => {
       const studentRecord = records.find(record =>
         record.rollNo === student.rollNo && record.studentName === student.studentName
@@ -388,7 +440,6 @@ const TeacherAttendance_Page = () => {
       }
     });
 
-    // Sort by date (newest first)
     return allAttendance.sort((a, b) => new Date(b.date) - new Date(a.date));
   };
 
@@ -494,7 +545,7 @@ const TeacherAttendance_Page = () => {
                   type="date"
                   value={formatDate(currentDate)}
                   onChange={handleDateChange}
-                  max={formatDate(getTodayDate())} // Disable future dates
+                  max={formatDate(getTodayDate())}
                   className="px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
                 />
 
@@ -784,6 +835,9 @@ const TeacherAttendance_Page = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">Create New Attendance</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Location-based attendance (200m radius)
+              </p>
             </div>
             <div className="p-6 space-y-4">
               <div>
@@ -818,6 +872,24 @@ const TeacherAttendance_Page = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                 />
               </div>
+
+              {/* Location Status */}
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                <div className="flex items-center space-x-2">
+                  <FiMapPin className="text-blue-500" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800">
+                      Location Verification
+                    </p>
+                    <p className="text-xs text-blue-600">
+                      {teacherLocation 
+                        ? `Location captured: ${teacherLocation.latitude.toFixed(6)}, ${teacherLocation.longitude.toFixed(6)}`
+                        : 'Your location will be captured when generating QR code'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button
@@ -828,10 +900,19 @@ const TeacherAttendance_Page = () => {
               </button>
               <button
                 onClick={handleGenerateQR}
-                disabled={isLoading}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading || isGettingLocation}
+                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
-                {isLoading ? 'Creating...' : 'Generate QR'}
+                {isGettingLocation ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Getting Location...</span>
+                  </>
+                ) : isLoading ? (
+                  'Creating...'
+                ) : (
+                  'Generate QR'
+                )}
               </button>
             </div>
           </div>
@@ -858,6 +939,20 @@ const TeacherAttendance_Page = () => {
                   minVersion={1}
                 />
               </div>
+
+              {teacherLocation && (
+                <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-3 w-full">
+                  <div className="flex items-center space-x-2">
+                    <FiMapPin className="text-green-500" />
+                    <div>
+                      <p className="text-sm font-medium text-green-800">Location Locked</p>
+                      <p className="text-xs text-green-600">
+                        Radius: 200m • Students must be nearby to mark attendance
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <p className="text-sm text-gray-600 text-center">
                 Students can scan this QR code to mark their attendance
