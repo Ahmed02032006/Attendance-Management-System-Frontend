@@ -945,10 +945,10 @@ const TeacherAttendance_Page = () => {
                   <div className="flex items-center space-x-2">
                     <FiMapPin className="text-green-500" />
                     <div>
-                      <p className="text-sm font-medium text-green-800">Location Captured</p>
-                      <p className="text-xs text-green-600">
+                      <p className="text-sm font-medium text-green-800">Location Captured Successfully</p>
+                      {/* <p className="text-xs text-green-600">
                         Students must be nearby to mark attendance
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                 </div>
