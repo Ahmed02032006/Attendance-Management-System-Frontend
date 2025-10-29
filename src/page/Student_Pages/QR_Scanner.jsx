@@ -275,20 +275,6 @@ if (!isSupportedDevice) {
           <p className="text-gray-600 mb-6 text-sm leading-relaxed">
             This QR scanner works best on mobile devices with Google Chrome browser for optimal scanning experience.
           </p>
-          
-          {/* Simple Requirements */}
-          <div className="bg-blue-50 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-center space-x-4 text-sm">
-              <div className="flex items-center text-gray-700">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                Mobile Device
-              </div>
-              <div className="flex items-center text-gray-700">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                Chrome Browser
-              </div>
-            </div>
-          </div>
 
           {/* Simple Instruction */}
           <div className="text-center">
