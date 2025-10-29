@@ -35,13 +35,13 @@ const QRScanner_Page = () => {
       // STRICT CHECK: Only allow Mobile + Chrome
       if (!isMobile) {
         setIsSupportedDevice(false);
-        toast.error('This page is only available on mobile devices');
+        // toast.error('This page is only available on mobile devices');
         return false;
       }
 
       if (!isChrome) {
         setIsSupportedDevice(false);
-        toast.error('Please use Google Chrome browser for QR scanning');
+        // toast.error('Please use Google Chrome browser for QR scanning');
         return false;
       }
 
@@ -254,39 +254,40 @@ const QRScanner_Page = () => {
   }, [cameraStream]);
 
   // Unsupported device message - Only show for non-mobile or non-Chrome browsers
-if (!isSupportedDevice) {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-6">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 max-w-sm w-full">
-        <div className="text-center">
-          {/* Icon */}
-          <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-blue-50 mb-6">
-            <svg className="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
-          
-          {/* Title */}
-          <h2 className="text-xl font-semibold text-gray-800 mb-3">
-            Mobile Chrome Required
-          </h2>
-          
-          {/* Description */}
-          <p className="text-gray-600 mb-6 text-sm leading-relaxed">
-            This QR scanner works best on mobile devices with Google Chrome browser for optimal scanning experience.
-          </p>
-
-          {/* Simple Instruction */}
+  if (!isSupportedDevice) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 max-w-sm w-full">
           <div className="text-center">
-            <p className="text-xs text-gray-500">
-              Please open this page on your mobile device using Chrome browser
+            {/* Icon */}
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-blue-50 mb-6">
+              <svg className="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-xl font-semibold text-gray-800 mb-3">
+              Mobile Chrome Required
+            </h2>
+
+            {/* Description */}
+            <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+              This QR scanner works best on mobile devices with Google Chrome browser for optimal scanning experience.
             </p>
+
+            {/* Simple Instruction */}
+            <div className="text-center">
+              <p className="text-xs text-gray-500">
+                {/* Please open this page on your mobile device using Chrome browser */}
+                This page is only available on mobile devices
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -346,10 +347,10 @@ if (!isSupportedDevice) {
                 onClick={toggleCameraScan}
                 disabled={!hasCameraPermission && !isScanning}
                 className={`mt-4 inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 ${isScanning
-                    ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
-                    : !hasCameraPermission
-                      ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
-                      : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                  ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
+                  : !hasCameraPermission
+                    ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
+                    : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
                   }`}
               >
                 {isScanning ? (
