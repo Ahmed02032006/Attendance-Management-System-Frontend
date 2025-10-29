@@ -81,13 +81,6 @@ const QRScanner_Page = () => {
           locationRadius: parsedData.locationRadius || 200
         };
 
-        // Check if location-based attendance is enabled
-        if (validatedData.teacherLocation) {
-          console.log('Location-based attendance detected');
-          console.log('Teacher location:', validatedData.teacherLocation);
-          console.log('Allowed radius:', validatedData.locationRadius + 'm');
-        }
-
         return validatedData;
       }
 
@@ -113,7 +106,7 @@ const QRScanner_Page = () => {
             attendanceTime: urlParams.get('attendanceTime') || urlParams.get('time') || new Date().toLocaleTimeString(),
             attendanceDate: urlParams.get('attendanceDate') || urlParams.get('date') || new Date().toISOString().split('T')[0],
             timestamp: new Date().toISOString(),
-            teacherLocation: null, // No location data in URL format
+            teacherLocation: null,
             locationRadius: 200
           };
         } catch (urlError) {
@@ -199,7 +192,7 @@ const QRScanner_Page = () => {
 
       const constraints = {
         video: {
-          facingMode: 'environment', // Always use rear camera for mobile
+          facingMode: 'environment',
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -283,12 +276,8 @@ const QRScanner_Page = () => {
       try {
         const parsedData = parseQRData(qrCode.data);
         
-        // Show scan success message with location info
-        if (parsedData.teacherLocation) {
-          toast.success('✓ Location-based attendance QR scanned!');
-        } else {
-          toast.success('✓ Attendance QR scanned successfully!');
-        }
+        // Show scan success message
+        toast.success('✓ QR Code scanned successfully!');
         
         // Small delay for better UX
         setTimeout(() => {
@@ -311,19 +300,6 @@ const QRScanner_Page = () => {
       stopCameraScan();
     } else {
       startCameraScan();
-    }
-  };
-
-  // Handle manual QR code input (fallback)
-  const handleManualInput = () => {
-    const manualCode = prompt('Enter the attendance code manually:');
-    if (manualCode) {
-      try {
-        const parsedData = parseQRData(manualCode);
-        navigateToAttendancePage(parsedData);
-      } catch (error) {
-        toast.error('Invalid code format');
-      }
     }
   };
 
@@ -363,7 +339,7 @@ const QRScanner_Page = () => {
             </p>
 
             {/* Requirements */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <h3 className="text-sm font-medium text-yellow-800 mb-2">Requirements:</h3>
               <ul className="text-xs text-yellow-700 space-y-1">
                 <li>• Mobile device with camera</li>
@@ -372,14 +348,6 @@ const QRScanner_Page = () => {
                 <li>• Camera permissions allowed</li>
               </ul>
             </div>
-
-            {/* Manual Input Fallback */}
-            <button
-              onClick={handleManualInput}
-              className="w-full bg-gray-600 text-white py-3 px-4 rounded-md hover:bg-gray-700 transition-colors font-medium text-sm"
-            >
-              Enter Code Manually
-            </button>
           </div>
         </div>
       </div>
@@ -496,45 +464,16 @@ const QRScanner_Page = () => {
               </button>
             </div>
           </div>
-
-          {/* Manual Input Option */}
-          <div className="text-center">
-            <button
-              onClick={handleManualInput}
-              className="text-sky-600 hover:text-sky-700 text-sm font-medium transition-colors"
-            >
-              Or enter code manually
-            </button>
-          </div>
         </div>
 
-        {/* Enhanced Instructions */}
+        {/* Instructions */}
         <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
           <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
           <ul className="text-sm text-sky-700 space-y-1">
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
-            <li>• <strong>Location Check:</strong> Your location will be verified automatically</li>
-            <li>• <strong>Requirements:</strong> Enable location services for attendance</li>
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
             <li>• <strong>Best Results:</strong> Use rear camera in well-lit area</li>
           </ul>
-        </div>
-
-        {/* Location Requirements Info */}
-        <div className="mt-4 bg-purple-50 border border-purple-200 rounded-lg p-4">
-          <div className="flex items-start space-x-2">
-            <svg className="w-5 h-5 text-purple-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <div>
-              <h4 className="text-sm font-medium text-purple-800 mb-1">Location-Based Attendance</h4>
-              <p className="text-xs text-purple-600">
-                This system uses your device's location to verify you are physically present in the classroom. 
-                Please enable location services when prompted.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

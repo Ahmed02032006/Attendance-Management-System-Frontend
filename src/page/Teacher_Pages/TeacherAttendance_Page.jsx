@@ -37,7 +37,7 @@ const TeacherAttendance_Page = () => {
   const [studentsPerPage] = useState(6);
   const [teacherLocation, setTeacherLocation] = useState(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  
+
   // Sorting states
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -143,29 +143,29 @@ const TeacherAttendance_Page = () => {
   // Extract numeric part from roll number for sorting
   const extractNumericFromRollNo = (rollNo) => {
     if (!rollNo) return 0;
-    
+
     const parts = rollNo.split('-');
     if (parts.length >= 2) {
       const numericPart = parts[1];
       const numericValue = parseInt(numericPart, 10);
       return isNaN(numericValue) ? 0 : numericValue;
     }
-    
+
     const numericMatches = rollNo.match(/\d+/g);
     if (numericMatches && numericMatches.length > 0) {
       return parseInt(numericMatches[0], 10);
     }
-    
+
     return 0;
   };
 
   // Convert time string to sortable format
   const timeToSortableValue = (timeStr) => {
     if (!timeStr) return 0;
-    
+
     try {
       let time = timeStr.trim().toUpperCase();
-      
+
       if (time.includes('AM') || time.includes('PM')) {
         return new Date(`2000-01-01 ${time}`).getTime();
       } else {
@@ -225,8 +225,8 @@ const TeacherAttendance_Page = () => {
     if (sortConfig.key !== key) {
       return <FiArrowUp className="w-3 h-3 opacity-30" />;
     }
-    return sortConfig.direction === 'asc' ? 
-      <FiArrowUp className="w-3 h-3" /> : 
+    return sortConfig.direction === 'asc' ?
+      <FiArrowUp className="w-3 h-3" /> :
       <FiArrowDown className="w-3 h-3" />;
   };
 
@@ -316,7 +316,7 @@ const TeacherAttendance_Page = () => {
       // Get teacher's location before generating QR
       const location = await getTeacherLocation();
       toast.success('Location captured successfully!');
-      
+
       setShowCreateModal(false);
       setShowQRModal(true);
     } catch (error) {
@@ -569,8 +569,8 @@ const TeacherAttendance_Page = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th 
-                        scope="col" 
+                      <th
+                        scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                         onClick={() => handleSort('studentName')}
                       >
@@ -579,8 +579,8 @@ const TeacherAttendance_Page = () => {
                           {getSortIcon('studentName')}
                         </div>
                       </th>
-                      <th 
-                        scope="col" 
+                      <th
+                        scope="col"
                         className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                         onClick={() => handleSort('rollNo')}
                       >
@@ -589,8 +589,8 @@ const TeacherAttendance_Page = () => {
                           {getSortIcon('rollNo')}
                         </div>
                       </th>
-                      <th 
-                        scope="col" 
+                      <th
+                        scope="col"
                         className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                         onClick={() => handleSort('time')}
                       >
@@ -882,7 +882,7 @@ const TeacherAttendance_Page = () => {
                       Location Verification
                     </p>
                     <p className="text-xs text-blue-600">
-                      {teacherLocation 
+                      {teacherLocation
                         ? `Location captured: ${teacherLocation.latitude.toFixed(6)}, ${teacherLocation.longitude.toFixed(6)}`
                         : 'Your location will be captured when generating QR code'
                       }
@@ -945,9 +945,9 @@ const TeacherAttendance_Page = () => {
                   <div className="flex items-center space-x-2">
                     <FiMapPin className="text-green-500" />
                     <div>
-                      <p className="text-sm font-medium text-green-800">Location Locked</p>
+                      <p className="text-sm font-medium text-green-800">Location Captured</p>
                       <p className="text-xs text-green-600">
-                        Radius: 200m • Students must be nearby to mark attendance
+                        Students must be nearby to mark attendance
                       </p>
                     </div>
                   </div>
