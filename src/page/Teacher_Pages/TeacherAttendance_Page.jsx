@@ -315,7 +315,7 @@ const TeacherAttendance_Page = () => {
     try {
       // Get teacher's location before generating QR
       const location = await getTeacherLocation();
-      toast.success('Location captured successfully!');
+      // toast.success('Location captured successfully!');
 
       setShowCreateModal(false);
       setShowQRModal(true);
