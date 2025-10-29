@@ -1,0 +1,1940 @@
+TEACHER ATTENDANCE PAGE : 
+
+import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import HeaderComponent from '../../components/HeaderComponent'
+import { QRCodeSVG } from 'qrcode.react'
+import { toast } from 'react-toastify'
+import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2 } from 'react-icons/fi'
+import {
+  getSubjectsWithAttendance,
+  createAttendance,
+  updateAttendance,
+  deleteAttendance,
+  clearAttendance
+} from '../../store/Teacher-Slicer/Attendance-Slicer.js'
+
+const TeacherAttendance_Page = () => {
+  const dispatch = useDispatch()
+  const {
+    subjectsWithAttendance,
+    isLoading
+  } = useSelector((state) => state.teacherAttendance)
+
+  const [selectedSubject, setSelectedSubject] = useState('');
+  const [showSubjectModal, setShowSubjectModal] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [attendanceToDelete, setAttendanceToDelete] = useState(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [attendanceForm, setAttendanceForm] = useState({
+    subject: '',
+    uniqueCode: ''
+  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [studentsPerPage] = useState(6);
+  
+  // Sorting states
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: 'asc' // 'asc' or 'desc'
+  });
+
+  const { user } = useSelector((state) => state.auth)
+
+  const userId = user?.id
+
+  // Fetch subjects with attendance on component mount
+  useEffect(() => {
+    dispatch(getSubjectsWithAttendance(userId)).unwrap();
+    // Cleanup on unmount
+    return () => {
+      dispatch(clearAttendance())
+    }
+  }, [dispatch])
+
+  // Set initial selected subject when data is loaded
+  useEffect(() => {
+    if (subjectsWithAttendance.length > 0 && !selectedSubject) {
+      setSelectedSubject(subjectsWithAttendance[0].id)
+    }
+  }, [subjectsWithAttendance, selectedSubject])
+
+  // Format date to YYYY-MM-DD
+  const formatDate = (date) => {
+    return date.toISOString().split('T')[0];
+  };
+
+  // Get today's date for max date restriction
+  const getTodayDate = () => {
+    return new Date();
+  };
+
+  // Check if a date is in the future
+  const isFutureDate = (date) => {
+    const today = getTodayDate();
+    return date > today;
+  };
+
+  const currentDateString = formatDate(currentDate);
+
+  // Get current attendance records from Redux state
+  const getCurrentAttendanceRecords = () => {
+    if (!selectedSubject) return [];
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+    return subject && subject.attendance ? subject.attendance[currentDateString] || [] : [];
+  };
+
+  const currentAttendanceRecords = getCurrentAttendanceRecords();
+
+  // Extract numeric part from roll number for sorting (specifically for format like 25FA-009-CE)
+  const extractNumericFromRollNo = (rollNo) => {
+    if (!rollNo) return 0;
+    
+    // For format like "25FA-009-CE", extract the middle numeric part
+    const parts = rollNo.split('-');
+    if (parts.length >= 2) {
+      const numericPart = parts[1]; // This should be "009", "005", "015", etc.
+      const numericValue = parseInt(numericPart, 10);
+      return isNaN(numericValue) ? 0 : numericValue;
+    }
+    
+    // Fallback: try to find any numeric sequences
+    const numericMatches = rollNo.match(/\d+/g);
+    if (numericMatches && numericMatches.length > 0) {
+      return parseInt(numericMatches[0], 10);
+    }
+    
+    return 0;
+  };
+
+  // Convert time string to sortable format (minutes since midnight)
+  const timeToSortableValue = (timeStr) => {
+    if (!timeStr) return 0;
+    
+    try {
+      // Handle time formats like "2:24 PM", "14:24", etc.
+      let time = timeStr.trim().toUpperCase();
+      
+      // If it's already in 24-hour format
+      if (time.includes('AM') || time.includes('PM')) {
+        return new Date(`2000-01-01 ${time}`).getTime();
+      } else {
+        // Assume 24-hour format
+        const [hours, minutes] = time.split(':').map(Number);
+        return (hours * 60 + minutes) * 60000; // Convert to milliseconds
+      }
+    } catch (error) {
+      return 0;
+    }
+  };
+
+  // Sorting function
+  const sortStudents = (students) => {
+    if (!sortConfig.key) return students;
+
+    return [...students].sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortConfig.key) {
+        case 'rollNo':
+          aValue = extractNumericFromRollNo(a.rollNo);
+          bValue = extractNumericFromRollNo(b.rollNo);
+          break;
+        case 'time':
+          aValue = timeToSortableValue(a.time);
+          bValue = timeToSortableValue(b.time);
+          break;
+        case 'studentName':
+          aValue = a.studentName?.toLowerCase() || '';
+          bValue = b.studentName?.toLowerCase() || '';
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
+  // Handle sort request
+  const handleSort = (key) => {
+    setSortConfig(prevConfig => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+    }));
+    setCurrentPage(1); // Reset to first page when sorting changes
+  };
+
+  // Get sort icon
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) {
+      return <FiArrowUp className="w-3 h-3 opacity-30" />;
+    }
+    return sortConfig.direction === 'asc' ? 
+      <FiArrowUp className="w-3 h-3" /> : 
+      <FiArrowDown className="w-3 h-3" />;
+  };
+
+  // Filter students based on search term
+  const filteredStudents = sortStudents(
+    currentAttendanceRecords.filter(student =>
+      student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.rollNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.subject.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Export to Excel function
+  const exportToExcel = () => {
+    if (filteredStudents.length === 0) {
+      toast.error('No data to export');
+      return;
+    }
+
+    try {
+      // Create CSV content
+      const headers = ['Student Name', 'Roll No', 'Time', 'Subject'];
+      const csvContent = [
+        headers.join(','),
+        ...filteredStudents.map(student =>
+          [
+            `"${student.studentName}"`,
+            `"${student.rollNo}"`,
+            `"${student.time}"`,
+            `"${student.subject}"`
+          ].join(',')
+        )
+      ].join('\n');
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+
+      const subjectName = subjectsWithAttendance.find(s => s.id === selectedSubject)?.name || 'attendance';
+      const fileName = `attendance_${subjectName}_${currentDateString}.csv`;
+
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      link.style.visibility = 'hidden';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // toast.success('Attendance data exported successfully!');
+    } catch (error) {
+      toast.error('Failed to export data');
+    }
+  };
+
+  // Pagination logic
+  const indexOfLastStudent = currentPage * studentsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
+  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setAttendanceForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubjectSelect = (subjectId) => {
+    setSelectedSubject(subjectId);
+    setShowSubjectModal(false);
+    setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
+    setCurrentPage(1); // Reset to first page when subject changes
+    setSortConfig({ key: null, direction: 'asc' }); // Reset sorting
+  };
+
+  const handleGenerateQR = () => {
+    if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
+      toast.error('Please fill all fields');
+      return;
+    }
+    setShowCreateModal(false);
+    setShowQRModal(true);
+  };
+
+  // Handle delete attendance
+  const handleDeleteClick = (attendanceId) => {
+    setAttendanceToDelete(attendanceId);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (attendanceToDelete) {
+      dispatch(deleteAttendance(attendanceToDelete)).unwrap();
+      toast.success(`Attendance record deleted successfully`);
+    }
+    setShowDeleteModal(false);
+    setAttendanceToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setAttendanceToDelete(null);
+  };
+
+  const navigateDate = (direction) => {
+    const newDate = new Date(currentDate);
+    if (direction === 'prev') {
+      newDate.setDate(newDate.getDate() - 1);
+    } else {
+      // Only allow navigating to next date if it's not in the future
+      newDate.setDate(newDate.getDate() + 1);
+      if (isFutureDate(newDate)) {
+        toast.error('Cannot select future dates');
+        return;
+      }
+    }
+    setCurrentDate(newDate);
+    setCurrentPage(1); // Reset to first page when date changes
+    setSortConfig({ key: null, direction: 'asc' }); // Reset sorting
+  };
+
+  const formatDisplayDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  // Date picker handler
+  const handleDateChange = (e) => {
+    const newDate = new Date(e.target.value);
+    if (isFutureDate(newDate)) {
+      toast.error('Cannot select future dates');
+      return;
+    }
+    setCurrentDate(newDate);
+    setCurrentPage(1); // Reset to first page when date changes
+    setSortConfig({ key: null, direction: 'asc' }); // Reset sorting
+  };
+
+  // Generate QR code data
+  const generateQRData = () => {
+    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
+    const currentTime = new Date().toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    return JSON.stringify({
+      type: 'attendance',
+      subject: attendanceForm.subject,
+      code: attendanceForm.uniqueCode,
+      subjectName: subjectName,
+      timestamp: new Date().toISOString(),
+      attendanceTime: currentTime, // Add this
+      attendanceDate: currentDate, // Add this
+      redirectUrl: `${window.location.origin}/student-attendance`
+    });
+  };
+
+  const qrData = generateQRData();
+
+  // Handle student name click
+  const handleStudentClick = (student) => {
+    setSelectedStudent(student);
+    setShowStudentModal(true);
+  };
+
+  // Reset search and pagination when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // Helper functions for student attendance data
+  const getStudentPreviousAttendance = (student) => {
+    if (!student || !selectedSubject) return [];
+
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+    if (!subject || !subject.attendance) return [];
+
+    const allAttendance = [];
+
+    // Get attendance records for all dates
+    Object.entries(subject.attendance).forEach(([date, records]) => {
+      const studentRecord = records.find(record =>
+        record.rollNo === student.rollNo && record.studentName === student.studentName
+      );
+
+      if (studentRecord) {
+        allAttendance.push({
+          ...studentRecord,
+          date: date
+        });
+      }
+    });
+
+    // Sort by date (newest first)
+    return allAttendance.sort((a, b) => new Date(b.date) - new Date(a.date));
+  };
+
+  const getTotalAttendanceDays = (student) => {
+    const attendance = getStudentPreviousAttendance(student);
+    return attendance.length;
+  };
+
+  const getPresentDays = (student) => {
+    const attendance = getStudentPreviousAttendance(student);
+    return attendance.filter(record => record.time).length;
+  };
+
+  const getAbsentDays = (student) => {
+    const attendance = getStudentPreviousAttendance(student);
+    return attendance.filter(record => !record.time).length;
+  };
+
+  const getAttendancePercentage = (student) => {
+    const total = getTotalAttendanceDays(student);
+    const present = getPresentDays(student);
+
+    if (total === 0) return 0;
+    return Math.round((present / total) * 100);
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-lg font-medium text-gray-700">Loading Attendance Data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <HeaderComponent heading={"Teacher Attendance"} subHeading={"View and manage teacher attendance"} role='' />
+
+      <div className="container max-w-full p-6">
+        {/* Date Navigation - Centered */}
+        {selectedSubject && (
+          <div className="flex justify-center items-center mb-8">
+            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-white rounded-lg border border-gray-200 px-6 py-4">
+              <button
+                onClick={() => navigateDate('prev')}
+                className="p-3 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              <div className="text-center flex flex-col items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  {formatDisplayDate(currentDate)}
+                </h2>
+                <p className="text-xs text-gray-600">
+                  {subjectsWithAttendance.find(s => s.id === selectedSubject)?.name}
+                </p>
+              </div>
+
+              <button
+                onClick={() => navigateDate('next')}
+                disabled={isFutureDate(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000))}
+                className={`p-3 rounded-full transition-colors ${isFutureDate(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000))
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  }`}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Attendance Table Section */}
+        {selectedSubject && (
+          <div className="space-y-6">
+            {/* Search and Date Picker */}
+            <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="relative max-w-md">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FiSearch className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search students..."
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* Date Picker Input */}
+                <input
+                  type="date"
+                  value={formatDate(currentDate)}
+                  onChange={handleDateChange}
+                  max={formatDate(getTodayDate())} // Disable future dates
+                  className="px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                />
+
+                {/* Export to Excel Button */}
+                <button
+                  onClick={exportToExcel}
+                  disabled={filteredStudents.length === 0}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Export Excel</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Attendance Table */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto hide-scrollbar">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th 
+                        scope="col" 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort('studentName')}
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Student Name</span>
+                          {getSortIcon('studentName')}
+                        </div>
+                      </th>
+                      <th 
+                        scope="col" 
+                        className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort('rollNo')}
+                      >
+                        <div className="flex items-center justify-center space-x-1">
+                          <span>Roll No.</span>
+                          {getSortIcon('rollNo')}
+                        </div>
+                      </th>
+                      <th 
+                        scope="col" 
+                        className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort('time')}
+                      >
+                        <div className="flex items-center justify-center space-x-1">
+                          <span>Time</span>
+                          {getSortIcon('time')}
+                        </div>
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Subject
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {currentStudents.length > 0 ? (
+                      currentStudents.map((student) => (
+                        <tr key={student.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-3.5 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <button
+                                onClick={() => handleStudentClick(student)}
+                                className="text-sm font-medium text-gray-600 hover:text-sky-600 transition-colors cursor-pointer text-left"
+                              >
+                                {student.studentName}
+                              </button>
+                            </div>
+                          </td>
+                          <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
+                            {student.rollNo}
+                          </td>
+                          <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
+                            {student.time}
+                          </td>
+                          <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
+                            {student.subject}
+                          </td>
+                          <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm">
+                            <div className="flex justify-center space-x-2">
+                              <button
+                                onClick={() => handleDeleteClick(student.id)}
+                                className="text-red-600 hover:text-red-800 transition-colors p-1 rounded hover:bg-red-50"
+                                title="Delete attendance record"
+                              >
+                                <FiTrash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
+                          {searchTerm ? "No matching students found" : "No attendance records found for " + formatDisplayDate(currentDate)}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {filteredStudents.length > 0 && (
+                <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                  <div className="mb-3 sm:mb-0">
+                    <p className="text-sm text-gray-700">
+                      Showing <span className="font-medium">{indexOfFirstStudent + 1}</span> to{' '}
+                      <span className="font-medium">{Math.min(indexOfLastStudent, filteredStudents.length)}</span> of{' '}
+                      <span className="font-medium">{filteredStudents.length}</span> students
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={prevPage}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                    >
+                      <FiChevronLeft className="h-4 w-4 mr-1" />
+                    </button>
+
+                    {totalPages <= 6 ? (
+                      Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                        <button
+                          key={number}
+                          onClick={() => paginate(number)}
+                          className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
+                            ? 'border-sky-600 bg-sky-600 text-white'
+                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                            } rounded-md transition-colors`}
+                        >
+                          {number}
+                        </button>
+                      ))
+                    ) : (
+                      <>
+                        {currentPage > 3 && (
+                          <button
+                            onClick={() => paginate(1)}
+                            className="px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-md transition-colors"
+                          >
+                            1
+                          </button>
+                        )}
+                        {currentPage > 4 && <span className="px-2 text-gray-500">...</span>}
+                        {[
+                          currentPage - 2,
+                          currentPage - 1,
+                          currentPage,
+                          currentPage + 1,
+                          currentPage + 2
+                        ]
+                          .filter(num => num > 0 && num <= totalPages)
+                          .map(number => (
+                            <button
+                              key={number}
+                              onClick={() => paginate(number)}
+                              className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
+                                ? 'border-sky-600 bg-sky-600 text-white'
+                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                } rounded-md transition-colors`}
+                            >
+                              {number}
+                            </button>
+                          ))}
+                        {currentPage < totalPages - 3 && <span className="px-2 text-gray-500">...</span>}
+                        {currentPage < totalPages - 2 && (
+                          <button
+                            onClick={() => paginate(totalPages)}
+                            className="px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-md transition-colors"
+                          >
+                            {totalPages}
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                    <button
+                      onClick={nextPage}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                    >
+                      <FiChevronRight className="h-4 w-4 ml-1" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Create New Attendance Button - Bottom Right */}
+        {selectedSubject && (
+          <div className="fixed bottom-6 right-6 z-40">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-3 rounded-sm shadow-lg transition-all duration-200 flex items-center space-x-3 hover:shadow-xl transform hover:scale-105"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="hidden sm:inline">Create New Attendance</span>
+              <span className="sm:hidden">Create</span>
+            </button>
+          </div>
+        )}
+
+        {/* No Subject Selected State */}
+        {!selectedSubject && !showSubjectModal && subjectsWithAttendance.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+            <div className="text-gray-400 mb-4">
+              <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Subject Selected</h3>
+            <p className="text-gray-600 mb-4">Please select a subject to view attendance records</p>
+            <button
+              onClick={() => setShowSubjectModal(true)}
+              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+            >
+              Select Subject
+            </button>
+          </div>
+        )}
+
+        {/* No Data State */}
+        {subjectsWithAttendance.length === 0 && !isLoading && (
+          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+            <div className="text-gray-400 mb-4">
+              <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Subjects Found</h3>
+            <p className="text-gray-600 mb-4">You don't have any subjects with attendance data yet</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+            >
+              Refresh Data
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Subject Selection Modal */}
+      {showSubjectModal && subjectsWithAttendance.length > 0 && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Select Subject</h3>
+              <p className="text-sm text-gray-600 mt-1">Choose a subject to view attendance records</p>
+            </div>
+            <div className="p-6">
+              <div className="flex items-center gap-3">
+                {subjectsWithAttendance.map((subject) => (
+                  <div
+                    key={subject.id}
+                    className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center"
+                    onClick={() => handleSubjectSelect(subject.id)}
+                  >
+                    <h4 className="font-light text-sm text-gray-700">
+                      {subject.name}
+                    </h4>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <p className="text-sm text-gray-600 text-center">
+                Select a subject to continue to the attendance dashboard
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Attendance Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Create New Attendance</h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Subject
+                </label>
+                <select
+                  name="subject"
+                  value={attendanceForm.subject}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                >
+                  <option value="">Select Subject</option>
+                  {subjectsWithAttendance.map((subject) => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Unique Code
+                </label>
+                <input
+                  type="text"
+                  name="uniqueCode"
+                  value={attendanceForm.uniqueCode}
+                  onChange={handleInputChange}
+                  placeholder="Enter unique code"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleGenerateQR}
+                disabled={isLoading}
+                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Creating...' : 'Generate QR'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Code Modal */}
+      {showQRModal && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
+            </div>
+            <div className="p-6 flex flex-col items-center">
+              <div className="w-64 h-64 bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2" id="qr-code-container">
+                <QRCodeSVG
+                  value={qrData}
+                  size={250}
+                  level="L"
+                  includeMargin={true}
+                  bgColor="#FFFFFF"
+                  fgColor="#000000"
+                  id="qr-code-svg"
+                  minVersion={1}
+                />
+              </div>
+
+              <p className="text-sm text-gray-600 text-center">
+                Students can scan this QR code to mark their attendance
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setShowQRModal(false)}
+                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Confirm Deletion</h3>
+            </div>
+            <div className="p-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <FiTrash2 className="w-6 h-6 text-red-600" />
+                </div>
+              </div>
+              <p className="text-center text-gray-700 mb-2">
+                Are you sure you want to delete this attendance record?
+              </p>
+              <p className="text-center text-sm text-gray-500">
+                This action cannot be undone.
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={handleCancelDelete}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-600 hover:text-gray-800 font-medium transition-colors"
+              >
+                No, Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Student Details Modal */}
+      {showStudentModal && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">
+                {selectedStudent?.studentName} - Attendance Details
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Roll No: {selectedStudent?.rollNo}
+              </p>
+            </div>
+
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              {selectedStudent && (
+                <div className="space-y-6">
+                  {/* Student Basic Info */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p className="font-medium text-gray-700">Student Name</p>
+                        <p className="text-gray-900">{selectedStudent.studentName}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-700">Roll Number</p>
+                        <p className="text-gray-900">{selectedStudent.rollNo}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-700">Current Subject</p>
+                        <p className="text-gray-900">{selectedStudent.subject}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Previous Attendance Records */}
+                  <div>
+                    <h4 className="text-md font-semibold text-gray-800 mb-4">Previous Attendance Records</h4>
+
+                    {getStudentPreviousAttendance(selectedStudent).length > 0 ? (
+                      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Date
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Day
+                                </th>
+                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Time
+                                </th>
+                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Subject
+                                </th>
+                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Status
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {getStudentPreviousAttendance(selectedStudent).map((record, index) => (
+                                <tr key={index} className="hover:bg-gray-50">
+                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                    {formatDisplayDate(new Date(record.date))}
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                                    {new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
+                                    {record.time || 'N/A'}
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
+                                    {record.subject}
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                      }`}>
+                                      {record.time ? 'Present' : 'Absent'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p className="mt-2 text-sm text-gray-600">No previous attendance records found</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setShowStudentModal(false)}
+                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  )
+}
+
+export default TeacherAttendance_Page
+
+STUDENT QR SCANNER PAGE : 
+
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import jsQR from 'jsqr';
+
+const QRScanner_Page = () => {
+  const [isScanning, setIsScanning] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
+  const [hasCameraPermission, setHasCameraPermission] = useState(true);
+  const [isSupportedDevice, setIsSupportedDevice] = useState(true);
+  const [deviceType, setDeviceType] = useState('mobile');
+  const navigate = useNavigate();
+
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const scanInterval = useRef(null);
+
+  // Device detection and validation
+  useEffect(() => {
+    const checkDeviceCompatibility = () => {
+      // Detect device type
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isTablet = /iPad|Android/i.test(navigator.userAgent) && !/Mobile/i.test(navigator.userAgent);
+      
+      // Detect browser
+      const isChrome = /Chrome|CriOS/i.test(navigator.userAgent);
+      // const isEdge = /Edg/i.test(navigator.userAgent);
+      
+      // Set device type
+      if (isMobile) setDeviceType('mobile');
+      else if (isTablet) setDeviceType('tablet');
+      else setDeviceType('desktop');
+
+      // Check compatibility
+      if (isMobile || isTablet) {
+        // For mobile/tablet: Only allow Chrome
+        if (!isChrome) {
+          setIsSupportedDevice(false);
+          // toast.error('Please use Google Chrome browser for better compatibility');
+          return false;
+        }
+      } else {
+        // For desktop: Allow Chrome, Edge, Firefox, Safari
+        if (!isChrome && !/Firefox|Safari/i.test(navigator.userAgent)) {
+          setIsSupportedDevice(false);
+          // toast.error('Please use a modern browser like Chrome, Edge, Firefox, or Safari');
+          return false;
+        }
+      }
+
+      // Check if browser supports required APIs
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setIsSupportedDevice(false);
+        // toast.error('Your browser does not support camera access');
+        return false;
+      }
+
+      setIsSupportedDevice(true);
+      return true;
+    };
+
+    checkDeviceCompatibility();
+  }, []);
+
+  // Enhanced QR data parsing
+  const parseQRData = (qrDataString) => {
+    if (!qrDataString) {
+      throw new Error('Empty QR code data');
+    }
+
+    // Try to parse as JSON first
+    try {
+      const parsedData = JSON.parse(qrDataString);
+      
+      // Validate required fields for attendance
+      if (parsedData.type === 'attendance') {
+        return {
+          type: 'attendance',
+          code: parsedData.code || parsedData.id || qrDataString,
+          subject: parsedData.subject || 'Unknown Subject',
+          subjectName: parsedData.subjectName || parsedData.subject || 'Unknown Subject',
+          attendanceTime: parsedData.attendanceTime || parsedData.time || new Date().toLocaleTimeString(),
+          attendanceDate: parsedData.attendanceDate || parsedData.date || new Date().toISOString().split('T')[0],
+          timestamp: parsedData.timestamp || new Date().toISOString()
+        };
+      }
+      
+      // If it's JSON but not attendance type, return as is
+      return parsedData;
+    } catch (error) {
+      // If not JSON, treat as plain text with potential URL parameters
+      console.log('QR data is not JSON, treating as plain text:', qrDataString);
+      
+      // Check if it's URL encoded data
+      if (qrDataString.includes('=') && (qrDataString.includes('?') || qrDataString.includes('&'))) {
+        try {
+          const urlParams = new URLSearchParams(qrDataString.includes('?') 
+            ? qrDataString.split('?')[1] 
+            : qrDataString
+          );
+          
+          return {
+            type: 'attendance',
+            code: urlParams.get('code') || urlParams.get('id') || qrDataString,
+            subject: urlParams.get('subject') || 'Unknown Subject',
+            subjectName: urlParams.get('subjectName') || urlParams.get('subject') || 'Unknown Subject',
+            attendanceTime: urlParams.get('attendanceTime') || urlParams.get('time') || new Date().toLocaleTimeString(),
+            attendanceDate: urlParams.get('attendanceDate') || urlParams.get('date') || new Date().toISOString().split('T')[0],
+            timestamp: new Date().toISOString()
+          };
+        } catch (urlError) {
+          console.log('Not a URL format, using plain text');
+        }
+      }
+      
+      // Plain text fallback
+      return {
+        type: 'attendance',
+        code: qrDataString,
+        subject: 'Scanned Subject',
+        subjectName: 'Scanned Subject',
+        attendanceTime: new Date().toLocaleTimeString(),
+        attendanceDate: new Date().toISOString().split('T')[0],
+        timestamp: new Date().toISOString()
+      };
+    }
+  };
+
+  const navigateToAttendancePage = (qrData) => {
+    navigate('/student-attendance', {
+      state: {
+        qrData: JSON.stringify(qrData)
+      }
+    });
+  };
+
+  // Image enhancement for better QR detection
+  const enhanceImageContrast = (imageData) => {
+    const data = imageData.data;
+    const newData = new Uint8ClampedArray(data.length);
+    
+    for (let i = 0; i < data.length; i += 4) {
+      // Convert to grayscale
+      const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      
+      // Enhance contrast
+      const enhanced = gray < 128 ? Math.max(0, gray - 50) : Math.min(255, gray + 50);
+      
+      newData[i] = enhanced;
+      newData[i + 1] = enhanced;
+      newData[i + 2] = enhanced;
+      newData[i + 3] = data[i + 3];
+    }
+    
+    return newData;
+  };
+
+  // Start camera for live scanning with better error handling
+  const startCameraScan = async () => {
+    try {
+      setIsScanning(true);
+      setHasCameraPermission(true);
+      
+      const constraints = {
+        video: { 
+          facingMode: deviceType === 'mobile' ? 'environment' : 'user',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      setCameraStream(stream);
+      videoRef.current.srcObject = stream;
+
+      // Wait for video to be ready
+      videoRef.current.onloadedmetadata = () => {
+        // Start scanning interval
+        scanInterval.current = setInterval(scanQRCode, 300);
+      };
+
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      setHasCameraPermission(false);
+      
+      if (error.name === 'NotAllowedError') {
+        toast.error('Camera access denied. Please allow camera permissions.');
+      } else if (error.name === 'NotFoundError') {
+        toast.error('No camera found on this device.');
+      } else {
+        toast.error('Cannot access camera. Please check permissions.');
+      }
+      
+      setIsScanning(false);
+    }
+  };
+
+  // Stop camera scanning
+  const stopCameraScan = () => {
+    if (scanInterval.current) {
+      clearInterval(scanInterval.current);
+      scanInterval.current = null;
+    }
+
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => {
+        track.stop();
+      });
+      setCameraStream(null);
+    }
+
+    setIsScanning(false);
+  };
+
+  // Enhanced QR code scanning from video stream
+  const scanQRCode = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    
+    if (!video || video.readyState !== video.HAVE_ENOUGH_DATA || video.videoWidth === 0) {
+      return;
+    }
+
+    const context = canvas.getContext('2d');
+    
+    // Set canvas size to video size
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Draw video frame on canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Get image data
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    
+    // Scan for QR code
+    const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+    
+    if (qrCode) {
+      console.log('Live QR Code detected:', qrCode.data);
+      console.log('QR Code location:', qrCode.location);
+      
+      stopCameraScan();
+
+      try {
+        const parsedData = parseQRData(qrCode.data);
+        toast.success('QR Code scanned successfully!');
+        navigateToAttendancePage(parsedData);
+      } catch (parseError) {
+        console.error('Error parsing QR data:', parseError);
+        toast.error('Invalid QR code format');
+        // Restart scanning if parsing fails
+        setTimeout(startCameraScan, 2000);
+      }
+    }
+  };
+
+  // Toggle camera scanning
+  const toggleCameraScan = () => {
+    if (isScanning) {
+      stopCameraScan();
+    } else {
+      startCameraScan();
+    }
+  };
+
+  // Handle image upload for QR scanning
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      // Set canvas dimensions to image dimensions
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      // Draw image on canvas
+      context.drawImage(img, 0, 0, img.width, img.height);
+      
+      // Get image data
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      
+      // Scan for QR code
+      const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+      
+      if (qrCode) {
+        console.log('Uploaded QR Code detected:', qrCode.data);
+        
+        try {
+          const parsedData = parseQRData(qrCode.data);
+          toast.success('QR Code scanned successfully!');
+          navigateToAttendancePage(parsedData);
+        } catch (parseError) {
+          console.error('Error parsing QR data:', parseError);
+          toast.error('Invalid QR code format');
+        }
+      } else {
+        toast.error('No QR code found in the image. Please try with a clearer image.');
+      }
+      
+      // Clean up
+      URL.revokeObjectURL(url);
+    };
+    
+    img.onerror = () => {
+      toast.error('Error loading image. Please try again.');
+      URL.revokeObjectURL(url);
+    };
+    
+    img.src = url;
+    event.target.value = ''; // Reset file input
+  };
+
+  // Clean up on component unmount
+  useEffect(() => {
+    return () => {
+      if (scanInterval.current) {
+        clearInterval(scanInterval.current);
+      }
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [cameraStream]);
+
+  // Unsupported device message
+  if (!isSupportedDevice) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 max-w-md mx-4">
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+              <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Browser Not Supported
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {deviceType === 'mobile' || deviceType === 'tablet' 
+                ? 'Please use Google Chrome browser on your mobile device for the best scanning experience.'
+                : 'Please use a modern browser like Chrome, Edge, Firefox, or Safari.'}
+            </p>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left">
+              <h3 className="text-sm font-medium text-yellow-800 mb-2">Recommended Browsers:</h3>
+              <ul className="text-sm text-yellow-700 space-y-1">
+                {deviceType === 'mobile' || deviceType === 'tablet' ? (
+                  <>
+                    <li>• Google Chrome</li>
+                    <li>• Microsoft Edge</li>
+                  </>
+                ) : (
+                  <>
+                    <li>• Google Chrome</li>
+                    <li>• Microsoft Edge</li>
+                    <li>• Mozilla Firefox</li>
+                    <li>• Apple Safari</li>
+                  </>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto max-w-md p-6">
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
+            Attendance Scanner
+          </h2>
+
+          {/* Live Camera Scanner */}
+          <div className="mb-6">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+              {!isScanning ? (
+                // Camera off state
+                <>
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  <p className="mt-2 text-sm text-gray-600">Camera scanner is off</p>
+                  <p className="text-xs text-gray-500 mt-1">Click below to start scanning</p>
+                  
+                  {!hasCameraPermission && (
+                    <p className="text-xs text-red-500 mt-2">
+                      Camera access denied. Please check browser permissions.
+                    </p>
+                  )}
+                </>
+              ) : (
+                // Camera on state
+                <>
+                  <div className="relative">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-48 object-cover rounded-lg bg-black"
+                    />
+                    {/* Scanning overlay with crosshair */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-48 h-48 border-2 border-green-400 rounded-lg relative">
+                        <div className="absolute inset-0 border-2 border-green-400 rounded-lg animate-pulse"></div>
+                        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-green-400 opacity-50"></div>
+                        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-green-400 opacity-50"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm text-green-600">Scanning for QR codes...</p>
+                  <p className="text-xs text-gray-500">Point camera at QR code</p>
+                </>
+              )}
+
+              <canvas ref={canvasRef} className="hidden" />
+
+              {/* Camera Toggle Button */}
+              <button
+                onClick={toggleCameraScan}
+                disabled={!hasCameraPermission && !isScanning}
+                className={`mt-4 inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 ${
+                  isScanning
+                    ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
+                    : !hasCameraPermission
+                    ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
+                    : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                }`}
+              >
+                {isScanning ? (
+                  <>
+                    <svg className="h-5 w-5 mr-2 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                    </svg>
+                    Stop Scanning
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Start Camera Scan
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Image Upload Option - Only for Desktop */}
+          {deviceType === 'desktop' && (
+            <div className="mb-6">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="mt-2 text-sm text-gray-600">Upload QR Code Image</p>
+                <p className="text-xs text-gray-500">Supported formats: JPG, PNG</p>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+                >
+                  <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  Upload Image
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Instructions */}
+        <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
+          <ul className="text-sm text-sky-700 space-y-1">
+            <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
+            {deviceType === 'desktop' && (
+              <li>• <strong>Image Upload:</strong> Upload a clear image of the QR code</li>
+            )}
+            <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default QRScanner_Page;
+
+STUDENT ATTENDANCE PAGE : 
+
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { createAttendance } from '../../store/Teacher-Slicer/Attendance-Slicer';
+import { useDispatch } from 'react-redux';
+import { useIPAddress } from '../../hooks/useIPAddress';
+
+const StudentAttendance_Page = () => {
+  const [formData, setFormData] = useState({
+    studentName: '',
+    rollNo: '',
+    uniqueCode: '',
+    ipAddress: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [qrData, setQrData] = useState(null);
+  const [currentTime, setCurrentTime] = useState('');
+  const ipAddress = useIPAddress();
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Function to format time as "11:05 AM"
+  const formatTime = (date = new Date()) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(formatTime());
+    };
+
+    updateTime();
+
+    const interval = setInterval(updateTime, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.qrData) {
+      try {
+        const parsedData = JSON.parse(location.state.qrData);
+        setQrData(parsedData);
+        setFormData(prev => ({
+          ...prev,
+          uniqueCode: parsedData.code,
+          ipAddress
+        }));
+      } catch (error) {
+        toast.error('Invalid QR code data');
+        navigate('/');
+      }
+    } else {
+      const urlParams = new URLSearchParams(location.search);
+      const code = urlParams.get('code');
+      const subject = urlParams.get('subject');
+      const subjectName = urlParams.get('subjectName');
+
+      if (code) {
+        setQrData({
+          code,
+          subject: subject || 'Unknown Subject',
+          subjectName: subjectName || 'Unknown Subject Name',
+          type: 'attendance'
+        });
+        setFormData(prev => ({
+          ...prev,
+          uniqueCode: code,
+        }));
+      } else {
+        toast.error('No attendance code found');
+        navigate('/');
+      }
+    }
+  }, [location, navigate]);
+
+  // Function to capitalize input text
+  const capitalizeText = (text) => {
+    return text.toUpperCase();
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Capitalize studentName and rollNo fields
+    const processedValue = (name === 'studentName' || name === 'rollNo') 
+      ? capitalizeText(value)
+      : value;
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: processedValue
+    }));
+  };
+
+  const getUniqueDeviceFingerprint = async () => {
+    const components = [];
+
+    try {
+      // 1. Enhanced Canvas Fingerprinting with more variations
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 300;
+      canvas.height = 100;
+
+      // More complex drawing with random elements
+      const randomSeed = Math.random() * 10000;
+      ctx.textBaseline = 'alphabetic';
+      ctx.font = '14px "Arial", "Helvetica", sans-serif';
+
+      // Add more device-specific properties
+      ctx.fillText(`Device:${navigator.hardwareConcurrency}📱${screen.colorDepth}`, 10, 20);
+      ctx.fillText(`Screen:${screen.width}x${screen.height}@${window.devicePixelRatio}`, 10, 40);
+      ctx.fillText(`Time:${Date.now()}`, 10, 60);
+
+      // Add some random shapes and gradients
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, `rgba(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255},0.7)`);
+      gradient.addColorStop(1, `rgba(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255},0.3)`);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(150, 10, 80, 30);
+
+      const canvasData = canvas.toDataURL();
+
+      // 2. WebGL Fingerprinting (more reliable)
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      let webglData = '';
+      if (gl) {
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        if (debugInfo) {
+          webglData = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) +
+            gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+        }
+      }
+
+      // 3. Audio Context Fingerprinting
+      let audioFingerprint = '';
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const analyser = audioContext.createAnalyser();
+        oscillator.connect(analyser);
+        analyser.connect(audioContext.destination);
+        oscillator.start();
+
+        const data = new Float32Array(analyser.frequencyBinCount);
+        analyser.getFloatFrequencyData(data);
+        audioFingerprint = data.join(',');
+
+        oscillator.stop();
+        audioContext.close();
+      } catch (audioError) {
+        audioFingerprint = 'audio_not_supported';
+      }
+
+      // 4. More Device Properties
+      const deviceProps = {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        languages: navigator.languages?.join(','),
+        platform: navigator.platform,
+        hardwareConcurrency: navigator.hardwareConcurrency,
+        deviceMemory: navigator.deviceMemory || 'unknown',
+        screen: `${screen.width}x${screen.height}`,
+        colorDepth: screen.colorDepth,
+        pixelRatio: window.devicePixelRatio,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        touchSupport: navigator.maxTouchPoints > 0
+      };
+
+      // 5. Combine all components with more entropy
+      const combined = [
+        canvasData,
+        webglData,
+        audioFingerprint,
+        JSON.stringify(deviceProps),
+        Date.now().toString(),
+        Math.random().toString(36).substring(2),
+        performance.now().toString()
+      ].join('|');
+
+      // 6. Better hashing function
+      let hash = 0;
+      for (let i = 0; i < combined.length; i++) {
+        const char = combined.charCodeAt(i);
+        hash = ((hash << 7) - hash) + char;
+        hash = hash & 0x7FFFFFFF; // Ensure positive 32-bit integer
+      }
+
+      // 7. Add timestamp and random component
+      const timestamp = Date.now().toString(36);
+      const randomComponent = Math.random().toString(36).substring(2, 8);
+
+      return `${hash.toString(36)}${timestamp}${randomComponent}`.substring(0, 32);
+
+    } catch (error) {
+      // Fallback fingerprint
+      const fallback = [
+        navigator.userAgent,
+        navigator.hardwareConcurrency,
+        screen.width,
+        screen.height,
+        Date.now(),
+        Math.random()
+      ].join('|');
+
+      let hash = 0;
+      for (let i = 0; i < fallback.length; i++) {
+        const char = fallback.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & 0x7FFFFFFF;
+      }
+
+      return `fallback_${hash.toString(36)}${Date.now().toString(36)}`.substring(0, 32);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.studentName.trim() || !formData.rollNo.trim() || !formData.uniqueCode.trim()) {
+      toast.error('Please fill all fields');
+      return;
+    }
+
+    if (!qrData) {
+      toast.error('Invalid attendance session');
+      return;
+    }
+
+    const deviceFingerprint = await getUniqueDeviceFingerprint();
+
+    setIsSubmitting(true);
+
+    try {
+      const currentTime = formatTime();
+
+      const AttendanceData = {
+        ...formData,
+        subjectName: qrData.subjectName,
+        subjectId: qrData.subject,
+        time: currentTime,
+        date: qrData.attendanceDate,
+        ipAddress: deviceFingerprint,
+      };
+
+      dispatch(createAttendance(AttendanceData))
+        .then((res) => {
+          if (res.payload.success) {
+            toast.success(`Attendance submitted successfully at ${currentTime}!`);
+            setFormData({
+              studentName: '',
+              rollNo: '',
+              uniqueCode: ''
+            });
+            navigate("/scan-attendance");
+          } else {
+            toast.error(res.payload.message)
+          }
+        })
+        .catch((error) => {
+        });
+
+    } catch (error) {
+      toast.error('Failed to submit attendance. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container max-w-2xl mx-auto p-2">
+        <div className="bg-white rounded-lg border border-gray-300 shadow-sm">
+          {/* Header with Current Time */}
+          <div className="px-6 py-4 border-b border-gray-200 bg-sky-50 rounded-t-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800">Mark Your Attendance</h2>
+                {qrData && (
+                  <div className="mt-0.5 text-xs text-gray-600 space-y-1">
+                    <p><span className="font-medium">Subject Name:</span> <span className='border-b border-gray-400'>{qrData.subjectName}</span></p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Attendance Form */}
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* Student Name */}
+            <div>
+              <label htmlFor="studentName" className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name *
+              </label>
+              <input
+                type="text"
+                id="studentName"
+                name="studentName"
+                value={formData.studentName}
+                onChange={handleInputChange}
+                placeholder="Enter your full name"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors uppercase"
+                required
+                style={{ textTransform: 'uppercase' }}
+              />
+            </div>
+
+            {/* Roll Number */}
+            <div>
+              <label htmlFor="rollNo" className="block text-sm font-medium text-gray-700 mb-2">
+                Roll Number *
+              </label>
+              <input
+                type="text"
+                id="rollNo"
+                name="rollNo"
+                value={formData.rollNo}
+                onChange={handleInputChange}
+                placeholder="Enter your roll number"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors uppercase"
+                required
+                style={{ textTransform: 'uppercase' }}
+              />
+            </div>
+
+            {/* Unique Code (Read-only) */}
+            <div>
+              <label htmlFor="uniqueCode" className="block text-sm font-medium text-gray-700 mb-2">
+                Attendance Code
+              </label>
+              <input
+                type="text"
+                id="uniqueCode"
+                name="uniqueCode"
+                value={formData.uniqueCode}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-md focus:outline-none cursor-not-allowed"
+              />
+              <p className="mt-1 text-xs text-gray-500">This code is automatically filled from the QR code</p>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="submit"
+                disabled={isSubmitting || !qrData}
+                className="flex-1 bg-sky-600 text-white py-3 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting...
+                  </span>
+                ) : (
+                  `Submit Attendance`
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Instructions */}
+          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Instructions:</h3>
+            <ul className="text-[12px] text-gray-600 space-y-1">
+              <li>• Fill in your full name and roll number accurately</li>
+              <li>• Double-check your details before submitting</li>
+              <li>• Your attendance time will be recorded automatically</li>
+              <li>• Click "Submit Attendance" to mark your presence</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default StudentAttendance_Page;
