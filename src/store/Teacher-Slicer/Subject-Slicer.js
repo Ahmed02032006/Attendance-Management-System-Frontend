@@ -89,6 +89,26 @@ export const deleteSubject = createAsyncThunk(
   }
 );
 
+// Reset subject attendance
+export const resetSubjectAttendance = createAsyncThunk(
+  "subjects/resetAttendance",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await axios.patch(
+        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/subject/${id}/reset-attendance`
+      );
+
+      if (response.status !== 200) {
+        return rejectWithValue(response.data);
+      }
+
+      return { ...response.data, subjectId: id };
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Something went wrong");
+    }
+  }
+);
+
 const subjectSlicer = createSlice({
   name: "subjects",
   initialState: initialState,
@@ -112,7 +132,7 @@ const subjectSlicer = createSlice({
         state.isLoading = false;
         state.subjects = [];
       })
-      
+
       // Create Subject
       .addCase(createSubject.pending, (state) => {
         state.isLoading = true;
@@ -125,14 +145,13 @@ const subjectSlicer = createSlice({
       .addCase(createSubject.rejected, (state, action) => {
         state.isLoading = false;
       })
-      
+
       // Update Subject
       .addCase(updateSubject.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(updateSubject.fulfilled, (state, action) => {
         state.isLoading = false;
-        // Update the subject in the list
         const updatedSubject = action.payload.data;
         const index = state.subjects.findIndex(subject => subject._id === updatedSubject._id);
         if (index !== -1) {
@@ -142,7 +161,7 @@ const subjectSlicer = createSlice({
       .addCase(updateSubject.rejected, (state, action) => {
         state.isLoading = false;
       })
-      
+
       // Delete Subject
       .addCase(deleteSubject.pending, (state) => {
         state.isLoading = true;
@@ -154,6 +173,23 @@ const subjectSlicer = createSlice({
         );
       })
       .addCase(deleteSubject.rejected, (state, action) => {
+        state.isLoading = false;
+      })
+
+      // Reset Subject
+      .addCase(resetSubjectAttendance.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(resetSubjectAttendance.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const subjectId = action.payload.subjectId;
+        const updatedSubject = action.payload.data;
+        const index = state.subjects.findIndex(sub => sub._id === subjectId);
+        if (index !== -1) {
+          state.subjects[index] = updatedSubject;
+        }
+      })
+      .addCase(resetSubjectAttendance.rejected, (state) => {
         state.isLoading = false;
       });
   },

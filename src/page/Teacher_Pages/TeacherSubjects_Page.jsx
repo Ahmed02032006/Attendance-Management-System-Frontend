@@ -8,7 +8,7 @@ import {
   createSubject,
   updateSubject,
   deleteSubject,
-  // resetSubjectAttendance
+  resetSubjectAttendance
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
@@ -128,7 +128,7 @@ const TeacherSubjects_Page = () => {
 
   const handleResetSubject = async () => {
     try {
-      // await dispatch(resetSubjectAttendance(selectedSubject._id)).unwrap()
+      await dispatch(resetSubjectAttendance(selectedSubject._id)).unwrap()
       setShowResetModal(false)
       toast.success('Subject attendance records cleared successfully!')
     } catch (error) {

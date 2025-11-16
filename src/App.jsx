@@ -33,7 +33,7 @@ const App = () => {
         position="bottom-right"
         autoClose={1000} 
         // hideProgressBar={true} 
-        // pauseOnHover={false}
+        pauseOnHover={false}
         toastStyle={{ fontFamily: "Poppins" }}
         draggable={false}
       />
