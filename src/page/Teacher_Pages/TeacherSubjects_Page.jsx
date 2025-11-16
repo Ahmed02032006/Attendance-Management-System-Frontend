@@ -534,15 +534,22 @@ const TeacherSubjects_Page = () => {
       {showEditModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">Edit Subject</h3>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                disabled={isLoading}
-              >
-                <FiX className="h-5 w-5" />
-              </button>
+            <div className="px-6 pt-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center">
+                  <FiEdit className="h-6 w-6 text-sky-600" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-800">Edit Subject</h3>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={isLoading}
+                >
+                  <FiX className="h-5 w-5" />
+                </button>
+              </div>
             </div>
             <form onSubmit={handleEditSubject}>
               <div className="p-6 space-y-4">
@@ -645,26 +652,28 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal - Consistent with Edit Modal */}
+      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">Delete Subject</h3>
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                disabled={isLoading}
-              >
-                <FiX className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="p-6">
+            <div className="px-6 pt-6">
               <div className="flex items-center justify-center mb-4">
                 <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                   <FiTrash2 className="h-6 w-6 text-red-600" />
                 </div>
               </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-800">Delete Subject</h3>
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={isLoading}
+                >
+                  <FiX className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
               <p className="text-gray-600 text-center mb-2">
                 Are you sure you want to delete the subject{' '}
                 <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong>?
@@ -693,26 +702,28 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
-      {/* Reset Subject Confirmation Modal - Consistent with Edit Modal */}
+      {/* Reset Subject Confirmation Modal */}
       {showResetModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">Reset Subject Attendance</h3>
-              <button
-                onClick={() => setShowResetModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                disabled={isLoading}
-              >
-                <FiX className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="p-6">
+            <div className="px-6 pt-6">
               <div className="flex items-center justify-center mb-4">
                 <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
                   <FiRefreshCcw className="h-6 w-6 text-yellow-600" />
                 </div>
               </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-800">Reset Subject Attendance</h3>
+                <button
+                  onClick={() => setShowResetModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={isLoading}
+                >
+                  <FiX className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
               <p className="text-gray-600 text-center mb-2">
                 Are you sure you want to reset attendance records for{' '}
                 <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong>?
