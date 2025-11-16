@@ -466,6 +466,15 @@ const TeacherAttendance_Page = () => {
     return Math.round((present / total) * 100);
   };
 
+  const handleRefresh = async () => {
+    try {
+      await dispatch(getSubjectsWithAttendance(userId)).unwrap();
+      toast.success('Attendance data refreshed successfully!');
+    } catch (error) {
+      toast.error('Failed to refresh data');
+    }
+  };
+
   // Loading state
   if (isLoading) {
     return (
@@ -559,6 +568,24 @@ const TeacherAttendance_Page = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <span>Export Excel</span>
+                </button>
+
+                {/* Refresh Button */}
+                <button
+                  onClick={() => handleRefresh()}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                  title="Refresh attendance data"
+                >
+                  <svg
+                    className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Refresh</span>
                 </button>
               </div>
             </div>
@@ -798,146 +825,151 @@ const TeacherAttendance_Page = () => {
       </div>
 
       {/* Subject Selection Modal */}
-      {showSubjectModal && subjectsWithAttendance.length > 0 && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">Select Subject</h3>
-              <p className="text-sm text-gray-600 mt-1">Choose a subject to view attendance records</p>
-            </div>
-            <div className="p-6">
-              <div className="flex items-center gap-3">
-                {subjectsWithAttendance.map((subject) => (
-                  <div
-                    key={subject.id}
-                    className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center"
-                    onClick={() => handleSubjectSelect(subject.id)}
-                  >
-                    <h4 className="font-light text-sm text-gray-700">
-                      {subject.name}
-                    </h4>
-                  </div>
-                ))}
+      {
+        showSubjectModal && subjectsWithAttendance.length > 0 && (
+          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-auto">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800">Select Subject</h3>
+                <p className="text-sm text-gray-600 mt-1">Choose a subject to view attendance records</p>
               </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-              <p className="text-sm text-gray-600 text-center">
-                Select a subject to continue to the attendance dashboard
-              </p>
+              <div className="p-6">
+                <div className="flex items-center gap-3">
+                  {subjectsWithAttendance.map((subject) => (
+                    <div
+                      key={subject.id}
+                      className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center"
+                      onClick={() => handleSubjectSelect(subject.id)}
+                    >
+                      <h4 className="font-light text-sm text-gray-700">
+                        {subject.name}
+                      </h4>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                <p className="text-sm text-gray-600 text-center">
+                  Select a subject to continue to the attendance dashboard
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Create Attendance Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">Create New Attendance</h3>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Subject
-                </label>
-                <select
-                  name="subject"
-                  value={attendanceForm.subject}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                >
-                  <option value="">Select Subject</option>
-                  {subjectsWithAttendance.map((subject) => (
-                    <option key={subject.id} value={subject.id}>
-                      {subject.name}
-                    </option>
-                  ))}
-                </select>
+      {
+        showCreateModal && (
+          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800">Create New Attendance</h3>
               </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Subject
+                  </label>
+                  <select
+                    name="subject"
+                    value={attendanceForm.subject}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                  >
+                    <option value="">Select Subject</option>
+                    {subjectsWithAttendance.map((subject) => (
+                      <option key={subject.id} value={subject.id}>
+                        {subject.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Unique Code
-                </label>
-                <input
-                  type="text"
-                  name="uniqueCode"
-                  value={attendanceForm.uniqueCode}
-                  onChange={handleInputChange}
-                  placeholder="Enter unique code"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Unique Code
+                  </label>
+                  <input
+                    type="text"
+                    name="uniqueCode"
+                    value={attendanceForm.uniqueCode}
+                    onChange={handleInputChange}
+                    placeholder="Enter unique code"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                  />
+                </div>
 
-              {/* Location Status */}
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                <div className="flex items-center space-x-2">
-                  <FiMapPin className="text-blue-500" />
-                  <div>
-                    <p className="text-sm font-medium text-blue-800">
-                      Location Verification
-                    </p>
-                    <p className="text-xs text-blue-600">
-                      {teacherLocation
-                        ? `Location captured: ${teacherLocation.latitude.toFixed(6)}, ${teacherLocation.longitude.toFixed(6)}`
-                        : 'Your location will be captured when generating QR code'
-                      }
-                    </p>
+                {/* Location Status */}
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                  <div className="flex items-center space-x-2">
+                    <FiMapPin className="text-blue-500" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-800">
+                        Location Verification
+                      </p>
+                      <p className="text-xs text-blue-600">
+                        {teacherLocation
+                          ? `Location captured: ${teacherLocation.latitude.toFixed(6)}, ${teacherLocation.longitude.toFixed(6)}`
+                          : 'Your location will be captured when generating QR code'
+                        }
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleGenerateQR}
-                disabled={isLoading || isGettingLocation}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-              >
-                {isGettingLocation ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Getting Location...</span>
-                  </>
-                ) : isLoading ? (
-                  'Creating...'
-                ) : (
-                  'Generate QR'
-                )}
-              </button>
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleGenerateQR}
+                  disabled={isLoading || isGettingLocation}
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  {isGettingLocation ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Getting Location...</span>
+                    </>
+                  ) : isLoading ? (
+                    'Creating...'
+                  ) : (
+                    'Generate QR'
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* QR Code Modal */}
-      {showQRModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
-            </div>
-            <div className="p-6 flex flex-col items-center">
-              <div className="w-64 h-64 bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2" id="qr-code-container">
-                <QRCodeSVG
-                  value={qrData}
-                  size={250}
-                  level="L"
-                  includeMargin={true}
-                  bgColor="#FFFFFF"
-                  fgColor="#000000"
-                  id="qr-code-svg"
-                  minVersion={1}
-                />
+      {
+        showQRModal && (
+          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
               </div>
+              <div className="p-6 flex flex-col items-center">
+                <div className="w-64 h-64 bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2" id="qr-code-container">
+                  <QRCodeSVG
+                    value={qrData}
+                    size={250}
+                    level="L"
+                    includeMargin={true}
+                    bgColor="#FFFFFF"
+                    fgColor="#000000"
+                    id="qr-code-svg"
+                    minVersion={1}
+                  />
+                </div>
 
-              {/* {teacherLocation && (
+                {/* {teacherLocation && (
                 <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-3 w-full">
                   <div className="flex items-center space-x-2">
                     <FiMapPin className="text-green-500" />
@@ -951,166 +983,171 @@ const TeacherAttendance_Page = () => {
                 </div>
               )} */}
 
-              <p className="text-sm text-gray-600 text-center">
-                Students can scan this QR code to mark their attendance
-              </p>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => setShowQRModal(false)}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
-              >
-                Close
-              </button>
+                <p className="text-sm text-gray-600 text-center">
+                  Students can scan this QR code to mark their attendance
+                </p>
+              </div>
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button
+                  onClick={() => setShowQRModal(false)}
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
-            <div className="p-6 text-center">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FiTrash2 className="w-6 h-6 text-red-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Record?</h3>
-              <p className="text-gray-600 text-sm mb-6">
-                This attendance record will be permanently removed.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={handleCancelDelete}
-                  className="flex-1 px-4 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleConfirmDelete}
-                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Delete
-                </button>
+      {
+        showDeleteModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
+              <div className="p-6 text-center">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FiTrash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Record?</h3>
+                <p className="text-gray-600 text-sm mb-6">
+                  This attendance record will be permanently removed.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleCancelDelete}
+                    className="flex-1 px-4 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmDelete}
+                    className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Student Details Modal */}
-      {showStudentModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {selectedStudent?.studentName} - Attendance Details
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Roll No: {selectedStudent?.rollNo}
-              </p>
-            </div>
+      {
+        showStudentModal && (
+          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {selectedStudent?.studentName} - Attendance Details
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Roll No: {selectedStudent?.rollNo}
+                </p>
+              </div>
 
-            <div className="p-6 max-h-[60vh] overflow-y-auto">
-              {selectedStudent && (
-                <div className="space-y-6">
-                  {/* Student Basic Info */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="font-medium text-gray-700">Student Name</p>
-                        <p className="text-gray-900">{selectedStudent.studentName}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">Roll Number</p>
-                        <p className="text-gray-900">{selectedStudent.rollNo}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">Current Subject</p>
-                        <p className="text-gray-900">{selectedStudent.subject}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Previous Attendance Records */}
-                  <div>
-                    <h4 className="text-md font-semibold text-gray-800 mb-4">Previous Attendance Records</h4>
-
-                    {getStudentPreviousAttendance(selectedStudent).length > 0 ? (
-                      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Date
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Day
-                                </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Time
-                                </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Subject
-                                </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Status
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {getStudentPreviousAttendance(selectedStudent).map((record, index) => (
-                                <tr key={index} className="hover:bg-gray-50">
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                    {formatDisplayDate(new Date(record.date))}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                                    {new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' })}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
-                                    {record.time || 'N/A'}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
-                                    {record.subject}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-center">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                      }`}>
-                                      {record.time ? 'Present' : 'Absent'}
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
+              <div className="p-6 max-h-[60vh] overflow-y-auto">
+                {selectedStudent && (
+                  <div className="space-y-6">
+                    {/* Student Basic Info */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <p className="font-medium text-gray-700">Student Name</p>
+                          <p className="text-gray-900">{selectedStudent.studentName}</p>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-700">Roll Number</p>
+                          <p className="text-gray-900">{selectedStudent.rollNo}</p>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-700">Current Subject</p>
+                          <p className="text-gray-900">{selectedStudent.subject}</p>
                         </div>
                       </div>
-                    ) : (
-                      <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <p className="mt-2 text-sm text-gray-600">No previous attendance records found</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+                    </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => setShowStudentModal(false)}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
-              >
-                Close
-              </button>
+                    {/* Previous Attendance Records */}
+                    <div>
+                      <h4 className="text-md font-semibold text-gray-800 mb-4">Previous Attendance Records</h4>
+
+                      {getStudentPreviousAttendance(selectedStudent).length > 0 ? (
+                        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Day
+                                  </th>
+                                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Time
+                                  </th>
+                                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Subject
+                                  </th>
+                                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {getStudentPreviousAttendance(selectedStudent).map((record, index) => (
+                                  <tr key={index} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                      {formatDisplayDate(new Date(record.date))}
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                                      {new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
+                                      {record.time || 'N/A'}
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
+                                      {record.subject}
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-center">
+                                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                        }`}>
+                                        {record.time ? 'Present' : 'Absent'}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <p className="mt-2 text-sm text-gray-600">No previous attendance records found</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button
+                  onClick={() => setShowStudentModal(false)}
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
-    </div>
+    </div >
   )
 }
 
