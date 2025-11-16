@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiEdit } from 'react-icons/fi'
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiEdit, FiRefreshCcw } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-import { 
-  getSubjectsByUser, 
-  createSubject, 
-  updateSubject, 
+import {
+  getSubjectsByUser,
+  createSubject,
+  updateSubject,
   deleteSubject,
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
   const dispatch = useDispatch()
   const { subjects, isLoading, currentSubject } = useSelector((state) => state.teacherSubject)
-  
+
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -44,14 +44,14 @@ const TeacherSubjects_Page = () => {
 
   // Filter subjects based on search and filter
   const filteredSubjects = subjects.filter(subject => {
-    const matchesSearch = 
+    const matchesSearch =
       subject.subjectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.subjectName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.subjectCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.semester?.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesFilter = statusFilter === 'All' || subject.status === statusFilter
-    
+
     return matchesSearch && matchesFilter
   })
 
@@ -71,7 +71,7 @@ const TeacherSubjects_Page = () => {
 
   const handleCreateSubject = async (e) => {
     e.preventDefault()
-    
+
     if (!subjectForm.subjectTitle || !subjectForm.subjectName || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
@@ -94,18 +94,18 @@ const TeacherSubjects_Page = () => {
 
   const handleEditSubject = async (e) => {
     e.preventDefault()
-    
+
     if (!subjectForm.subjectTitle || !subjectForm.subjectName || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
     }
 
     try {
-      await dispatch(updateSubject({ 
-        id: selectedSubject._id, 
-        formData: subjectForm 
+      await dispatch(updateSubject({
+        id: selectedSubject._id,
+        formData: subjectForm
       })).unwrap()
-      
+
       setShowEditModal(false)
       resetForm()
       toast.success('Subject updated successfully!')
@@ -172,7 +172,7 @@ const TeacherSubjects_Page = () => {
     })
   }
 
-  if(isLoading){
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
@@ -252,11 +252,10 @@ const TeacherSubjects_Page = () => {
                           {subject.semester}
                         </td>
                         <td className="px-6 py-3.5 whitespace-nowrap text-center">
-                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-                            subject.status === "Active"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}>
+                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${subject.status === "Active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                            }`}>
                             {subject.status}
                           </span>
                         </td>
@@ -269,12 +268,21 @@ const TeacherSubjects_Page = () => {
                             >
                               <FiEdit className="h-5 w-5" />
                             </button>
+
                             <button
                               onClick={() => openDeleteModal(subject)}
                               className="text-red-600 hover:text-red-900 transition-colors"
                               title="Delete Subject"
                             >
                               <FiTrash2 className="h-5 w-5" />
+                            </button>
+
+                            <button
+                              onClick={() => resetSubject(subject)}
+                              className="text-yellow-600 hover:text-yellow-900 transition-colors"
+                              title="Reset Subject"
+                            >
+                              <FiRefreshCcw className="h-5 w-5" />
                             </button>
                           </div>
                         </td>
@@ -287,8 +295,8 @@ const TeacherSubjects_Page = () => {
                           <FiSearch className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                           <p className="text-lg font-medium">No subjects found</p>
                           <p className="mt-1">
-                            {searchTerm || statusFilter !== 'All' 
-                              ? 'Try adjusting your search or filter' 
+                            {searchTerm || statusFilter !== 'All'
+                              ? 'Try adjusting your search or filter'
                               : 'Get started by creating your first subject'
                             }
                           </p>
@@ -619,57 +627,57 @@ const TeacherSubjects_Page = () => {
       )}
 
       {/* Delete Confirmation Modal - Minimalist */}
-{showDeleteModal && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-    <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
-      <div className="p-6 text-center">
-        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <FiTrash2 className="h-8 w-8 text-red-600" />
-        </div>
-        
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Delete Subject?
-        </h3>
-        
-        <p className="text-gray-600 text-sm mb-2">
-          <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong> will be permanently deleted.
-        </p>
-        
-        <p className="text-red-600 text-xs mb-6">
-          This action cannot be undone.
-        </p>
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiTrash2 className="h-8 w-8 text-red-600" />
+              </div>
 
-        <div className="flex gap-3">
-          <button
-            onClick={() => setShowDeleteModal(false)}
-            disabled={isLoading}
-            className="flex-1 px-4 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleDeleteSubject}
-            disabled={isLoading}
-            className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Deleting
-              </>
-            ) : (
-              'Delete'
-            )}
-          </button>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Delete Subject?
+              </h3>
+
+              <p className="text-gray-600 text-sm mb-2">
+                <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong> will be permanently deleted.
+              </p>
+
+              <p className="text-red-600 text-xs mb-6">
+                This action cannot be undone.
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteSubject}
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Deleting
+                    </>
+                  ) : (
+                    'Delete'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
-      
+      )}
+
     </div>
   )
 }
