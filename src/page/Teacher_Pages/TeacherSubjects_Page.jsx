@@ -530,26 +530,131 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
+      {/* Create Subject Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
+                  <FiPlus className="h-4 w-4 text-sky-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800">Create New Subject</h3>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                disabled={isLoading}
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleCreateSubject}>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Subject Title *
+                  </label>
+                  <input
+                    type="text"
+                    name="subjectTitle"
+                    value={subjectForm.subjectTitle}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Mathematics"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Subject Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="subjectName"
+                    value={subjectForm.subjectName}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Advanced Mathematics"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Subject Code *
+                  </label>
+                  <input
+                    type="text"
+                    name="subjectCode"
+                    value={subjectForm.subjectCode}
+                    onChange={handleInputChange}
+                    placeholder="e.g., MATH101"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Semester *
+                  </label>
+                  <input
+                    type="text"
+                    name="semester"
+                    value={subjectForm.semester}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 2nd"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                  disabled={isLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Creating...' : 'Create Subject'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Edit Subject Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="px-6 pt-6">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center">
-                  <FiEdit className="h-6 w-6 text-sky-600" />
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
+                  <FiEdit className="h-4 w-4 text-sky-600" />
                 </div>
-              </div>
-              <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-800">Edit Subject</h3>
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                  disabled={isLoading}
-                >
-                  <FiX className="h-5 w-5" />
-                </button>
               </div>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                disabled={isLoading}
+              >
+                <FiX className="h-5 w-5" />
+              </button>
             </div>
             <form onSubmit={handleEditSubject}>
               <div className="p-6 space-y-4">
@@ -656,22 +761,20 @@ const TeacherSubjects_Page = () => {
       {showDeleteModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="px-6 pt-6">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                  <FiTrash2 className="h-6 w-6 text-red-600" />
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                  <FiTrash2 className="h-4 w-4 text-red-600" />
                 </div>
-              </div>
-              <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-800">Delete Subject</h3>
-                <button
-                  onClick={() => setShowDeleteModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                  disabled={isLoading}
-                >
-                  <FiX className="h-5 w-5" />
-                </button>
               </div>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                disabled={isLoading}
+              >
+                <FiX className="h-5 w-5" />
+              </button>
             </div>
             <div className="p-6">
               <p className="text-gray-600 text-center mb-2">
@@ -706,22 +809,20 @@ const TeacherSubjects_Page = () => {
       {showResetModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="px-6 pt-6">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <FiRefreshCcw className="h-6 w-6 text-yellow-600" />
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <FiRefreshCcw className="h-4 w-4 text-yellow-600" />
                 </div>
-              </div>
-              <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-800">Reset Subject Attendance</h3>
-                <button
-                  onClick={() => setShowResetModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                  disabled={isLoading}
-                >
-                  <FiX className="h-5 w-5" />
-                </button>
               </div>
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                disabled={isLoading}
+              >
+                <FiX className="h-5 w-5" />
+              </button>
             </div>
             <div className="p-6">
               <p className="text-gray-600 text-center mb-2">
