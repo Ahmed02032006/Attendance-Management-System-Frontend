@@ -129,6 +129,7 @@ const TeacherSubjects_Page = () => {
   const handleResetSubject = async () => {
     try {
       await dispatch(resetSubjectAttendance(selectedSubject._id)).unwrap()
+      dispatch(getSubjectsByUser(currentUserId)).unwrap();
       setShowResetModal(false)
       toast.success('Subject attendance records cleared successfully!')
     } catch (error) {
