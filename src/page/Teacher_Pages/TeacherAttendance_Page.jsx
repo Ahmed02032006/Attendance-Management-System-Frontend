@@ -969,7 +969,7 @@ const TeacherAttendance_Page = () => {
                   />
                 </div>
 
-                {/* {teacherLocation && (
+                {teacherLocation && (
                 <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-3 w-full">
                   <div className="flex items-center space-x-2">
                     <FiMapPin className="text-green-500" />
@@ -981,7 +981,7 @@ const TeacherAttendance_Page = () => {
                     </div>
                   </div>
                 </div>
-              )} */}
+              )}
 
                 <p className="text-sm text-gray-600 text-center">
                   Students can scan this QR code to mark their attendance
