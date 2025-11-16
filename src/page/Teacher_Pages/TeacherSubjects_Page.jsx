@@ -426,7 +426,6 @@ const TeacherSubjects_Page = () => {
         </button>
       </div>
 
-      {/* Consistent Modal Structure for all modals */}
 
       {/* Create Subject Modal */}
       {showCreateModal && (
