@@ -469,7 +469,6 @@ const TeacherAttendance_Page = () => {
   const handleRefresh = async () => {
     try {
       await dispatch(getSubjectsWithAttendance(userId)).unwrap();
-      toast.success('Attendance data refreshed successfully!');
     } catch (error) {
       toast.error('Failed to refresh data');
     }
