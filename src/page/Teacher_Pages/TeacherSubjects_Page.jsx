@@ -129,7 +129,6 @@ const TeacherSubjects_Page = () => {
   const handleResetSubject = async () => {
     try {
       await dispatch(resetSubjectAttendance(selectedSubject._id)).unwrap()
-      // dispatch(getSubjectsByUser(currentUserId)).unwrap();
       setShowResetModal(false)
       toast.success('Subject attendance records cleared successfully!')
     } catch (error) {
@@ -428,108 +427,6 @@ const TeacherSubjects_Page = () => {
       </div>
 
       {/* Consistent Modal Structure for all modals */}
-
-      {/* Create Subject Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">Create New Subject</h3>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                disabled={isLoading}
-              >
-                <FiX className="h-5 w-5" />
-              </button>
-            </div>
-            <form onSubmit={handleCreateSubject}>
-              <div className="p-6 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Subject Title *
-                  </label>
-                  <input
-                    type="text"
-                    name="subjectTitle"
-                    value={subjectForm.subjectTitle}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Mathematics"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Subject Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="subjectName"
-                    value={subjectForm.subjectName}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Advanced Mathematics"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Subject Code *
-                  </label>
-                  <input
-                    type="text"
-                    name="subjectCode"
-                    value={subjectForm.subjectCode}
-                    onChange={handleInputChange}
-                    placeholder="e.g., MATH101"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Semester *
-                  </label>
-                  <input
-                    type="text"
-                    name="semester"
-                    value={subjectForm.semester}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 2nd"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-                  disabled={isLoading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Creating...' : 'Create Subject'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Create Subject Modal */}
       {showCreateModal && (
