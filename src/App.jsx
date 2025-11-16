@@ -31,7 +31,7 @@ const App = () => {
     <>
       <ToastContainer
         position="bottom-right"
-        // autoClose={1500} 
+        autoClose={1000} 
         // hideProgressBar={true} 
         // pauseOnHover={false}
         toastStyle={{ fontFamily: "Poppins" }}
