@@ -182,12 +182,12 @@ const subjectSlicer = createSlice({
       })
       .addCase(resetSubjectAttendance.fulfilled, (state, action) => {
         state.isLoading = false;
-        const subjectId = action.payload.subjectId;
-        const updatedSubject = action.payload.data;
-        const index = state.subjects.findIndex(sub => sub._id === subjectId);
-        if (index !== -1) {
-          state.subjects[index] = updatedSubject;
-        }
+        // const subjectId = action.payload.subjectId;
+        // const updatedSubject = action.payload.data;
+        // const index = state.subjects.findIndex(sub => sub._id === subjectId);
+        // if (index !== -1) {
+        //   state.subjects[index] = updatedSubject;
+        // }
       })
       .addCase(resetSubjectAttendance.rejected, (state) => {
         state.isLoading = false;
