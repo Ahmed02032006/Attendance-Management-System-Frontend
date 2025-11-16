@@ -18,7 +18,7 @@ const TeacherSubjects_Page = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showResetModal, setShowResetModal] = useState(false) // New state for reset modal
+  const [showResetModal, setShowResetModal] = useState(false)
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
@@ -126,7 +126,6 @@ const TeacherSubjects_Page = () => {
     }
   }
 
-  // New function to handle subject reset
   const handleResetSubject = async () => {
     try {
       // await dispatch(resetSubjectAttendance(selectedSubject._id)).unwrap()
@@ -160,7 +159,6 @@ const TeacherSubjects_Page = () => {
     setShowDeleteModal(true)
   }
 
-  // New function to open reset modal
   const openResetModal = (subject) => {
     setSelectedSubject(subject)
     setShowResetModal(true)
@@ -428,6 +426,8 @@ const TeacherSubjects_Page = () => {
         </button>
       </div>
 
+      {/* Consistent Modal Structure for all modals */}
+
       {/* Create Subject Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -645,105 +645,97 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Consistent with Edit Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
-            <div className="p-6 text-center">
-              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FiTrash2 className="h-8 w-8 text-red-600" />
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Delete Subject</h3>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                disabled={isLoading}
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <FiTrash2 className="h-6 w-6 text-red-600" />
+                </div>
               </div>
-
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Delete Subject?
-              </h3>
-
-              <p className="text-gray-600 text-sm mb-2">
-                <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong> will be permanently deleted.
+              <p className="text-gray-600 text-center mb-2">
+                Are you sure you want to delete the subject{' '}
+                <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong>?
               </p>
-
-              <p className="text-red-600 text-xs mb-6">
-                This action cannot be undone.
+              <p className="text-red-600 text-sm text-center mb-6">
+                This action cannot be undone and all subject data will be permanently removed.
               </p>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowDeleteModal(false)}
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteSubject}
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Deleting
-                    </>
-                  ) : (
-                    'Delete'
-                  )}
-                </button>
-              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                disabled={isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteSubject}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Deleting...' : 'Delete Subject'}
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Reset Subject Confirmation Modal */}
+      {/* Reset Subject Confirmation Modal - Consistent with Edit Modal */}
       {showResetModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
-            <div className="p-6 text-center">
-              <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FiRefreshCcw className="h-8 w-8 text-yellow-600" />
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Reset Subject Attendance</h3>
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                disabled={isLoading}
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <FiRefreshCcw className="h-6 w-6 text-yellow-600" />
+                </div>
               </div>
-
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Reset Subject Attendance?
-              </h3>
-
-              <p className="text-gray-600 text-sm mb-2">
-                All attendance records for <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong> will be cleared.
+              <p className="text-gray-600 text-center mb-2">
+                Are you sure you want to reset attendance records for{' '}
+                <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong>?
               </p>
-
-              <p className="text-yellow-600 text-xs mb-6">
-                This will remove all student attendance data for this subject.
+              <p className="text-yellow-600 text-sm text-center mb-6">
+                This will clear all student attendance data for this subject. This action cannot be undone.
               </p>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowResetModal(false)}
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleResetSubject}
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-2.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Resetting
-                    </>
-                  ) : (
-                    'Reset Attendance'
-                  )}
-                </button>
-              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                disabled={isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResetSubject}
+                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Resetting...' : 'Reset Attendance'}
+              </button>
             </div>
           </div>
         </div>
