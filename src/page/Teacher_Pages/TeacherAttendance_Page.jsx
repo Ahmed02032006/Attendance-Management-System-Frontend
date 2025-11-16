@@ -970,18 +970,18 @@ const TeacherAttendance_Page = () => {
                 </div>
 
                 {teacherLocation && (
-                <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-3 w-full">
-                  <div className="flex items-center space-x-2">
-                    <FiMapPin className="text-green-500" />
-                    <div>
-                      <p className="text-sm font-medium text-green-800">Location Captured Successfully</p>
-                      <p className="text-xs text-green-600">
+                  <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-3 w-full">
+                    <div className="flex items-center space-x-2">
+                      <FiMapPin className="text-green-500" />
+                      <div>
+                        <p className="text-sm font-medium text-green-800">Location Captured Successfully</p>
+                        {/* <p className="text-xs text-green-600">
                         Students must be nearby to mark attendance
-                      </p>
+                      </p> */}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
                 <p className="text-sm text-gray-600 text-center">
                   Students can scan this QR code to mark their attendance
