@@ -95,7 +95,7 @@ export const resetSubjectAttendance = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await axios.patch(
-        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/subject/${id}/reset-attendance`
+        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/subject/reset-attendance/${id}`
       );
 
       if (response.status !== 200) {
