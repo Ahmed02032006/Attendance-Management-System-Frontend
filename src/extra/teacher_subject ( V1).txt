@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiEdit, FiRefreshCcw } from 'react-icons/fi'
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiEdit } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
   getSubjectsByUser,
   createSubject,
   updateSubject,
   deleteSubject,
-  // resetSubjectAttendance
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
@@ -18,7 +17,6 @@ const TeacherSubjects_Page = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showResetModal, setShowResetModal] = useState(false) // New state for reset modal
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
@@ -126,17 +124,6 @@ const TeacherSubjects_Page = () => {
     }
   }
 
-  // New function to handle subject reset
-  const handleResetSubject = async () => {
-    try {
-      // await dispatch(resetSubjectAttendance(selectedSubject._id)).unwrap()
-      setShowResetModal(false)
-      toast.success('Subject attendance records cleared successfully!')
-    } catch (error) {
-      toast.error(error?.message || 'Failed to reset subject attendance')
-    }
-  }
-
   const openCreateModal = () => {
     resetForm()
     setShowCreateModal(true)
@@ -158,12 +145,6 @@ const TeacherSubjects_Page = () => {
   const openDeleteModal = (subject) => {
     setSelectedSubject(subject)
     setShowDeleteModal(true)
-  }
-
-  // New function to open reset modal
-  const openResetModal = (subject) => {
-    setSelectedSubject(subject)
-    setShowResetModal(true)
   }
 
   const resetForm = () => {
@@ -209,7 +190,7 @@ const TeacherSubjects_Page = () => {
       <div className="container max-w-full mx-auto p-6">
         {/* Search and Filter Section */}
         <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="relative grow max-w-md">
+          <div className="relative flex-grow max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FiSearch className="h-5 w-5 text-gray-400" />
             </div>
@@ -253,7 +234,7 @@ const TeacherSubjects_Page = () => {
                       <tr key={subject._id} className="hover:bg-gray-50">
                         <td className="px-6 py-3.5 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="shrink-0 h-10 w-10 rounded-full bg-blue-100 overflow-hidden border border-gray-300 flex items-center justify-center">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 overflow-hidden border border-gray-300 flex items-center justify-center">
                               <span className="text-blue-600 font-semibold text-sm">
                                 {subject.subjectTitle?.charAt(0)}
                               </span>
@@ -272,8 +253,8 @@ const TeacherSubjects_Page = () => {
                         </td>
                         <td className="px-6 py-3.5 whitespace-nowrap text-center">
                           <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${subject.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
                             }`}>
                             {subject.status}
                           </span>
@@ -287,21 +268,12 @@ const TeacherSubjects_Page = () => {
                             >
                               <FiEdit className="h-5 w-5" />
                             </button>
-
                             <button
                               onClick={() => openDeleteModal(subject)}
                               className="text-red-600 hover:text-red-900 transition-colors"
                               title="Delete Subject"
                             >
                               <FiTrash2 className="h-5 w-5" />
-                            </button>
-
-                            <button
-                              onClick={() => openResetModal(subject)}
-                              className="text-yellow-600 hover:text-yellow-900 transition-colors"
-                              title="Reset Subject Attendance"
-                            >
-                              <FiRefreshCcw className="h-5 w-5" />
                             </button>
                           </div>
                         </td>
@@ -645,7 +617,7 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Minimalist */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
@@ -689,58 +661,6 @@ const TeacherSubjects_Page = () => {
                     </>
                   ) : (
                     'Delete'
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reset Subject Confirmation Modal */}
-      {showResetModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
-            <div className="p-6 text-center">
-              <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FiRefreshCcw className="h-8 w-8 text-yellow-600" />
-              </div>
-
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Reset Subject Attendance?
-              </h3>
-
-              <p className="text-gray-600 text-sm mb-2">
-                All attendance records for <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong> will be cleared.
-              </p>
-
-              <p className="text-yellow-600 text-xs mb-6">
-                This will remove all student attendance data for this subject.
-              </p>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowResetModal(false)}
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleResetSubject}
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-2.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Resetting
-                    </>
-                  ) : (
-                    'Reset Attendance'
                   )}
                 </button>
               </div>
