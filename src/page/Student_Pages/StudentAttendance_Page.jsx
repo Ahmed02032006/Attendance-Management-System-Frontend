@@ -107,8 +107,8 @@ const StudentAttendance_Page = () => {
     });
   };
 
-  // Verify if student is within required radius
-  const verifyLocation = (studentLoc, teacherLoc, radius = 0.75) => { // CHANGED FROM 200 to 0.75
+  // Verify if student is within required radius - CHANGED default to 2 meters
+  const verifyLocation = (studentLoc, teacherLoc, radius = 2) => { // CHANGED from 200 to 2
     if (!studentLoc || !teacherLoc) {
       return false;
     }
@@ -264,10 +264,15 @@ const StudentAttendance_Page = () => {
     if (qrData.teacherLocation) {
       try {
         const studentLoc = await getStudentLocation();
-        const isWithinRadius = verifyLocation(studentLoc, qrData.teacherLocation, qrData.locationRadius || 0.75); // CHANGED FROM 200
+        // CHANGED: Use 2 meters radius from QR data or default to 2
+        const isWithinRadius = verifyLocation(
+          studentLoc,
+          qrData.teacherLocation,
+          qrData.locationRadius || 2 // CHANGED: Use 2 instead of 200
+        );
 
         if (!isWithinRadius) {
-          toast.error('You are too far from the teacher. Please move closer (within 25 cm) to mark attendance.');
+          toast.error('You must be within 2 meters of the teacher to mark attendance.');
           return;
         }
       } catch (error) {
@@ -420,6 +425,7 @@ const StudentAttendance_Page = () => {
             <ul className="text-[12px] text-gray-600 space-y-1">
               <li>• Fill in your full name and roll number accurately</li>
               <li>• Double-check your details before submitting</li>
+              <li>• You must be within 2 meters of the teacher to mark attendance</li> {/* ADDED/CHANGED */}
               <li>• Your attendance time will be recorded automatically</li>
               <li>• Click "Submit Attendance" to mark your presence</li>
             </ul>

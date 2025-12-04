@@ -400,7 +400,7 @@ const TeacherAttendance_Page = () => {
       attendanceTime: currentTime,
       attendanceDate: currentDate,
       teacherLocation: teacherLocation, // Include teacher's location in QR data
-      locationRadius: 0.75, // CHANGED FROM 200 to 0.75 meters
+      locationRadius: 2, // CHANGED: 2 meters radius instead of 200
       redirectUrl: `${window.location.origin}/student-attendance`
     });
   };
@@ -974,8 +974,8 @@ const TeacherAttendance_Page = () => {
                       <FiMapPin className="text-green-500" />
                       <div>
                         <p className="text-sm font-medium text-green-800">Location Captured Successfully</p>
-                        <p className="text-xs text-green-600 mt-1">
-                          Note: Students must be within <span className="font-semibold">25 cm (0.25 m)</span> to mark attendance
+                        <p className="text-xs text-green-600">
+                          Students must be within 2 meters to mark attendance
                         </p>
                       </div>
                     </div>
