@@ -381,8 +381,7 @@ const TeacherAttendance_Page = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
-  // TeacherAttendance_Page.js
-  // In the generateQRData function:
+  // Generate QR code data with location
   const generateQRData = () => {
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date().toLocaleTimeString('en-US', {
@@ -401,7 +400,7 @@ const TeacherAttendance_Page = () => {
       attendanceTime: currentTime,
       attendanceDate: currentDate,
       teacherLocation: teacherLocation, // Include teacher's location in QR data
-      locationRadius: 50, // ✅ CHANGED: 50 meters radius instead of 200
+      locationRadius: 100, // 100 meters radius
       redirectUrl: `${window.location.origin}/student-attendance`
     });
   };
