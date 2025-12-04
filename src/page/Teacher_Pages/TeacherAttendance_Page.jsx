@@ -391,6 +391,12 @@ const TeacherAttendance_Page = () => {
     });
     const currentDate = new Date().toISOString().split('T')[0];
 
+    // IMPORTANT: Ensure we're getting fresh location
+    if (!teacherLocation) {
+      toast.error('Please enable location services first');
+      return '';
+    }
+
     return JSON.stringify({
       type: 'attendance',
       subject: attendanceForm.subject,
@@ -400,7 +406,7 @@ const TeacherAttendance_Page = () => {
       attendanceTime: currentTime,
       attendanceDate: currentDate,
       teacherLocation: teacherLocation, // Include teacher's location in QR data
-      locationRadius: 200, // 200 meters radius
+      locationRadius: 1, // CHANGED from 200 to 1 meter
       redirectUrl: `${window.location.origin}/student-attendance`
     });
   };
