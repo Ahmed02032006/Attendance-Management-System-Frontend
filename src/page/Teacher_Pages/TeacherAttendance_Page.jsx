@@ -381,7 +381,8 @@ const TeacherAttendance_Page = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
-  // Generate QR code data with location
+  // TeacherAttendance_Page.js
+  // In the generateQRData function:
   const generateQRData = () => {
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date().toLocaleTimeString('en-US', {
@@ -400,7 +401,7 @@ const TeacherAttendance_Page = () => {
       attendanceTime: currentTime,
       attendanceDate: currentDate,
       teacherLocation: teacherLocation, // Include teacher's location in QR data
-      locationRadius: 2, // CHANGED: 2 meters radius instead of 200
+      locationRadius: 50, // ✅ CHANGED: 50 meters radius instead of 200
       redirectUrl: `${window.location.origin}/student-attendance`
     });
   };
@@ -974,9 +975,9 @@ const TeacherAttendance_Page = () => {
                       <FiMapPin className="text-green-500" />
                       <div>
                         <p className="text-sm font-medium text-green-800">Location Captured Successfully</p>
-                        <p className="text-xs text-green-600">
-                          Students must be within 2 meters to mark attendance
-                        </p>
+                        {/* <p className="text-xs text-green-600">
+                        Students must be nearby to mark attendance
+                      </p> */}
                       </div>
                     </div>
                   </div>
