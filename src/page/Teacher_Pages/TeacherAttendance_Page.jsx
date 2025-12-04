@@ -400,7 +400,7 @@ const TeacherAttendance_Page = () => {
       attendanceTime: currentTime,
       attendanceDate: currentDate,
       teacherLocation: teacherLocation, // Include teacher's location in QR data
-      locationRadius: 0.25, // CHANGED FROM 200 to 0.25 meters
+      locationRadius: 0.75, // CHANGED FROM 200 to 0.75 meters
       redirectUrl: `${window.location.origin}/student-attendance`
     });
   };

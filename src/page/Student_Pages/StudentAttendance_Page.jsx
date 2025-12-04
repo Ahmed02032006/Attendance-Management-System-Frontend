@@ -108,7 +108,7 @@ const StudentAttendance_Page = () => {
   };
 
   // Verify if student is within required radius
-  const verifyLocation = (studentLoc, teacherLoc, radius = 0.25) => { // CHANGED FROM 200 to 0.25
+  const verifyLocation = (studentLoc, teacherLoc, radius = 0.75) => { // CHANGED FROM 200 to 0.75
     if (!studentLoc || !teacherLoc) {
       return false;
     }
@@ -264,7 +264,7 @@ const StudentAttendance_Page = () => {
     if (qrData.teacherLocation) {
       try {
         const studentLoc = await getStudentLocation();
-        const isWithinRadius = verifyLocation(studentLoc, qrData.teacherLocation, qrData.locationRadius || 0.25); // CHANGED FROM 200
+        const isWithinRadius = verifyLocation(studentLoc, qrData.teacherLocation, qrData.locationRadius || 0.75); // CHANGED FROM 200
 
         if (!isWithinRadius) {
           toast.error('You are too far from the teacher. Please move closer (within 25 cm) to mark attendance.');
