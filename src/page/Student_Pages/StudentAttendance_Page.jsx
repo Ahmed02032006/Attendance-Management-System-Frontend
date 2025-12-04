@@ -7,26 +7,17 @@ import { useIPAddress } from '../../hooks/useIPAddress';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 // Helper function to calculate distance between two coordinates using Haversine formula
-// More accurate distance calculation
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  if (lat1 === lat2 && lon1 === lon2) {
-    return 0;
-  }
-
-  const R = 6371000; // Earth's radius in meters
-  const φ1 = lat1 * Math.PI / 180;
-  const φ2 = lat2 * Math.PI / 180;
-  const Δφ = (lat2 - lat1) * Math.PI / 180;
-  const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-    Math.cos(φ1) * Math.cos(φ2) *
-    Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  const distance = R * c; // Distance in meters
-
-  return Math.round(distance * 100) / 100; // Round to 2 decimal places
+  const distance = R * c; // Distance in kilometers
+  return distance * 1000; // Convert to meters
 };
 
 const StudentAttendance_Page = () => {
@@ -114,6 +105,23 @@ const StudentAttendance_Page = () => {
         }
       );
     });
+  };
+
+  // Verify if student is within required radius
+  const verifyLocation = (studentLoc, teacherLoc, radius = 0.25) => { // CHANGED FROM 200 to 0.25
+    if (!studentLoc || !teacherLoc) {
+      return false;
+    }
+
+    const distance = calculateDistance(
+      studentLoc.latitude,
+      studentLoc.longitude,
+      teacherLoc.latitude,
+      teacherLoc.longitude
+    );
+
+    console.log(`Distance from teacher: ${distance.toFixed(2)} meters`);
+    return distance <= radius;
   };
 
   useEffect(() => {
@@ -255,38 +263,22 @@ const StudentAttendance_Page = () => {
     // Verify location before submission (only if teacher location is available)
     if (qrData.teacherLocation) {
       try {
-        setIsSubmitting(true);
-        setIsGettingLocation(true);
-
-        // Get fresh student location
         const studentLoc = await getStudentLocation();
-
-        // Add debugging logs
-        console.log('Teacher Location:', qrData.teacherLocation);
-        console.log('Student Location:', studentLoc);
-
-        const radius = qrData.locationRadius || 1; // Use radius from QR or default to 1 meter
-        const isWithinRadius = verifyLocation(studentLoc, qrData.teacherLocation, radius);
-
-        console.log(`Allowed Radius: ${radius} meters`);
-        console.log(`Is within radius: ${isWithinRadius}`);
+        const isWithinRadius = verifyLocation(studentLoc, qrData.teacherLocation, qrData.locationRadius || 0.25); // CHANGED FROM 200
 
         if (!isWithinRadius) {
-          toast.error(`You must be within ${radius} meter of the teacher to mark attendance.`);
-          setIsSubmitting(false);
-          setIsGettingLocation(false);
+          toast.error('You are too far from the teacher. Please move closer (within 25 cm) to mark attendance.');
           return;
         }
       } catch (error) {
-        console.error('Location error:', error);
-        toast.error(error.message || 'Failed to verify location. Please enable location services.');
-        setIsSubmitting(false);
-        setIsGettingLocation(false);
+        toast.error('Failed to verify location. Please enable location services.');
         return;
       }
     }
 
     const deviceFingerprint = await getUniqueDeviceFingerprint();
+
+    setIsSubmitting(true);
 
     try {
       const currentTime = formatTime();
@@ -300,13 +292,7 @@ const StudentAttendance_Page = () => {
         ipAddress: deviceFingerprint,
         studentLocation: studentLocation,
         teacherLocation: qrData.teacherLocation,
-        locationVerified: true,
-        distance: qrData.teacherLocation ? calculateDistance(
-          studentLocation.latitude,
-          studentLocation.longitude,
-          qrData.teacherLocation.latitude,
-          qrData.teacherLocation.longitude
-        ) : null
+        locationVerified: true
       };
 
       dispatch(createAttendance(AttendanceData))
@@ -331,35 +317,7 @@ const StudentAttendance_Page = () => {
       toast.error('Failed to submit attendance. Please try again.');
     } finally {
       setIsSubmitting(false);
-      setIsGettingLocation(false);
     }
-  };
-
-  // Add location accuracy validation
-  const verifyLocation = (studentLoc, teacherLoc, radius = 1) => {
-    if (!studentLoc || !teacherLoc) {
-      console.log('Missing location data');
-      return false;
-    }
-
-    // Check if location accuracy is too poor
-    if (studentLoc.accuracy > 50) { // If accuracy worse than 50 meters
-      console.warn(`Poor location accuracy: ${studentLoc.accuracy} meters`);
-      toast.warning(`Your location accuracy is poor (${studentLoc.accuracy.toFixed(1)}m). Try moving to an open area.`);
-    }
-
-    const distance = calculateDistance(
-      studentLoc.latitude,
-      studentLoc.longitude,
-      teacherLoc.latitude,
-      teacherLoc.longitude
-    );
-
-    console.log(`Distance from teacher: ${distance.toFixed(2)} meters (Allowed: ${radius}m)`);
-    console.log(`Student: ${studentLoc.latitude}, ${studentLoc.longitude}`);
-    console.log(`Teacher: ${teacherLoc.latitude}, ${teacherLoc.longitude}`);
-
-    return distance <= radius;
   };
 
   return (
