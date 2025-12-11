@@ -7,7 +7,6 @@ const QRScanner_Page = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [cameraStream, setCameraStream] = useState(null);
   const [hasCameraPermission, setHasCameraPermission] = useState(true);
-  const [isSupportedDevice, setIsSupportedDevice] = useState(true);
   const [scanResult, setScanResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
@@ -16,48 +15,7 @@ const QRScanner_Page = () => {
   const canvasRef = useRef(null);
   const scanInterval = useRef(null);
 
-  // Device detection and validation - ONLY Mobile + Chrome
-  useEffect(() => {
-    const checkDeviceCompatibility = () => {
-      // Detect if it's a mobile device
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-      // Detect if it's Chrome browser
-      const isChrome = /Chrome|CriOS/i.test(navigator.userAgent);
-
-      // Check if browser supports required APIs
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setIsSupportedDevice(false);
-        toast.error('Your browser does not support camera access');
-        return false;
-      }
-
-      // Check if geolocation is supported (required for location-based attendance)
-      if (!navigator.geolocation) {
-        setIsSupportedDevice(false);
-        toast.error('Your device does not support location services which are required for attendance');
-        return false;
-      }
-
-      // STRICT CHECK: Only allow Mobile + Chrome
-      if (!isMobile) {
-        setIsSupportedDevice(false);
-        return false;
-      }
-
-      if (!isChrome) {
-        setIsSupportedDevice(false);
-        return false;
-      }
-
-      setIsSupportedDevice(true);
-      return true;
-    };
-
-    checkDeviceCompatibility();
-  }, []);
-
-  // Enhanced QR data parsing with location support
+  // Enhanced QR data parsing
   const parseQRData = (qrDataString) => {
     if (!qrDataString) {
       throw new Error('Empty QR code data');
@@ -77,8 +35,6 @@ const QRScanner_Page = () => {
           attendanceTime: parsedData.attendanceTime || parsedData.time || new Date().toLocaleTimeString(),
           attendanceDate: parsedData.attendanceDate || parsedData.date || new Date().toISOString().split('T')[0],
           timestamp: parsedData.timestamp || new Date().toISOString(),
-          teacherLocation: parsedData.teacherLocation || null,
-          locationRadius: parsedData.locationRadius || 200
         };
 
         return validatedData;
@@ -106,8 +62,6 @@ const QRScanner_Page = () => {
             attendanceTime: urlParams.get('attendanceTime') || urlParams.get('time') || new Date().toLocaleTimeString(),
             attendanceDate: urlParams.get('attendanceDate') || urlParams.get('date') || new Date().toISOString().split('T')[0],
             timestamp: new Date().toISOString(),
-            teacherLocation: null,
-            locationRadius: 200
           };
         } catch (urlError) {
           console.log('Not a URL format, using plain text');
@@ -123,64 +77,16 @@ const QRScanner_Page = () => {
         attendanceTime: new Date().toLocaleTimeString(),
         attendanceDate: new Date().toISOString().split('T')[0],
         timestamp: new Date().toISOString(),
-        teacherLocation: null,
-        locationRadius: 200
       };
     }
   };
 
   const navigateToAttendancePage = (qrData) => {
-    // Check if location is required and if device supports it
-    if (qrData.teacherLocation) {
-      // Verify geolocation support before navigating
-      if (!navigator.geolocation) {
-        toast.error('Location services are required but not supported on your device');
-        return;
+    navigate('/student-attendance', {
+      state: {
+        qrData: JSON.stringify(qrData)
       }
-
-      // Request location permission proactively
-      navigator.geolocation.getCurrentPosition(
-        () => {
-          // Location permission granted, proceed to attendance page
-          navigate('/student-attendance', {
-            state: {
-              qrData: JSON.stringify(qrData)
-            }
-          });
-        },
-        (error) => {
-          let errorMessage = 'Location access is required for attendance: ';
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage += 'Please enable location permissions in your browser settings';
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage += 'Location information unavailable';
-              break;
-            case error.TIMEOUT:
-              errorMessage += 'Location request timed out';
-              break;
-            default:
-              errorMessage += 'Please enable location services';
-              break;
-          }
-          toast.error(errorMessage);
-          setIsScanning(false);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
-        }
-      );
-    } else {
-      // No location required, proceed directly
-      navigate('/student-attendance', {
-        state: {
-          qrData: JSON.stringify(qrData)
-        }
-      });
-    }
+    });
   };
 
   // Start camera for live scanning with better error handling
@@ -314,45 +220,6 @@ const QRScanner_Page = () => {
       }
     };
   }, [cameraStream]);
-
-  // Unsupported device message
-  if (!isSupportedDevice) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 max-w-sm w-full">
-          <div className="text-center">
-            {/* Icon */}
-            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-blue-50 mb-6">
-              <svg className="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            </div>
-
-            {/* Title */}
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              Mobile Chrome Required
-            </h2>
-
-            {/* Description */}
-            <p className="text-gray-600 mb-6 text-sm leading-relaxed">
-              This QR scanner works best on mobile devices with Google Chrome browser for optimal scanning experience.
-            </p>
-
-            {/* Requirements */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-yellow-800 mb-2">Requirements:</h3>
-              <ul className="text-xs text-yellow-700 space-y-1">
-                <li>• Mobile device with camera</li>
-                <li>• Google Chrome browser</li>
-                <li>• Location services enabled</li>
-                <li>• Camera permissions allowed</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

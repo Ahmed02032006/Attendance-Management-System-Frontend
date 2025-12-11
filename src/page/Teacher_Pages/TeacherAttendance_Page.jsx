@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'react-toastify'
-import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2, FiMapPin } from 'react-icons/fi'
+import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
   createAttendance,
@@ -35,8 +35,6 @@ const TeacherAttendance_Page = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
-  const [teacherLocation, setTeacherLocation] = useState(null);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   // Sorting states
   const [sortConfig, setSortConfig] = useState({
@@ -62,56 +60,6 @@ const TeacherAttendance_Page = () => {
       setSelectedSubject(subjectsWithAttendance[0].id)
     }
   }, [subjectsWithAttendance, selectedSubject])
-
-  // Get teacher's current location
-  const getTeacherLocation = () => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported by this browser'));
-        return;
-      }
-
-      setIsGettingLocation(true);
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const location = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-            timestamp: new Date().toISOString()
-          };
-          setTeacherLocation(location);
-          setIsGettingLocation(false);
-          resolve(location);
-        },
-        (error) => {
-          setIsGettingLocation(false);
-          let errorMessage = 'Failed to get location: ';
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage += 'Location access denied by user';
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage += 'Location information unavailable';
-              break;
-            case error.TIMEOUT:
-              errorMessage += 'Location request timed out';
-              break;
-            default:
-              errorMessage += 'Unknown error occurred';
-              break;
-          }
-          reject(new Error(errorMessage));
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        }
-      );
-    });
-  };
 
   // Format date to YYYY-MM-DD
   const formatDate = (date) => {
@@ -312,16 +260,8 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
-    try {
-      // Get teacher's location before generating QR
-      const location = await getTeacherLocation();
-      // toast.success('Location captured successfully!');
-
-      setShowCreateModal(false);
-      setShowQRModal(true);
-    } catch (error) {
-      toast.error(error.message);
-    }
+    setShowCreateModal(false);
+    setShowQRModal(true);
   };
 
   // Handle delete attendance
@@ -381,7 +321,7 @@ const TeacherAttendance_Page = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
-  // In your TeacherAttendance_Page.js, update the generateQRData function:
+  // Update the generateQRData function to remove location
   const generateQRData = () => {
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date().toLocaleTimeString('en-US', {
@@ -399,8 +339,6 @@ const TeacherAttendance_Page = () => {
       timestamp: new Date().toISOString(),
       attendanceTime: currentTime,
       attendanceDate: currentDate,
-      teacherLocation: teacherLocation, // Include teacher's location in QR data
-      locationRadius: 100, // Changed to 100 meters radius
       redirectUrl: `${window.location.origin}/student-attendance`
     });
   };
@@ -898,24 +836,6 @@ const TeacherAttendance_Page = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
-
-                {/* Location Status */}
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                  <div className="flex items-center space-x-2">
-                    <FiMapPin className="text-blue-500" />
-                    <div>
-                      <p className="text-sm font-medium text-blue-800">
-                        Location Verification
-                      </p>
-                      <p className="text-xs text-blue-600">
-                        {teacherLocation
-                          ? `Location captured: ${teacherLocation.latitude.toFixed(6)}, ${teacherLocation.longitude.toFixed(6)}`
-                          : 'Your location will be captured when generating QR code'
-                        }
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                 <button
@@ -926,19 +846,10 @@ const TeacherAttendance_Page = () => {
                 </button>
                 <button
                   onClick={handleGenerateQR}
-                  disabled={isLoading || isGettingLocation}
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isGettingLocation ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Getting Location...</span>
-                    </>
-                  ) : isLoading ? (
-                    'Creating...'
-                  ) : (
-                    'Generate QR'
-                  )}
+                  {isLoading ? 'Creating...' : 'Generate QR'}
                 </button>
               </div>
             </div>
@@ -967,20 +878,6 @@ const TeacherAttendance_Page = () => {
                     minVersion={1}
                   />
                 </div>
-
-                {teacherLocation && (
-                  <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-3 w-full">
-                    <div className="flex items-center space-x-2">
-                      <FiMapPin className="text-green-500" />
-                      <div>
-                        <p className="text-sm font-medium text-green-800">Location Captured Successfully</p>
-                        {/* <p className="text-xs text-green-600">
-                        Students must be nearby to mark attendance
-                      </p> */}
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 <p className="text-sm text-gray-600 text-center">
                   Students can scan this QR code to mark their attendance
