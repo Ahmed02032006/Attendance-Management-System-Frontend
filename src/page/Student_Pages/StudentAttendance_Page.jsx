@@ -14,8 +14,6 @@ const StudentAttendance_Page = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [qrData, setQrData] = useState(null);
   const [currentTime, setCurrentTime] = useState('');
-  const [qrExpired, setQrExpired] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(null);
 
   const locationHook = useLocation();
   const navigate = useNavigate();
@@ -40,56 +38,15 @@ const StudentAttendance_Page = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Check QR expiry
-  useEffect(() => {
-    if (qrData && qrData.expiryTime) {
-      const checkExpiry = () => {
-        const now = new Date();
-        const expiry = new Date(qrData.expiryTime);
-        const remaining = Math.max(0, Math.floor((expiry - now) / 1000));
-        
-        setTimeRemaining(remaining);
-        
-        if (remaining <= 0) {
-          setQrExpired(true);
-          toast.error('This QR code has expired! Please ask your teacher for a new one.');
-        } else {
-          setQrExpired(false);
-        }
-      };
-
-      checkExpiry();
-      const interval = setInterval(checkExpiry, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [qrData]);
-
   useEffect(() => {
     if (locationHook.state?.qrData) {
       try {
         const parsedData = JSON.parse(locationHook.state.qrData);
-        
-        // Check if QR is expired
-        if (parsedData.expiryTime) {
-          const now = new Date();
-          const expiry = new Date(parsedData.expiryTime);
-          
-          if (expiry < now) {
-            toast.error('This QR code has expired! Please ask your teacher for a new one.');
-            setQrExpired(true);
-          } else {
-            setQrExpired(false);
-            setQrData(parsedData);
-            setFormData(prev => ({
-              ...prev,
-              uniqueCode: parsedData.code,
-            }));
-          }
-        } else {
-          // Old QR format without expiry
-          toast.warning('This is an old QR code. Please scan a new one.');
-          setQrExpired(true);
-        }
+        setQrData(parsedData);
+        setFormData(prev => ({
+          ...prev,
+          uniqueCode: parsedData.code,
+        }));
       } catch (error) {
         toast.error('Invalid QR code data');
         navigate('/');
@@ -101,10 +58,6 @@ const StudentAttendance_Page = () => {
       const subjectName = urlParams.get('subjectName');
 
       if (code) {
-        // Direct URL access - QR likely expired
-        toast.warning('This QR code link may have expired. Please scan a fresh QR code.');
-        setQrExpired(true);
-        
         setQrData({
           code,
           subject: subject || 'Unknown Subject',
@@ -210,12 +163,6 @@ const StudentAttendance_Page = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check if QR is expired
-    if (qrExpired) {
-      toast.error('Cannot submit: QR code has expired!');
-      return;
-    }
-
     if (!formData.studentName.trim() || !formData.rollNo.trim() || !formData.uniqueCode.trim()) {
       toast.error('Please fill all fields');
       return;
@@ -224,17 +171,6 @@ const StudentAttendance_Page = () => {
     if (!qrData) {
       toast.error('Invalid attendance session');
       return;
-    }
-
-    // Double check expiry on submit
-    if (qrData.expiryTime) {
-      const now = new Date();
-      const expiry = new Date(qrData.expiryTime);
-      if (expiry < now) {
-        toast.error('QR code expired just now! Please scan a new one.');
-        setQrExpired(true);
-        return;
-      }
     }
 
     const deviceFingerprint = await getUniqueDeviceFingerprint();
@@ -251,8 +187,6 @@ const StudentAttendance_Page = () => {
         time: currentTime,
         date: qrData.attendanceDate,
         ipAddress: deviceFingerprint,
-        qrId: qrData.qrId || 'unknown', // Include QR ID for tracking
-        qrTimestamp: qrData.timestamp || new Date().toISOString()
       };
 
       dispatch(createAttendance(AttendanceData))
@@ -292,52 +226,11 @@ const StudentAttendance_Page = () => {
                 {qrData && (
                   <div className="mt-0.5 text-xs text-gray-600 space-y-1">
                     <p><span className="font-medium">Subject Name:</span> <span className='border-b border-gray-400'>{qrData.subjectName}</span></p>
-                    
-                    {/* QR Expiry Status */}
-                    {qrData.expiryTime && (
-                      <div className={`mt-2 px-3 py-1.5 rounded-md ${qrExpired ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">
-                            {qrExpired ? 'QR Expired' : 'QR Active'}
-                          </span>
-                          {!qrExpired && timeRemaining !== null && (
-                            <span className="font-bold">
-                              {timeRemaining}s
-                            </span>
-                          )}
-                        </div>
-                        {!qrExpired && (
-                          <p className="text-xs mt-1">
-                            Expires in {timeRemaining} seconds
-                          </p>
-                        )}
-                        {qrExpired && (
-                          <p className="text-xs mt-1">
-                            Please scan a fresh QR code from your teacher
-                          </p>
-                        )}
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
             </div>
           </div>
-
-          {/* QR Expired Warning */}
-          {qrExpired && (
-            <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="font-medium text-red-800">QR Code Expired</span>
-              </div>
-              <p className="text-sm text-red-600 mt-1">
-                This QR code is no longer valid. Please ask your teacher to generate a new one.
-              </p>
-            </div>
-          )}
 
           {/* Attendance Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -356,7 +249,6 @@ const StudentAttendance_Page = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors uppercase"
                 required
                 style={{ textTransform: 'uppercase' }}
-                disabled={qrExpired}
               />
             </div>
 
@@ -375,7 +267,6 @@ const StudentAttendance_Page = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors uppercase"
                 required
                 style={{ textTransform: 'uppercase' }}
-                disabled={qrExpired}
               />
             </div>
 
@@ -399,7 +290,7 @@ const StudentAttendance_Page = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 type="submit"
-                disabled={isSubmitting || !qrData || qrExpired}
+                disabled={isSubmitting || !qrData}
                 className="flex-1 bg-sky-600 text-white py-3 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {isSubmitting ? (
@@ -422,8 +313,7 @@ const StudentAttendance_Page = () => {
             <h3 className="text-sm font-medium text-gray-700 mb-2">Instructions:</h3>
             <ul className="text-[12px] text-gray-600 space-y-1">
               <li>• Fill in your full name and roll number accurately</li>
-              <li>• QR codes expire after 20 seconds for security</li>
-              <li>• Make sure you're scanning a fresh QR code</li>
+              <li>• Make sure you're in the correct class session</li>
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
             </ul>

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'react-toastify'
-import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2, FiClock } from 'react-icons/fi'
+import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
   createAttendance,
@@ -36,12 +36,6 @@ const TeacherAttendance_Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
 
-  // QR Expiry states
-  const [qrExpiryTime, setQrExpiryTime] = useState(null);
-  const [qrRefreshTimer, setQrRefreshTimer] = useState(null);
-  const [currentQRCode, setCurrentQRCode] = useState(null);
-  const [qrCountdown, setQrCountdown] = useState(20);
-
   // Sorting states
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -57,9 +51,6 @@ const TeacherAttendance_Page = () => {
     // Cleanup on unmount
     return () => {
       dispatch(clearAttendance())
-      if (qrRefreshTimer) {
-        clearInterval(qrRefreshTimer);
-      }
     }
   }, [dispatch])
 
@@ -69,29 +60,6 @@ const TeacherAttendance_Page = () => {
       setSelectedSubject(subjectsWithAttendance[0].id)
     }
   }, [subjectsWithAttendance, selectedSubject])
-
-  // QR Countdown Timer
-  useEffect(() => {
-    let interval;
-    if (showQRModal && qrCountdown > 0) {
-      interval = setInterval(() => {
-        setQrCountdown(prev => {
-          if (prev <= 1) {
-            // Generate new QR when countdown reaches 0
-            generateNewQR();
-            return 20; // Reset to 20 seconds
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [showQRModal, qrCountdown]);
 
   // Format date to YYYY-MM-DD
   const formatDate = (date) => {
@@ -119,73 +87,6 @@ const TeacherAttendance_Page = () => {
   };
 
   const currentAttendanceRecords = getCurrentAttendanceRecords();
-
-  // Generate QR Data with expiry timestamp
-  const generateQRData = () => {
-    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
-    const currentTime = new Date().toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-    const currentDate = new Date().toISOString().split('T')[0];
-    const expiryTime = new Date();
-    expiryTime.setSeconds(expiryTime.getSeconds() + 20); // 20 seconds expiry
-
-    return JSON.stringify({
-      type: 'attendance',
-      subject: attendanceForm.subject,
-      code: attendanceForm.uniqueCode,
-      subjectName: subjectName,
-      timestamp: new Date().toISOString(),
-      attendanceTime: currentTime,
-      attendanceDate: currentDate,
-      expiryTime: expiryTime.toISOString(), // Add expiry time
-      qrId: `qr_${Date.now()}`, // Unique ID for this QR
-      redirectUrl: `${window.location.origin}/student-attendance`
-    });
-  };
-
-  // Generate new QR code
-  const generateNewQR = () => {
-    if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
-      toast.error('Cannot generate new QR - missing subject or code');
-      setShowQRModal(false);
-      return;
-    }
-
-    const newQRData = generateQRData();
-    setCurrentQRCode(newQRData);
-    
-    // Update expiry time
-    const expiryTime = new Date();
-    expiryTime.setSeconds(expiryTime.getSeconds() + 20);
-    setQrExpiryTime(expiryTime);
-    
-    toast.info('QR Code refreshed! New code is now active.');
-  };
-
-  const handleGenerateQR = async () => {
-    if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
-      toast.error('Please fill all fields');
-      return;
-    }
-
-    // Generate initial QR data
-    const qrData = generateQRData();
-    setCurrentQRCode(qrData);
-    
-    // Set expiry time (20 seconds from now)
-    const expiryTime = new Date();
-    expiryTime.setSeconds(expiryTime.getSeconds() + 20);
-    setQrExpiryTime(expiryTime);
-    
-    // Reset countdown
-    setQrCountdown(20);
-
-    setShowCreateModal(false);
-    setShowQRModal(true);
-  };
 
   // Extract numeric part from roll number for sorting
   const extractNumericFromRollNo = (rollNo) => {
@@ -353,6 +254,16 @@ const TeacherAttendance_Page = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
+  const handleGenerateQR = async () => {
+    if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
+      toast.error('Please fill all fields');
+      return;
+    }
+
+    setShowCreateModal(false);
+    setShowQRModal(true);
+  };
+
   // Handle delete attendance
   const handleDeleteClick = (attendanceId) => {
     setAttendanceToDelete(attendanceId);
@@ -409,6 +320,30 @@ const TeacherAttendance_Page = () => {
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
   };
+
+  // Update the generateQRData function to remove location
+  const generateQRData = () => {
+    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
+    const currentTime = new Date().toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    return JSON.stringify({
+      type: 'attendance',
+      subject: attendanceForm.subject,
+      code: attendanceForm.uniqueCode,
+      subjectName: subjectName,
+      timestamp: new Date().toISOString(),
+      attendanceTime: currentTime,
+      attendanceDate: currentDate,
+      redirectUrl: `${window.location.origin}/student-attendance`
+    });
+  };
+
+  const qrData = generateQRData();
 
   // Handle student name click
   const handleStudentClick = (student) => {
@@ -901,20 +836,6 @@ const TeacherAttendance_Page = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
-                
-                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                  <div className="flex items-center space-x-2">
-                    <FiClock className="text-yellow-500" />
-                    <div>
-                      <p className="text-sm font-medium text-yellow-800">
-                        QR Code Expiry
-                      </p>
-                      <p className="text-xs text-yellow-600">
-                        QR codes will automatically refresh every 20 seconds for security
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                 <button
@@ -936,45 +857,18 @@ const TeacherAttendance_Page = () => {
         )
       }
 
-      {/* QR Code Modal with Countdown */}
+      {/* QR Code Modal */}
       {
         showQRModal && (
           <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
               <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1">
-                    <FiClock className="w-4 h-4 text-blue-500" />
-                    <span className="text-sm font-medium">
-                      {qrCountdown}s
-                    </span>
-                  </div>
-                </div>
               </div>
               <div className="p-6 flex flex-col items-center">
-                {/* Countdown Timer */}
-                <div className="w-full mb-4">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-blue-800">QR Code expires in:</span>
-                      <div className={`px-2 py-1 rounded text-xs font-bold ${qrCountdown <= 5 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                        {qrCountdown} seconds
-                      </div>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full transition-all duration-1000 ${qrCountdown <= 5 ? 'bg-red-500' : 'bg-green-500'}`}
-                        style={{ width: `${(qrCountdown / 20) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* QR Code */}
                 <div className="w-64 h-64 bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2" id="qr-code-container">
                   <QRCodeSVG
-                    value={currentQRCode}
+                    value={qrData}
                     size={250}
                     level="L"
                     includeMargin={true}
@@ -985,32 +879,13 @@ const TeacherAttendance_Page = () => {
                   />
                 </div>
 
-                {/* Refresh QR Button */}
-                <button
-                  onClick={generateNewQR}
-                  className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors flex items-center space-x-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  <span>Refresh QR Now</span>
-                </button>
-
                 <p className="text-sm text-gray-600 text-center">
-                  Students must scan this within {qrCountdown} seconds
-                </p>
-                <p className="text-xs text-gray-500 text-center mt-1">
-                  Previous QR codes will not be accepted
+                  Students can scan this QR code to mark their attendance
                 </p>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
                 <button
-                  onClick={() => {
-                    if (qrRefreshTimer) {
-                      clearInterval(qrRefreshTimer);
-                    }
-                    setShowQRModal(false);
-                  }}
+                  onClick={() => setShowQRModal(false)}
                   className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
                 >
                   Close
