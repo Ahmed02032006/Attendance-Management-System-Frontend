@@ -35,10 +35,35 @@ const TeacherAttendance_Page = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
-  // Add these state variables
+  // Add these state variables at the top of the component
   const [qrExpiryTime, setQrExpiryTime] = useState(null);
-  const [remainingTime, setRemainingTime] = useState(0);
-  const [qrRefreshTimer, setQrRefreshTimer] = useState(null);
+  const [qrRefreshInterval, setQrRefreshInterval] = useState(null);
+  const [currentQrCode, setCurrentQrCode] = useState('');
+
+  // Add this useEffect for QR auto-refresh
+  useEffect(() => {
+    if (showQRModal) {
+      // Generate first QR immediately
+      handleQRGeneration();
+
+      // Set interval to refresh QR every 40 seconds
+      const interval = setInterval(() => {
+        handleQRGeneration();
+      }, 40000);
+
+      setQrRefreshInterval(interval);
+
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    } else {
+      // Clear interval when modal closes
+      if (qrRefreshInterval) {
+        clearInterval(qrRefreshInterval);
+        setQrRefreshInterval(null);
+      }
+    }
+  }, [showQRModal]);
 
   // Sorting states
   const [sortConfig, setSortConfig] = useState({
@@ -48,15 +73,6 @@ const TeacherAttendance_Page = () => {
 
   const { user } = useSelector((state) => state.auth)
   const userId = user?.id
-
-  // Cleanup interval on component unmount
-  useEffect(() => {
-    return () => {
-      if (qrRefreshTimer) {
-        clearInterval(qrRefreshTimer);
-      }
-    };
-  }, [qrRefreshTimer]);
 
   // Fetch subjects with attendance on component mount
   useEffect(() => {
@@ -267,49 +283,54 @@ const TeacherAttendance_Page = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
+  // New function to generate QR with timestamp
+  const handleQRGeneration = () => {
+    if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
+      toast.error('Please fill all fields');
+      return;
+    }
+
+    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
+    const currentTime = new Date();
+    const expiryTime = new Date(currentTime.getTime() + 40000); // 40 seconds from now
+
+    // Generate a dynamic code with timestamp
+    const dynamicCode = `${attendanceForm.uniqueCode}_${currentTime.getTime()}`;
+
+    const qrData = JSON.stringify({
+      type: 'attendance',
+      subject: attendanceForm.subject,
+      code: dynamicCode, // Use dynamic code with timestamp
+      originalCode: attendanceForm.uniqueCode, // Keep original for reference
+      subjectName: subjectName,
+      timestamp: currentTime.toISOString(),
+      expiryTimestamp: expiryTime.toISOString(), // Add expiry timestamp
+      attendanceTime: currentTime.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }),
+      attendanceDate: currentTime.toISOString().split('T')[0],
+      redirectUrl: `${window.location.origin}/student-attendance`
+    });
+
+    setCurrentQrCode(qrData);
+    setQrExpiryTime(expiryTime);
+
+    toast.info('QR code refreshed. Previous codes are now invalid.', {
+      autoClose: 2000
+    });
+  };
+
+  // Update the handleGenerateQR function
   const handleGenerateQR = async () => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
       return;
     }
 
-    // Clear any existing timer
-    if (qrRefreshTimer) {
-      clearInterval(qrRefreshTimer);
-      setQrRefreshTimer(null);
-    }
-
     setShowCreateModal(false);
     setShowQRModal(true);
-
-    // Set expiry time (40 seconds from now)
-    const expiryTime = new Date(Date.now() + 40000);
-    setQrExpiryTime(expiryTime);
-    setRemainingTime(40);
-
-    // Start countdown timer
-    const timer = setInterval(() => {
-      setRemainingTime(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-
-          // Generate new QR code with fresh timestamp
-          const newExpiryTime = new Date(Date.now() + 40000);
-          setQrExpiryTime(newExpiryTime);
-
-          // Show notification
-          toast.info('QR code refreshed! Previous QR is now invalid.', {
-            position: 'top-center',
-            autoClose: 3000,
-          });
-
-          return 40;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    setQrRefreshTimer(timer);
   };
 
   // Handle delete attendance
@@ -379,17 +400,12 @@ const TeacherAttendance_Page = () => {
     });
     const currentDate = new Date().toISOString().split('T')[0];
 
-    // Generate unique session ID
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
     return JSON.stringify({
       type: 'attendance',
       subject: attendanceForm.subject,
       code: attendanceForm.uniqueCode,
       subjectName: subjectName,
       timestamp: new Date().toISOString(),
-      sessionId: sessionId, // Add session ID
-      expiryTime: qrExpiryTime ? qrExpiryTime.toISOString() : new Date(Date.now() + 40000).toISOString(), // Add expiry time
       attendanceTime: currentTime,
       attendanceDate: currentDate,
       redirectUrl: `${window.location.origin}/student-attendance`
@@ -918,20 +934,15 @@ const TeacherAttendance_Page = () => {
               <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
                 <div className="flex items-center space-x-2">
-                  <div className="text-sm font-medium text-gray-700">
-                    Expires in:
-                  </div>
-                  <div className={`px-2 py-1 rounded text-sm font-bold ${remainingTime <= 10 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                    {remainingTime}s
-                  </div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-green-600 font-medium">Live</span>
                 </div>
               </div>
               <div className="p-6 flex flex-col items-center">
-                {/* QR Code Container */}
-                <div className="relative">
-                  <div className="w-64 h-64 bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2">
+                <div className="w-64 h-64 bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2" id="qr-code-container">
+                  {currentQrCode && (
                     <QRCodeSVG
-                      value={qrData}
+                      value={currentQrCode}
                       size={250}
                       level="L"
                       includeMargin={true}
@@ -940,45 +951,31 @@ const TeacherAttendance_Page = () => {
                       id="qr-code-svg"
                       minVersion={1}
                     />
-                  </div>
-
-                  {/* Refresh indicator */}
-                  {remainingTime <= 10 && (
-                    <div className="absolute top-0 right-0 bg-red-500 text-white text-xs px-2 py-1 rounded-bl-lg rounded-tr-lg animate-pulse">
-                      Refreshing soon
-                    </div>
                   )}
                 </div>
 
-                <div className="text-center space-y-2">
+                <div className="text-center mb-4">
                   <p className="text-sm text-gray-600">
-                    Scan this QR code to mark attendance
+                    This QR refreshes automatically every 40 seconds
                   </p>
-                  <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>QR refreshes every 40 seconds</span>
-                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Previous QR codes become invalid
+                  </p>
                 </div>
               </div>
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={() => {
-                    if (qrRefreshTimer) {
-                      clearInterval(qrRefreshTimer);
-                      setQrRefreshTimer(null);
-                    }
                     setShowQRModal(false);
-                    setQrExpiryTime(null);
+                    if (qrRefreshInterval) {
+                      clearInterval(qrRefreshInterval);
+                      setQrRefreshInterval(null);
+                    }
                   }}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
                 >
-                  Close QR
+                  Close
                 </button>
-                <div className="text-xs text-gray-500">
-                  {subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name}
-                </div>
               </div>
             </div>
           </div>

@@ -42,19 +42,6 @@ const StudentAttendance_Page = () => {
     if (locationHook.state?.qrData) {
       try {
         const parsedData = JSON.parse(locationHook.state.qrData);
-
-        // Check if QR has expired
-        if (parsedData.expiryTime) {
-          const expiryTime = new Date(parsedData.expiryTime);
-          const currentTime = new Date();
-
-          if (currentTime > expiryTime) {
-            toast.error('QR code has expired. Please scan the latest QR code.');
-            navigate('/');
-            return;
-          }
-        }
-
         setQrData(parsedData);
         setFormData(prev => ({
           ...prev,
@@ -71,15 +58,11 @@ const StudentAttendance_Page = () => {
       const subjectName = urlParams.get('subjectName');
 
       if (code) {
-        // For URL-based QR codes without expiry, allow but show warning
-        toast.warn('Using legacy QR code. Ask teacher for updated QR.');
-
         setQrData({
           code,
           subject: subject || 'Unknown Subject',
           subjectName: subjectName || 'Unknown Subject Name',
-          type: 'attendance',
-          isLegacy: true
+          type: 'attendance'
         });
         setFormData(prev => ({
           ...prev,
@@ -190,6 +173,25 @@ const StudentAttendance_Page = () => {
       return;
     }
 
+    // Check if QR code is expired
+    if (qrData.expiryTimestamp) {
+      const expiryTime = new Date(qrData.expiryTimestamp);
+      const currentTime = new Date();
+
+      if (currentTime > expiryTime) {
+        toast.error('QR code has expired. Please scan a fresh QR code.');
+        navigate('/scan-attendance');
+        return;
+      }
+    }
+
+    // Extract original code from dynamic code
+    const submittedCode = qrData.originalCode || qrData.code;
+
+    // If code contains timestamp (format: code_timestamp), extract original
+    const codeParts = submittedCode.split('_');
+    const originalCode = codeParts.length > 1 ? codeParts[0] : submittedCode;
+
     const deviceFingerprint = await getUniqueDeviceFingerprint();
 
     setIsSubmitting(true);
@@ -199,6 +201,7 @@ const StudentAttendance_Page = () => {
 
       const AttendanceData = {
         ...formData,
+        uniqueCode: originalCode, // Send original code to backend
         subjectName: qrData.subjectName,
         subjectId: qrData.subject,
         time: currentTime,
