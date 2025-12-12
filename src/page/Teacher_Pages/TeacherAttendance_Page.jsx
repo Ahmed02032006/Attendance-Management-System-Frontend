@@ -940,7 +940,7 @@ const TeacherAttendance_Page = () => {
                   )}
                 </div>
 
-                <div className="text-center mb-4">
+                <div className="text-center">
                   <p className="text-sm text-gray-600">
                     Students can scan this QR code to mark their attendance
                   </p>
