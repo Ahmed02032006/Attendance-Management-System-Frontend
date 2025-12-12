@@ -25,6 +25,16 @@ const QRScanner_Page = () => {
     try {
       const parsedData = JSON.parse(qrDataString);
 
+      // Check if QR has expired
+      if (parsedData.expiryTime) {
+        const expiryTime = new Date(parsedData.expiryTime);
+        const currentTime = new Date();
+
+        if (currentTime > expiryTime) {
+          throw new Error('QR code has expired. Please scan the latest QR code.');
+        }
+      }
+
       // Validate required fields for attendance
       if (parsedData.type === 'attendance') {
         const validatedData = {
@@ -35,6 +45,8 @@ const QRScanner_Page = () => {
           attendanceTime: parsedData.attendanceTime || parsedData.time || new Date().toLocaleTimeString(),
           attendanceDate: parsedData.attendanceDate || parsedData.date || new Date().toISOString().split('T')[0],
           timestamp: parsedData.timestamp || new Date().toISOString(),
+          sessionId: parsedData.sessionId, // Include session ID
+          expiryTime: parsedData.expiryTime, // Include expiry time
         };
 
         return validatedData;
@@ -181,10 +193,10 @@ const QRScanner_Page = () => {
 
       try {
         const parsedData = parseQRData(qrCode.data);
-        
+
         // Show scan success message
         toast.success('✓ QR Code scanned successfully!');
-        
+
         // Small delay for better UX
         setTimeout(() => {
           navigateToAttendancePage(parsedData);
@@ -192,7 +204,13 @@ const QRScanner_Page = () => {
 
       } catch (parseError) {
         console.error('Error parsing QR data:', parseError);
-        toast.error('Invalid QR code format');
+
+        if (parseError.message.includes('expired')) {
+          toast.error('⚠️ QR code has expired! Please scan the latest QR code from your teacher.');
+        } else {
+          toast.error('Invalid QR code format');
+        }
+
         setIsProcessing(false);
         // Restart scanning if parsing fails
         setTimeout(startCameraScan, 2000);
@@ -279,7 +297,7 @@ const QRScanner_Page = () => {
                         <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-green-400 opacity-50"></div>
                       </div>
                     </div>
-                    
+
                     {/* Scanning animation */}
                     <div className="absolute bottom-2 left-0 right-0 flex justify-center">
                       <div className="bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs">

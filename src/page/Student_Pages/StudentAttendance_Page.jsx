@@ -42,6 +42,19 @@ const StudentAttendance_Page = () => {
     if (locationHook.state?.qrData) {
       try {
         const parsedData = JSON.parse(locationHook.state.qrData);
+
+        // Check if QR has expired
+        if (parsedData.expiryTime) {
+          const expiryTime = new Date(parsedData.expiryTime);
+          const currentTime = new Date();
+
+          if (currentTime > expiryTime) {
+            toast.error('QR code has expired. Please scan the latest QR code.');
+            navigate('/');
+            return;
+          }
+        }
+
         setQrData(parsedData);
         setFormData(prev => ({
           ...prev,
@@ -58,11 +71,15 @@ const StudentAttendance_Page = () => {
       const subjectName = urlParams.get('subjectName');
 
       if (code) {
+        // For URL-based QR codes without expiry, allow but show warning
+        toast.warn('Using legacy QR code. Ask teacher for updated QR.');
+
         setQrData({
           code,
           subject: subject || 'Unknown Subject',
           subjectName: subjectName || 'Unknown Subject Name',
-          type: 'attendance'
+          type: 'attendance',
+          isLegacy: true
         });
         setFormData(prev => ({
           ...prev,
@@ -82,11 +99,11 @@ const StudentAttendance_Page = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    const processedValue = (name === 'studentName' || name === 'rollNo') 
+
+    const processedValue = (name === 'studentName' || name === 'rollNo')
       ? capitalizeText(value)
       : value;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: processedValue
@@ -97,14 +114,14 @@ const StudentAttendance_Page = () => {
   const getUniqueDeviceFingerprint = async () => {
     try {
       const storedFingerprint = localStorage.getItem('deviceFingerprint');
-      
+
       if (storedFingerprint) {
         return storedFingerprint;
       }
 
       const agent = await FingerprintJS.load();
       const result = await agent.get();
-      
+
       const persistentData = {
         visitorId: result.visitorId,
         userAgent: navigator.userAgent,
@@ -126,12 +143,12 @@ const StudentAttendance_Page = () => {
 
       const fingerprint = `device_${hash.toString(36)}`;
       localStorage.setItem('deviceFingerprint', fingerprint);
-      
+
       return fingerprint;
 
     } catch (error) {
       console.error('Error getting device fingerprint:', error);
-      
+
       const storedFingerprint = localStorage.getItem('deviceFingerprint');
       if (storedFingerprint) {
         return storedFingerprint;
@@ -155,7 +172,7 @@ const StudentAttendance_Page = () => {
 
       const basicFingerprint = `basic_${hash.toString(36)}`;
       localStorage.setItem('deviceFingerprint', basicFingerprint);
-      
+
       return basicFingerprint;
     }
   };
