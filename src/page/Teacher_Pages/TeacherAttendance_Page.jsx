@@ -35,35 +35,11 @@ const TeacherAttendance_Page = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
-  // Add these state variables at the top of the component
+
+  // QR Auto-refresh states
   const [qrExpiryTime, setQrExpiryTime] = useState(null);
   const [qrRefreshInterval, setQrRefreshInterval] = useState(null);
   const [currentQrCode, setCurrentQrCode] = useState('');
-
-  // Add this useEffect for QR auto-refresh
-  useEffect(() => {
-    if (showQRModal) {
-      // Generate first QR immediately
-      handleQRGeneration();
-
-      // Set interval to refresh QR every 40 seconds
-      const interval = setInterval(() => {
-        handleQRGeneration();
-      }, 40000);
-
-      setQrRefreshInterval(interval);
-
-      return () => {
-        if (interval) clearInterval(interval);
-      };
-    } else {
-      // Clear interval when modal closes
-      if (qrRefreshInterval) {
-        clearInterval(qrRefreshInterval);
-        setQrRefreshInterval(null);
-      }
-    }
-  }, [showQRModal]);
 
   // Sorting states
   const [sortConfig, setSortConfig] = useState({
@@ -89,6 +65,31 @@ const TeacherAttendance_Page = () => {
       setSelectedSubject(subjectsWithAttendance[0].id)
     }
   }, [subjectsWithAttendance, selectedSubject])
+
+  // QR Auto-refresh useEffect
+  useEffect(() => {
+    if (showQRModal) {
+      // Generate first QR immediately
+      handleQRGeneration();
+      
+      // Set interval to refresh QR every 40 seconds
+      const interval = setInterval(() => {
+        handleQRGeneration();
+      }, 40000);
+      
+      setQrRefreshInterval(interval);
+      
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    } else {
+      // Clear interval when modal closes
+      if (qrRefreshInterval) {
+        clearInterval(qrRefreshInterval);
+        setQrRefreshInterval(null);
+      }
+    }
+  }, [showQRModal]);
 
   // Format date to YYYY-MM-DD
   const formatDate = (date) => {
@@ -293,10 +294,10 @@ const TeacherAttendance_Page = () => {
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 40000); // 40 seconds from now
-
+    
     // Generate a dynamic code with timestamp
     const dynamicCode = `${attendanceForm.uniqueCode}_${currentTime.getTime()}`;
-
+    
     const qrData = JSON.stringify({
       type: 'attendance',
       subject: attendanceForm.subject,
@@ -316,13 +317,12 @@ const TeacherAttendance_Page = () => {
 
     setCurrentQrCode(qrData);
     setQrExpiryTime(expiryTime);
-
+    
     toast.info('QR code refreshed. Previous codes are now invalid.', {
       autoClose: 2000
     });
   };
 
-  // Update the handleGenerateQR function
   const handleGenerateQR = async () => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
@@ -389,30 +389,6 @@ const TeacherAttendance_Page = () => {
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
   };
-
-  // Update the generateQRData function to remove location
-  const generateQRData = () => {
-    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
-    const currentTime = new Date().toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-    const currentDate = new Date().toISOString().split('T')[0];
-
-    return JSON.stringify({
-      type: 'attendance',
-      subject: attendanceForm.subject,
-      code: attendanceForm.uniqueCode,
-      subjectName: subjectName,
-      timestamp: new Date().toISOString(),
-      attendanceTime: currentTime,
-      attendanceDate: currentDate,
-      redirectUrl: `${window.location.origin}/student-attendance`
-    });
-  };
-
-  const qrData = generateQRData();
 
   // Handle student name click
   const handleStudentClick = (student) => {
@@ -953,7 +929,7 @@ const TeacherAttendance_Page = () => {
                     />
                   )}
                 </div>
-
+                
                 <div className="text-center mb-4">
                   <p className="text-sm text-gray-600">
                     This QR refreshes automatically every 40 seconds

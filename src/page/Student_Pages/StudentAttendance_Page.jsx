@@ -42,6 +42,19 @@ const StudentAttendance_Page = () => {
     if (locationHook.state?.qrData) {
       try {
         const parsedData = JSON.parse(locationHook.state.qrData);
+        
+        // Check if QR code is expired
+        if (parsedData.expiryTimestamp) {
+          const expiryTime = new Date(parsedData.expiryTimestamp);
+          const currentTime = new Date();
+          
+          if (currentTime > expiryTime) {
+            toast.error('QR code has expired. Please scan a fresh QR code.');
+            navigate('/scan-attendance');
+            return;
+          }
+        }
+        
         setQrData(parsedData);
         setFormData(prev => ({
           ...prev,
@@ -82,11 +95,11 @@ const StudentAttendance_Page = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    const processedValue = (name === 'studentName' || name === 'rollNo')
+    
+    const processedValue = (name === 'studentName' || name === 'rollNo') 
       ? capitalizeText(value)
       : value;
-
+    
     setFormData(prev => ({
       ...prev,
       [name]: processedValue
@@ -97,14 +110,14 @@ const StudentAttendance_Page = () => {
   const getUniqueDeviceFingerprint = async () => {
     try {
       const storedFingerprint = localStorage.getItem('deviceFingerprint');
-
+      
       if (storedFingerprint) {
         return storedFingerprint;
       }
 
       const agent = await FingerprintJS.load();
       const result = await agent.get();
-
+      
       const persistentData = {
         visitorId: result.visitorId,
         userAgent: navigator.userAgent,
@@ -126,12 +139,12 @@ const StudentAttendance_Page = () => {
 
       const fingerprint = `device_${hash.toString(36)}`;
       localStorage.setItem('deviceFingerprint', fingerprint);
-
+      
       return fingerprint;
 
     } catch (error) {
       console.error('Error getting device fingerprint:', error);
-
+      
       const storedFingerprint = localStorage.getItem('deviceFingerprint');
       if (storedFingerprint) {
         return storedFingerprint;
@@ -155,7 +168,7 @@ const StudentAttendance_Page = () => {
 
       const basicFingerprint = `basic_${hash.toString(36)}`;
       localStorage.setItem('deviceFingerprint', basicFingerprint);
-
+      
       return basicFingerprint;
     }
   };
@@ -177,7 +190,7 @@ const StudentAttendance_Page = () => {
     if (qrData.expiryTimestamp) {
       const expiryTime = new Date(qrData.expiryTimestamp);
       const currentTime = new Date();
-
+      
       if (currentTime > expiryTime) {
         toast.error('QR code has expired. Please scan a fresh QR code.');
         navigate('/scan-attendance');
@@ -187,7 +200,7 @@ const StudentAttendance_Page = () => {
 
     // Extract original code from dynamic code
     const submittedCode = qrData.originalCode || qrData.code;
-
+    
     // If code contains timestamp (format: code_timestamp), extract original
     const codeParts = submittedCode.split('_');
     const originalCode = codeParts.length > 1 ? codeParts[0] : submittedCode;
@@ -304,6 +317,11 @@ const StudentAttendance_Page = () => {
                 className="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-md focus:outline-none cursor-not-allowed"
               />
               <p className="mt-1 text-xs text-gray-500">This code is automatically filled from the QR code</p>
+              {qrData?.expiryTimestamp && (
+                <p className="mt-1 text-xs text-green-600">
+                  ✓ This QR code is valid and fresh
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}
@@ -336,6 +354,7 @@ const StudentAttendance_Page = () => {
               <li>• Make sure you're in the correct class session</li>
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
+              <li>• QR codes expire after 40 seconds</li>
             </ul>
           </div>
         </div>
