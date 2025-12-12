@@ -71,14 +71,14 @@ const TeacherAttendance_Page = () => {
     if (showQRModal) {
       // Generate first QR immediately
       handleQRGeneration();
-      
+
       // Set interval to refresh QR every 40 seconds
       const interval = setInterval(() => {
         handleQRGeneration();
       }, 40000);
-      
+
       setQrRefreshInterval(interval);
-      
+
       return () => {
         if (interval) clearInterval(interval);
       };
@@ -285,7 +285,8 @@ const TeacherAttendance_Page = () => {
   };
 
   // New function to generate QR with timestamp
-  const handleQRGeneration = () => {
+  // Silent refresh version
+  const handleQRGeneration = (isInitial = false) => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
       return;
@@ -294,10 +295,10 @@ const TeacherAttendance_Page = () => {
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 40000); // 40 seconds from now
-    
+
     // Generate a dynamic code with timestamp
     const dynamicCode = `${attendanceForm.uniqueCode}_${currentTime.getTime()}`;
-    
+
     const qrData = JSON.stringify({
       type: 'attendance',
       subject: attendanceForm.subject,
@@ -317,10 +318,14 @@ const TeacherAttendance_Page = () => {
 
     setCurrentQrCode(qrData);
     setQrExpiryTime(expiryTime);
-    
-    toast.info('QR code refreshed. Previous codes are now invalid.', {
-      autoClose: 2000
-    });
+
+    // Only show toast for initial creation, not for auto-refresh
+    if (isInitial) {
+      toast.success('QR code generated successfully!', {
+        autoClose: 2000
+      });
+    }
+    // No toast for auto-refresh - silent refresh
   };
 
   const handleGenerateQR = async () => {
@@ -331,6 +336,11 @@ const TeacherAttendance_Page = () => {
 
     setShowCreateModal(false);
     setShowQRModal(true);
+
+    // Show success message when modal opens
+    toast.success('QR code generated successfully!', {
+      autoClose: 2000
+    });
   };
 
   // Handle delete attendance
@@ -929,15 +939,15 @@ const TeacherAttendance_Page = () => {
                     />
                   )}
                 </div>
-                
-                <div className="text-center mb-4">
+
+                {/* <div className="text-center mb-4">
                   <p className="text-sm text-gray-600">
                     This QR refreshes automatically every 40 seconds
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     Previous QR codes become invalid
                   </p>
-                </div>
+                </div> */}
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
                 <button

@@ -378,7 +378,7 @@ const QRScanner_Page = () => {
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
             <li>• <strong>Best Results:</strong> Use rear camera in well-lit area</li>
-            <li>• <strong>Note:</strong> QR codes expire after 40 seconds</li>
+            {/* <li>• <strong>Note:</strong> QR codes expire after 40 seconds</li> */}
           </ul>
         </div>
       </div>

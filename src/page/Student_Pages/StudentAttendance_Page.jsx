@@ -354,7 +354,7 @@ const StudentAttendance_Page = () => {
               <li>• Make sure you're in the correct class session</li>
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
-              <li>• QR codes expire after 40 seconds</li>
+              {/* <li>• QR codes expire after 40 seconds</li> */}
             </ul>
           </div>
         </div>
