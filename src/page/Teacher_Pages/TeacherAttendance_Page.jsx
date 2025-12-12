@@ -921,7 +921,7 @@ const TeacherAttendance_Page = () => {
                 <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-green-600 font-medium">Live</span>
+                  {/* <span className="text-xs text-green-600 font-medium">Live</span> */}
                 </div>
               </div>
               <div className="p-6 flex flex-col items-center">

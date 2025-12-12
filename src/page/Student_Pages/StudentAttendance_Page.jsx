@@ -317,11 +317,11 @@ const StudentAttendance_Page = () => {
                 className="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-md focus:outline-none cursor-not-allowed"
               />
               <p className="mt-1 text-xs text-gray-500">This code is automatically filled from the QR code</p>
-              {qrData?.expiryTimestamp && (
+              {/* {qrData?.expiryTimestamp && (
                 <p className="mt-1 text-xs text-green-600">
                   ✓ This QR code is valid and fresh
                 </p>
-              )}
+              )} */}
             </div>
 
             {/* Submit Button */}
