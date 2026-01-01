@@ -16,20 +16,20 @@ const QRScanner_Page = () => {
   const scanInterval = useRef(null);
 
   // Enhanced QR data parsing with expiry check
+  // Enhanced QR data parsing with immediate expiry check
   const parseQRData = (qrDataString) => {
     if (!qrDataString) {
       throw new Error('Empty QR code data');
     }
 
-    console.log('QR Data received:', qrDataString); // Debug log
+    console.log('QR Data for parsing:', qrDataString);
 
-    // Try to parse as URL first
+    // Try to parse as URL first (new simplified format)
     try {
-      // Check if it's a URL
       const url = new URL(qrDataString);
       const urlParams = new URLSearchParams(url.search);
 
-      // Check expiry
+      // Already checked expiry in scanQRCode, but double-check here
       const expiryTimestamp = urlParams.get('expiry');
       if (expiryTimestamp) {
         const expiryTime = new Date(parseInt(expiryTimestamp));
@@ -40,7 +40,6 @@ const QRScanner_Page = () => {
         }
       }
 
-      // Build parsed data from URL parameters
       const code = urlParams.get('code');
       if (!code) {
         throw new Error('Invalid QR code: No attendance code found');
@@ -49,7 +48,7 @@ const QRScanner_Page = () => {
       const parsedData = {
         type: 'attendance',
         code: code,
-        originalCode: code, // Same as code since we're not using timestamp in code anymore
+        originalCode: code,
         subject: urlParams.get('subject') || 'Unknown Subject',
         subjectName: urlParams.get('subjectName') || 'Unknown Subject',
         attendanceTime: new Date().toLocaleTimeString('en-US', {
@@ -64,46 +63,88 @@ const QRScanner_Page = () => {
 
       return parsedData;
     } catch (error) {
-      console.log('Not a URL format, trying other formats:', error);
+      console.log('Not a URL format, trying JSON:', error);
     }
 
-    // If not a URL, try other formats (keeping your existing code for backward compatibility)
+    // Try to parse as JSON (for backward compatibility)
     try {
-      // Try to parse as JSON (for backward compatibility)
-      if (qrDataString.trim().startsWith('{') && qrDataString.trim().endsWith('}')) {
-        const parsedData = JSON.parse(qrDataString);
+      const parsedData = JSON.parse(qrDataString);
 
-        // Validate QR code expiry
-        if (parsedData.expiryTimestamp) {
-          const expiryTime = new Date(parsedData.expiryTimestamp);
+      // Validate QR code expiry (double-check)
+      if (parsedData.expiryTimestamp) {
+        const expiryTime = new Date(parsedData.expiryTimestamp);
+        const currentTime = new Date();
+
+        if (currentTime > expiryTime) {
+          throw new Error('QR code has expired. Please scan a fresh QR code.');
+        }
+      }
+
+      // Validate required fields for attendance
+      if (parsedData.type === 'attendance') {
+        const validatedData = {
+          type: 'attendance',
+          code: parsedData.code || parsedData.id || qrDataString,
+          originalCode: parsedData.originalCode || parsedData.code,
+          subject: parsedData.subject || 'Unknown Subject',
+          subjectName: parsedData.subjectName || parsedData.subject || 'Unknown Subject',
+          attendanceTime: parsedData.attendanceTime || parsedData.time || new Date().toLocaleTimeString(),
+          attendanceDate: parsedData.attendanceDate || parsedData.date || new Date().toISOString().split('T')[0],
+          timestamp: parsedData.timestamp || new Date().toISOString(),
+          expiryTimestamp: parsedData.expiryTimestamp,
+        };
+
+        return validatedData;
+      }
+
+      // If it's JSON but not attendance type, return as is
+      return parsedData;
+    } catch (error) {
+      console.log('Not JSON format, trying other formats:', error);
+    }
+
+    // Check for expired QR codes in URL format (alternative)
+    if (qrDataString.includes('expiry=')) {
+      try {
+        const urlParams = new URLSearchParams(qrDataString.includes('?')
+          ? qrDataString.split('?')[1]
+          : qrDataString
+        );
+
+        const expiryTimestamp = urlParams.get('expiry');
+        if (expiryTimestamp) {
+          const expiryTime = new Date(parseInt(expiryTimestamp));
           const currentTime = new Date();
 
           if (currentTime > expiryTime) {
             throw new Error('QR code has expired. Please scan a fresh QR code.');
           }
         }
-
-        // Validate required fields for attendance
-        if (parsedData.type === 'attendance') {
-          const validatedData = {
-            type: 'attendance',
-            code: parsedData.code || parsedData.id || qrDataString,
-            originalCode: parsedData.originalCode || parsedData.code,
-            subject: parsedData.subject || 'Unknown Subject',
-            subjectName: parsedData.subjectName || parsedData.subject || 'Unknown Subject',
-            attendanceTime: parsedData.attendanceTime || parsedData.time || new Date().toLocaleTimeString(),
-            attendanceDate: parsedData.attendanceDate || parsedData.date || new Date().toISOString().split('T')[0],
-            timestamp: parsedData.timestamp || new Date().toISOString(),
-            expiryTimestamp: parsedData.expiryTimestamp,
-          };
-
-          return validatedData;
-        }
-
-        return parsedData;
+      } catch (urlError) {
+        console.log('Error checking alternative URL expiry:', urlError);
       }
-    } catch (jsonError) {
-      console.log('Not JSON format:', jsonError);
+    }
+
+    // Check if it's URL encoded data (alternative format)
+    if (qrDataString.includes('=') && (qrDataString.includes('?') || qrDataString.includes('&'))) {
+      try {
+        const urlParams = new URLSearchParams(qrDataString.includes('?')
+          ? qrDataString.split('?')[1]
+          : qrDataString
+        );
+
+        return {
+          type: 'attendance',
+          code: urlParams.get('code') || urlParams.get('id') || qrDataString,
+          subject: urlParams.get('subject') || 'Unknown Subject',
+          subjectName: urlParams.get('subjectName') || urlParams.get('subject') || 'Unknown Subject',
+          attendanceTime: urlParams.get('attendanceTime') || urlParams.get('time') || new Date().toLocaleTimeString(),
+          attendanceDate: urlParams.get('attendanceDate') || urlParams.get('date') || new Date().toISOString().split('T')[0],
+          timestamp: new Date().toISOString(),
+        };
+      } catch (urlError) {
+        console.log('Not a URL format, using plain text');
+      }
     }
 
     // Plain text fallback
@@ -186,6 +227,7 @@ const QRScanner_Page = () => {
   };
 
   // Enhanced QR code scanning from video stream
+  // Enhanced QR code scanning from video stream with immediate expiry check
   const scanQRCode = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -214,13 +256,84 @@ const QRScanner_Page = () => {
       setScanResult(qrCode.data);
       setIsProcessing(true);
 
+      // STOP CAMERA IMMEDIATELY when QR is detected
       stopCameraScan();
 
       try {
+        // FIRST: Check if it's a URL with expiry parameter
+        let isExpired = false;
+        let expiryMessage = '';
+
+        // Check for URL format first (new simplified format)
+        if (qrCode.data.includes('expiry=')) {
+          try {
+            const url = new URL(qrCode.data);
+            const urlParams = new URLSearchParams(url.search);
+            const expiryTimestamp = urlParams.get('expiry');
+
+            if (expiryTimestamp) {
+              const expiryTime = new Date(parseInt(expiryTimestamp));
+              const currentTime = new Date();
+
+              if (currentTime > expiryTime) {
+                isExpired = true;
+                expiryMessage = 'QR code has expired. Please ask for a fresh QR code.';
+              }
+            }
+          } catch (urlError) {
+            console.log('Error checking URL expiry:', urlError);
+          }
+        }
+
+        // Check for JSON format (old format)
+        if (!isExpired && qrCode.data.trim().startsWith('{') && qrCode.data.trim().endsWith('}')) {
+          try {
+            const parsedJson = JSON.parse(qrCode.data);
+            if (parsedJson.expiryTimestamp) {
+              const expiryTime = new Date(parsedJson.expiryTimestamp);
+              const currentTime = new Date();
+
+              if (currentTime > expiryTime) {
+                isExpired = true;
+                expiryMessage = 'QR code has expired. Please ask for a fresh QR code.';
+              }
+            }
+          } catch (jsonError) {
+            console.log('Error checking JSON expiry:', jsonError);
+          }
+        }
+
+        // IF QR IS EXPIRED - Show popup and restart camera
+        if (isExpired) {
+          toast.error(`❌ ${expiryMessage}`, {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+
+          // Clear scan result
+          setScanResult(null);
+          setIsProcessing(false);
+
+          // Restart scanning after delay
+          setTimeout(() => {
+            startCameraScan();
+          }, 3000);
+
+          return; // Stop further processing
+        }
+
+        // IF QR IS NOT EXPIRED - Process normally
         const parsedData = parseQRData(qrCode.data);
 
         // Show scan success message
-        toast.success('✓ QR Code scanned successfully!');
+        toast.success('✓ QR Code scanned successfully!', {
+          position: "top-center",
+          autoClose: 1500,
+        });
 
         // Small delay for better UX
         setTimeout(() => {
@@ -231,15 +344,21 @@ const QRScanner_Page = () => {
         console.error('Error parsing QR data:', parseError);
 
         // Show specific error messages
+        let errorMessage = 'Invalid QR code format';
         if (parseError.message.includes('expired')) {
-          toast.error('❌ QR code has expired! Please ask for a fresh QR code.');
-        } else {
-          toast.error('Invalid QR code format');
+          errorMessage = '❌ QR code has expired! Please ask for a fresh QR code.';
         }
+
+        toast.error(errorMessage, {
+          position: "top-center",
+          autoClose: 3000,
+        });
 
         setIsProcessing(false);
         // Restart scanning if parsing fails
-        setTimeout(startCameraScan, 2000);
+        setTimeout(() => {
+          startCameraScan();
+        }, 2000);
       }
     }
   };
