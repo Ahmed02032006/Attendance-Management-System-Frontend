@@ -226,7 +226,6 @@ const QRScanner_Page = () => {
     setIsScanning(false);
   };
 
-  // Enhanced QR code scanning from video stream
   // Enhanced QR code scanning from video stream with immediate expiry check
   const scanQRCode = () => {
     const video = videoRef.current;
@@ -305,8 +304,8 @@ const QRScanner_Page = () => {
 
         // IF QR IS EXPIRED - Show popup and restart camera
         if (isExpired) {
-          toast.error(`❌ ${expiryMessage}`, {
-            position: "top-center",
+          toast.error(`${expiryMessage}`, {
+            // position: "top-center",
             autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: true,
@@ -330,8 +329,8 @@ const QRScanner_Page = () => {
         const parsedData = parseQRData(qrCode.data);
 
         // Show scan success message
-        toast.success('✓ QR Code scanned successfully!', {
-          position: "top-center",
+        toast.success('QR Code scanned successfully!', {
+          // position: "top-center",
           autoClose: 1500,
         });
 
@@ -346,11 +345,11 @@ const QRScanner_Page = () => {
         // Show specific error messages
         let errorMessage = 'Invalid QR code format';
         if (parseError.message.includes('expired')) {
-          errorMessage = '❌ QR code has expired! Please ask for a fresh QR code.';
+          errorMessage = 'QR code has expired! Please ask for a fresh QR code.';
         }
 
         toast.error(errorMessage, {
-          position: "top-center",
+          // position: "top-center",
           autoClose: 3000,
         });
 
