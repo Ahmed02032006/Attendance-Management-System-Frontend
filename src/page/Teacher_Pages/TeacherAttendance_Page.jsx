@@ -935,13 +935,15 @@ const TeacherAttendance_Page = () => {
           <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className={`bg-white rounded-lg shadow-xl ${isQrZoomed ? 'w-full max-w-2xl' : 'w-full max-w-sm'}`}>
               <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     {/* <span className="text-xs text-green-600 font-medium">Live</span> */}
                   </div>
-                <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
+                </div>
                 <div className="flex items-center space-x-4">
-                  
+
                   {/* Zoom Toggle Button */}
                   <button
                     onClick={toggleQrZoom}
@@ -957,7 +959,7 @@ const TeacherAttendance_Page = () => {
                 </div>
               </div>
               <div className="p-6 flex flex-col items-center">
-                <div 
+                <div
                   className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
                   id="qr-code-container"
                 >
