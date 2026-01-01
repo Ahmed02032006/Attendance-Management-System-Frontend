@@ -979,13 +979,13 @@ const TeacherAttendance_Page = () => {
                   <p className="text-sm text-gray-600">
                     Students can scan this QR code to mark their attendance
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  {/* <p className="text-xs text-gray-500 mt-1">
                     {isQrZoomed ? "Click minimize icon to reduce size" : "Click maximize icon to enlarge"}
-                  </p>
+                  </p> */}
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-between">
-                <button
+                {/* <button
                   onClick={toggleQrZoom}
                   className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors flex items-center space-x-2"
                 >
@@ -1000,7 +1000,7 @@ const TeacherAttendance_Page = () => {
                       <span>Maximize</span>
                     </>
                   )}
-                </button>
+                </button> */}
                 <button
                   onClick={() => {
                     setShowQRModal(false);
