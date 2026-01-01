@@ -69,17 +69,31 @@ const StudentAttendance_Page = () => {
       const code = urlParams.get('code');
       const subject = urlParams.get('subject');
       const subjectName = urlParams.get('subjectName');
+      const expiry = urlParams.get('expiry');
 
       if (code) {
+        // Check expiry
+        if (expiry) {
+          const expiryTime = new Date(parseInt(expiry));
+          const currentTime = new Date();
+
+          if (currentTime > expiryTime) {
+            toast.error('QR code has expired. Please scan a fresh QR code.');
+            navigate('/scan-attendance');
+            return;
+          }
+        }
+
         setQrData({
           code,
           subject: subject || 'Unknown Subject',
           subjectName: subjectName || 'Unknown Subject Name',
-          type: 'attendance'
+          type: 'attendance',
+          expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null
         });
         setFormData(prev => ({
           ...prev,
-          uniqueCode: code,
+          uniqueCode: code, // Use the original code
         }));
       } else {
         toast.error('No attendance code found');

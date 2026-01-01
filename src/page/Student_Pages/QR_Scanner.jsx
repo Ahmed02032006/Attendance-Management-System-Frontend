@@ -21,95 +21,101 @@ const QRScanner_Page = () => {
       throw new Error('Empty QR code data');
     }
 
-    // Try to parse as JSON first
-    try {
-      const parsedData = JSON.parse(qrDataString);
+    console.log('QR Data received:', qrDataString); // Debug log
 
-      // Validate QR code expiry
-      if (parsedData.expiryTimestamp) {
-        const expiryTime = new Date(parsedData.expiryTimestamp);
+    // Try to parse as URL first
+    try {
+      // Check if it's a URL
+      const url = new URL(qrDataString);
+      const urlParams = new URLSearchParams(url.search);
+
+      // Check expiry
+      const expiryTimestamp = urlParams.get('expiry');
+      if (expiryTimestamp) {
+        const expiryTime = new Date(parseInt(expiryTimestamp));
         const currentTime = new Date();
-        
+
         if (currentTime > expiryTime) {
           throw new Error('QR code has expired. Please scan a fresh QR code.');
         }
       }
 
-      // Validate required fields for attendance
-      if (parsedData.type === 'attendance') {
-        const validatedData = {
-          type: 'attendance',
-          code: parsedData.code || parsedData.id || qrDataString,
-          originalCode: parsedData.originalCode || parsedData.code,
-          subject: parsedData.subject || 'Unknown Subject',
-          subjectName: parsedData.subjectName || parsedData.subject || 'Unknown Subject',
-          attendanceTime: parsedData.attendanceTime || parsedData.time || new Date().toLocaleTimeString(),
-          attendanceDate: parsedData.attendanceDate || parsedData.date || new Date().toISOString().split('T')[0],
-          timestamp: parsedData.timestamp || new Date().toISOString(),
-          expiryTimestamp: parsedData.expiryTimestamp,
-        };
-
-        return validatedData;
+      // Build parsed data from URL parameters
+      const code = urlParams.get('code');
+      if (!code) {
+        throw new Error('Invalid QR code: No attendance code found');
       }
 
-      // If it's JSON but not attendance type, return as is
+      const parsedData = {
+        type: 'attendance',
+        code: code,
+        originalCode: code, // Same as code since we're not using timestamp in code anymore
+        subject: urlParams.get('subject') || 'Unknown Subject',
+        subjectName: urlParams.get('subjectName') || 'Unknown Subject',
+        attendanceTime: new Date().toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        }),
+        attendanceDate: new Date().toISOString().split('T')[0],
+        timestamp: urlParams.get('timestamp') ? new Date(parseInt(urlParams.get('timestamp'))).toISOString() : new Date().toISOString(),
+        expiryTimestamp: expiryTimestamp ? new Date(parseInt(expiryTimestamp)).toISOString() : null,
+      };
+
       return parsedData;
     } catch (error) {
-      // Check for expired QR codes in URL format
-      if (qrDataString.includes('expiry=')) {
-        try {
-          const urlParams = new URLSearchParams(qrDataString.includes('?')
-            ? qrDataString.split('?')[1]
-            : qrDataString
-          );
-          
-          const expiryTimestamp = urlParams.get('expiry');
-          if (expiryTimestamp) {
-            const expiryTime = new Date(expiryTimestamp);
-            const currentTime = new Date();
-            
-            if (currentTime > expiryTime) {
-              throw new Error('QR code has expired. Please scan a fresh QR code.');
-            }
-          }
-        } catch (urlError) {
-          console.log('Error checking expiry:', urlError);
-        }
-      }
-
-      // Check if it's URL encoded data
-      if (qrDataString.includes('=') && (qrDataString.includes('?') || qrDataString.includes('&'))) {
-        try {
-          const urlParams = new URLSearchParams(qrDataString.includes('?')
-            ? qrDataString.split('?')[1]
-            : qrDataString
-          );
-
-          return {
-            type: 'attendance',
-            code: urlParams.get('code') || urlParams.get('id') || qrDataString,
-            subject: urlParams.get('subject') || 'Unknown Subject',
-            subjectName: urlParams.get('subjectName') || urlParams.get('subject') || 'Unknown Subject',
-            attendanceTime: urlParams.get('attendanceTime') || urlParams.get('time') || new Date().toLocaleTimeString(),
-            attendanceDate: urlParams.get('attendanceDate') || urlParams.get('date') || new Date().toISOString().split('T')[0],
-            timestamp: new Date().toISOString(),
-          };
-        } catch (urlError) {
-          console.log('Not a URL format, using plain text');
-        }
-      }
-
-      // Plain text fallback
-      return {
-        type: 'attendance',
-        code: qrDataString,
-        subject: 'Scanned Subject',
-        subjectName: 'Scanned Subject',
-        attendanceTime: new Date().toLocaleTimeString(),
-        attendanceDate: new Date().toISOString().split('T')[0],
-        timestamp: new Date().toISOString(),
-      };
+      console.log('Not a URL format, trying other formats:', error);
     }
+
+    // If not a URL, try other formats (keeping your existing code for backward compatibility)
+    try {
+      // Try to parse as JSON (for backward compatibility)
+      if (qrDataString.trim().startsWith('{') && qrDataString.trim().endsWith('}')) {
+        const parsedData = JSON.parse(qrDataString);
+
+        // Validate QR code expiry
+        if (parsedData.expiryTimestamp) {
+          const expiryTime = new Date(parsedData.expiryTimestamp);
+          const currentTime = new Date();
+
+          if (currentTime > expiryTime) {
+            throw new Error('QR code has expired. Please scan a fresh QR code.');
+          }
+        }
+
+        // Validate required fields for attendance
+        if (parsedData.type === 'attendance') {
+          const validatedData = {
+            type: 'attendance',
+            code: parsedData.code || parsedData.id || qrDataString,
+            originalCode: parsedData.originalCode || parsedData.code,
+            subject: parsedData.subject || 'Unknown Subject',
+            subjectName: parsedData.subjectName || parsedData.subject || 'Unknown Subject',
+            attendanceTime: parsedData.attendanceTime || parsedData.time || new Date().toLocaleTimeString(),
+            attendanceDate: parsedData.attendanceDate || parsedData.date || new Date().toISOString().split('T')[0],
+            timestamp: parsedData.timestamp || new Date().toISOString(),
+            expiryTimestamp: parsedData.expiryTimestamp,
+          };
+
+          return validatedData;
+        }
+
+        return parsedData;
+      }
+    } catch (jsonError) {
+      console.log('Not JSON format:', jsonError);
+    }
+
+    // Plain text fallback
+    return {
+      type: 'attendance',
+      code: qrDataString,
+      subject: 'Scanned Subject',
+      subjectName: 'Scanned Subject',
+      attendanceTime: new Date().toLocaleTimeString(),
+      attendanceDate: new Date().toISOString().split('T')[0],
+      timestamp: new Date().toISOString(),
+    };
   };
 
   const navigateToAttendancePage = (qrData) => {
@@ -212,10 +218,10 @@ const QRScanner_Page = () => {
 
       try {
         const parsedData = parseQRData(qrCode.data);
-        
+
         // Show scan success message
         toast.success('✓ QR Code scanned successfully!');
-        
+
         // Small delay for better UX
         setTimeout(() => {
           navigateToAttendancePage(parsedData);
@@ -223,14 +229,14 @@ const QRScanner_Page = () => {
 
       } catch (parseError) {
         console.error('Error parsing QR data:', parseError);
-        
+
         // Show specific error messages
         if (parseError.message.includes('expired')) {
           toast.error('❌ QR code has expired! Please ask for a fresh QR code.');
         } else {
           toast.error('Invalid QR code format');
         }
-        
+
         setIsProcessing(false);
         // Restart scanning if parsing fails
         setTimeout(startCameraScan, 2000);
@@ -317,7 +323,7 @@ const QRScanner_Page = () => {
                         <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-green-400 opacity-50"></div>
                       </div>
                     </div>
-                    
+
                     {/* Scanning animation */}
                     <div className="absolute bottom-2 left-0 right-0 flex justify-center">
                       <div className="bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs">

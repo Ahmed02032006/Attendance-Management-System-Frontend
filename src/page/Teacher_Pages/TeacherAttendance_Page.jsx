@@ -299,33 +299,44 @@ const TeacherAttendance_Page = () => {
     // Generate a dynamic code with timestamp
     const dynamicCode = `${attendanceForm.uniqueCode}_${currentTime.getTime()}`;
 
-    const qrData = JSON.stringify({
-      type: 'attendance',
+    // Extract the original code (before underscore) for the URL
+    const originalCode = attendanceForm.uniqueCode;
+
+    // Create a simplified URL with query parameters instead of JSON
+    // This makes the QR code much less dense and easier to scan
+    const baseUrl = `${window.location.origin}/student-attendance`;
+
+    // Create URL with only essential parameters
+    const url = new URL(baseUrl);
+    url.searchParams.append('code', originalCode); // Use original code, not the timestamped one
+    url.searchParams.append('subject', attendanceForm.subject);
+    url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
+    url.searchParams.append('timestamp', currentTime.getTime()); // For uniqueness
+    url.searchParams.append('expiry', expiryTime.getTime()); // For expiry check
+
+    // Use the URL string as QR data - much simpler than JSON
+    const qrData = url.toString();
+
+    // Store the full data separately for internal use if needed
+    const fullQrData = {
+      url: qrData,
+      originalCode: originalCode,
       subject: attendanceForm.subject,
-      code: dynamicCode, // Use dynamic code with timestamp
-      originalCode: attendanceForm.uniqueCode, // Keep original for reference
       subjectName: subjectName,
-      timestamp: currentTime.toISOString(),
-      expiryTimestamp: expiryTime.toISOString(), // Add expiry timestamp
-      attendanceTime: currentTime.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      }),
-      attendanceDate: currentTime.toISOString().split('T')[0],
-      redirectUrl: `${window.location.origin}/student-attendance`
-    });
+      timestamp: currentTime.getTime(),
+      expiry: expiryTime.getTime()
+    };
 
     setCurrentQrCode(qrData);
     setQrExpiryTime(expiryTime);
 
-    // Only show toast for initial creation, not for auto-refresh
     if (isInitial) {
       toast.success('QR code generated successfully!', {
         autoClose: 2000
       });
     }
-    // No toast for auto-refresh - silent refresh
+
+    console.log('QR Data length:', qrData.length, 'characters'); // Debug log
   };
 
   const handleGenerateQR = async () => {
