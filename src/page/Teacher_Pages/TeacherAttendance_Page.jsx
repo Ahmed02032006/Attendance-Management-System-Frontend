@@ -936,7 +936,7 @@ const TeacherAttendance_Page = () => {
             <div className={`bg-white rounded-lg shadow-xl ${isQrZoomed ? 'w-full max-w-2xl' : 'w-full max-w-sm'}`}>
               <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <div className='flex items-center justify-between'>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 space-y-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     {/* <span className="text-xs text-green-600 font-medium">Live</span> */}
                   </div>
