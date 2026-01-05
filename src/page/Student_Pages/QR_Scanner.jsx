@@ -9,40 +9,61 @@ const QRScanner_Page = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState(true);
   const [scanResult, setScanResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isSupportedBrowser, setIsSupportedBrowser] = useState(true);
+  const [isChromeBrowser, setIsChromeBrowser] = useState(false);
   const navigate = useNavigate();
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const scanInterval = useRef(null);
 
-  // Check if the browser is mobile Google Chrome
-  const checkBrowserCompatibility = () => {
-    const userAgent = navigator.userAgent.toLowerCase();
+  // Strict Chrome detection only
+  const checkChromeBrowser = () => {
+    const userAgent = navigator.userAgent;
     
-    // Check for Chrome on Android (mobile)
-    const isMobileChrome = /chrome/.test(userAgent) && /android/.test(userAgent) && !/edg/.test(userAgent);
+    // Strict Chrome detection - only allow Google Chrome
+    // Check for Chrome (not Chromium-based browsers)
+    const isChrome = /Chrome/.test(userAgent) && /Google Inc/.test(navigator.vendor);
     
-    // Check for Chrome on iOS (mobile)
-    const isIOSChrome = /crios/.test(userAgent) || (/chrome/.test(userAgent) && /iphone|ipad|ipod/.test(userAgent));
+    // Even stricter: Check for Chrome mobile or desktop
+    const isChromeMobile = /Chrome/.test(userAgent) && /Mobile/.test(userAgent) && /Google Inc/.test(navigator.vendor);
+    const isChromeDesktop = /Chrome/.test(userAgent) && !/Mobile/.test(userAgent) && /Google Inc/.test(navigator.vendor);
     
-    // Check if it's mobile device
-    const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    // Check for Chrome iOS
+    const isCriOS = /CriOS/.test(userAgent);
     
-    // Check if it's desktop Chrome (for testing purposes - you might want to enable this during development)
-    const isDesktopChrome = /chrome/.test(userAgent) && !/edg/.test(userAgent) && !isMobileDevice;
+    // Final check: Must be Chrome (mobile, desktop, or iOS) AND from Google Inc.
+    const chromeDetected = (isChrome || isCriOS) && /Google Inc/.test(navigator.vendor);
     
-    // For production: Only allow mobile Chrome
-    // For development: You can enable desktop Chrome too by changing the condition
-    const supported = (isMobileChrome || isIOSChrome) || isDesktopChrome; // Remove || isDesktopChrome for production
+    console.log('Browser Detection:', {
+      userAgent: userAgent,
+      vendor: navigator.vendor,
+      isChrome: isChrome,
+      isChromeMobile: isChromeMobile,
+      isChromeDesktop: isChromeDesktop,
+      isCriOS: isCriOS,
+      chromeDetected: chromeDetected,
+      isChromeStrict: /Chrome/.test(userAgent) && !/Edge/.test(userAgent) && !/Edg/.test(userAgent) && !/OPR/.test(userAgent) && !/Brave/.test(userAgent) && !/YaBrowser/.test(userAgent) && !/SamsungBrowser/.test(userAgent) && /Google Inc/.test(navigator.vendor)
+    });
     
-    setIsSupportedBrowser(supported);
-    return supported;
+    // Strict Chrome only detection (blocks Brave, Edge, Opera, Samsung, etc.)
+    const strictChromeOnly = /Chrome/.test(userAgent) && 
+                            !/Edge/.test(userAgent) && 
+                            !/Edg/.test(userAgent) && 
+                            !/OPR/.test(userAgent) && 
+                            !/Opera/.test(userAgent) &&
+                            !/Brave/.test(userAgent) && 
+                            !/YaBrowser/.test(userAgent) && 
+                            !/SamsungBrowser/.test(userAgent) &&
+                            !/Vivaldi/.test(userAgent) &&
+                            !/Chromium/.test(userAgent) &&
+                            /Google Inc/.test(navigator.vendor);
+    
+    setIsChromeBrowser(strictChromeOnly || isCriOS);
+    return strictChromeOnly || isCriOS;
   };
 
   // Enhanced QR data parsing with immediate expiry check
   const parseQRData = (qrDataString) => {
-    // ... (keep your existing parseQRData function unchanged)
     if (!qrDataString) {
       throw new Error('Empty QR code data');
     }
@@ -330,7 +351,6 @@ const QRScanner_Page = () => {
         // IF QR IS EXPIRED - Show popup and restart camera
         if (isExpired) {
           toast.error(`${expiryMessage}`, {
-            // position: "top-center",
             autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: true,
@@ -355,7 +375,6 @@ const QRScanner_Page = () => {
 
         // Show scan success message
         toast.success('QR Code scanned successfully!', {
-          // position: "top-center",
           autoClose: 1500,
         });
 
@@ -374,7 +393,6 @@ const QRScanner_Page = () => {
         }
 
         toast.error(errorMessage, {
-          // position: "top-center",
           autoClose: 3000,
         });
 
@@ -398,10 +416,10 @@ const QRScanner_Page = () => {
 
   // Clean up on component unmount
   useEffect(() => {
-    // Check browser compatibility on component mount
-    const isCompatible = checkBrowserCompatibility();
-    if (!isCompatible) {
-      toast.error('This page only works on mobile Google Chrome browser', {
+    // Check Chrome browser on component mount
+    const isChrome = checkChromeBrowser();
+    if (!isChrome) {
+      toast.error('This page only works on Google Chrome browser', {
         autoClose: false,
         closeOnClick: false,
         draggable: false,
@@ -418,8 +436,8 @@ const QRScanner_Page = () => {
     };
   }, [cameraStream]);
 
-  // If browser is not supported, show information box instead of scanner
-  if (!isSupportedBrowser) {
+  // If browser is not Chrome, show information box instead of scanner
+  if (!isChromeBrowser) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg border border-red-200 p-8">
@@ -431,8 +449,17 @@ const QRScanner_Page = () => {
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Browser Not Supported</h2>
             <p className="text-gray-600 mb-6">
-              This attendance scanner only works on <strong>mobile Google Chrome</strong> browser.
+              This attendance scanner only works on <strong>Google Chrome browser</strong>.
             </p>
+            
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-red-700">
+                <strong>Detected Browser:</strong> {navigator.userAgent.split(')')[0].split('(')[1] || 'Unknown Browser'}
+              </p>
+              <p className="text-xs text-red-600 mt-1">
+                This browser is not Google Chrome. Please use Google Chrome to access this page.
+              </p>
+            </div>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -440,11 +467,11 @@ const QRScanner_Page = () => {
             <ol className="text-sm text-blue-700 space-y-2">
               <li className="flex items-start">
                 <span className="font-bold mr-2">1.</span>
-                Open <strong>Google Chrome</strong> on your mobile device
+                Download and install <strong>Google Chrome</strong> from your app store
               </li>
               <li className="flex items-start">
                 <span className="font-bold mr-2">2.</span>
-                Navigate to this page in Chrome
+                Open this page in <strong>Google Chrome</strong>
               </li>
               <li className="flex items-start">
                 <span className="font-bold mr-2">3.</span>
@@ -457,42 +484,46 @@ const QRScanner_Page = () => {
             </ol>
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <h3 className="font-medium text-yellow-800 mb-2">Why Mobile Chrome Only?</h3>
-            <ul className="text-sm text-yellow-700 space-y-1">
-              <li>• Consistent camera API support</li>
-              <li>• Better QR scanning performance</li>
-              <li>• Secure browser environment</li>
-              <li>• Optimized for mobile camera scanning</li>
-            </ul>
-          </div>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-500 mb-4">
-              Detected Browser: <span className="font-mono font-medium">{navigator.userAgent.split(')')[0].split('(')[1] || navigator.userAgent.substring(0, 50)}...</span>
-            </p>
-            
+          <div className="text-center space-y-4">
             <button
               onClick={() => {
-                // Try to open in Chrome if available
-                if (/android/i.test(navigator.userAgent)) {
-                  window.location.href = 'intent://scan/#Intent;scheme=chrome;package=com.android.chrome;end';
-                } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-                  window.location.href = 'googlechrome://';
+                // Different download links based on platform
+                const userAgent = navigator.userAgent.toLowerCase();
+                if (/android/.test(userAgent)) {
+                  window.open('https://play.google.com/store/apps/details?id=com.android.chrome', '_blank');
+                } else if (/iphone|ipad|ipod/.test(userAgent)) {
+                  window.open('https://apps.apple.com/app/apple-store/id535886823', '_blank');
                 } else {
                   window.open('https://www.google.com/chrome/', '_blank');
                 }
               }}
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0112 6.545h10.691A12 12 0 0012 0zM1.931 5.47A11.943 11.943 0 000 12c0 6.627 5.373 12 12 12s12-5.373 12-12c0-1.54-.29-3.011-.818-4.364h-9.182v5.455h5.183c-.317 1.559-1.17 2.921-2.348 3.893l3.953 6.848a11.93 11.93 0 01-7.488 2.648 11.943 11.943 0 01-10.573-6.287L7.698 14.58A5.476 5.476 0 016.545 12a5.476 5.476 0 011.153-3.38L1.931 5.47z"/>
               </svg>
-              Open in Chrome
+              Download Google Chrome
+            </button>
+
+            <button
+              onClick={() => {
+                // Try to detect if Chrome is already installed and open this URL in Chrome
+                window.location.href = 'googlechrome://' + window.location.href.replace(/^https?:\/\//, '');
+                setTimeout(() => {
+                  // Fallback to regular URL if Chrome app not available
+                  window.location.href = window.location.href;
+                }, 1000);
+              }}
+              className="w-full inline-flex items-center justify-center px-6 py-2 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg className="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Open in Chrome (if installed)
             </button>
 
             <p className="text-xs text-gray-400 mt-4">
-              If you're already using Chrome, please ensure you're on the latest version.
+              Note: Safari, Firefox, Brave, Edge, Opera, and other browsers are not supported.
             </p>
           </div>
         </div>
@@ -500,11 +531,20 @@ const QRScanner_Page = () => {
     );
   }
 
-  // Original scanner UI for supported browsers
+  // Original scanner UI for Chrome browser
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto max-w-md p-6">
         <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <div className="flex items-center justify-center mb-4">
+            <div className="bg-green-100 p-2 rounded-full">
+              <svg className="h-6 w-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0112 6.545h10.691A12 12 0 0012 0zM1.931 5.47A11.943 11.943 0 000 12c0 6.627 5.373 12 12 12s12-5.373 12-12c0-1.54-.29-3.011-.818-4.364h-9.182v5.455h5.183c-.317 1.559-1.17 2.921-2.348 3.893l3.953 6.848a11.93 11.93 0 01-7.488 2.648 11.943 11.943 0 01-10.573-6.287L7.698 14.58A5.476 5.476 0 016.545 12a5.476 5.476 0 011.153-3.38L1.931 5.47z"/>
+              </svg>
+            </div>
+            <span className="ml-2 text-sm text-green-600 font-medium">Google Chrome Detected ✓</span>
+          </div>
+
           <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
             Attendance Scanner
           </h2>
@@ -617,7 +657,7 @@ const QRScanner_Page = () => {
         <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
           <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
           <ul className="text-sm text-sky-700 space-y-1">
-            <li>• <strong>Browser:</strong> Mobile Google Chrome only</li>
+            <li>• <strong>Browser:</strong> Google Chrome only</li>
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
             <li>• <strong>Best Results:</strong> Use rear camera in well-lit area</li>
