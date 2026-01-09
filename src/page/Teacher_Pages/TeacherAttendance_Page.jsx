@@ -285,8 +285,30 @@ const TeacherAttendance_Page = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
-  // New function to generate QR with timestamp
-  // Silent refresh version
+  // NEW: Create a compact, Base64-encoded QR data
+  const createCompactQRData = () => {
+    const currentTime = new Date();
+    const expiryTime = new Date(currentTime.getTime() + 40000); // 40 seconds
+    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
+    
+    // Create a compact object with only essential data
+    const qrObject = {
+      c: attendanceForm.uniqueCode, // code
+      s: attendanceForm.subject,    // subject ID
+      n: subjectName || 'Unknown',  // subject name
+      t: currentTime.getTime(),     // timestamp
+      e: expiryTime.getTime()       // expiry timestamp
+    };
+    
+    // Convert to JSON and then Base64 for compactness
+    const jsonString = JSON.stringify(qrObject);
+    const base64Data = btoa(jsonString);
+    
+    // Use a very short URL path
+    return `${window.location.origin}/attendance-scan/${base64Data}`;
+  };
+
+  // UPDATED: Simplified QR generation
   const handleQRGeneration = (isInitial = false) => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
@@ -295,49 +317,22 @@ const TeacherAttendance_Page = () => {
 
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date();
-    const expiryTime = new Date(currentTime.getTime() + 40000); // 40 seconds from now
+    const expiryTime = new Date(currentTime.getTime() + 40000);
 
-    // Generate a dynamic code with timestamp
-    const dynamicCode = `${attendanceForm.uniqueCode}_${currentTime.getTime()}`;
-
-    // Extract the original code (before underscore) for the URL
-    const originalCode = attendanceForm.uniqueCode;
-
-    // Create a simplified URL with query parameters instead of JSON
-    // This makes the QR code much less dense and easier to scan
-    const baseUrl = `${window.location.origin}/student-attendance`;
-
-    // Create URL with only essential parameters
-    const url = new URL(baseUrl);
-    url.searchParams.append('code', originalCode); // Use original code, not the timestamped one
-    url.searchParams.append('subject', attendanceForm.subject);
-    url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('timestamp', currentTime.getTime()); // For uniqueness
-    url.searchParams.append('expiry', expiryTime.getTime()); // For expiry check
-
-    // Use the URL string as QR data - much simpler than JSON
-    const qrData = url.toString();
-
-    // Store the full data separately for internal use if needed
-    const fullQrData = {
-      url: qrData,
-      originalCode: originalCode,
-      subject: attendanceForm.subject,
-      subjectName: subjectName,
-      timestamp: currentTime.getTime(),
-      expiry: expiryTime.getTime()
-    };
-
+    // Generate compact QR data
+    const qrData = createCompactQRData();
+    
     setCurrentQrCode(qrData);
     setQrExpiryTime(expiryTime);
+
+    console.log('Compact QR Data:', qrData);
+    console.log('QR Data length:', qrData.length, 'characters');
 
     if (isInitial) {
       toast.success('QR code generated successfully!', {
         autoClose: 2000
       });
     }
-
-    console.log('QR Data length:', qrData.length, 'characters'); // Debug log
   };
 
   const handleGenerateQR = async () => {
@@ -349,7 +344,6 @@ const TeacherAttendance_Page = () => {
     setShowCreateModal(false);
     setShowQRModal(true);
 
-    // Show success message when modal opens
     toast.success('QR code generated successfully!', {
       autoClose: 2000
     });
@@ -929,7 +923,7 @@ const TeacherAttendance_Page = () => {
         )
       }
 
-      {/* QR Code Modal - UPDATED WITH ZOOM FEATURE */}
+      {/* QR Code Modal - OPTIMIZED FOR BETTER SCANNING */}
       {
         showQRModal && (
           <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -938,13 +932,11 @@ const TeacherAttendance_Page = () => {
                 <div className='flex items-center justify-between gap-3'>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    {/* <span className="text-xs text-green-600 font-medium">Live</span> */}
+                    <span className="text-xs text-green-600 font-medium">Live</span>
                   </div>
                   <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
                 </div>
                 <div className="flex items-center space-x-4">
-
-                  {/* Zoom Toggle Button */}
                   <button
                     onClick={toggleQrZoom}
                     className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
@@ -960,53 +952,47 @@ const TeacherAttendance_Page = () => {
               </div>
               <div className="p-6 flex flex-col items-center">
                 <div
-                  className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
+                  className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-4 border-white p-2 transition-all duration-300`}
                   id="qr-code-container"
                 >
                   {currentQrCode && (
                     <QRCodeSVG
                       value={currentQrCode}
                       size={isQrZoomed ? 350 : 250}
-                      level="L"
+                      level="H" // Higher error correction for better scanning
                       includeMargin={true}
                       bgColor="#FFFFFF"
                       fgColor="#000000"
                       id="qr-code-svg"
                       minVersion={1}
+                      imageSettings={{
+                        src: '', // Optional: Add a small logo in center if needed
+                        height: 24,
+                        width: 24,
+                        excavate: true,
+                      }}
                     />
                   )}
                 </div>
 
-                <div className="text-center">
+                <div className="text-center space-y-2">
                   <p className="text-sm text-gray-600">
                     Students can scan this QR code to mark their attendance
                   </p>
-                  {/* <p className="text-xs text-gray-500 mt-1">
-                    {isQrZoomed ? "Click minimize icon to reduce size" : "Click maximize icon to enlarge"}
-                  </p> */}
+                  <p className="text-xs text-gray-500">
+                    Code: {attendanceForm.uniqueCode} • Expires in 40 seconds
+                  </p>
+                  <div className="flex justify-center items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-600">QR updates automatically</span>
+                  </div>
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-                {/* <button
-                  onClick={toggleQrZoom}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors flex items-center space-x-2"
-                >
-                  {isQrZoomed ? (
-                    <>
-                      <FiMinimize2 className="w-4 h-4" />
-                      <span>Minimize</span>
-                    </>
-                  ) : (
-                    <>
-                      <FiMaximize2 className="w-4 h-4" />
-                      <span>Maximize</span>
-                    </>
-                  )}
-                </button> */}
                 <button
                   onClick={() => {
                     setShowQRModal(false);
-                    setIsQrZoomed(false); // Reset zoom state when closing
+                    setIsQrZoomed(false);
                     if (qrRefreshInterval) {
                       clearInterval(qrRefreshInterval);
                       setQrRefreshInterval(null);
