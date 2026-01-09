@@ -49,7 +49,7 @@ const StudentAttendance_Page = () => {
           const currentTime = new Date();
 
           if (currentTime > expiryTime) {
-            toast.error('QR code has expired. Please scan a fresh QR code.');
+            toast.error('QR code has expired (90 seconds limit). Please scan a fresh QR code.');
             navigate('/scan-attendance');
             return;
           }
@@ -65,11 +65,17 @@ const StudentAttendance_Page = () => {
         navigate('/');
       }
     } else {
+      // Updated to handle both old and new parameter names
       const urlParams = new URLSearchParams(locationHook.search);
-      const code = urlParams.get('code');
-      const subject = urlParams.get('subject');
-      const subjectName = urlParams.get('subjectName');
-      const expiry = urlParams.get('expiry');
+      
+      // Try new short parameter names first, fall back to old names
+      const code = urlParams.get('c') || urlParams.get('code');
+      const subject = urlParams.get('s') || urlParams.get('subject');
+      const subjectNameEncoded = urlParams.get('n') || urlParams.get('subjectName');
+      const expiry = urlParams.get('e') || urlParams.get('expiry');
+      
+      // Decode subject name if it was encoded
+      const subjectName = subjectNameEncoded ? decodeURIComponent(subjectNameEncoded) : 'Unknown Subject';
 
       if (code) {
         // Check expiry
@@ -78,7 +84,7 @@ const StudentAttendance_Page = () => {
           const currentTime = new Date();
 
           if (currentTime > expiryTime) {
-            toast.error('QR code has expired. Please scan a fresh QR code.');
+            toast.error('QR code has expired (90 seconds limit). Please scan a fresh QR code.');
             navigate('/scan-attendance');
             return;
           }
@@ -87,7 +93,7 @@ const StudentAttendance_Page = () => {
         setQrData({
           code,
           subject: subject || 'Unknown Subject',
-          subjectName: subjectName || 'Unknown Subject Name',
+          subjectName: subjectName,
           type: 'attendance',
           expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null
         });
@@ -206,7 +212,7 @@ const StudentAttendance_Page = () => {
       const currentTime = new Date();
 
       if (currentTime > expiryTime) {
-        toast.error('QR code has expired. Please scan a fresh QR code.');
+        toast.error('QR code has expired (90 seconds limit). Please scan a fresh QR code.');
         navigate('/scan-attendance');
         return;
       }
@@ -364,7 +370,7 @@ const StudentAttendance_Page = () => {
               <li>• Make sure you're in the correct class session</li>
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
-              {/* <li>• QR codes expire after 40 seconds</li> */}
+              <li>• QR codes expire after 90 seconds</li>
             </ul>
           </div>
         </div>

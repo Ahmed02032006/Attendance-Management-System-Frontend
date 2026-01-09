@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'react-toastify'
-import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2, FiMaximize2, FiMinimize2 } from 'react-icons/fi'
+import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2, FiMaximize2, FiMinimize2, FiClock } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
   deleteAttendance,
@@ -42,6 +42,9 @@ const TeacherAttendance_Page = () => {
   // QR Zoom state
   const [isQrZoomed, setIsQrZoomed] = useState(false);
 
+  // Countdown timer state
+  const [qrTimeLeft, setQrTimeLeft] = useState(90);
+
   // Sorting states
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -73,15 +76,26 @@ const TeacherAttendance_Page = () => {
       // Generate first QR immediately
       handleQRGeneration();
 
-      // Set interval to refresh QR every 40 seconds
+      // Set interval to refresh QR every 90 seconds
       const interval = setInterval(() => {
         handleQRGeneration();
-      }, 40000);
+      }, 90000); // 90000 ms = 90 seconds
 
       setQrRefreshInterval(interval);
 
+      // Start countdown timer
+      const timer = setInterval(() => {
+        setQrTimeLeft(prev => {
+          if (prev <= 1) {
+            return 90; // Reset to 90 when new QR is generated
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
       return () => {
         if (interval) clearInterval(interval);
+        if (timer) clearInterval(timer);
       };
     } else {
       // Clear interval when modal closes
@@ -89,8 +103,29 @@ const TeacherAttendance_Page = () => {
         clearInterval(qrRefreshInterval);
         setQrRefreshInterval(null);
       }
+      setQrTimeLeft(90); // Reset timer
     }
   }, [showQRModal]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    let timer;
+    if (showQRModal && qrTimeLeft > 0) {
+      timer = setInterval(() => {
+        setQrTimeLeft(prev => {
+          if (prev <= 1) {
+            // QR will auto-refresh via the main interval
+            return 90; // Reset to 90 when new QR is generated
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [showQRModal, qrTimeLeft]);
 
   // Format date to YYYY-MM-DD
   const formatDate = (date) => {
@@ -285,30 +320,7 @@ const TeacherAttendance_Page = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
-  // NEW: Create a compact, Base64-encoded QR data
-  const createCompactQRData = () => {
-    const currentTime = new Date();
-    const expiryTime = new Date(currentTime.getTime() + 40000); // 40 seconds
-    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
-    
-    // Create a compact object with only essential data
-    const qrObject = {
-      c: attendanceForm.uniqueCode, // code
-      s: attendanceForm.subject,    // subject ID
-      n: subjectName || 'Unknown',  // subject name
-      t: currentTime.getTime(),     // timestamp
-      e: expiryTime.getTime()       // expiry timestamp
-    };
-    
-    // Convert to JSON and then Base64 for compactness
-    const jsonString = JSON.stringify(qrObject);
-    const base64Data = btoa(jsonString);
-    
-    // Use a very short URL path
-    return `${window.location.origin}/attendance-scan/${base64Data}`;
-  };
-
-  // UPDATED: Simplified QR generation
+  // Silent refresh version - Updated to use less dense URL
   const handleQRGeneration = (isInitial = false) => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
@@ -317,16 +329,35 @@ const TeacherAttendance_Page = () => {
 
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date();
-    const expiryTime = new Date(currentTime.getTime() + 40000);
+    const expiryTime = new Date(currentTime.getTime() + 90000); // 90 seconds from now
 
-    // Generate compact QR data
-    const qrData = createCompactQRData();
+    // Generate a dynamic code with timestamp
+    const dynamicCode = `${attendanceForm.uniqueCode}_${currentTime.getTime()}`;
+
+    // Extract the original code (before underscore) for the URL
+    const originalCode = attendanceForm.uniqueCode;
+
+    // Create a VERY SIMPLE URL with minimal parameters
+    // This makes the QR code much smaller and easier to scan
+    const baseUrl = `${window.location.origin}/student-attendance`;
     
+    // Use only essential parameters in a specific order to minimize URL length
+    const url = new URL(baseUrl);
+    url.searchParams.append('c', originalCode); // Shortened parameter name
+    url.searchParams.append('s', attendanceForm.subject); // Shortened
+    url.searchParams.append('n', subjectName ? encodeURIComponent(subjectName.substring(0, 20)) : 'Subject'); // Limited length
+    url.searchParams.append('e', expiryTime.getTime()); // Expiry timestamp
+    url.searchParams.append('t', currentTime.getTime()); // Creation timestamp
+
+    // Use the URL string as QR data
+    const qrData = url.toString();
+
+    console.log('QR Data length:', qrData.length, 'characters');
+    console.log('QR Data:', qrData);
+
     setCurrentQrCode(qrData);
     setQrExpiryTime(expiryTime);
-
-    console.log('Compact QR Data:', qrData);
-    console.log('QR Data length:', qrData.length, 'characters');
+    setQrTimeLeft(90); // Reset countdown
 
     if (isInitial) {
       toast.success('QR code generated successfully!', {
@@ -344,6 +375,7 @@ const TeacherAttendance_Page = () => {
     setShowCreateModal(false);
     setShowQRModal(true);
 
+    // Show success message when modal opens
     toast.success('QR code generated successfully!', {
       autoClose: 2000
     });
@@ -923,7 +955,7 @@ const TeacherAttendance_Page = () => {
         )
       }
 
-      {/* QR Code Modal - OPTIMIZED FOR BETTER SCANNING */}
+      {/* QR Code Modal - UPDATED WITH ZOOM FEATURE AND COUNTDOWN */}
       {
         showQRModal && (
           <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -937,6 +969,13 @@ const TeacherAttendance_Page = () => {
                   <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
                 </div>
                 <div className="flex items-center space-x-4">
+                  {/* Countdown Timer */}
+                  <div className="bg-gray-100 px-3 py-1 rounded-full flex items-center space-x-2">
+                    <FiClock className="w-3 h-3 text-gray-600" />
+                    <span className="text-sm font-medium text-gray-700">{qrTimeLeft}s</span>
+                  </div>
+                  
+                  {/* Zoom Toggle Button */}
                   <button
                     onClick={toggleQrZoom}
                     className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
@@ -952,47 +991,40 @@ const TeacherAttendance_Page = () => {
               </div>
               <div className="p-6 flex flex-col items-center">
                 <div
-                  className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-4 border-white p-2 transition-all duration-300`}
+                  className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
                   id="qr-code-container"
                 >
                   {currentQrCode && (
                     <QRCodeSVG
                       value={currentQrCode}
                       size={isQrZoomed ? 350 : 250}
-                      level="H" // Higher error correction for better scanning
+                      level="L"
                       includeMargin={true}
                       bgColor="#FFFFFF"
                       fgColor="#000000"
                       id="qr-code-svg"
                       minVersion={1}
-                      imageSettings={{
-                        src: '', // Optional: Add a small logo in center if needed
-                        height: 24,
-                        width: 24,
-                        excavate: true,
-                      }}
                     />
                   )}
                 </div>
 
-                <div className="text-center space-y-2">
+                <div className="text-center">
                   <p className="text-sm text-gray-600">
                     Students can scan this QR code to mark their attendance
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Code: {attendanceForm.uniqueCode} • Expires in 40 seconds
+                  <p className="text-xs text-gray-500 mt-1">
+                    QR code refreshes every 90 seconds
                   </p>
-                  <div className="flex justify-center items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-600">QR updates automatically</span>
-                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Time remaining: {qrTimeLeft} seconds
+                  </p>
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={() => {
                     setShowQRModal(false);
-                    setIsQrZoomed(false);
+                    setIsQrZoomed(false); // Reset zoom state when closing
                     if (qrRefreshInterval) {
                       clearInterval(qrRefreshInterval);
                       setQrRefreshInterval(null);
