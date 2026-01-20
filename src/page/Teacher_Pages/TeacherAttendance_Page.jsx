@@ -73,10 +73,10 @@ const TeacherAttendance_Page = () => {
       // Generate first QR immediately
       handleQRGeneration();
 
-      // Set interval to refresh QR every 40 seconds
+      // Set interval to refresh QR every 1 minute 60 seconds
       const interval = setInterval(() => {
         handleQRGeneration();
-      }, 40000);
+      }, 80000);
 
       setQrRefreshInterval(interval);
 
@@ -295,7 +295,7 @@ const TeacherAttendance_Page = () => {
 
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date();
-    const expiryTime = new Date(currentTime.getTime() + 40000); // 40 seconds from now
+    const expiryTime = new Date(currentTime.getTime() + 80000); // 1 minute 60 seconds from now
 
     // Generate a dynamic code with timestamp
     const dynamicCode = `${attendanceForm.uniqueCode}_${currentTime.getTime()}`;
