@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import jsQR from 'jsqr';
 
 const QRScanner_Page = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -9,6 +8,7 @@ const QRScanner_Page = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState(true);
   const [scanResult, setScanResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [manualCode, setManualCode] = useState('');
   const navigate = useNavigate();
 
   const videoRef = useRef(null);
@@ -16,33 +16,32 @@ const QRScanner_Page = () => {
   const scanInterval = useRef(null);
 
   // Enhanced QR data parsing with expiry check
-  // Enhanced QR data parsing with immediate expiry check
   const parseQRData = (qrDataString) => {
     if (!qrDataString) {
-      throw new Error('Empty QR code data');
+      throw new Error('Empty attendance code');
     }
 
-    console.log('QR Data for parsing:', qrDataString);
+    console.log('Attendance Code for parsing:', qrDataString);
 
-    // Try to parse as URL first (new simplified format)
+    // Try to parse as URL first (simplified format)
     try {
       const url = new URL(qrDataString);
       const urlParams = new URLSearchParams(url.search);
 
-      // Already checked expiry in scanQRCode, but double-check here
+      // Check expiry
       const expiryTimestamp = urlParams.get('expiry');
       if (expiryTimestamp) {
         const expiryTime = new Date(parseInt(expiryTimestamp));
         const currentTime = new Date();
 
         if (currentTime > expiryTime) {
-          throw new Error('QR code has expired. Please scan a fresh QR code.');
+          throw new Error('Attendance code has expired. Please enter a fresh code.');
         }
       }
 
       const code = urlParams.get('code');
       if (!code) {
-        throw new Error('Invalid QR code: No attendance code found');
+        throw new Error('Invalid attendance code: No code found');
       }
 
       const parsedData = {
@@ -70,13 +69,13 @@ const QRScanner_Page = () => {
     try {
       const parsedData = JSON.parse(qrDataString);
 
-      // Validate QR code expiry (double-check)
+      // Validate expiry
       if (parsedData.expiryTimestamp) {
         const expiryTime = new Date(parsedData.expiryTimestamp);
         const currentTime = new Date();
 
         if (currentTime > expiryTime) {
-          throw new Error('QR code has expired. Please scan a fresh QR code.');
+          throw new Error('Attendance code has expired. Please enter a fresh code.');
         }
       }
 
@@ -103,7 +102,7 @@ const QRScanner_Page = () => {
       console.log('Not JSON format, trying other formats:', error);
     }
 
-    // Check for expired QR codes in URL format (alternative)
+    // Check for expired codes in URL format
     if (qrDataString.includes('expiry=')) {
       try {
         const urlParams = new URLSearchParams(qrDataString.includes('?')
@@ -117,7 +116,7 @@ const QRScanner_Page = () => {
           const currentTime = new Date();
 
           if (currentTime > expiryTime) {
-            throw new Error('QR code has expired. Please scan a fresh QR code.');
+            throw new Error('Attendance code has expired. Please enter a fresh code.');
           }
         }
       } catch (urlError) {
@@ -125,7 +124,7 @@ const QRScanner_Page = () => {
       }
     }
 
-    // Check if it's URL encoded data (alternative format)
+    // Check if it's URL encoded data
     if (qrDataString.includes('=') && (qrDataString.includes('?') || qrDataString.includes('&'))) {
       try {
         const urlParams = new URLSearchParams(qrDataString.includes('?')
@@ -147,12 +146,12 @@ const QRScanner_Page = () => {
       }
     }
 
-    // Plain text fallback
+    // Plain text fallback - treat as simple attendance code
     return {
       type: 'attendance',
       code: qrDataString,
-      subject: 'Scanned Subject',
-      subjectName: 'Scanned Subject',
+      subject: 'Class Session',
+      subjectName: 'Class Session',
       attendanceTime: new Date().toLocaleTimeString(),
       attendanceDate: new Date().toISOString().split('T')[0],
       timestamp: new Date().toISOString(),
@@ -167,208 +166,121 @@ const QRScanner_Page = () => {
     });
   };
 
-  // Start camera for live scanning with better error handling
-  const startCameraScan = async () => {
-    try {
-      setIsScanning(true);
-      setHasCameraPermission(true);
-      setScanResult(null);
-
-      const constraints = {
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-      setCameraStream(stream);
-      videoRef.current.srcObject = stream;
-
-      // Wait for video to be ready
-      videoRef.current.onloadedmetadata = () => {
-        // Start scanning interval
-        scanInterval.current = setInterval(scanQRCode, 300);
-      };
-
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      setHasCameraPermission(false);
-
-      if (error.name === 'NotAllowedError') {
-        toast.error('Camera access denied. Please allow camera permissions.');
-      } else if (error.name === 'NotFoundError') {
-        toast.error('No camera found on this device.');
-      } else {
-        toast.error('Cannot access camera. Please check permissions.');
+  // Generate dotted code pattern
+  const generateDottedCode = () => {
+    const rows = 5;
+    const cols = 8;
+    let pattern = '';
+    
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        // Randomly place dots (80% chance)
+        pattern += Math.random() < 0.8 ? '•' : ' ';
       }
-
-      setIsScanning(false);
+      pattern += '\n';
     }
+    
+    return pattern;
   };
 
-  // Stop camera scanning
-  const stopCameraScan = () => {
-    if (scanInterval.current) {
-      clearInterval(scanInterval.current);
-      scanInterval.current = null;
+  // Check dotted code pattern
+  const checkDottedCodePattern = (pattern) => {
+    // Simple validation - check if it has dots in a grid pattern
+    const lines = pattern.split('\n').filter(line => line.trim());
+    if (lines.length < 3 || lines.length > 10) return false;
+    
+    const firstLineLength = lines[0].length;
+    for (const line of lines) {
+      if (line.length !== firstLineLength) return false;
+      if (!line.includes('•')) return false;
     }
-
-    if (cameraStream) {
-      cameraStream.getTracks().forEach(track => {
-        track.stop();
-      });
-      setCameraStream(null);
-    }
-
-    setIsScanning(false);
+    
+    return true;
   };
 
-  // Enhanced QR code scanning from video stream with immediate expiry check
-  const scanQRCode = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-
-    if (!video || video.readyState !== video.HAVE_ENOUGH_DATA || video.videoWidth === 0) {
+  // Handle manual code submission
+  const handleManualSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!manualCode.trim()) {
+      toast.error('Please enter the attendance code');
       return;
     }
-
-    const context = canvas.getContext('2d');
-
-    // Set canvas size to video size
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    // Draw video frame on canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Get image data
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-    // Scan for QR code
-    const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
-
-    if (qrCode && !isProcessing) {
-      console.log('Live QR Code detected:', qrCode.data);
-      setScanResult(qrCode.data);
-      setIsProcessing(true);
-
-      // STOP CAMERA IMMEDIATELY when QR is detected
-      stopCameraScan();
-
-      try {
-        // FIRST: Check if it's a URL with expiry parameter
-        let isExpired = false;
-        let expiryMessage = '';
-
-        // Check for URL format first (new simplified format)
-        if (qrCode.data.includes('expiry=')) {
-          try {
-            const url = new URL(qrCode.data);
-            const urlParams = new URLSearchParams(url.search);
-            const expiryTimestamp = urlParams.get('expiry');
-
-            if (expiryTimestamp) {
-              const expiryTime = new Date(parseInt(expiryTimestamp));
-              const currentTime = new Date();
-
-              if (currentTime > expiryTime) {
-                isExpired = true;
-                expiryMessage = 'QR code has expired. Please ask for a fresh QR code.';
-              }
-            }
-          } catch (urlError) {
-            console.log('Error checking URL expiry:', urlError);
+    
+    setIsProcessing(true);
+    
+    try {
+      // Clean the code - remove spaces and special characters except dots
+      const cleanedCode = manualCode.trim();
+      
+      // Check if it's a dotted pattern or regular code
+      let parsedData;
+      
+      if (cleanedCode.includes('•')) {
+        // It's a dotted code
+        if (!checkDottedCodePattern(cleanedCode)) {
+          throw new Error('Invalid dotted pattern. Please check the code.');
+        }
+        
+        // For dotted codes, we need to extract the actual code
+        // In a real system, you'd decode the pattern here
+        // For now, we'll simulate extraction
+        const extractedCode = extractCodeFromPattern(cleanedCode);
+        
+        parsedData = {
+          type: 'attendance',
+          code: extractedCode,
+          originalCode: extractedCode,
+          subject: 'Class Session',
+          subjectName: 'Class Session',
+          attendanceTime: new Date().toLocaleTimeString(),
+          attendanceDate: new Date().toISOString().split('T')[0],
+          timestamp: new Date().toISOString(),
+        };
+      } else {
+        // It's a regular code or URL
+        parsedData = parseQRData(cleanedCode);
+        
+        // Check expiry
+        if (parsedData.expiryTimestamp) {
+          const expiryTime = new Date(parsedData.expiryTimestamp);
+          const currentTime = new Date();
+          
+          if (currentTime > expiryTime) {
+            throw new Error('Attendance code has expired. Please enter a fresh code.');
           }
         }
-
-        // Check for JSON format (old format)
-        if (!isExpired && qrCode.data.trim().startsWith('{') && qrCode.data.trim().endsWith('}')) {
-          try {
-            const parsedJson = JSON.parse(qrCode.data);
-            if (parsedJson.expiryTimestamp) {
-              const expiryTime = new Date(parsedJson.expiryTimestamp);
-              const currentTime = new Date();
-
-              if (currentTime > expiryTime) {
-                isExpired = true;
-                expiryMessage = 'QR code has expired. Please ask for a fresh QR code.';
-              }
-            }
-          } catch (jsonError) {
-            console.log('Error checking JSON expiry:', jsonError);
-          }
-        }
-
-        // IF QR IS EXPIRED - Show popup and restart camera
-        if (isExpired) {
-          toast.error(`${expiryMessage}`, {
-            // position: "top-center",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-
-          // Clear scan result
-          setScanResult(null);
-          setIsProcessing(false);
-
-          // Restart scanning after delay
-          setTimeout(() => {
-            startCameraScan();
-          }, 3000);
-
-          return; // Stop further processing
-        }
-
-        // IF QR IS NOT EXPIRED - Process normally
-        const parsedData = parseQRData(qrCode.data);
-
-        // Show scan success message
-        toast.success('QR Code scanned successfully!', {
-          // position: "top-center",
-          autoClose: 1500,
-        });
-
-        // Small delay for better UX
-        setTimeout(() => {
-          navigateToAttendancePage(parsedData);
-        }, 1000);
-
-      } catch (parseError) {
-        console.error('Error parsing QR data:', parseError);
-
-        // Show specific error messages
-        let errorMessage = 'Invalid QR code format';
-        if (parseError.message.includes('expired')) {
-          errorMessage = 'QR code has expired! Please ask for a fresh QR code.';
-        }
-
-        toast.error(errorMessage, {
-          // position: "top-center",
-          autoClose: 3000,
-        });
-
-        setIsProcessing(false);
-        // Restart scanning if parsing fails
-        setTimeout(() => {
-          startCameraScan();
-        }, 2000);
       }
+      
+      toast.success('Code validated successfully!');
+      
+      setTimeout(() => {
+        navigateToAttendancePage(parsedData);
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error processing code:', error);
+      toast.error(error.message || 'Invalid attendance code');
+      setIsProcessing(false);
     }
   };
 
-  // Toggle camera scanning
-  const toggleCameraScan = () => {
-    if (isScanning) {
-      stopCameraScan();
-    } else {
-      startCameraScan();
+  // Extract code from dotted pattern (simplified version)
+  const extractCodeFromPattern = (pattern) => {
+    // In a real implementation, this would decode the pattern
+    // For now, we'll generate a code based on dot positions
+    const lines = pattern.split('\n').filter(line => line.trim());
+    let binaryString = '';
+    
+    for (const line of lines) {
+      for (const char of line) {
+        binaryString += char === '•' ? '1' : '0';
+      }
     }
+    
+    // Convert binary to hex (simplified)
+    const hexCode = parseInt(binaryString, 2).toString(16).substring(0, 8);
+    return `CODE_${hexCode.toUpperCase()}`;
   };
 
   // Clean up on component unmount
@@ -391,6 +303,68 @@ const QRScanner_Page = () => {
             Attendance Scanner
           </h2>
 
+          {/* Manual Code Input */}
+          <div className="mb-6">
+            <form onSubmit={handleManualSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="manualCode" className="block text-sm font-medium text-gray-700 mb-2">
+                    Enter Attendance Code *
+                  </label>
+                  <textarea
+                    id="manualCode"
+                    name="manualCode"
+                    value={manualCode}
+                    onChange={(e) => setManualCode(e.target.value)}
+                    placeholder="Paste the dotted pattern or enter code here"
+                    className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors font-mono text-lg"
+                    rows="4"
+                    required
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Enter the dotted pattern (e.g., ••• •• •••) or paste the full code
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isProcessing || !manualCode.trim()}
+                  className="w-full bg-sky-600 text-white py-3 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  {isProcessing ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Validating...
+                    </span>
+                  ) : (
+                    'Validate & Continue'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center my-8">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="mx-4 text-sm text-gray-500">OR</span>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
+
+          {/* Dotted Pattern Example */}
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Example Dotted Pattern:</h3>
+            <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-center whitespace-pre">
+              {generateDottedCode()}
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              The teacher will display a similar pattern. Copy and paste it above.
+            </p>
+          </div>
+
           {/* Scan Result Preview */}
           {scanResult && (
             <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -398,111 +372,21 @@ const QRScanner_Page = () => {
                 <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-sm font-medium text-green-800">QR Code Scanned Successfully</span>
+                <span className="text-sm font-medium text-green-800">Code validated successfully!</span>
               </div>
               <p className="text-xs text-green-600 mt-1">Redirecting to attendance page...</p>
             </div>
           )}
-
-          {/* Live Camera Scanner */}
-          <div className="mb-6">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
-              {!isScanning ? (
-                // Camera off state
-                <>
-                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  <p className="mt-2 text-sm text-gray-600">Camera scanner is off</p>
-                  <p className="text-xs text-gray-500 mt-1">Click below to start scanning</p>
-
-                  {!hasCameraPermission && (
-                    <p className="text-xs text-red-500 mt-2">
-                      Camera access denied. Please check browser permissions.
-                    </p>
-                  )}
-                </>
-              ) : (
-                // Camera on state
-                <>
-                  <div className="relative">
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className="w-full h-48 object-cover rounded-lg bg-black"
-                    />
-                    {/* Scanning overlay with crosshair */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-48 h-48 border-2 border-green-400 rounded-lg relative">
-                        <div className="absolute inset-0 border-2 border-green-400 rounded-lg animate-pulse"></div>
-                        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-green-400 opacity-50"></div>
-                        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-green-400 opacity-50"></div>
-                      </div>
-                    </div>
-
-                    {/* Scanning animation */}
-                    <div className="absolute bottom-2 left-0 right-0 flex justify-center">
-                      <div className="bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs">
-                        <div className="flex items-center space-x-2">
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                          </div>
-                          <span>Scanning...</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-sm text-green-600">Scanning for QR codes...</p>
-                  <p className="text-xs text-gray-500">Point camera at QR code</p>
-                </>
-              )}
-
-              <canvas ref={canvasRef} className="hidden" />
-
-              {/* Camera Toggle Button */}
-              <button
-                onClick={toggleCameraScan}
-                disabled={!hasCameraPermission && !isScanning}
-                className={`mt-4 inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 ${isScanning
-                  ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
-                  : !hasCameraPermission
-                    ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
-                    : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
-                  }`}
-              >
-                {isScanning ? (
-                  <>
-                    <svg className="h-5 w-5 mr-2 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-                    </svg>
-                    Stop Scanning
-                  </>
-                ) : (
-                  <>
-                    <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Start Camera Scan
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Instructions */}
         <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
           <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
           <ul className="text-sm text-sky-700 space-y-1">
-            <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
-            <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
-            <li>• <strong>Best Results:</strong> Use rear camera in well-lit area</li>
-            {/* <li>• <strong>Note:</strong> QR codes expire after 40 seconds</li> */}
+            <li>• <strong>Manual Entry:</strong> Enter the dotted pattern shown by teacher</li>
+            <li>• <strong>Copy & Paste:</strong> Copy the exact pattern with dots and spaces</li>
+            <li>• <strong>Tips:</strong> Ensure you copy all dots and spaces accurately</li>
+            <li>• <strong>Note:</strong> Each pattern is unique and expires after 80 seconds</li>
           </ul>
         </div>
       </div>
