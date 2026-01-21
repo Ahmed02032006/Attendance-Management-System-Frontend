@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
+import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'react-toastify'
-import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2, FiMaximize2, FiMinimize2, FiCopy, FiCheck } from 'react-icons/fi'
+import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2, FiMaximize2, FiMinimize2 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
   deleteAttendance,
@@ -19,7 +20,7 @@ const TeacherAttendance_Page = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [showSubjectModal, setShowSubjectModal] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showDottedCodeModal, setShowDottedCodeModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -33,19 +34,18 @@ const TeacherAttendance_Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
 
-  // Dotted Code states
-  const [dottedCodeExpiryTime, setDottedCodeExpiryTime] = useState(null);
-  const [dottedCodeRefreshInterval, setDottedCodeRefreshInterval] = useState(null);
-  const [currentDottedCode, setCurrentDottedCode] = useState('');
-  const [copiedToClipboard, setCopiedToClipboard] = useState(false);
+  // QR Auto-refresh states
+  const [qrExpiryTime, setQrExpiryTime] = useState(null);
+  const [qrRefreshInterval, setQrRefreshInterval] = useState(null);
+  const [currentQrCode, setCurrentQrCode] = useState('');
 
-  // Zoom state
-  const [isZoomed, setIsZoomed] = useState(false);
+  // QR Zoom state
+  const [isQrZoomed, setIsQrZoomed] = useState(false);
 
   // Sorting states
   const [sortConfig, setSortConfig] = useState({
     key: null,
-    direction: 'asc'
+    direction: 'asc' // 'asc' or 'desc'
   });
 
   const { user } = useSelector((state) => state.auth)
@@ -54,6 +54,7 @@ const TeacherAttendance_Page = () => {
   // Fetch subjects with attendance on component mount
   useEffect(() => {
     dispatch(getSubjectsWithAttendance(userId)).unwrap();
+    // Cleanup on unmount
     return () => {
       dispatch(clearAttendance())
     }
@@ -66,104 +67,30 @@ const TeacherAttendance_Page = () => {
     }
   }, [subjectsWithAttendance, selectedSubject])
 
-  // Generate random dotted pattern
-  const generateDottedPattern = () => {
-    const rows = 5;
-    const cols = 8;
-    let pattern = '';
-    
-    // Create pattern with random dots
-    for (let i = 0; i < rows; i++) {
-      let row = '';
-      for (let j = 0; j < cols; j++) {
-        // 80% chance of dot, 20% chance of space
-        row += Math.random() < 0.8 ? '•' : ' ';
-      }
-      pattern += row + '\n';
-    }
-    
-    return pattern.trim();
-  };
-
-  // Encode data into dotted pattern
-  const encodeToDottedPattern = (data) => {
-    // Convert data to binary string
-    let binaryString = '';
-    for (let i = 0; i < data.length; i++) {
-      const charCode = data.charCodeAt(i).toString(2);
-      binaryString += charCode.padStart(8, '0');
-    }
-    
-    // Convert binary to dots pattern (5x8 grid)
-    const rows = 5;
-    const cols = 8;
-    let pattern = '';
-    let bitIndex = 0;
-    
-    for (let i = 0; i < rows; i++) {
-      let row = '';
-      for (let j = 0; j < cols; j++) {
-        if (bitIndex < binaryString.length) {
-          row += binaryString[bitIndex] === '1' ? '•' : ' ';
-          bitIndex++;
-        } else {
-          row += ' '; // Fill with spaces if binary string is shorter
-        }
-      }
-      pattern += row + '\n';
-    }
-    
-    return pattern.trim();
-  };
-
-  // Decode dotted pattern to data
-  const decodeFromDottedPattern = (pattern) => {
-    const lines = pattern.split('\n').filter(line => line.trim() || line === '');
-    let binaryString = '';
-    
-    for (const line of lines) {
-      for (const char of line) {
-        binaryString += char === '•' ? '1' : '0';
-      }
-    }
-    
-    // Convert binary to string
-    let result = '';
-    for (let i = 0; i < binaryString.length; i += 8) {
-      const byte = binaryString.substring(i, i + 8);
-      if (byte.length === 8) {
-        const charCode = parseInt(byte, 2);
-        result += String.fromCharCode(charCode);
-      }
-    }
-    
-    return result.trim();
-  };
-
-  // Dotted Code Auto-refresh useEffect
+  // QR Auto-refresh useEffect
   useEffect(() => {
-    if (showDottedCodeModal) {
-      // Generate first dotted code immediately
-      handleDottedCodeGeneration();
+    if (showQRModal) {
+      // Generate first QR immediately
+      handleQRGeneration();
 
-      // Set interval to refresh every 80 seconds
+      // Set interval to refresh QR every 1 minute 60 seconds
       const interval = setInterval(() => {
-        handleDottedCodeGeneration();
+        handleQRGeneration();
       }, 80000);
 
-      setDottedCodeRefreshInterval(interval);
+      setQrRefreshInterval(interval);
 
       return () => {
         if (interval) clearInterval(interval);
       };
     } else {
       // Clear interval when modal closes
-      if (dottedCodeRefreshInterval) {
-        clearInterval(dottedCodeRefreshInterval);
-        setDottedCodeRefreshInterval(null);
+      if (qrRefreshInterval) {
+        clearInterval(qrRefreshInterval);
+        setQrRefreshInterval(null);
       }
     }
-  }, [showDottedCodeModal]);
+  }, [showQRModal]);
 
   // Format date to YYYY-MM-DD
   const formatDate = (date) => {
@@ -358,8 +285,9 @@ const TeacherAttendance_Page = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
-  // Generate dotted code with timestamp
-  const handleDottedCodeGeneration = (isInitial = false) => {
+  // New function to generate QR with timestamp
+  // Silent refresh version
+  const handleQRGeneration = (isInitial = false) => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
       return;
@@ -367,66 +295,69 @@ const TeacherAttendance_Page = () => {
 
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date();
-    const expiryTime = new Date(currentTime.getTime() + 80000); // 80 seconds from now
+    const expiryTime = new Date(currentTime.getTime() + 80000); // 1 minute 60 seconds from now
 
-    // Create data string
-    const data = JSON.stringify({
-      code: attendanceForm.uniqueCode,
-      subject: attendanceForm.subject,
-      subjectName: subjectName || 'Unknown Subject',
-      timestamp: currentTime.getTime(),
-      expiry: expiryTime.getTime()
-    });
+    // Generate a dynamic code with timestamp
+    const dynamicCode = `${attendanceForm.uniqueCode}_${currentTime.getTime()}`;
 
-    // Encode to dotted pattern
-    const dottedPattern = encodeToDottedPattern(data);
-    setCurrentDottedCode(dottedPattern);
-    setDottedCodeExpiryTime(expiryTime);
+    // Extract the original code (before underscore) for the URL
+    const originalCode = attendanceForm.uniqueCode;
 
-    // Also generate a URL for direct access (optional)
-    const url = new URL(`${window.location.origin}/student-attendance`);
-    url.searchParams.append('code', attendanceForm.uniqueCode);
+    // Create a simplified URL with query parameters instead of JSON
+    // This makes the QR code much less dense and easier to scan
+    const baseUrl = `${window.location.origin}/student-attendance`;
+
+    // Create URL with only essential parameters
+    const url = new URL(baseUrl);
+    url.searchParams.append('code', originalCode); // Use original code, not the timestamped one
     url.searchParams.append('subject', attendanceForm.subject);
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('timestamp', currentTime.getTime());
-    url.searchParams.append('expiry', expiryTime.getTime());
+    url.searchParams.append('timestamp', currentTime.getTime()); // For uniqueness
+    url.searchParams.append('expiry', expiryTime.getTime()); // For expiry check
+
+    // Use the URL string as QR data - much simpler than JSON
+    const qrData = url.toString();
+
+    // Store the full data separately for internal use if needed
+    const fullQrData = {
+      url: qrData,
+      originalCode: originalCode,
+      subject: attendanceForm.subject,
+      subjectName: subjectName,
+      timestamp: currentTime.getTime(),
+      expiry: expiryTime.getTime()
+    };
+
+    setCurrentQrCode(qrData);
+    setQrExpiryTime(expiryTime);
 
     if (isInitial) {
-      toast.success('Dotted code generated successfully!', {
+      toast.success('QR code generated successfully!', {
         autoClose: 2000
       });
     }
+
+    console.log('QR Data length:', qrData.length, 'characters'); // Debug log
   };
 
-  const handleGenerateDottedCode = async () => {
+  const handleGenerateQR = async () => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
       return;
     }
 
     setShowCreateModal(false);
-    setShowDottedCodeModal(true);
-    handleDottedCodeGeneration(true);
+    setShowQRModal(true);
+
+    // Show success message when modal opens
+    toast.success('QR code generated successfully!', {
+      autoClose: 2000
+    });
   };
 
-  // Copy to clipboard
-  const copyToClipboard = () => {
-    if (!currentDottedCode) return;
-    
-    navigator.clipboard.writeText(currentDottedCode)
-      .then(() => {
-        setCopiedToClipboard(true);
-        toast.success('Pattern copied to clipboard!');
-        
-        // Reset copied state after 2 seconds
-        setTimeout(() => {
-          setCopiedToClipboard(false);
-        }, 2000);
-      })
-      .catch(err => {
-        console.error('Failed to copy: ', err);
-        toast.error('Failed to copy pattern');
-      });
+  // Toggle QR zoom
+  const toggleQrZoom = () => {
+    setIsQrZoomed(!isQrZoomed);
   };
 
   // Handle delete attendance
@@ -551,11 +482,6 @@ const TeacherAttendance_Page = () => {
     } catch (error) {
       toast.error('Failed to refresh data');
     }
-  };
-
-  // Toggle zoom
-  const toggleZoom = () => {
-    setIsZoomed(!isZoomed);
   };
 
   // Loading state
@@ -908,342 +834,342 @@ const TeacherAttendance_Page = () => {
       </div>
 
       {/* Subject Selection Modal */}
-      {showSubjectModal && subjectsWithAttendance.length > 0 && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">Select Subject</h3>
-              <p className="text-sm text-gray-600 mt-1">Choose a subject to view attendance records</p>
-            </div>
-            <div className="p-6">
-              <div className="flex items-center gap-3">
-                {subjectsWithAttendance.map((subject) => (
-                  <div
-                    key={subject.id}
-                    className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center"
-                    onClick={() => handleSubjectSelect(subject.id)}
-                  >
-                    <h4 className="font-light text-sm text-gray-700">
-                      {subject.name}
-                    </h4>
-                  </div>
-                ))}
+      {
+        showSubjectModal && subjectsWithAttendance.length > 0 && (
+          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-auto">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800">Select Subject</h3>
+                <p className="text-sm text-gray-600 mt-1">Choose a subject to view attendance records</p>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-3">
+                  {subjectsWithAttendance.map((subject) => (
+                    <div
+                      key={subject.id}
+                      className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center"
+                      onClick={() => handleSubjectSelect(subject.id)}
+                    >
+                      <h4 className="font-light text-sm text-gray-700">
+                        {subject.name}
+                      </h4>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                <p className="text-sm text-gray-600 text-center">
+                  Select a subject to continue to the attendance dashboard
+                </p>
               </div>
             </div>
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-              <p className="text-sm text-gray-600 text-center">
-                Select a subject to continue to the attendance dashboard
-              </p>
-            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Create Attendance Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">Create New Attendance</h3>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Subject
-                </label>
-                <select
-                  name="subject"
-                  value={attendanceForm.subject}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                >
-                  <option value="">Select Subject</option>
-                  {subjectsWithAttendance.map((subject) => (
-                    <option key={subject.id} value={subject.id}>
-                      {subject.name}
-                    </option>
-                  ))}
-                </select>
+      {
+        showCreateModal && (
+          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800">Create New Attendance</h3>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Unique Code
-                </label>
-                <input
-                  type="text"
-                  name="uniqueCode"
-                  value={attendanceForm.uniqueCode}
-                  onChange={handleInputChange}
-                  placeholder="Enter unique code"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                />
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleGenerateDottedCode}
-                disabled={isLoading}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Creating...' : 'Generate Dotted Code'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Dotted Code Modal */}
-      {showDottedCodeModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className={`bg-white rounded-lg shadow-xl ${isZoomed ? 'w-full max-w-2xl' : 'w-full max-w-sm'}`}>
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <div className='flex items-center justify-between gap-3'>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-green-600 font-medium">Live</span>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Subject
+                  </label>
+                  <select
+                    name="subject"
+                    value={attendanceForm.subject}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                  >
+                    <option value="">Select Subject</option>
+                    {subjectsWithAttendance.map((subject) => (
+                      <option key={subject.id} value={subject.id}>
+                        {subject.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800">Attendance Dotted Code</h3>
-              </div>
-              <div className="flex items-center space-x-4">
-                {/* Copy Button */}
-                <button
-                  onClick={copyToClipboard}
-                  className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                  title="Copy pattern to clipboard"
-                >
-                  {copiedToClipboard ? (
-                    <FiCheck className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <FiCopy className="w-4 h-4 text-gray-700" />
-                  )}
-                </button>
-                
-                {/* Zoom Toggle Button */}
-                <button
-                  onClick={toggleZoom}
-                  className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                  title={isZoomed ? "Minimize" : "Maximize"}
-                >
-                  {isZoomed ? (
-                    <FiMinimize2 className="w-4 h-4 text-gray-700" />
-                  ) : (
-                    <FiMaximize2 className="w-4 h-4 text-gray-700" />
-                  )}
-                </button>
-              </div>
-            </div>
-            <div className="p-6 flex flex-col items-center">
-              <div
-                className={`${isZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-gray-900 text-green-400 flex items-center justify-center rounded-lg mb-4 border-2 border-gray-700 p-4 transition-all duration-300`}
-              >
-                <pre className={`font-mono ${isZoomed ? 'text-2xl' : 'text-xl'} leading-tight text-center`}>
-                  {currentDottedCode}
-                </pre>
-              </div>
 
-              <div className="text-center space-y-2">
-                <p className="text-sm text-gray-600">
-                  Share this dotted pattern with students
-                </p>
-                <p className="text-xs text-gray-500">
-                  Students can copy and paste this pattern in the scanner
-                </p>
-                {dottedCodeExpiryTime && (
-                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-medium">
-                    <svg className="w-3 h-3 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Expires in 80 seconds
-                  </div>
-                )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Unique Code
+                  </label>
+                  <input
+                    type="text"
+                    name="uniqueCode"
+                    value={attendanceForm.uniqueCode}
+                    onChange={handleInputChange}
+                    placeholder="Enter unique code"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-              <button
-                onClick={copyToClipboard}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors flex items-center space-x-2"
-              >
-                {copiedToClipboard ? (
-                  <>
-                    <FiCheck className="w-4 h-4" />
-                    <span>Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <FiCopy className="w-4 h-4" />
-                    <span>Copy Pattern</span>
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  setShowDottedCodeModal(false);
-                  setIsZoomed(false);
-                  if (dottedCodeRefreshInterval) {
-                    clearInterval(dottedCodeRefreshInterval);
-                    setDottedCodeRefreshInterval(null);
-                  }
-                }}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
-            <div className="p-6 text-center">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FiTrash2 className="w-6 h-6 text-red-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Record?</h3>
-              <p className="text-gray-600 text-sm mb-6">
-                This attendance record will be permanently removed.
-              </p>
-              <div className="flex gap-3">
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                 <button
-                  onClick={handleCancelDelete}
-                  className="flex-1 px-4 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleConfirmDelete}
-                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  onClick={handleGenerateQR}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Delete
+                  {isLoading ? 'Creating...' : 'Generate QR'}
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
-      {/* Student Details Modal */}
-      {showStudentModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {selectedStudent?.studentName} - Attendance Details
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Roll No: {selectedStudent?.rollNo}
-              </p>
-            </div>
-
-            <div className="p-6 max-h-[60vh] overflow-y-auto">
-              {selectedStudent && (
-                <div className="space-y-6">
-                  {/* Student Basic Info */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="font-medium text-gray-700">Student Name</p>
-                        <p className="text-gray-900">{selectedStudent.studentName}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">Roll Number</p>
-                        <p className="text-gray-900">{selectedStudent.rollNo}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">Current Subject</p>
-                        <p className="text-gray-900">{selectedStudent.subject}</p>
-                      </div>
-                    </div>
+      {/* QR Code Modal - UPDATED WITH ZOOM FEATURE */}
+      {
+        showQRModal && (
+          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className={`bg-white rounded-lg shadow-xl ${isQrZoomed ? 'w-full max-w-2xl' : 'w-full max-w-sm'}`}>
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div className='flex items-center justify-between gap-3'>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    {/* <span className="text-xs text-green-600 font-medium">Live</span> */}
                   </div>
-
-                  {/* Previous Attendance Records */}
-                  <div>
-                    <h4 className="text-md font-semibold text-gray-800 mb-4">Previous Attendance Records</h4>
-
-                    {getStudentPreviousAttendance(selectedStudent).length > 0 ? (
-                      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Date
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Day
-                                </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Time
-                                </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Subject
-                                </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Status
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {getStudentPreviousAttendance(selectedStudent).map((record, index) => (
-                                <tr key={index} className="hover:bg-gray-50">
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                    {formatDisplayDate(new Date(record.date))}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                                    {new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' })}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
-                                    {record.time || 'N/A'}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
-                                    {record.subject}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-center">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                      }`}>
-                                      {record.time ? 'Present' : 'Absent'}
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <p className="mt-2 text-sm text-gray-600">No previous attendance records found</p>
-                      </div>
-                    )}
-                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
                 </div>
-              )}
-            </div>
+                <div className="flex items-center space-x-4">
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => setShowStudentModal(false)}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
-              >
-                Close
-              </button>
+                  {/* Zoom Toggle Button */}
+                  <button
+                    onClick={toggleQrZoom}
+                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                    title={isQrZoomed ? "Minimize QR Code" : "Maximize QR Code"}
+                  >
+                    {isQrZoomed ? (
+                      <FiMinimize2 className="w-4 h-4 text-gray-700" />
+                    ) : (
+                      <FiMaximize2 className="w-4 h-4 text-gray-700" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 flex flex-col items-center">
+                <div
+                  className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
+                  id="qr-code-container"
+                >
+                  {currentQrCode && (
+                    <QRCodeSVG
+                      value={currentQrCode}
+                      size={isQrZoomed ? 350 : 250}
+                      level="L"
+                      includeMargin={true}
+                      bgColor="#FFFFFF"
+                      fgColor="#000000"
+                      id="qr-code-svg"
+                      minVersion={1}
+                    />
+                  )}
+                </div>
+
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">
+                    Students can scan this QR code to mark their attendance
+                  </p>
+                  {/* <p className="text-xs text-gray-500 mt-1">
+                    {isQrZoomed ? "Click minimize icon to reduce size" : "Click maximize icon to enlarge"}
+                  </p> */}
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+                {/* <button
+                  onClick={toggleQrZoom}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors flex items-center space-x-2"
+                >
+                  {isQrZoomed ? (
+                    <>
+                      <FiMinimize2 className="w-4 h-4" />
+                      <span>Minimize</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiMaximize2 className="w-4 h-4" />
+                      <span>Maximize</span>
+                    </>
+                  )}
+                </button> */}
+                <button
+                  onClick={() => {
+                    setShowQRModal(false);
+                    setIsQrZoomed(false); // Reset zoom state when closing
+                    if (qrRefreshInterval) {
+                      clearInterval(qrRefreshInterval);
+                      setQrRefreshInterval(null);
+                    }
+                  }}
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+
+      {
+        showDeleteModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-sm border border-gray-200">
+              <div className="p-6 text-center">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FiTrash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Record?</h3>
+                <p className="text-gray-600 text-sm mb-6">
+                  This attendance record will be permanently removed.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleCancelDelete}
+                    className="flex-1 px-4 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmDelete}
+                    className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Student Details Modal */}
+      {
+        showStudentModal && (
+          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {selectedStudent?.studentName} - Attendance Details
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Roll No: {selectedStudent?.rollNo}
+                </p>
+              </div>
+
+              <div className="p-6 max-h-[60vh] overflow-y-auto">
+                {selectedStudent && (
+                  <div className="space-y-6">
+                    {/* Student Basic Info */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <p className="font-medium text-gray-700">Student Name</p>
+                          <p className="text-gray-900">{selectedStudent.studentName}</p>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-700">Roll Number</p>
+                          <p className="text-gray-900">{selectedStudent.rollNo}</p>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-700">Current Subject</p>
+                          <p className="text-gray-900">{selectedStudent.subject}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Previous Attendance Records */}
+                    <div>
+                      <h4 className="text-md font-semibold text-gray-800 mb-4">Previous Attendance Records</h4>
+
+                      {getStudentPreviousAttendance(selectedStudent).length > 0 ? (
+                        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Day
+                                  </th>
+                                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Time
+                                  </th>
+                                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Subject
+                                  </th>
+                                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {getStudentPreviousAttendance(selectedStudent).map((record, index) => (
+                                  <tr key={index} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                      {formatDisplayDate(new Date(record.date))}
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                                      {new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
+                                      {record.time || 'N/A'}
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
+                                      {record.subject}
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-center">
+                                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                        }`}>
+                                        {record.time ? 'Present' : 'Absent'}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <p className="mt-2 text-sm text-gray-600">No previous attendance records found</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button
+                  onClick={() => setShowStudentModal(false)}
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+    </div >
   )
 }
 
