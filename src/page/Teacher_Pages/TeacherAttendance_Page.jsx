@@ -933,17 +933,15 @@ const TeacherAttendance_Page = () => {
       {
         showQRModal && (
           <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className={`bg-white rounded-lg shadow-xl ${isQrZoomed ? 'w-full max-w-2xl' : 'w-full max-w-sm'}`}>
+            <div className={`bg-white rounded-lg shadow-xl ${isQrZoomed ? 'w-full max-w-3xl' : 'w-full max-w-sm'}`}>
               <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <div className='flex items-center justify-between gap-3'>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    {/* <span className="text-xs text-green-600 font-medium">Live</span> */}
                   </div>
                   <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
                 </div>
                 <div className="flex items-center space-x-4">
-
                   {/* Zoom Toggle Button */}
                   <button
                     onClick={toggleQrZoom}
@@ -960,13 +958,13 @@ const TeacherAttendance_Page = () => {
               </div>
               <div className="p-6 flex flex-col items-center">
                 <div
-                  className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
+                  className={`${isQrZoomed ? 'w-[500px] h-[500px]' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
                   id="qr-code-container"
                 >
                   {currentQrCode && (
                     <QRCodeSVG
                       value={currentQrCode}
-                      size={isQrZoomed ? 400 : 250}
+                      size={isQrZoomed ? 450 : 250}
                       level="L"
                       includeMargin={true}
                       bgColor="#FFFFFF"
@@ -981,28 +979,12 @@ const TeacherAttendance_Page = () => {
                   <p className="text-sm text-gray-600">
                     Students can scan this QR code to mark their attendance
                   </p>
-                  {/* <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     {isQrZoomed ? "Click minimize icon to reduce size" : "Click maximize icon to enlarge"}
-                  </p> */}
+                  </p>
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-                {/* <button
-                  onClick={toggleQrZoom}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors flex items-center space-x-2"
-                >
-                  {isQrZoomed ? (
-                    <>
-                      <FiMinimize2 className="w-4 h-4" />
-                      <span>Minimize</span>
-                    </>
-                  ) : (
-                    <>
-                      <FiMaximize2 className="w-4 h-4" />
-                      <span>Maximize</span>
-                    </>
-                  )}
-                </button> */}
                 <button
                   onClick={() => {
                     setShowQRModal(false);
