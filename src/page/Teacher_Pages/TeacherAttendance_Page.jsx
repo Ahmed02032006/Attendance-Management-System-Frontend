@@ -966,7 +966,7 @@ const TeacherAttendance_Page = () => {
                   {currentQrCode && (
                     <QRCodeSVG
                       value={currentQrCode}
-                      size={isQrZoomed ? 100 : 50}
+                      size={isQrZoomed ? 400 : 250}
                       level="L"
                       includeMargin={true}
                       bgColor="#FFFFFF"
