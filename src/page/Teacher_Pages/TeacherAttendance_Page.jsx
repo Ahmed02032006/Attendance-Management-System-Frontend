@@ -1022,6 +1022,83 @@ const TeacherAttendance_Page = () => {
         )
       }
 
+      {/* 
+      ====================================================================
+        {
+        showQRModal && (
+          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className={`bg-white rounded-lg shadow-xl ${isQrZoomed ? 'w-full max-w-3xl' : 'w-full max-w-sm'}`}>
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div className='flex items-center justify-between gap-3'>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={toggleQrZoom}
+                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                    title={isQrZoomed ? "Minimize QR Code" : "Maximize QR Code"}
+                  >
+                    {isQrZoomed ? (
+                      <FiMinimize2 className="w-4 h-4 text-gray-700" />
+                    ) : (
+                      <FiMaximize2 className="w-4 h-4 text-gray-700" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 flex flex-col items-center">
+                <div
+                  className={`${isQrZoomed ? 'w-[500px] h-[500px]' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
+                  id="qr-code-container"
+                >
+                  {currentQrCode && (
+                    <QRCodeSVG
+                      value={currentQrCode}
+                      size={isQrZoomed ? 450 : 250}
+                      level="L"
+                      includeMargin={true}
+                      bgColor="#FFFFFF"
+                      fgColor="#000000"
+                      id="qr-code-svg"
+                      minVersion={1}
+                    />
+                  )}
+                </div>
+
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">
+                    Students can scan this QR code to mark their attendance
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {isQrZoomed ? "Click minimize icon to reduce size" : "Click maximize icon to enlarge"}
+                  </p>
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button
+                  onClick={() => {
+                    setShowQRModal(false);
+                    setIsQrZoomed(false); // Reset zoom state when closing
+                    if (qrRefreshInterval) {
+                      clearInterval(qrRefreshInterval);
+                      setQrRefreshInterval(null);
+                    }
+                  }}
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+      ====================================================================
+      */}
+
       {
         showDeleteModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">

@@ -5,6 +5,71 @@ import { createAttendance } from '../../store/Teacher-Slicer/Attendance-Slicer';
 import { useDispatch } from 'react-redux';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
+// Browser detection function (same as in QR scanner)
+const isChromeBrowser = () => {
+  const userAgent = navigator.userAgent;
+  const isChrome = /Chrome\//.test(userAgent) && !/Edge\//.test(userAgent) && !/OPR\//.test(userAgent);
+  const isChromium = /Chromium\//.test(userAgent);
+  return isChrome || isChromium;
+};
+
+// Component for displaying browser restriction message
+const BrowserRestriction = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-lg border border-gray-200 max-w-md w-full p-6 text-center">
+        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.986-.833-2.756 0L4.196 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        </div>
+        
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Browser Not Supported</h2>
+        
+        <p className="text-gray-600 mb-6">
+          This page requires <span className="font-semibold text-blue-600">Google Chrome</span> browser for optimal performance and security.
+          Please switch to Google Chrome to mark your attendance.
+        </p>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <span className="text-blue-600 font-bold">C</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">Google Chrome</p>
+              <p className="text-xs text-gray-500">Recommended browser</p>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-4">
+            <p className="text-sm text-gray-500 mb-4">
+              Other browsers may not work properly with the attendance system.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => window.open('https://www.google.com/chrome/', '_blank')}
+              className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium"
+            >
+              Download Chrome
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-50 transition-colors font-medium"
+            >
+              Go Back Home
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const StudentAttendance_Page = () => {
   const [formData, setFormData] = useState({
     studentName: '',
@@ -18,6 +83,18 @@ const StudentAttendance_Page = () => {
   const locationHook = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // Check browser on component mount
+  useEffect(() => {
+    if (!isChromeBrowser()) {
+      toast.error('Please use Google Chrome browser for attendance submission');
+    }
+  }, []);
+
+  // If not Chrome, show restriction component
+  if (!isChromeBrowser()) {
+    return <BrowserRestriction />;
+  }
 
   // Function to format time as "11:05 AM"
   const formatTime = (date = new Date()) => {
@@ -264,6 +341,21 @@ const StudentAttendance_Page = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container max-w-2xl mx-auto p-2">
+        {/* Chrome Browser Banner */}
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <span className="text-blue-600 font-bold">C</span>
+              </div>
+              <span className="text-sm font-medium text-blue-800">Using Google Chrome</span>
+            </div>
+            <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+          </div>
+        </div>
+
         <div className="bg-white rounded-lg border border-gray-300 shadow-sm">
           {/* Header with Current Time */}
           <div className="px-6 py-4 border-b border-gray-200 bg-sky-50 rounded-t-lg">
@@ -360,6 +452,7 @@ const StudentAttendance_Page = () => {
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Instructions:</h3>
             <ul className="text-[12px] text-gray-600 space-y-1">
+              <li>• <strong>Browser:</strong> Requires Google Chrome for submission</li>
               <li>• Fill in your full name and roll number accurately</li>
               <li>• Make sure you're in the correct class session</li>
               <li>• Double-check your details before submitting</li>
