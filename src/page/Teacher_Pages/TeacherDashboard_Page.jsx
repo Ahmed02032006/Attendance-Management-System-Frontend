@@ -9,7 +9,10 @@ import {
   FiUsers,
   FiTrendingUp,
   FiChevronLeft,
-  FiChevronRight
+  FiChevronRight,
+  FiCalendar,
+  FiClock,
+  FiUser
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
@@ -23,7 +26,8 @@ const TeacherDashboard_Page = () => {
   const {
     dashboardSubjects,
     dashboardAttendance,
-    isLoading
+    isLoading,
+    error
   } = useSelector((state) => state.teacherDashboard)
 
   const [selectedSubject, setSelectedSubject] = useState(null)
@@ -31,10 +35,17 @@ const TeacherDashboard_Page = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage] = useState(5)
   const [dataLoaded, setDataLoaded] = useState(false)
+  const [hasData, setHasData] = useState(false)
 
   const { user } = useSelector((state) => state.auth)
-
   const userId = user?.id
+
+  // Check if user has any data
+  const checkIfHasData = () => {
+    const hasSubjects = dashboardSubjects.length > 0
+    const hasAttendance = Object.keys(dashboardAttendance).length > 0
+    return hasSubjects || hasAttendance
+  }
 
   // Fetch data on component mount
   useEffect(() => {
@@ -48,12 +59,18 @@ const TeacherDashboard_Page = () => {
         setDataLoaded(true)
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
-        setDataLoaded(true) // Set to true even on error to stop loading
-        toast.error('Failed to load dashboard data')
+        setDataLoaded(true)
+        
+        // Only show error toast if it's not a "no data" scenario
+        if (error.response?.status !== 404 && !error.message?.includes('No data')) {
+          toast.error('Failed to load dashboard data')
+        }
       }
     }
 
-    fetchData()
+    if (userId) {
+      fetchData()
+    }
 
     // Cleanup on unmount
     return () => {
@@ -61,16 +78,22 @@ const TeacherDashboard_Page = () => {
     }
   }, [dispatch, userId])
 
-  // Set initial selected subject when subjects are loaded
+  // Update hasData state when data is loaded
   useEffect(() => {
-    if (dashboardSubjects.length > 0 && !selectedSubject && dataLoaded) {
-      setSelectedSubject(dashboardSubjects[0].id)
+    if (dataLoaded) {
+      const dataExists = checkIfHasData()
+      setHasData(dataExists)
+      
+      // Set initial selected subject when subjects are loaded
+      if (dashboardSubjects.length > 0 && !selectedSubject) {
+        setSelectedSubject(dashboardSubjects[0].id)
 
-      // Set initial date to the latest available date for the first subject
-      const subjectAttendance = dashboardAttendance[dashboardSubjects[0].id]
-      if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
-        const latestDate = Object.keys(subjectAttendance).sort().reverse()[0]
-        setCurrentDate(latestDate)
+        // Set initial date to the latest available date for the first subject
+        const subjectAttendance = dashboardAttendance[dashboardSubjects[0].id]
+        if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
+          const latestDate = Object.keys(subjectAttendance).sort().reverse()[0]
+          setCurrentDate(latestDate)
+        }
       }
     }
   }, [dashboardSubjects, selectedSubject, dashboardAttendance, dataLoaded])
@@ -108,6 +131,7 @@ const TeacherDashboard_Page = () => {
 
   // Format date for display
   const formatDate = (dateString) => {
+    if (!dateString) return 'No date selected'
     return new Date(dateString).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -148,7 +172,7 @@ const TeacherDashboard_Page = () => {
     setCurrentPage(1)
   }, [selectedSubject, currentDate])
 
-  // Color mapping for subjects (you can modify this based on your needs)
+  // Color mapping for subjects
   const getSubjectColor = (index) => {
     const colors = [
       'bg-blue-500', 'bg-green-500', 'bg-purple-500',
@@ -170,9 +194,99 @@ const TeacherDashboard_Page = () => {
     );
   }
 
+  // Empty state - No data available (fresh account)
+  if (dataLoaded && !hasData) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <HeaderComponent 
+          heading={"Teacher Dashboard"} 
+          subHeading={"Welcome to your dashboard"} 
+          role='teacher' 
+        />
+
+        <div className="container max-w-full mx-auto p-4 sm:p-6">
+          <div className="flex flex-col items-center justify-center min-h-[60vh]">
+            <div className="max-w-md mx-auto text-center bg-white rounded-xl border border-gray-200 p-8 sm:p-10">
+              <div className="w-20 h-20 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FiBook className="h-10 w-10 text-sky-600" />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                Welcome to Your Dashboard!
+              </h2>
+              
+              <p className="text-gray-600 mb-6">
+                Your dashboard is ready, but it looks like you haven't been assigned to any subjects yet or there's no attendance data available.
+              </p>
+              
+              <div className="space-y-4 text-left mb-8">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="w-6 h-6 bg-sky-100 rounded-full flex items-center justify-center">
+                      <FiUser className="h-3 w-3 text-sky-600" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">No Subjects Assigned</h4>
+                    <p className="text-sm text-gray-600">
+                      You need to be assigned to subjects by the administrator.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="w-6 h-6 bg-sky-100 rounded-full flex items-center justify-center">
+                      <FiCalendar className="h-3 w-3 text-sky-600" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">No Attendance Records</h4>
+                    <p className="text-sm text-gray-600">
+                      Attendance data will appear here once you start taking attendance for your classes.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="w-6 h-6 bg-sky-100 rounded-full flex items-center justify-center">
+                      <FiClock className="h-3 w-3 text-sky-600" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">What to Do Next</h4>
+                    <p className="text-sm text-gray-600">
+                      Contact your administrator to get assigned to subjects and start using the attendance system.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => {
+                  // You can add a refresh function here
+                  window.location.reload();
+                }}
+                className="inline-flex items-center px-6 py-3 bg-sky-600 text-white font-medium rounded-lg hover:bg-sky-700 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+              >
+                <FiArrowRight className="mr-2 h-5 w-5" />
+                Refresh Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderComponent heading={"Teacher Dashboard"} subHeading={"Overview of your teaching activities"} role='admin' />
+      <HeaderComponent 
+        heading={"Teacher Dashboard"} 
+        subHeading={"Overview of your teaching activities"} 
+        role='teacher' 
+      />
 
       <div className="container max-w-full mx-auto p-4 sm:p-6">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
@@ -182,14 +296,17 @@ const TeacherDashboard_Page = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">My Subjects</h3>
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-100 text-blue-800">
+                  {dashboardSubjects.length} total
+                </span>
               </div>
 
               {dashboardSubjects.length === 0 ? (
                 <div className="text-center py-6 sm:py-8">
                   <FiBook className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
-                  <p className="text-gray-500 text-base sm:text-lg font-medium">No subjects found</p>
+                  <p className="text-gray-500 text-base sm:text-lg font-medium">No subjects assigned</p>
                   <p className="text-gray-400 text-xs sm:text-sm mt-1">
-                    You are not assigned to any subjects yet
+                    You will see subjects here once assigned by admin
                   </p>
                 </div>
               ) : (
@@ -288,8 +405,13 @@ const TeacherDashboard_Page = () => {
 
                 {!selectedSubject ? (
                   <div className="text-center py-6 sm:py-8">
-                    <FiEye className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
-                    <p className="text-gray-500 text-base sm:text-lg font-medium">Select a subject to view attendance</p>
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FiEye className="h-10 w-10 text-gray-400" />
+                    </div>
+                    <p className="text-gray-500 text-base sm:text-lg font-medium mb-2">Select a subject to view attendance</p>
+                    <p className="text-gray-400 text-sm">
+                      Choose a subject from the left panel to see attendance records
+                    </p>
                   </div>
                 ) : currentRecords.length > 0 ? (
                   <div className="overflow-x-auto -mx-4 sm:mx-0">
@@ -311,30 +433,54 @@ const TeacherDashboard_Page = () => {
                         {currentRecords.map((record) => (
                           <tr key={record.id} className="hover:bg-gray-50">
                             <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
-                                {record.studentName}
+                              <div className="flex items-center">
+                                <div className="flex-shrink-0 h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                  <span className="text-sm font-medium text-gray-600">
+                                    {record.studentName?.charAt(0) || 'S'}
+                                  </span>
+                                </div>
+                                <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
+                                  {record.studentName}
+                                </div>
                               </div>
                             </td>
                             <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-center text-sm text-gray-500">
-                              {record.rollNo}
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {record.rollNo}
+                              </span>
                             </td>
                             <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-center text-sm text-gray-500">
-                              {record.time}
+                              <div className="flex items-center justify-center">
+                                <FiClock className="h-3.5 w-3.5 text-gray-400 mr-1.5" />
+                                {record.time}
+                              </div>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+                ) : selectedSubject && availableDates.length === 0 ? (
+                  <div className="text-center py-6 sm:py-8">
+                    <div className="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FiCalendar className="h-10 w-10 text-yellow-500" />
+                    </div>
+                    <p className="text-gray-500 text-base sm:text-lg font-medium mb-2">No attendance data yet</p>
+                    <p className="text-gray-400 text-sm mb-4">
+                      No attendance records found for {selectedSubjectData?.name}
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Start taking attendance for this subject to see records here
+                    </p>
+                  </div>
                 ) : (
                   <div className="text-center py-6 sm:py-8">
-                    <FiEye className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
-                    <p className="text-gray-500 text-base sm:text-lg font-medium">No attendance records found</p>
-                    <p className="text-gray-400 text-xs sm:text-sm mt-1">
-                      {availableDates.length === 0
-                        ? `No attendance data available for ${selectedSubjectData?.name}`
-                        : `No records for ${formatDate(currentDate)}`
-                      }
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FiEye className="h-10 w-10 text-gray-400" />
+                    </div>
+                    <p className="text-gray-500 text-base sm:text-lg font-medium mb-2">No records for this date</p>
+                    <p className="text-gray-400 text-sm">
+                      Select a different date from the navigation above
                     </p>
                   </div>
                 )}
