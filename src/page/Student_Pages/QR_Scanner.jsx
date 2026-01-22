@@ -495,7 +495,6 @@ const QRScanner_Page = () => {
           
           <h2 className="text-2xl font-bold text-gray-800 mb-3">Browser Not Supported</h2>
           <br />
-          <br />
           
           <div className="space-y-4 mb-6 text-left">
             <div className="flex items-start space-x-3">
