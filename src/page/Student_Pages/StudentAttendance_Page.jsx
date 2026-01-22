@@ -65,9 +65,9 @@ const StudentAttendance_Page = () => {
       });
       
       // Redirect to home
-      setTimeout(() => {
-        navigate('/');
-      }, 3000);
+      // setTimeout(() => {
+      //   navigate('/');
+      // }, 3000);
       
       return false;
     };
