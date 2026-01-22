@@ -54,10 +54,7 @@ const StudentAttendance_Page = () => {
       } else if (!isChromeBrowser) {
         errorMessage = 'Google Chrome Required';
         details = 'Please use Google Chrome browser to access this feature.';
-      } else if (isDesktopOrTab) {
-        errorMessage = 'Mobile Phone Required';
-        details = 'This feature is not available on tablets or desktop devices.';
-      }
+      } 
       
       toast.error(`${errorMessage}: ${details}`, {
         autoClose: 5000,
