@@ -16,7 +16,7 @@ const QRScanner_Page = () => {
   const canvasRef = useRef(null);
   const scanInterval = useRef(null);
 
-  // Check device and browser restrictions
+  // Check device and browser restrictions - NO TOASTS, NO NAVIGATION
   useEffect(() => {
     const checkDeviceRestrictions = () => {
       // Check if device is mobile
@@ -33,58 +33,15 @@ const QRScanner_Page = () => {
         (/iPad|Tablet|SamsungTablet/.test(navigator.userAgent) && !isChromeOnAndroid);
       
       // Allow only mobile devices with Chrome browser
-      if (isMobileDevice && isChromeBrowser && !isDesktopOrTab) {
-        setIsAllowedDevice(true);
-        return true;
-      }
+      const allowed = isMobileDevice && isChromeBrowser && !isDesktopOrTab;
+      setIsAllowedDevice(allowed);
       
-      // If not allowed, show error and redirect
-      setIsAllowedDevice(false);
-      
-      let errorMessage = 'Access Restricted';
-      let details = '';
-      
-      if (!isMobileDevice) {
-        errorMessage = 'Mobile Device Required';
-        details = 'This feature is only available on mobile devices.';
-      } else if (!isChromeBrowser) {
-        errorMessage = 'Google Chrome Required';
-        details = 'Please use Google Chrome browser to access this feature.';
-      } else if (isDesktopOrTab) {
-        errorMessage = 'Mobile Phone Required';
-        details = 'This feature is not available on tablets or desktop devices.';
-      }
-      
-      toast.error(`${errorMessage}: ${details}`, {
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      
-      // Redirect to home or show error page
-      setTimeout(() => {
-        navigate('/');
-      }, 3000);
-      
-      return false;
+      return allowed;
     };
 
     // Run the check immediately
-    const isAllowed = checkDeviceRestrictions();
-
-    // Also check on resize/orientation change
-    const handleResize = () => {
-      checkDeviceRestrictions();
-    };
-
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [navigate]);
+    checkDeviceRestrictions();
+  }, []);
 
   // Enhanced QR data parsing with expiry check
   const parseQRData = (qrDataString) => {
@@ -241,7 +198,6 @@ const QRScanner_Page = () => {
   const startCameraScan = async () => {
     // Check device restrictions before starting camera
     if (!isAllowedDevice) {
-      toast.error('Device not supported. Please use Google Chrome on a mobile device.');
       return;
     }
 
@@ -456,7 +412,7 @@ const QRScanner_Page = () => {
     };
   }, [cameraStream]);
 
-  // Device restriction error screen
+  // Device restriction error screen - SHOW IMMEDIATELY IF NOT ALLOWED
   if (!isAllowedDevice) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center p-4">
@@ -545,12 +501,12 @@ const QRScanner_Page = () => {
             <h2 className="text-xl font-semibold text-gray-800">
               Attendance Scanner
             </h2>
-            {/* <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 flex items-center">
+            <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 flex items-center">
               <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
               Mobile Chrome
-            </span> */}
+            </span>
           </div>
 
           {/* Scan Result Preview */}
@@ -661,7 +617,7 @@ const QRScanner_Page = () => {
         <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
           <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
           <ul className="text-sm text-sky-700 space-y-1">
-            {/* <li>• <strong>Device:</strong> Mobile phone with Google Chrome browser</li> */}
+            <li>• <strong>Device:</strong> Mobile phone with Google Chrome browser</li>
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
             <li>• <strong>Best Results:</strong> Use rear camera in well-lit area</li>
