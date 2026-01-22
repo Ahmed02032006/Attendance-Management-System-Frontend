@@ -437,14 +437,14 @@ const StudentAttendance_Page = () => {
                 {qrData && (
                   <div className="mt-0.5 text-xs text-gray-600 space-y-1">
                     <p><span className="font-medium">Subject Name:</span> <span className='border-b border-gray-400'>{qrData.subjectName}</span></p>
-                    <div className="flex items-center mt-1">
+                    {/* <div className="flex items-center mt-1">
                       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-800 flex items-center">
                         <svg className="w-2 h-2 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                         Mobile Chrome
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                 )}
               </div>
@@ -532,7 +532,7 @@ const StudentAttendance_Page = () => {
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Instructions:</h3>
             <ul className="text-[12px] text-gray-600 space-y-1">
-              <li>• <strong>Device:</strong> Mobile phone with Google Chrome browser only</li>
+              {/* <li>• <strong>Device:</strong> Mobile phone with Google Chrome browser only</li> */}
               <li>• Fill in your full name and roll number accurately</li>
               <li>• Make sure you're in the correct class session</li>
               <li>• Double-check your details before submitting</li>
