@@ -3,97 +3,90 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import jsQR from 'jsqr';
 
-// Browser detection function
-const isChromeBrowser = () => {
-  const userAgent = navigator.userAgent;
-  const isChrome = /Chrome\//.test(userAgent) && !/Edge\//.test(userAgent) && !/OPR\//.test(userAgent);
-  const isChromium = /Chromium\//.test(userAgent);
-  return isChrome || isChromium;
-};
-
-// Component for displaying browser restriction message
-const BrowserRestriction = () => {
-  const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 max-w-md w-full p-6 text-center">
-        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.986-.833-2.756 0L4.196 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
-        </div>
-        
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Browser Not Supported</h2>
-        
-        <p className="text-gray-600 mb-6">
-          This page requires <span className="font-semibold text-blue-600">Google Chrome</span> browser for optimal performance and security.
-          Please switch to Google Chrome to access the QR scanner.
-        </p>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-center space-x-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <span className="text-blue-600 font-bold">C</span>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Google Chrome</p>
-              <p className="text-xs text-gray-500">Recommended browser</p>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-500 mb-4">
-              Other browsers may not support camera access or QR code scanning properly.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => window.open('https://www.google.com/chrome/', '_blank')}
-              className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium"
-            >
-              Download Chrome
-            </button>
-            <button
-              onClick={() => navigate('/')}
-              className="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-50 transition-colors font-medium"
-            >
-              Go Back Home
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const QRScanner_Page = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [cameraStream, setCameraStream] = useState(null);
   const [hasCameraPermission, setHasCameraPermission] = useState(true);
   const [scanResult, setScanResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAllowedDevice, setIsAllowedDevice] = useState(false);
   const navigate = useNavigate();
-
-  // Check browser on component mount
-  useEffect(() => {
-    if (!isChromeBrowser()) {
-      toast.error('Please use Google Chrome browser for QR scanning');
-    }
-  }, []);
-
-  // If not Chrome, show restriction component
-  if (!isChromeBrowser()) {
-    return <BrowserRestriction />;
-  }
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const scanInterval = useRef(null);
 
+  // Check device and browser restrictions
+  useEffect(() => {
+    const checkDeviceRestrictions = () => {
+      // Check if device is mobile
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      // Check if browser is Chrome/Chromium based
+      const isChromeBrowser = /Chrome|CriOS/.test(navigator.userAgent) && !/Edg|OPR|Opera|SamsungBrowser/.test(navigator.userAgent);
+      
+      // Check if running in Chrome on Android (specific check for mobile Chrome)
+      const isChromeOnAndroid = /Android.*Chrome\//.test(navigator.userAgent);
+      
+      // Check if it's a desktop/tab (we want to block these)
+      const isDesktopOrTab = !isMobileDevice || 
+        (/iPad|Tablet|SamsungTablet/.test(navigator.userAgent) && !isChromeOnAndroid);
+      
+      // Allow only mobile devices with Chrome browser
+      if (isMobileDevice && isChromeBrowser && !isDesktopOrTab) {
+        setIsAllowedDevice(true);
+        return true;
+      }
+      
+      // If not allowed, show error and redirect
+      setIsAllowedDevice(false);
+      
+      let errorMessage = 'Access Restricted';
+      let details = '';
+      
+      if (!isMobileDevice) {
+        errorMessage = 'Mobile Device Required';
+        details = 'This feature is only available on mobile devices.';
+      } else if (!isChromeBrowser) {
+        errorMessage = 'Google Chrome Required';
+        details = 'Please use Google Chrome browser to access this feature.';
+      } else if (isDesktopOrTab) {
+        errorMessage = 'Mobile Phone Required';
+        details = 'This feature is not available on tablets or desktop devices.';
+      }
+      
+      toast.error(`${errorMessage}: ${details}`, {
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      // Redirect to home or show error page
+      setTimeout(() => {
+        navigate('/');
+      }, 3000);
+      
+      return false;
+    };
+
+    // Run the check immediately
+    const isAllowed = checkDeviceRestrictions();
+
+    // Also check on resize/orientation change
+    const handleResize = () => {
+      checkDeviceRestrictions();
+    };
+
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [navigate]);
+
   // Enhanced QR data parsing with expiry check
-  // Enhanced QR data parsing with immediate expiry check
   const parseQRData = (qrDataString) => {
     if (!qrDataString) {
       throw new Error('Empty QR code data');
@@ -246,6 +239,12 @@ const QRScanner_Page = () => {
 
   // Start camera for live scanning with better error handling
   const startCameraScan = async () => {
+    // Check device restrictions before starting camera
+    if (!isAllowedDevice) {
+      toast.error('Device not supported. Please use Google Chrome on a mobile device.');
+      return;
+    }
+
     try {
       setIsScanning(true);
       setHasCameraPermission(true);
@@ -382,7 +381,6 @@ const QRScanner_Page = () => {
         // IF QR IS EXPIRED - Show popup and restart camera
         if (isExpired) {
           toast.error(`${expiryMessage}`, {
-            // position: "top-center",
             autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: true,
@@ -407,7 +405,6 @@ const QRScanner_Page = () => {
 
         // Show scan success message
         toast.success('QR Code scanned successfully!', {
-          // position: "top-center",
           autoClose: 1500,
         });
 
@@ -426,7 +423,6 @@ const QRScanner_Page = () => {
         }
 
         toast.error(errorMessage, {
-          // position: "top-center",
           autoClose: 3000,
         });
 
@@ -460,28 +456,102 @@ const QRScanner_Page = () => {
     };
   }, [cameraStream]);
 
+  // Device restriction error screen
+  if (!isAllowedDevice) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-xl shadow-lg border border-red-200 p-8 text-center">
+          <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.232 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Access Restricted</h2>
+          
+          <div className="space-y-4 mb-6 text-left">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900">Mobile Device Required</h4>
+                <p className="text-sm text-gray-600">
+                  This feature is only available on mobile phones. Tablets and computers are not supported.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-1.76v.5a3.5 3.5 0 01-3.5 3.5h-.5V8h1.76V6.69h5.31a3 3 0 013 3v5.31H8V15h10.5a1.5 1.5 0 001.5-1.5v-6a4.81 4.81 0 01-4.41 4.81z" />
+                    <path d="M3.5 11.5a2 2 0 100 4 2 2 0 000-4z" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900">Google Chrome Required</h4>
+                <p className="text-sm text-gray-600">
+                  Please use Google Chrome browser to access the QR scanner feature.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 14a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fillRule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900">How to Access</h4>
+                <p className="text-sm text-gray-600">
+                  1. Open Google Chrome on your mobile phone<br />
+                  2. Navigate to this website<br />
+                  3. Allow camera permissions when prompted
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => navigate('/')}
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Return to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto max-w-md p-6">
-        {/* Chrome Browser Banner */}
-        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-blue-600 font-bold">C</span>
-              </div>
-              <span className="text-sm font-medium text-blue-800">Using Google Chrome</span>
-            </div>
-            <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-          </div>
-        </div>
-
         <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
-            Attendance Scanner
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Attendance Scanner
+            </h2>
+            <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 flex items-center">
+              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Mobile Chrome
+            </span>
+          </div>
 
           {/* Scan Result Preview */}
           {scanResult && (
@@ -591,11 +661,10 @@ const QRScanner_Page = () => {
         <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
           <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
           <ul className="text-sm text-sky-700 space-y-1">
-            <li>• <strong>Browser:</strong> Requires Google Chrome for best results</li>
+            <li>• <strong>Device:</strong> Mobile phone with Google Chrome browser</li>
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
             <li>• <strong>Best Results:</strong> Use rear camera in well-lit area</li>
-            {/* <li>• <strong>Note:</strong> QR codes expire after 40 seconds</li> */}
           </ul>
         </div>
       </div>
