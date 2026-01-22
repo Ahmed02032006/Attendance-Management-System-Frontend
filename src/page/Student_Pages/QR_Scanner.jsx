@@ -9,82 +9,49 @@ const QRScanner_Page = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState(true);
   const [scanResult, setScanResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isAllowedDevice, setIsAllowedDevice] = useState(null); // null initially for loading
+  const [isAllowedDevice, setIsAllowedDevice] = useState(true); // Default to true to prevent white screen
   const navigate = useNavigate();
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const scanInterval = useRef(null);
 
-  // Improved device and browser restrictions detection
+  // Simplified device and browser restrictions detection
   useEffect(() => {
     const checkDeviceRestrictions = () => {
       const userAgent = navigator.userAgent.toLowerCase();
       
-      // More accurate mobile device detection
-      const isMobileDevice = 
-        /android|webos|iphone|ipod|blackberry|iemobile|opera mini/i.test(userAgent) ||
-        (/ipad/i.test(userAgent) && !/macintosh/i.test(navigator.platform)) ||
-        (/windows phone/i.test(userAgent)) ||
-        (navigator.maxTouchPoints > 1 && /macintosh/i.test(navigator.platform)); // iPad on Mac Safari
-
-      // Check if browser is Chrome/Chromium based - more accurate detection
-      const isChromeBrowser = 
-        /chrome|crios/.test(userAgent) && 
-        !/edg|opr|opera|samsungbrowser|vivaldi|brave/i.test(userAgent);
-
-      // More accurate tablet detection
-      const isTablet = 
-        /ipad|tablet|samsungtablet|kindle|playbook|silk/i.test(userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad on Safari
-
-      // Check for desktop/laptop
-      const isDesktop = !isMobileDevice && !isTablet;
-
-      // Check screen size as additional indicator (mobile usually <= 768px width)
-      const isSmallScreen = window.innerWidth <= 768;
-
-      // Allow mobile Chrome (not tablets) or mobile devices that might not have Chrome in user agent but are mobile
-      // Also allow if it's mobile-sized screen (for testing)
-      const allowed = 
-        (isMobileDevice && isChromeBrowser && !isTablet) ||
-        (isMobileDevice && !isDesktop && isSmallScreen && (isChromeBrowser || /android|iphone/i.test(userAgent)));
-
-      console.log('Device Detection:', {
+      // SIMPLIFIED: Only block obvious desktop browsers
+      // Check for desktop patterns
+      const isDesktop = 
+        /windows nt|macintosh|linux x86_64|wow64/i.test(navigator.userAgent) &&
+        !/android|iphone|ipad|ipod|mobile/i.test(userAgent);
+      
+      // Check for tablet patterns
+      const isTablet = /ipad|tablet|(android(?!.*mobile))|kindle|silk/i.test(userAgent);
+      
+      // Check browser - allow Chrome and most mobile browsers
+      const isMobileBrowser = 
+        /chrome|safari|firefox|edge|samsungbrowser|opera|vivaldi|brave/i.test(userAgent);
+      
+      // Allow mobile devices, block obvious desktop
+      const allowed = !isDesktop;
+      
+      console.log('Device Check:', {
         userAgent: navigator.userAgent,
-        isMobileDevice,
-        isChromeBrowser,
-        isTablet,
         isDesktop,
-        isSmallScreen,
+        isTablet,
+        isMobileBrowser,
         allowed
       });
-
+      
       setIsAllowedDevice(allowed);
       return allowed;
     };
 
-    // Run the check immediately
-    const allowed = checkDeviceRestrictions();
-
-    // If not allowed but we're in development, allow anyway for testing
-    if (!allowed && process.env.NODE_ENV === 'development') {
-      console.log('Development mode: Overriding device restrictions');
-      setIsAllowedDevice(true);
-    }
+    // Run the check
+    checkDeviceRestrictions();
   }, []);
-
-  // Show loading state while checking
-  if (isAllowedDevice === null) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-lg font-medium text-gray-700">Checking device compatibility...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Enhanced QR data parsing with expiry check
   const parseQRData = (qrDataString) => {
@@ -455,7 +422,7 @@ const QRScanner_Page = () => {
     };
   }, [cameraStream]);
 
-  // Device restriction error screen
+  // Device restriction error screen - only show if explicitly blocked
   if (!isAllowedDevice) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center p-4">
@@ -478,26 +445,9 @@ const QRScanner_Page = () => {
                 </div>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Mobile Device Required</h4>
+                <h4 className="font-medium text-gray-900">Desktop Access Not Allowed</h4>
                 <p className="text-sm text-gray-600">
-                  This feature is only available on mobile phones. Tablets and computers are not supported.
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0 mt-1">
-                <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
-                  <svg className="h-4 w-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-1.76v.5a3.5 3.5 0 01-3.5 3.5h-.5V8h1.76V6.69h5.31a3 3 0 013 3v5.31H8V15h10.5a1.5 1.5 0 001.5-1.5v-6a4.81 4.81 0 01-4.41 4.81z" />
-                    <path d="M3.5 11.5a2 2 0 100 4 2 2 0 000-4z" />
-                  </svg>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-900">Google Chrome Required</h4>
-                <p className="text-sm text-gray-600">
-                  Please use Google Chrome browser to access the QR scanner feature.
+                  This feature is optimized for mobile devices. Please use your smartphone to access the QR scanner.
                 </p>
               </div>
             </div>
@@ -514,7 +464,7 @@ const QRScanner_Page = () => {
               <div>
                 <h4 className="font-medium text-gray-900">How to Access</h4>
                 <p className="text-sm text-gray-600">
-                  1. Open Google Chrome on your mobile phone<br />
+                  1. Open your browser on your smartphone<br />
                   2. Navigate to this website<br />
                   3. Allow camera permissions when prompted
                 </p>
@@ -548,7 +498,7 @@ const QRScanner_Page = () => {
               <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              Mobile Chrome
+              Mobile Optimized
             </span>
           </div>
 
@@ -660,7 +610,7 @@ const QRScanner_Page = () => {
         <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
           <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
           <ul className="text-sm text-sky-700 space-y-1">
-            <li>• <strong>Device:</strong> Mobile phone with Google Chrome browser</li>
+            <li>• <strong>Device:</strong> Mobile phone recommended for best experience</li>
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
             <li>• <strong>Best Results:</strong> Use rear camera in well-lit area</li>
