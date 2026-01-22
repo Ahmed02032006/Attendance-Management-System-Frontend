@@ -958,7 +958,7 @@ const TeacherAttendance_Page = () => {
                   </button>
                 </div>
               </div>
-              <div className="p-4 flex flex-col items-center">
+              <div className="p-6 flex flex-col items-center">
                 <div
                   className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
                   id="qr-code-container"
