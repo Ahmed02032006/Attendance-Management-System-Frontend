@@ -9,97 +9,95 @@ const QRScanner_Page = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState(true);
   const [scanResult, setScanResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isAllowedDevice, setIsAllowedDevice] = useState(true); // Start as true, then check
+  const [isAllowedDevice, setIsAllowedDevice] = useState(false); // Start as false, check immediately
   const navigate = useNavigate();
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const scanInterval = useRef(null);
 
-  // Accurate browser and device detection
+  // STRICT browser and device detection - runs immediately
   useEffect(() => {
     const checkBrowserRestrictions = () => {
       const userAgent = navigator.userAgent;
       const userAgentLower = userAgent.toLowerCase();
       
-      // Check for mobile device
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-      
-      // Check for tablet
-      const isTablet = /iPad|Tablet|Kindle|Silk/i.test(userAgent) || 
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      
-      // Check for desktop
-      const isDesktop = !isMobileDevice && !isTablet;
-      
-      // SPECIFIC BROWSER DETECTION
+      // STRICT Chrome detection
       let isChrome = false;
       let browserName = 'Unknown';
       
-      // Detect Chrome/Chromium browsers
-      if (/Chrome/i.test(userAgent) && !/Edge|Edg|OPR|Opera|SamsungBrowser|Vivaldi|Brave/i.test(userAgent)) {
-        isChrome = true;
-        browserName = 'Chrome';
-      } 
-      // Detect Chrome on iOS (CriOS)
-      else if (/CriOS/i.test(userAgent)) {
+      // Method 1: Check for Chrome with specific version (most accurate)
+      if (/Chrome\//.test(userAgent)) {
+        // Extract Chrome version
+        const chromeMatch = userAgent.match(/Chrome\/(\d+)/);
+        if (chromeMatch) {
+          // Check it's not Edge, Opera, Samsung, Vivaldi, Brave, etc.
+          const isEdge = /Edg|Edge\//.test(userAgent);
+          const isOpera = /OPR|Opera/.test(userAgent);
+          const isSamsung = /SamsungBrowser/.test(userAgent);
+          const isVivaldi = /Vivaldi/.test(userAgent);
+          const isBrave = /Brave/.test(userAgent);
+          const isUCBrowser = /UCBrowser|UCWEB/.test(userAgent);
+          const isFirefox = /Firefox|FxiOS/.test(userAgent);
+          const isSafari = /Safari/.test(userAgent) && !/Chrome|CriOS/.test(userAgent);
+          const isPhoenix = /Phoenix/.test(userAgent);
+          
+          // Only allow pure Chrome (not Chromium-based others)
+          if (!isEdge && !isOpera && !isSamsung && !isVivaldi && !isBrave && 
+              !isUCBrowser && !isFirefox && !isSafari && !isPhoenix) {
+            isChrome = true;
+            browserName = 'Google Chrome';
+          }
+        }
+      }
+      
+      // Method 2: Check for Chrome on iOS (CriOS)
+      if (!isChrome && /CriOS/.test(userAgent)) {
         isChrome = true;
         browserName = 'Chrome iOS';
       }
-      // Detect Edge (Chromium-based but not Chrome)
-      else if (/Edg|Edge/i.test(userAgent)) {
-        browserName = 'Edge';
-      }
-      // Detect Safari
-      else if (/Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent)) {
-        browserName = 'Safari';
-      }
-      // Detect Firefox
-      else if (/Firefox|FxiOS/i.test(userAgent)) {
-        browserName = 'Firefox';
-      }
-      // Detect Opera
-      else if (/OPR|Opera/i.test(userAgent)) {
-        browserName = 'Opera';
-      }
-      // Detect Samsung Browser
-      else if (/SamsungBrowser/i.test(userAgent)) {
-        browserName = 'Samsung Browser';
+      
+      // Method 3: Check for Chromium (fallback)
+      if (!isChrome && /Chromium/.test(userAgent)) {
+        const isEdge = /Edg|Edge\//.test(userAgent);
+        const isOpera = /OPR|Opera/.test(userAgent);
+        if (!isEdge && !isOpera) {
+          isChrome = true;
+          browserName = 'Chromium';
+        }
       }
       
-      // Check if it's Chrome on Android (most common for QR scanning)
-      const isChromeOnAndroid = /Android.*Chrome\//.test(userAgent);
+      // If still not Chrome, detect what it actually is
+      if (!isChrome) {
+        if (/Edg|Edge\//.test(userAgent)) browserName = 'Microsoft Edge';
+        else if (/Firefox|FxiOS/.test(userAgent)) browserName = 'Mozilla Firefox';
+        else if (/Safari/.test(userAgent) && !/Chrome|CriOS/.test(userAgent)) browserName = 'Apple Safari';
+        else if (/OPR|Opera/.test(userAgent)) browserName = 'Opera';
+        else if (/SamsungBrowser/.test(userAgent)) browserName = 'Samsung Internet';
+        else if (/UCBrowser|UCWEB/.test(userAgent)) browserName = 'UC Browser';
+        else if (/Phoenix/.test(userAgent)) browserName = 'Phoenix Browser';
+        else if (/Brave/.test(userAgent)) browserName = 'Brave Browser';
+        else if (/Vivaldi/.test(userAgent)) browserName = 'Vivaldi Browser';
+        else if (/Chrome/.test(userAgent)) browserName = 'Other Chromium Browser';
+        else browserName = 'Unknown Browser';
+      }
       
-      // Check if it's Chrome on iOS
-      const isChromeOnIOS = /CriOS/.test(userAgent) && /iPhone|iPad|iPod/.test(userAgent);
-      
-      // Final check: Allow Chrome browsers on mobile devices
-      // For development, allow all browsers
-      const isDevelopment = process.env.NODE_ENV === 'development';
-      const allowed = isDevelopment || (isChrome && (isMobileDevice || isChromeOnAndroid || isChromeOnIOS));
-      
-      console.log('Browser Detection:', {
+      console.log('STRICT Browser Detection:', {
         userAgent: userAgent,
         browserName: browserName,
         isChrome: isChrome,
-        isMobileDevice: isMobileDevice,
-        isTablet: isTablet,
-        isDesktop: isDesktop,
-        isChromeOnAndroid: isChromeOnAndroid,
-        isChromeOnIOS: isChromeOnIOS,
-        allowed: allowed,
-        isDevelopment: isDevelopment
+        allowed: isChrome
       });
       
-      setIsAllowedDevice(allowed);
-      return { allowed, browserName, isMobileDevice };
+      setIsAllowedDevice(isChrome);
+      return { isChrome, browserName };
     };
 
-    const { allowed, browserName, isMobileDevice } = checkBrowserRestrictions();
+    const { isChrome, browserName } = checkBrowserRestrictions();
     
-    // If not allowed, show message
-    if (!allowed && !process.env.NODE_ENV === 'development') {
-      console.log(`Access denied: ${browserName} on ${isMobileDevice ? 'mobile' : 'desktop'}`);
+    // Log if not Chrome
+    if (!isChrome) {
+      console.log(`Access denied: ${browserName} browser detected. Only Google Chrome is allowed.`);
     }
   }, []);
 
@@ -472,17 +470,23 @@ const QRScanner_Page = () => {
     };
   }, [cameraStream]);
 
-  // Browser restriction error screen
-  if (!isAllowedDevice && process.env.NODE_ENV !== 'development') {
+  // Browser restriction error screen - ALWAYS SHOW if not Chrome
+  if (!isAllowedDevice) {
+    // Detect browser more accurately for display
     const userAgent = navigator.userAgent;
     let detectedBrowser = 'Unknown Browser';
     
-    if (/Edg|Edge/i.test(userAgent)) detectedBrowser = 'Microsoft Edge';
-    else if (/Firefox|FxiOS/i.test(userAgent)) detectedBrowser = 'Mozilla Firefox';
-    else if (/Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent)) detectedBrowser = 'Apple Safari';
-    else if (/OPR|Opera/i.test(userAgent)) detectedBrowser = 'Opera Browser';
-    else if (/SamsungBrowser/i.test(userAgent)) detectedBrowser = 'Samsung Internet';
-    else if (/Chrome/i.test(userAgent)) detectedBrowser = 'Google Chrome';
+    if (/Edg|Edge\//.test(userAgent)) detectedBrowser = 'Microsoft Edge';
+    else if (/Firefox|FxiOS/.test(userAgent)) detectedBrowser = 'Mozilla Firefox';
+    else if (/Safari/.test(userAgent) && !/Chrome|CriOS/.test(userAgent)) detectedBrowser = 'Apple Safari';
+    else if (/OPR|Opera/.test(userAgent)) detectedBrowser = 'Opera Browser';
+    else if (/SamsungBrowser/.test(userAgent)) detectedBrowser = 'Samsung Internet';
+    else if (/UCBrowser|UCWEB/.test(userAgent)) detectedBrowser = 'UC Browser';
+    else if (/Phoenix/.test(userAgent)) detectedBrowser = 'Phoenix Browser';
+    else if (/Brave/.test(userAgent)) detectedBrowser = 'Brave Browser';
+    else if (/Vivaldi/.test(userAgent)) detectedBrowser = 'Vivaldi Browser';
+    else if (/Chrome/.test(userAgent)) detectedBrowser = 'Other Chromium Browser';
+    else detectedBrowser = 'Unknown Browser';
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center p-4">
@@ -494,7 +498,9 @@ const QRScanner_Page = () => {
           </div>
           
           <h2 className="text-2xl font-bold text-gray-800 mb-3">Browser Not Supported</h2>
-          <br />
+          <p className="text-gray-600 mb-4">
+            Detected: <span className="font-semibold text-red-600">{detectedBrowser}</span>
+          </p>
           
           <div className="space-y-4 mb-6 text-left">
             <div className="flex items-start space-x-3">
@@ -509,7 +515,7 @@ const QRScanner_Page = () => {
               <div>
                 <h4 className="font-medium text-gray-900">Google Chrome Required</h4>
                 <p className="text-sm text-gray-600">
-                  This QR scanner works best with Google Chrome browser for optimal performance and compatibility.
+                  This QR scanner only works with Google Chrome browser for security and compatibility.
                 </p>
               </div>
             </div>
@@ -546,13 +552,14 @@ const QRScanner_Page = () => {
                 <p className="text-sm text-gray-600">
                   • Better camera API support<br />
                   • More reliable QR scanning<br />
-                  • Consistent performance across devices
+                  • Consistent performance across devices<br />
+                  • Enhanced security features
                 </p>
               </div>
             </div>
           </div>
           
-          {/* <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => window.open('https://www.google.com/chrome/', '_blank')}
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -573,7 +580,7 @@ const QRScanner_Page = () => {
               </svg>
               Return to Home
             </button>
-          </div> */}
+          </div>
         </div>
       </div>
     );
@@ -587,12 +594,12 @@ const QRScanner_Page = () => {
             <h2 className="text-xl font-semibold text-gray-800">
               Attendance Scanner
             </h2>
-            {/* <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 flex items-center">
+            <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 flex items-center">
               <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
               Chrome Browser
-            </span> */}
+            </span>
           </div>
 
           {/* Scan Result Preview */}
