@@ -207,7 +207,7 @@ const TeacherSubjects_Page = () => {
       <div className="container max-w-full mx-auto p-6">
         {/* Search and Filter Section */}
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="relative max-w-md">
+          <div className="relative w-full sm:w-auto sm:flex-1 max-w-xl">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FiSearch className="h-5 w-5 text-gray-400" />
             </div>
@@ -220,19 +220,8 @@ const TeacherSubjects_Page = () => {
             />
           </div>
 
-          {/* Status Filter and Create Button */}
+          {/* Create Subject Button */}
           <div className="flex items-center gap-3">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm"
-            >
-              <option value="All">All Status</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-
-            {/* Create Subject Button - Moved here */}
             <button
               onClick={openCreateModal}
               disabled={isLoading}
