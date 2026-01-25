@@ -542,60 +542,78 @@ const TeacherAttendance_Page = () => {
         {/* Attendance Table Section */}
         {selectedSubject && (
           <div className="space-y-6">
-            {/* Search and Date Picker */}
-            <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="relative max-w-md">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiSearch className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search students..."
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+            {/* Header Section with Create Button */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              {/* Create New Attendance Button - Moved to top */}
+              <div className="w-full sm:w-auto order-1 sm:order-2">
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2.5 px-4 rounded-sm transition-all duration-200 flex items-center justify-center space-x-2 hover:shadow-lg"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Create New Attendance</span>
+                </button>
               </div>
 
-              <div className="flex items-center gap-3">
-                {/* Date Picker Input */}
-                <input
-                  type="date"
-                  value={formatDate(currentDate)}
-                  onChange={handleDateChange}
-                  max={formatDate(getTodayDate())}
-                  className="px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
-                />
+              {/* Search and Controls - Adjust layout */}
+              <div className="w-full order-2 sm:order-1">
+                <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="relative max-w-md">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FiSearch className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search students..."
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
 
-                {/* Export to Excel Button */}
-                <button
-                  onClick={exportToExcel}
-                  disabled={filteredStudents.length === 0}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Export Excel</span>
-                </button>
+                  <div className="flex items-center gap-3">
+                    {/* Date Picker Input */}
+                    <input
+                      type="date"
+                      value={formatDate(currentDate)}
+                      onChange={handleDateChange}
+                      max={formatDate(getTodayDate())}
+                      className="px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                    />
 
-                {/* Refresh Button */}
-                <button
-                  onClick={() => handleRefresh()}
-                  disabled={isLoading}
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-                  title="Refresh attendance data"
-                >
-                  <svg
-                    className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  <span>Refresh</span>
-                </button>
+                    {/* Export to Excel Button */}
+                    <button
+                      onClick={exportToExcel}
+                      disabled={filteredStudents.length === 0}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>Export Excel</span>
+                    </button>
+
+                    {/* Refresh Button */}
+                    <button
+                      onClick={() => handleRefresh()}
+                      disabled={isLoading}
+                      className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                      title="Refresh attendance data"
+                    >
+                      <svg
+                        className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span>Refresh</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -778,22 +796,6 @@ const TeacherAttendance_Page = () => {
           </div>
         )}
 
-        {/* Create New Attendance Button - Bottom Right */}
-        {selectedSubject && (
-          <div className="fixed bottom-6 right-6 z-40">
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-3 rounded-sm shadow-lg transition-all duration-200 flex items-center space-x-3 hover:shadow-xl transform hover:scale-105"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span className="hidden sm:inline">Create New Attendance</span>
-              <span className="sm:hidden">Create</span>
-            </button>
-          </div>
-        )}
-
         {/* No Subject Selected State */}
         {!selectedSubject && !showSubjectModal && subjectsWithAttendance.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
@@ -938,7 +940,6 @@ const TeacherAttendance_Page = () => {
                 <div className='flex items-center justify-between gap-3'>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    {/* <span className="text-xs text-green-600 font-medium">Live</span> */}
                   </div>
                   <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
                 </div>
@@ -981,100 +982,6 @@ const TeacherAttendance_Page = () => {
                   <p className="text-sm text-gray-600">
                     Students can scan this QR code to mark their attendance
                   </p>
-                  {/* <p className="text-xs text-gray-500 mt-1">
-                    {isQrZoomed ? "Click minimize icon to reduce size" : "Click maximize icon to enlarge"}
-                  </p> */}
-                </div>
-              </div>
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-                {/* <button
-                  onClick={toggleQrZoom}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors flex items-center space-x-2"
-                >
-                  {isQrZoomed ? (
-                    <>
-                      <FiMinimize2 className="w-4 h-4" />
-                      <span>Minimize</span>
-                    </>
-                  ) : (
-                    <>
-                      <FiMaximize2 className="w-4 h-4" />
-                      <span>Maximize</span>
-                    </>
-                  )}
-                </button> */}
-                <button
-                  onClick={() => {
-                    setShowQRModal(false);
-                    setIsQrZoomed(false); // Reset zoom state when closing
-                    if (qrRefreshInterval) {
-                      clearInterval(qrRefreshInterval);
-                      setQrRefreshInterval(null);
-                    }
-                  }}
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )
-      }
-
-      {/* 
-      ====================================================================
-        {
-        showQRModal && (
-          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className={`bg-white rounded-lg shadow-xl ${isQrZoomed ? 'w-full max-w-3xl' : 'w-full max-w-sm'}`}>
-              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <div className='flex items-center justify-between gap-3'>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={toggleQrZoom}
-                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                    title={isQrZoomed ? "Minimize QR Code" : "Maximize QR Code"}
-                  >
-                    {isQrZoomed ? (
-                      <FiMinimize2 className="w-4 h-4 text-gray-700" />
-                    ) : (
-                      <FiMaximize2 className="w-4 h-4 text-gray-700" />
-                    )}
-                  </button>
-                </div>
-              </div>
-              <div className="p-6 flex flex-col items-center">
-                <div
-                  className={`${isQrZoomed ? 'w-[500px] h-[500px]' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
-                  id="qr-code-container"
-                >
-                  {currentQrCode && (
-                    <QRCodeSVG
-                      value={currentQrCode}
-                      size={isQrZoomed ? 450 : 250}
-                      level="L"
-                      includeMargin={true}
-                      bgColor="#FFFFFF"
-                      fgColor="#000000"
-                      id="qr-code-svg"
-                      minVersion={1}
-                    />
-                  )}
-                </div>
-
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">
-                    Students can scan this QR code to mark their attendance
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {isQrZoomed ? "Click minimize icon to reduce size" : "Click maximize icon to enlarge"}
-                  </p>
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
@@ -1096,8 +1003,6 @@ const TeacherAttendance_Page = () => {
           </div>
         )
       }
-      ====================================================================
-      */}
 
       {
         showDeleteModal && (
