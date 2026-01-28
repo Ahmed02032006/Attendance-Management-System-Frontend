@@ -20,9 +20,9 @@ const StudentAttendance_Page = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Accurate browser detection
+  // Enhanced Chrome-only detection
   useEffect(() => {
-    const checkBrowserRestrictions = () => {
+    const checkBrowserRestrictions = async () => {
       const userAgent = navigator.userAgent;
       const userAgentLower = userAgent.toLowerCase();
 
@@ -33,71 +33,122 @@ const StudentAttendance_Page = () => {
       const isTablet = /iPad|Tablet|Kindle|Silk/i.test(userAgent) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-      // Check for desktop
-      const isDesktop = !isMobileDevice && !isTablet;
+      // COMPREHENSIVE BROWSER DETECTION - CHROME ONLY
+      let isGenuineChrome = false;
+      let browserName = 'Unknown Browser';
 
-      // BRAVE BROWSER DETECTION
-      // Brave doesn't expose itself in user agent, so we need to check for the brave object
-      const isBrave = (navigator.brave && typeof navigator.brave.isBrave === 'function');
+      // 1. Check for Brave (using async detection)
+      const isBrave = (navigator.brave && await navigator.brave.isBrave().catch(() => false)) || false;
 
-      // SPECIFIC BROWSER DETECTION
-      let isChrome = false;
-      let browserName = 'Unknown';
+      // 2. Check for common Chrome-based browsers to EXCLUDE
+      const isEdge = /Edg|Edge/i.test(userAgent);
+      const isOpera = /OPR|Opera/i.test(userAgent);
+      const isSamsung = /SamsungBrowser/i.test(userAgent);
+      const isUCBrowser = /UCBrowser/i.test(userAgent);
+      const isVivaldi = /Vivaldi/i.test(userAgent);
+      const isYandex = /YaBrowser/i.test(userAgent);
+      const isDuckDuckGo = /DuckDuckGo/i.test(userAgent);
+      const isPhoenix = /Phoenix/i.test(userAgent);
+      const isMiuiBrowser = /MiuiBrowser|XiaoMi/i.test(userAgent);
+      const isOppoR15 = /OPPO/i.test(userAgent) && /OPR/i.test(userAgent);
+      const isVivoBrowser = /VivoBrowser/i.test(userAgent);
+      const isHuaweiBrowser = /HuaweiBrowser/i.test(userAgent);
+      const isQQBrowser = /QQBrowser/i.test(userAgent);
+      const isBaiduBrowser = /BIDUBrowser|baiduboxapp/i.test(userAgent);
+      const is360Browser = /360SE|360EE/i.test(userAgent);
+      const isSogouBrowser = /MetaSr|SogouMobileBrowser/i.test(userAgent);
+      const isFirefox = /Firefox|FxiOS/i.test(userAgent);
+      const isSafari = /Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent);
 
-      // Detect Brave first (before Chrome check)
+      // 3. Check if it has Chrome in user agent
+      const hasChrome = /Chrome/i.test(userAgent);
+      const hasCriOS = /CriOS/i.test(userAgent); // Chrome on iOS
+
+      // 4. Additional checks for Chromium-based browsers
+      const isChromiumBased = hasChrome || hasCriOS;
+
+      // 5. Detect browser name
       if (isBrave) {
-        browserName = 'Brave';
-        isChrome = false; // Explicitly set to false
-      }
-      // Detect Chrome/Chromium browsers (but not Brave)
-      else if (/Chrome/i.test(userAgent) && !/Edge|Edg|OPR|Opera|SamsungBrowser|Vivaldi/i.test(userAgent)) {
-        isChrome = true;
-        browserName = 'Chrome';
-      }
-      // Detect Chrome on iOS (CriOS)
-      else if (/CriOS/i.test(userAgent)) {
-        isChrome = true;
-        browserName = 'Chrome iOS';
-      }
-      // Detect Edge (Chromium-based but not Chrome)
-      else if (/Edg|Edge/i.test(userAgent)) {
-        browserName = 'Edge';
-      }
-      // Detect Safari
-      else if (/Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent)) {
+        browserName = 'Brave Browser';
+      } else if (isEdge) {
+        browserName = 'Microsoft Edge';
+      } else if (isOpera) {
+        browserName = 'Opera Browser';
+      } else if (isSamsung) {
+        browserName = 'Samsung Internet';
+      } else if (isUCBrowser) {
+        browserName = 'UC Browser';
+      } else if (isVivaldi) {
+        browserName = 'Vivaldi';
+      } else if (isYandex) {
+        browserName = 'Yandex Browser';
+      } else if (isDuckDuckGo) {
+        browserName = 'DuckDuckGo Browser';
+      } else if (isPhoenix) {
+        browserName = 'Phoenix Browser';
+      } else if (isMiuiBrowser) {
+        browserName = 'Mi Browser';
+      } else if (isVivoBrowser) {
+        browserName = 'Vivo Browser';
+      } else if (isHuaweiBrowser) {
+        browserName = 'Huawei Browser';
+      } else if (isQQBrowser) {
+        browserName = 'QQ Browser';
+      } else if (isBaiduBrowser) {
+        browserName = 'Baidu Browser';
+      } else if (is360Browser) {
+        browserName = '360 Browser';
+      } else if (isSogouBrowser) {
+        browserName = 'Sogou Browser';
+      } else if (isFirefox) {
+        browserName = 'Mozilla Firefox';
+      } else if (isSafari) {
         browserName = 'Safari';
-      }
-      // Detect Firefox
-      else if (/Firefox|FxiOS/i.test(userAgent)) {
-        browserName = 'Firefox';
-      }
-      // Detect Opera
-      else if (/OPR|Opera/i.test(userAgent)) {
-        browserName = 'Opera';
-      }
-      // Detect Samsung Browser
-      else if (/SamsungBrowser/i.test(userAgent)) {
-        browserName = 'Samsung Browser';
+      } else if (hasCriOS) {
+        browserName = 'Chrome iOS';
+        isGenuineChrome = true; // Chrome on iOS is genuine
+      } else if (hasChrome) {
+        browserName = 'Google Chrome';
+        isGenuineChrome = true; // Likely genuine Chrome
       }
 
-      // Check if it's Chrome on Android (most common for QR scanning)
-      const isChromeOnAndroid = /Android.*Chrome\//.test(userAgent) && !isBrave;
+      // 6. Final validation - Must have Chrome AND NOT be any other browser
+      const isNotOtherBrowser = !isBrave && !isEdge && !isOpera && !isSamsung &&
+        !isUCBrowser && !isVivaldi && !isYandex && !isDuckDuckGo &&
+        !isPhoenix && !isMiuiBrowser && !isVivoBrowser && !isHuaweiBrowser &&
+        !isQQBrowser && !isBaiduBrowser && !is360Browser && !isSogouBrowser &&
+        !isFirefox && !isSafari;
 
-      // Check if it's Chrome on iOS
+      // 7. Additional Chrome validation using vendor
+      const hasGoogleVendor = navigator.vendor && navigator.vendor.includes('Google');
+
+      // 8. Check for Chrome-specific APIs
+      const hasChromeObject = !!(window.chrome && window.chrome.runtime);
+
+      // Final decision: Must pass ALL checks
+      isGenuineChrome = isChromiumBased && isNotOtherBrowser && (hasGoogleVendor || hasCriOS);
+
+      // Chrome on Android specific check
+      const isChromeOnAndroid = /Android.*Chrome\//.test(userAgent) && isNotOtherBrowser && hasGoogleVendor;
+
+      // Chrome on iOS specific check
       const isChromeOnIOS = /CriOS/.test(userAgent) && /iPhone|iPad|iPod/.test(userAgent);
 
-      // Final check: Allow Chrome browsers on mobile devices, but NOT Brave
+      // Final check: Allow only genuine Chrome on mobile devices
       const isDevelopment = process.env.NODE_ENV === 'development';
-      const allowed = isDevelopment || (isChrome && !isBrave && (isMobileDevice || isChromeOnAndroid || isChromeOnIOS));
+      const allowed = isDevelopment || (isGenuineChrome && (isMobileDevice || isChromeOnAndroid || isChromeOnIOS));
 
-      console.log('Browser Detection:', {
+      console.log('Strict Chrome Detection:', {
         userAgent: userAgent,
         browserName: browserName,
-        isChrome: isChrome,
+        isGenuineChrome: isGenuineChrome,
+        hasChrome: hasChrome,
+        hasCriOS: hasCriOS,
+        hasGoogleVendor: hasGoogleVendor,
+        hasChromeObject: hasChromeObject,
+        isNotOtherBrowser: isNotOtherBrowser,
         isBrave: isBrave,
         isMobileDevice: isMobileDevice,
-        isTablet: isTablet,
-        isDesktop: isDesktop,
         isChromeOnAndroid: isChromeOnAndroid,
         isChromeOnIOS: isChromeOnIOS,
         allowed: allowed,
@@ -105,15 +156,15 @@ const StudentAttendance_Page = () => {
       });
 
       setIsAllowedDevice(allowed);
-      return { allowed, browserName, isMobileDevice, isBrave };
+      return { allowed, browserName, isMobileDevice };
     };
 
-    const { allowed, browserName, isMobileDevice, isBrave } = checkBrowserRestrictions();
-
-    // If not allowed, show message
-    if (!allowed && process.env.NODE_ENV !== 'development') {
-      console.log(`Access denied: ${browserName} on ${isMobileDevice ? 'mobile' : 'desktop'}`);
-    }
+    checkBrowserRestrictions().then(({ allowed, browserName, isMobileDevice }) => {
+      // If not allowed, show message
+      if (!allowed && process.env.NODE_ENV !== 'development') {
+        console.log(`Access denied: ${browserName} on ${isMobileDevice ? 'mobile' : 'desktop'}`);
+      }
+    });
   }, []);
 
   // Function to format time as "11:05 AM"
@@ -359,19 +410,30 @@ const StudentAttendance_Page = () => {
   };
 
   // Browser restriction error screen
-  // In the browser restriction error screen:
-  if (!isAllowedDevice && process.env.NODE_ENV !== 'development') {
+  if (!isAllowedDevice) {
     const userAgent = navigator.userAgent;
-    const isBrave = (navigator.brave && typeof navigator.brave.isBrave === 'function');
     let detectedBrowser = 'Unknown Browser';
 
-    if (isBrave) detectedBrowser = 'Brave Browser';
+    // Comprehensive browser detection for error message
+    if (navigator.brave) detectedBrowser = 'Brave Browser';
     else if (/Edg|Edge/i.test(userAgent)) detectedBrowser = 'Microsoft Edge';
-    else if (/Firefox|FxiOS/i.test(userAgent)) detectedBrowser = 'Mozilla Firefox';
-    else if (/Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent)) detectedBrowser = 'Apple Safari';
     else if (/OPR|Opera/i.test(userAgent)) detectedBrowser = 'Opera Browser';
     else if (/SamsungBrowser/i.test(userAgent)) detectedBrowser = 'Samsung Internet';
-    else if (/Chrome/i.test(userAgent)) detectedBrowser = 'Google Chrome';
+    else if (/UCBrowser/i.test(userAgent)) detectedBrowser = 'UC Browser';
+    else if (/Vivaldi/i.test(userAgent)) detectedBrowser = 'Vivaldi';
+    else if (/YaBrowser/i.test(userAgent)) detectedBrowser = 'Yandex Browser';
+    else if (/DuckDuckGo/i.test(userAgent)) detectedBrowser = 'DuckDuckGo Browser';
+    else if (/Phoenix/i.test(userAgent)) detectedBrowser = 'Phoenix Browser';
+    else if (/MiuiBrowser|XiaoMi/i.test(userAgent)) detectedBrowser = 'Mi Browser';
+    else if (/VivoBrowser/i.test(userAgent)) detectedBrowser = 'Vivo Browser';
+    else if (/HuaweiBrowser/i.test(userAgent)) detectedBrowser = 'Huawei Browser';
+    else if (/QQBrowser/i.test(userAgent)) detectedBrowser = 'QQ Browser';
+    else if (/BIDUBrowser|baiduboxapp/i.test(userAgent)) detectedBrowser = 'Baidu Browser';
+    else if (/360SE|360EE/i.test(userAgent)) detectedBrowser = '360 Browser';
+    else if (/MetaSr|SogouMobileBrowser/i.test(userAgent)) detectedBrowser = 'Sogou Browser';
+    else if (/Firefox|FxiOS/i.test(userAgent)) detectedBrowser = 'Mozilla Firefox';
+    else if (/Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent)) detectedBrowser = 'Safari';
+    else if (/Chrome/i.test(userAgent)) detectedBrowser = 'Chromium-based Browser';
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center p-4">
