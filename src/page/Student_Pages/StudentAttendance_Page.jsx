@@ -24,16 +24,36 @@ const StudentAttendance_Page = () => {
   useEffect(() => {
     const checkBrowserRestrictions = () => {
       const userAgent = navigator.userAgent;
-      
+      const userAgentLower = userAgent.toLowerCase();
+
+      // Check for mobile device
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+
+      // Check for tablet
+      const isTablet = /iPad|Tablet|Kindle|Silk/i.test(userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      // Check for desktop
+      const isDesktop = !isMobileDevice && !isTablet;
+
+      // BRAVE BROWSER DETECTION
+      // Brave doesn't expose itself in user agent, so we need to check for the brave object
+      const isBrave = (navigator.brave && typeof navigator.brave.isBrave === 'function');
+
       // SPECIFIC BROWSER DETECTION
       let isChrome = false;
       let browserName = 'Unknown';
-      
-      // Detect Chrome/Chromium browsers
-      if (/Chrome/i.test(userAgent) && !/Edge|Edg|OPR|Opera|SamsungBrowser|Vivaldi|Brave/i.test(userAgent)) {
+
+      // Detect Brave first (before Chrome check)
+      if (isBrave) {
+        browserName = 'Brave';
+        isChrome = false; // Explicitly set to false
+      }
+      // Detect Chrome/Chromium browsers (but not Brave)
+      else if (/Chrome/i.test(userAgent) && !/Edge|Edg|OPR|Opera|SamsungBrowser|Vivaldi/i.test(userAgent)) {
         isChrome = true;
         browserName = 'Chrome';
-      } 
+      }
       // Detect Chrome on iOS (CriOS)
       else if (/CriOS/i.test(userAgent)) {
         isChrome = true;
@@ -59,32 +79,40 @@ const StudentAttendance_Page = () => {
       else if (/SamsungBrowser/i.test(userAgent)) {
         browserName = 'Samsung Browser';
       }
-      
-      // Check for mobile device
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-      
-      // For development, allow all browsers
+
+      // Check if it's Chrome on Android (most common for QR scanning)
+      const isChromeOnAndroid = /Android.*Chrome\//.test(userAgent) && !isBrave;
+
+      // Check if it's Chrome on iOS
+      const isChromeOnIOS = /CriOS/.test(userAgent) && /iPhone|iPad|iPod/.test(userAgent);
+
+      // Final check: Allow Chrome browsers on mobile devices, but NOT Brave
       const isDevelopment = process.env.NODE_ENV === 'development';
-      const allowed = isDevelopment || isChrome;
-      
+      const allowed = isDevelopment || (isChrome && !isBrave && (isMobileDevice || isChromeOnAndroid || isChromeOnIOS));
+
       console.log('Browser Detection:', {
         userAgent: userAgent,
         browserName: browserName,
         isChrome: isChrome,
+        isBrave: isBrave,
         isMobileDevice: isMobileDevice,
+        isTablet: isTablet,
+        isDesktop: isDesktop,
+        isChromeOnAndroid: isChromeOnAndroid,
+        isChromeOnIOS: isChromeOnIOS,
         allowed: allowed,
         isDevelopment: isDevelopment
       });
-      
+
       setIsAllowedDevice(allowed);
-      return { allowed, browserName };
+      return { allowed, browserName, isMobileDevice, isBrave };
     };
 
-    const { allowed, browserName } = checkBrowserRestrictions();
-    
+    const { allowed, browserName, isMobileDevice, isBrave } = checkBrowserRestrictions();
+
     // If not allowed, show message
-    if (!allowed && !process.env.NODE_ENV === 'development') {
-      console.log(`Access denied: ${browserName}`);
+    if (!allowed && process.env.NODE_ENV !== 'development') {
+      console.log(`Access denied: ${browserName} on ${isMobileDevice ? 'mobile' : 'desktop'}`);
     }
   }, []);
 
@@ -331,11 +359,14 @@ const StudentAttendance_Page = () => {
   };
 
   // Browser restriction error screen
+  // In the browser restriction error screen:
   if (!isAllowedDevice && process.env.NODE_ENV !== 'development') {
     const userAgent = navigator.userAgent;
+    const isBrave = (navigator.brave && typeof navigator.brave.isBrave === 'function');
     let detectedBrowser = 'Unknown Browser';
-    
-    if (/Edg|Edge/i.test(userAgent)) detectedBrowser = 'Microsoft Edge';
+
+    if (isBrave) detectedBrowser = 'Brave Browser';
+    else if (/Edg|Edge/i.test(userAgent)) detectedBrowser = 'Microsoft Edge';
     else if (/Firefox|FxiOS/i.test(userAgent)) detectedBrowser = 'Mozilla Firefox';
     else if (/Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent)) detectedBrowser = 'Apple Safari';
     else if (/OPR|Opera/i.test(userAgent)) detectedBrowser = 'Opera Browser';
@@ -350,12 +381,12 @@ const StudentAttendance_Page = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.232 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          
+
           <h2 className="text-2xl font-bold text-gray-800 mb-3">Browser Not Supported</h2>
           <p className="text-gray-600 mb-4">
             Detected: <span className="font-semibold text-red-600">{detectedBrowser}</span>
           </p>
-          
+
           <div className="space-y-4 mb-6 text-left">
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 mt-1">
@@ -373,7 +404,7 @@ const StudentAttendance_Page = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 mt-1">
                 <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
@@ -392,7 +423,7 @@ const StudentAttendance_Page = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 mt-1">
                 <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
@@ -411,7 +442,7 @@ const StudentAttendance_Page = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => window.open('https://www.google.com/chrome/', '_blank')}
@@ -423,7 +454,7 @@ const StudentAttendance_Page = () => {
               </svg>
               Download Chrome
             </button>
-            
+
             <button
               onClick={() => navigate('/')}
               className="inline-flex items-center px-6 py-3 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
