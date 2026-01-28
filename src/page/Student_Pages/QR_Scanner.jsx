@@ -16,122 +16,68 @@ const QRScanner_Page = () => {
   const canvasRef = useRef(null);
   const scanInterval = useRef(null);
 
-  // Enhanced Chrome-only detection
+  // Add this function before the useEffect
+  const isGenuineChromeStrict = async () => {
+    try {
+      // Test 1: User Agent
+      const userAgent = navigator.userAgent;
+      const hasChrome = /Chrome/i.test(userAgent) || /CriOS/i.test(userAgent);
+      if (!hasChrome) return false;
+
+      // Test 2: Vendor
+      if (!navigator.vendor || !navigator.vendor.includes('Google')) return false;
+
+      // Test 3: Brave check
+      if (navigator.brave) {
+        try {
+          const isBrave = await navigator.brave.isBrave();
+          if (isBrave) return false;
+        } catch (e) {
+          // Brave method doesn't exist, continue
+        }
+      }
+
+      // Test 4: Check for other browser patterns (single comprehensive regex)
+      const otherBrowsers = /Edg|Edge|OPR|Opera|Samsung|UCBrowser|Vivaldi|Yandex|YaBrowser|DuckDuckGo|Phoenix|Miui|XiaoMi|Vivo|Huawei|QQ|Baidu|360|Sogou|Maxthon|Sleipnir|Puffin|Dolphin|Coast|Skyfire|Bolt|Iron|Epic|Pale Moon|Basilisk|Waterfox/i;
+      if (otherBrowsers.test(userAgent)) return false;
+
+      // Test 5: Mobile check
+      const isMobile = /Android|iPhone|iPad|iPod/.test(userAgent);
+      if (!isMobile) return false;
+
+      // Test 6: For Android, verify Chrome object
+      if (/Android/.test(userAgent)) {
+        if (!window.chrome) return false;
+      }
+
+      // All tests passed
+      return true;
+
+    } catch (error) {
+      console.error('Chrome validation error:', error);
+      return false;
+    }
+  };
+
+  // Then use it in your useEffect:
   useEffect(() => {
     const checkBrowserRestrictions = async () => {
-      const userAgent = navigator.userAgent;
-
-      // Check for mobile device
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-
-      let isGenuineChrome = false;
-      let browserName = 'Unknown Browser';
-      let detectionMethod = '';
-
-      // For development, allow all
       const isDevelopment = process.env.NODE_ENV === 'development';
 
       if (isDevelopment) {
         setIsAllowedDevice(true);
-        return { allowed: true, browserName: 'Development Mode', isMobileDevice };
+        return;
       }
 
-      // WHITELIST APPROACH - Only allow genuine Chrome
+      const isAllowed = await isGenuineChromeStrict();
+      setIsAllowedDevice(isAllowed);
 
-      // Method 1: Check for Chrome on iOS (CriOS)
-      if (/CriOS/i.test(userAgent) && /iPhone|iPad|iPod/.test(userAgent)) {
-        isGenuineChrome = true;
-        browserName = 'Chrome iOS';
-        detectionMethod = 'CriOS detection';
+      if (!isAllowed) {
+        console.log('Access denied: Not genuine Chrome mobile');
       }
-      // Method 2: Check for genuine Chrome on Android/Desktop
-      else if (/Chrome/i.test(userAgent)) {
-        // Verify it's genuine Chrome using multiple checks
-
-        // Check 1: Must have Google vendor
-        const hasGoogleVendor = navigator.vendor && navigator.vendor.includes('Google');
-
-        // Check 2: Must NOT have other browser signatures
-        const hasOtherBrowserSignature =
-          /Edg|Edge|OPR|Opera|SamsungBrowser|UCBrowser|Vivaldi|YaBrowser|DuckDuckGo|Phoenix|MiuiBrowser|XiaoMi|VivoBrowser|HuaweiBrowser|QQBrowser|BIDUBrowser|baiduboxapp|360SE|360EE|MetaSr|SogouMobileBrowser/i.test(userAgent);
-
-        // Check 3: Brave detection (async)
-        const isBrave = (navigator.brave && await navigator.brave.isBrave().catch(() => false)) || false;
-
-        // Check 4: Chrome object exists (for desktop/Android Chrome)
-        const hasChromeObject = !!(window.chrome);
-
-        // Check 5: Check if it's Android Chrome specifically
-        const isAndroidChrome = /Android/.test(userAgent) && /Chrome\/[.0-9]*/.test(userAgent);
-
-        // Final validation: All checks must pass
-        if (hasGoogleVendor && !hasOtherBrowserSignature && !isBrave) {
-          // Additional check for mobile
-          if (isMobileDevice) {
-            // On mobile, we need stricter validation
-            if (isAndroidChrome || hasChromeObject) {
-              isGenuineChrome = true;
-              browserName = 'Google Chrome (Android)';
-              detectionMethod = 'Full validation passed';
-            } else {
-              // Likely a Chrome-based browser pretending to be Chrome
-              browserName = 'Chrome-based Browser (Not genuine Chrome)';
-              detectionMethod = 'Failed mobile validation';
-            }
-          } else {
-            // Desktop is not allowed anyway, but detect it
-            browserName = 'Chrome (Desktop - Not Allowed)';
-            detectionMethod = 'Desktop detected';
-          }
-        } else {
-          // Failed validation
-          if (!hasGoogleVendor) {
-            browserName = 'Chrome-based Browser (No Google vendor)';
-            detectionMethod = 'Missing Google vendor';
-          } else if (hasOtherBrowserSignature) {
-            browserName = 'Chrome-based Browser (Other signature detected)';
-            detectionMethod = 'Other browser signature found';
-          } else if (isBrave) {
-            browserName = 'Brave Browser';
-            detectionMethod = 'Brave detected';
-          }
-        }
-      }
-      // Method 3: Detect other browsers explicitly
-      else if (/Firefox|FxiOS/i.test(userAgent)) {
-        browserName = 'Firefox';
-        detectionMethod = 'Firefox user agent';
-      } else if (/Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent)) {
-        browserName = 'Safari';
-        detectionMethod = 'Safari user agent';
-      } else {
-        browserName = 'Unknown Browser';
-        detectionMethod = 'No Chrome signature found';
-      }
-
-      // Final decision: Only allow genuine Chrome on mobile
-      const allowed = isGenuineChrome && isMobileDevice;
-
-      console.log('Chrome Whitelist Detection:', {
-        userAgent: userAgent,
-        browserName: browserName,
-        detectionMethod: detectionMethod,
-        isGenuineChrome: isGenuineChrome,
-        isMobileDevice: isMobileDevice,
-        vendor: navigator.vendor,
-        hasChromeObject: !!(window.chrome),
-        allowed: allowed,
-      });
-
-      setIsAllowedDevice(allowed);
-      return { allowed, browserName, isMobileDevice };
     };
 
-    checkBrowserRestrictions().then(({ allowed, browserName, isMobileDevice }) => {
-      if (!allowed && process.env.NODE_ENV !== 'development') {
-        console.log(`Access denied: ${browserName} on ${isMobileDevice ? 'mobile' : 'desktop'}`);
-      }
-    });
+    checkBrowserRestrictions();
   }, []);
 
   // Enhanced QR data parsing with expiry check
