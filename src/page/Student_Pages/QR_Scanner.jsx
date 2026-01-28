@@ -9,11 +9,99 @@ const QRScanner_Page = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState(true);
   const [scanResult, setScanResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAllowedDevice, setIsAllowedDevice] = useState(true); // Start as true, then check
   const navigate = useNavigate();
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const scanInterval = useRef(null);
+
+  // Accurate browser and device detection
+  useEffect(() => {
+    const checkBrowserRestrictions = () => {
+      const userAgent = navigator.userAgent;
+      const userAgentLower = userAgent.toLowerCase();
+      
+      // Check for mobile device
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      
+      // Check for tablet
+      const isTablet = /iPad|Tablet|Kindle|Silk/i.test(userAgent) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      // Check for desktop
+      const isDesktop = !isMobileDevice && !isTablet;
+      
+      // SPECIFIC BROWSER DETECTION
+      let isChrome = false;
+      let browserName = 'Unknown';
+      
+      // Detect Chrome/Chromium browsers
+      if (/Chrome/i.test(userAgent) && !/Edge|Edg|OPR|Opera|SamsungBrowser|Vivaldi|Brave/i.test(userAgent)) {
+        isChrome = true;
+        browserName = 'Chrome';
+      } 
+      // Detect Chrome on iOS (CriOS)
+      else if (/CriOS/i.test(userAgent)) {
+        isChrome = true;
+        browserName = 'Chrome iOS';
+      }
+      // Detect Edge (Chromium-based but not Chrome)
+      else if (/Edg|Edge/i.test(userAgent)) {
+        browserName = 'Edge';
+      }
+      // Detect Safari
+      else if (/Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent)) {
+        browserName = 'Safari';
+      }
+      // Detect Firefox
+      else if (/Firefox|FxiOS/i.test(userAgent)) {
+        browserName = 'Firefox';
+      }
+      // Detect Opera
+      else if (/OPR|Opera/i.test(userAgent)) {
+        browserName = 'Opera';
+      }
+      // Detect Samsung Browser
+      else if (/SamsungBrowser/i.test(userAgent)) {
+        browserName = 'Samsung Browser';
+      }
+      
+      // Check if it's Chrome on Android (most common for QR scanning)
+      const isChromeOnAndroid = /Android.*Chrome\//.test(userAgent);
+      
+      // Check if it's Chrome on iOS
+      const isChromeOnIOS = /CriOS/.test(userAgent) && /iPhone|iPad|iPod/.test(userAgent);
+      
+      // Final check: Allow Chrome browsers on mobile devices
+      // For development, allow all browsers
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      const allowed = isDevelopment || (isChrome && (isMobileDevice || isChromeOnAndroid || isChromeOnIOS));
+      
+      console.log('Browser Detection:', {
+        userAgent: userAgent,
+        browserName: browserName,
+        isChrome: isChrome,
+        isMobileDevice: isMobileDevice,
+        isTablet: isTablet,
+        isDesktop: isDesktop,
+        isChromeOnAndroid: isChromeOnAndroid,
+        isChromeOnIOS: isChromeOnIOS,
+        allowed: allowed,
+        isDevelopment: isDevelopment
+      });
+      
+      setIsAllowedDevice(allowed);
+      return { allowed, browserName, isMobileDevice };
+    };
+
+    const { allowed, browserName, isMobileDevice } = checkBrowserRestrictions();
+    
+    // If not allowed, show message
+    if (!allowed && !process.env.NODE_ENV === 'development') {
+      console.log(`Access denied: ${browserName} on ${isMobileDevice ? 'mobile' : 'desktop'}`);
+    }
+  }, []);
 
   // Enhanced QR data parsing with expiry check
   const parseQRData = (qrDataString) => {
@@ -168,6 +256,11 @@ const QRScanner_Page = () => {
 
   // Start camera for live scanning with better error handling
   const startCameraScan = async () => {
+    // Check device restrictions before starting camera
+    if (!isAllowedDevice) {
+      return;
+    }
+
     try {
       setIsScanning(true);
       setHasCameraPermission(true);
@@ -379,6 +472,113 @@ const QRScanner_Page = () => {
     };
   }, [cameraStream]);
 
+  // Browser restriction error screen
+  if (!isAllowedDevice && process.env.NODE_ENV !== 'development') {
+    const userAgent = navigator.userAgent;
+    let detectedBrowser = 'Unknown Browser';
+    
+    if (/Edg|Edge/i.test(userAgent)) detectedBrowser = 'Microsoft Edge';
+    else if (/Firefox|FxiOS/i.test(userAgent)) detectedBrowser = 'Mozilla Firefox';
+    else if (/Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent)) detectedBrowser = 'Apple Safari';
+    else if (/OPR|Opera/i.test(userAgent)) detectedBrowser = 'Opera Browser';
+    else if (/SamsungBrowser/i.test(userAgent)) detectedBrowser = 'Samsung Internet';
+    else if (/Chrome/i.test(userAgent)) detectedBrowser = 'Google Chrome';
+
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-xl shadow-lg border border-red-200 p-8 text-center">
+          <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.232 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Browser Not Supported</h2>
+          <br />
+          
+          <div className="space-y-4 mb-6 text-left">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-1.76v.5a3.5 3.5 0 01-3.5 3.5h-.5V8h1.76V6.69h5.31a3 3 0 013 3v5.31H8V15h10.5a1.5 1.5 0 001.5-1.5v-6a4.81 4.81 0 01-4.41 4.81z" />
+                    <path d="M3.5 11.5a2 2 0 100 4 2 2 0 000-4z" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900">Google Chrome Required</h4>
+                <p className="text-sm text-gray-600">
+                  This QR scanner works best with Google Chrome browser for optimal performance and compatibility.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 14a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fillRule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900">How to Access</h4>
+                <p className="text-sm text-gray-600">
+                  1. Download Google Chrome from your app store<br />
+                  2. Open Chrome and navigate to this website<br />
+                  3. Allow camera permissions when prompted
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900">Why Chrome?</h4>
+                <p className="text-sm text-gray-600">
+                  • Better camera API support<br />
+                  • More reliable QR scanning<br />
+                  • Consistent performance across devices
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {/* <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => window.open('https://www.google.com/chrome/', '_blank')}
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-1.76v.5a3.5 3.5 0 01-3.5 3.5h-.5V8h1.76V6.69h5.31a3 3 0 013 3v5.31H8V15h10.5a1.5 1.5 0 001.5-1.5v-6a4.81 4.81 0 01-4.41 4.81z" />
+                <path d="M3.5 11.5a2 2 0 100 4 2 2 0 000-4z" />
+              </svg>
+              Download Chrome
+            </button>
+            
+            <button
+              onClick={() => navigate('/')}
+              className="inline-flex items-center px-6 py-3 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+            >
+              <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Return to Home
+            </button>
+          </div> */}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto max-w-md p-6">
@@ -387,6 +587,12 @@ const QRScanner_Page = () => {
             <h2 className="text-xl font-semibold text-gray-800">
               Attendance Scanner
             </h2>
+            {/* <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800 flex items-center">
+              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Chrome Browser
+            </span> */}
           </div>
 
           {/* Scan Result Preview */}
@@ -497,10 +703,10 @@ const QRScanner_Page = () => {
         <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
           <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
           <ul className="text-sm text-sky-700 space-y-1">
+            <li>• <strong>Browser:</strong> Google Chrome browser required</li>
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>
             <li>• <strong>Best Results:</strong> Use rear camera in well-lit area</li>
-            <li>• <strong>Browser:</strong> Works best with modern browsers</li>
           </ul>
         </div>
       </div>
