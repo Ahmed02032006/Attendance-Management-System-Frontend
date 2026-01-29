@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import {
   FiBook,
+  FiBarChart2,
   FiEye,
+  FiArrowRight,
+  FiUsers,
+  FiTrendingUp,
   FiChevronLeft,
   FiChevronRight,
   FiMessageSquare,
@@ -11,7 +15,7 @@ import {
   FiX,
   FiHelpCircle
 } from 'react-icons/fi'
-import { BiSupport } from "react-icons/bi";
+import { toast } from 'react-toastify'
 import {
   getDashboardSubjects,
   getDashboardAttendance,
@@ -44,6 +48,10 @@ const TeacherDashboard_Page = () => {
     }
   ])
   const [isSending, setIsSending] = useState(false)
+
+  // Refs for auto-focus and auto-scroll
+  const inputRef = useRef(null)
+  const messagesEndRef = useRef(null)
 
   const { user } = useSelector((state) => state.auth)
 
@@ -87,6 +95,26 @@ const TeacherDashboard_Page = () => {
       }
     }
   }, [dashboardSubjects, selectedSubject, dashboardAttendance, dataLoaded])
+
+  // Auto-focus input when chat opens
+  useEffect(() => {
+    if (isChatOpen && inputRef.current) {
+      // Small delay to ensure chat is fully rendered
+      setTimeout(() => {
+        inputRef.current.focus()
+      }, 100)
+    }
+  }, [isChatOpen])
+
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    scrollToBottom()
+  }, [chatMessages])
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   // Get available dates for selected subject
   const getAvailableDates = () => {
@@ -190,12 +218,19 @@ const TeacherDashboard_Page = () => {
     setTimeout(() => {
       const aiResponse = {
         id: chatMessages.length + 2,
-        text: `I've received your query: "${message}". This is a simulated response. In a real application, this would connect to a support system.`,
+        text: `I've received your query: "${userMessage.text}". This is a simulated response. In a real application, this would connect to a support system.`,
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
       setChatMessages(prev => [...prev, aiResponse])
       setIsSending(false)
+      
+      // Focus input after response
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus()
+        }
+      }, 100)
     }, 1000)
   }
 
@@ -496,8 +531,7 @@ const TeacherDashboard_Page = () => {
         {isChatOpen ? (
           <FiX className="h-6 w-6" />
         ) : (
-          // <FiMessageSquare className="h-6 w-6" />
-          <BiSupport className="h-6 w-6" />
+          <FiMessageSquare className="h-6 w-6" />
         )}
       </button>
 
@@ -555,6 +589,8 @@ const TeacherDashboard_Page = () => {
                   </div>
                 </div>
               )}
+              {/* Invisible element for auto-scroll */}
+              <div ref={messagesEndRef} />
             </div>
           </div>
 
@@ -562,6 +598,7 @@ const TeacherDashboard_Page = () => {
           <div className="border-t border-gray-200 p-3">
             <div className="flex items-center space-x-2">
               <input
+                ref={inputRef}
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
