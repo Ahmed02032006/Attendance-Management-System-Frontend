@@ -16,6 +16,7 @@ import {
   FiHelpCircle
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
+import { BiSupport } from "react-icons/bi";
 import {
   getDashboardSubjects,
   getDashboardAttendance,
@@ -298,7 +299,7 @@ const TeacherDashboard_Page = () => {
                       onClick={() => handleSubjectSelect(subject.id)}
                     >
                       <div className="flex items-center space-x-3 flex-1 min-w-0">
-                        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${getSubjectColor(index)} flex items-center justify-center flex-shrink-0`}>
+                        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${getSubjectColor(index)} flex items-center justify-center shrink-0`}>
                           <span className="text-white font-semibold text-xs sm:text-sm">
                             {subject.name?.charAt(0) || 'S'}
                           </span>
@@ -314,7 +315,7 @@ const TeacherDashboard_Page = () => {
                           <p className="text-xs text-gray-500 truncate">{subject.code}</p>
                         </div>
                       </div>
-                      <div className="text-right flex-shrink-0 ml-2">
+                      <div className="text-right shrink-0 ml-2">
                         <p className={`text-sm font-medium ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
                           }`}>
                           {subject.students || 0}
@@ -337,7 +338,7 @@ const TeacherDashboard_Page = () => {
                   <button
                     onClick={() => navigateDate('prev')}
                     disabled={currentDateIndex >= availableDates.length - 1}
-                    className={`p-2 rounded-lg transition-colors flex-shrink-0 ${currentDateIndex >= availableDates.length - 1
+                    className={`p-2 rounded-lg transition-colors shrink-0 ${currentDateIndex >= availableDates.length - 1
                       ? 'text-gray-300 cursor-not-allowed'
                       : 'text-gray-600 hover:bg-gray-100'
                       }`}
@@ -531,7 +532,8 @@ const TeacherDashboard_Page = () => {
         {isChatOpen ? (
           <FiX className="h-6 w-6" />
         ) : (
-          <FiMessageSquare className="h-6 w-6" />
+          // <FiMessageSquare className="h-6 w-6" />
+          <BiSupport className="h-6 w-6" />
         )}
       </button>
 
