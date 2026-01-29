@@ -10,12 +10,10 @@ import {
   FiTrendingUp,
   FiChevronLeft,
   FiChevronRight,
-  FiMessageCircle,
+  FiMessageSquare,
   FiSend,
   FiX,
-  FiHelpCircle,
-  FiUser,
-  FiSmile
+  FiHelpCircle
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
@@ -44,21 +42,12 @@ const TeacherDashboard_Page = () => {
   const [chatMessages, setChatMessages] = useState([
     {
       id: 1,
-      text: "Welcome! I'm your AI assistant. How can I help you with the attendance system today?",
+      text: "Hello! I'm your virtual assistant. How can I help you today?",
       sender: 'assistant',
-      timestamp: 'Just now',
-      avatar: '🤖'
-    },
-    {
-      id: 2,
-      text: "You can ask me about attendance reports, student management, or any technical issues.",
-      sender: 'assistant',
-      timestamp: 'Just now',
-      avatar: '🤖'
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ])
   const [isSending, setIsSending] = useState(false)
-  const [isMinimized, setIsMinimized] = useState(false)
 
   const { user } = useSelector((state) => state.auth)
 
@@ -76,12 +65,14 @@ const TeacherDashboard_Page = () => {
         setDataLoaded(true)
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
-        setDataLoaded(true)
+        setDataLoaded(true) // Set to true even on error to stop loading
+        // toast.error('Failed to load dashboard data')
       }
     }
 
     fetchData()
 
+    // Cleanup on unmount
     return () => {
       dispatch(clearDashboard())
     }
@@ -92,6 +83,7 @@ const TeacherDashboard_Page = () => {
     if (dashboardSubjects.length > 0 && !selectedSubject && dataLoaded) {
       setSelectedSubject(dashboardSubjects[0].id)
 
+      // Set initial date to the latest available date for the first subject
       const subjectAttendance = dashboardAttendance[dashboardSubjects[0].id]
       if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
         const latestDate = Object.keys(subjectAttendance).sort().reverse()[0]
@@ -158,6 +150,7 @@ const TeacherDashboard_Page = () => {
     setSelectedSubject(subjectId)
     setCurrentPage(1)
 
+    // Set to latest date for the selected subject
     const subjectAttendance = dashboardAttendance[subjectId]
     if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
       const latestDate = Object.keys(subjectAttendance).sort().reverse()[0]
@@ -172,7 +165,7 @@ const TeacherDashboard_Page = () => {
     setCurrentPage(1)
   }, [selectedSubject, currentDate])
 
-  // Color mapping for subjects
+  // Color mapping for subjects (you can modify this based on your needs)
   const getSubjectColor = (index) => {
     const colors = [
       'bg-blue-500', 'bg-green-500', 'bg-purple-500',
@@ -190,36 +183,24 @@ const TeacherDashboard_Page = () => {
       id: chatMessages.length + 1,
       text: message,
       sender: 'user',
-      timestamp: 'Just now',
-      avatar: '👤'
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
     setChatMessages(prev => [...prev, userMessage])
     setMessage('')
     setIsSending(true)
 
-    // Simulate AI response
+    // Simulate AI response (replace with actual API call)
     setTimeout(() => {
-      const responses = [
-        "I understand your query about attendance management. Let me help you with that.",
-        "For attendance reports, you can export data from the attendance section. Would you like more details?",
-        "I can help you with student attendance tracking and generate reports. What specific information do you need?",
-        "For technical issues, please contact our support team at support@attendance.com or try clearing your browser cache.",
-        "You can manage student attendance by selecting the subject and date from the dashboard above."
-      ];
-      
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      
       const aiResponse = {
         id: chatMessages.length + 2,
-        text: randomResponse,
+        text: `I've received your query: "${message}". This is a simulated response. In a real application, this would connect to a support system.`,
         sender: 'assistant',
-        timestamp: 'Just now',
-        avatar: '🤖'
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
       setChatMessages(prev => [...prev, aiResponse])
       setIsSending(false)
-    }, 800)
+    }, 1000)
   }
 
   const handleKeyPress = (e) => {
@@ -233,16 +214,11 @@ const TeacherDashboard_Page = () => {
     setChatMessages([
       {
         id: 1,
-        text: "Chat cleared. How can I assist you today?",
+        text: "Hello! I'm your virtual assistant. How can I help you today?",
         sender: 'assistant',
-        timestamp: 'Just now',
-        avatar: '🤖'
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ])
-  }
-
-  const toggleMinimize = () => {
-    setIsMinimized(!isMinimized)
   }
 
   // Show loader when data is still loading
@@ -515,186 +491,101 @@ const TeacherDashboard_Page = () => {
         </div>
       </div>
 
-      {/* Floating Chat Widget */}
-      {!isChatOpen ? (
-        <button
-          onClick={() => setIsChatOpen(true)}
-          className="fixed bottom-6 right-6 z-40 group"
-          aria-label="Open support chat"
-        >
-          <div className="relative">
-            <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full opacity-0 group-hover:opacity-20 blur-lg transition-opacity duration-300"></div>
-            <div className="relative w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full shadow-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl">
-              <FiMessageCircle className="h-7 w-7" />
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
-                <span className="text-xs font-bold">!</span>
+      {/* Floating Chat Button */}
+      <button
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-sky-600 hover:bg-sky-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-105"
+        aria-label="Open customer support chat"
+      >
+        {isChatOpen ? (
+          <FiX className="h-6 w-6" />
+        ) : (
+          <FiMessageSquare className="h-6 w-6" />
+        )}
+      </button>
+
+      {/* Chat Assistant Box */}
+      {isChatOpen && (
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+          {/* Chat Header */}
+          <div className="bg-sky-600 px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <FiHelpCircle className="h-5 w-5 text-sky-600" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">Customer Support</h3>
+                <p className="text-sky-100 text-xs">Virtual Assistant</p>
               </div>
             </div>
-          </div>
-          <div className="absolute right-20 bottom-4 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-            Need help? Chat with us
-          </div>
-        </button>
-      ) : (
-        <div className={`fixed right-6 z-50 transition-all duration-300 ${isMinimized ? 'bottom-6' : 'bottom-6'}`}>
-          {isMinimized ? (
-            <div 
-              onClick={() => setIsMinimized(false)}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-xl px-5 py-3 cursor-pointer hover:shadow-2xl transition-all duration-300 flex items-center space-x-3 group"
+            <button
+              onClick={clearChat}
+              className="text-sky-100 hover:text-white text-sm font-medium px-2 py-1 rounded hover:bg-sky-700 transition-colors"
             >
-              <FiMessageCircle className="h-5 w-5" />
-              <span className="font-medium">Support Chat</span>
-              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <span className="text-sm">Click to open</span>
-              </div>
+              Clear
+            </button>
+          </div>
+
+          {/* Chat Messages */}
+          <div className="h-80 overflow-y-auto p-4 bg-gray-50">
+            <div className="space-y-4">
+              {chatMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-lg px-3 py-2 ${msg.sender === 'user'
+                        ? 'bg-sky-600 text-white rounded-br-none'
+                        : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                      }`}
+                  >
+                    <p className="text-sm">{msg.text}</p>
+                    <p className="text-xs mt-1 opacity-70">
+                      {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {isSending && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-gray-200 text-gray-800 rounded-lg rounded-bl-none px-3 py-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden w-80 sm:w-96">
-              {/* Chat Header with Gradient */}
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-4 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                      <FiHelpCircle className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold">AI Support Assistant</h3>
-                    <p className="text-indigo-100 text-xs">Online • 24/7 Support</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={toggleMinimize}
-                    className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
-                    aria-label="Minimize chat"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setIsChatOpen(false)}
-                    className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
-                    aria-label="Close chat"
-                  >
-                    <FiX className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
+          </div>
 
-              {/* Chat Messages Area */}
-              <div className="h-80 overflow-y-auto p-4 bg-gradient-to-b from-gray-50 to-white">
-                <div className="space-y-4">
-                  {chatMessages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} items-end space-x-2`}
-                    >
-                      {msg.sender === 'assistant' && (
-                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                          {msg.avatar}
-                        </div>
-                      )}
-                      <div className="max-w-[75%]">
-                        <div
-                          className={`rounded-2xl px-4 py-3 ${msg.sender === 'user'
-                              ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-br-none'
-                              : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm'
-                            }`}
-                        >
-                          <p className="text-sm">{msg.text}</p>
-                        </div>
-                        <p className={`text-xs mt-1 ${msg.sender === 'user' ? 'text-right text-gray-500' : 'text-gray-400'}`}>
-                          {msg.timestamp}
-                        </p>
-                      </div>
-                      {msg.sender === 'user' && (
-                        <div className="w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                          {msg.avatar}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {isSending && (
-                    <div className="flex justify-start items-end space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm">
-                        🤖
-                      </div>
-                      <div className="bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-bl-none px-4 py-3">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <button
-                    onClick={() => setMessage("How to generate attendance reports?")}
-                    className="text-xs bg-white border border-gray-300 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 px-3 py-1.5 rounded-full transition-colors"
-                  >
-                    📊 Reports
-                  </button>
-                  <button
-                    onClick={() => setMessage("How to mark attendance?")}
-                    className="text-xs bg-white border border-gray-300 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 px-3 py-1.5 rounded-full transition-colors"
-                  >
-                    ✓ Mark Attendance
-                  </button>
-                  <button
-                    onClick={() => setMessage("Technical issues with attendance system")}
-                    className="text-xs bg-white border border-gray-300 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 px-3 py-1.5 rounded-full transition-colors"
-                  >
-                    🔧 Tech Support
-                  </button>
-                </div>
-
-                {/* Chat Input */}
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Type your message here..."
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    disabled={isSending}
-                  />
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                    <button
-                      onClick={clearChat}
-                      className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg transition-colors"
-                      title="Clear chat"
-                    >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={handleSendMessage}
-                      disabled={!message.trim() || isSending}
-                      className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg p-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      aria-label="Send message"
-                    >
-                      <FiSend className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-2 text-center">
-                  Press Enter to send • Shift + Enter for new line
-                </p>
-              </div>
+          {/* Chat Input */}
+          <div className="border-t border-gray-200 p-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message here..."
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                disabled={isSending}
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!message.trim() || isSending}
+                className="bg-sky-600 hover:bg-sky-700 text-white rounded-lg p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Send message"
+              >
+                <FiSend className="h-5 w-5" />
+              </button>
             </div>
-          )}
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Type your query and press Enter to send
+            </p>
+          </div>
         </div>
       )}
     </div>
