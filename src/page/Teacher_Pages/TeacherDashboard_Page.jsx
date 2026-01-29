@@ -497,7 +497,7 @@ const TeacherDashboard_Page = () => {
           <FiX className="h-6 w-6" />
         ) : (
           // <FiMessageSquare className="h-6 w-6" />
-          <BiSupport />
+          <BiSupport className="h-6 w-6" />
         )}
       </button>
 
