@@ -251,7 +251,7 @@ const TeacherDashboard_Page = () => {
 
     try {
       // Replace with your actual API endpoint
-      const response = await fetch('https://chat-bot-api-tau.vercel.app/ask', {
+      const response = await fetch('https://your-api.com/support/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
