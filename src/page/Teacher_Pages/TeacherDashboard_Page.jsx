@@ -3,11 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import {
   FiBook,
-  FiBarChart2,
   FiEye,
-  FiArrowRight,
-  FiUsers,
-  FiTrendingUp,
   FiChevronLeft,
   FiChevronRight,
   FiMessageSquare,
@@ -15,7 +11,7 @@ import {
   FiX,
   FiHelpCircle
 } from 'react-icons/fi'
-import { toast } from 'react-toastify'
+import { BiSupport } from "react-icons/bi";
 import {
   getDashboardSubjects,
   getDashboardAttendance,
@@ -500,7 +496,8 @@ const TeacherDashboard_Page = () => {
         {isChatOpen ? (
           <FiX className="h-6 w-6" />
         ) : (
-          <FiMessageSquare className="h-6 w-6" />
+          // <FiMessageSquare className="h-6 w-6" />
+          <BiSupport />
         )}
       </button>
 
