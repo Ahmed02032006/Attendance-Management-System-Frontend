@@ -40,14 +40,7 @@ const TeacherDashboard_Page = () => {
   // Chat state variables
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [message, setMessage] = useState('')
-  const [chatMessages, setChatMessages] = useState([
-    {
-      id: 1,
-      text: "Hello! I'm your virtual assistant. How can I help you today?",
-      sender: 'assistant',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-  ])
+  const [chatMessages, setChatMessages] = useState([])
   const [isSending, setIsSending] = useState(false)
 
   // Refs for auto-focus and auto-scroll
@@ -57,6 +50,50 @@ const TeacherDashboard_Page = () => {
   const { user } = useSelector((state) => state.auth)
 
   const userId = user?.id
+
+  // Load chat messages from localStorage on component mount
+  useEffect(() => {
+    const savedMessages = localStorage.getItem('teacher_dashboard_chat_messages')
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages)
+        if (Array.isArray(parsedMessages) && parsedMessages.length > 0) {
+          setChatMessages(parsedMessages)
+        } else {
+          // If no saved messages or empty array, set default welcome message
+          setChatMessages([{
+            id: 1,
+            text: "Hello! I'm your virtual assistant. How can I help you today?",
+            sender: 'assistant',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }])
+        }
+      } catch (error) {
+        console.error('Error loading chat messages:', error)
+        setChatMessages([{
+          id: 1,
+          text: "Hello! I'm your virtual assistant. How can I help you today?",
+          sender: 'assistant',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }])
+      }
+    } else {
+      // If no saved messages, set default welcome message
+      setChatMessages([{
+        id: 1,
+        text: "Hello! I'm your virtual assistant. How can I help you today?",
+        sender: 'assistant',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }])
+    }
+  }, [])
+
+  // Save chat messages to localStorage whenever they change
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      localStorage.setItem('teacher_dashboard_chat_messages', JSON.stringify(chatMessages))
+    }
+  }, [chatMessages])
 
   // Fetch data on component mount
   useEffect(() => {
@@ -211,14 +248,15 @@ const TeacherDashboard_Page = () => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
-    setChatMessages(prev => [...prev, userMessage])
+    const updatedMessages = [...chatMessages, userMessage]
+    setChatMessages(updatedMessages)
     setMessage('')
     setIsSending(true)
 
     // Simulate AI response (replace with actual API call)
     setTimeout(() => {
       const aiResponse = {
-        id: chatMessages.length + 2,
+        id: updatedMessages.length + 1,
         text: `I've received your query: "${userMessage.text}". This is a simulated response. In a real application, this would connect to a support system.`,
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -243,14 +281,15 @@ const TeacherDashboard_Page = () => {
   }
 
   const clearChat = () => {
-    setChatMessages([
-      {
-        id: 1,
-        text: "Hello! I'm your virtual assistant. How can I help you today?",
-        sender: 'assistant',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-    ])
+    // Clear both state and localStorage
+    const defaultMessage = [{
+      id: 1,
+      text: "Hello! I'm your virtual assistant. How can I help you today?",
+      sender: 'assistant',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }]
+    setChatMessages(defaultMessage)
+    localStorage.setItem('teacher_dashboard_chat_messages', JSON.stringify(defaultMessage))
   }
 
   // Show loader when data is still loading
@@ -532,7 +571,6 @@ const TeacherDashboard_Page = () => {
         {isChatOpen ? (
           <FiX className="h-6 w-6" />
         ) : (
-          // <FiMessageSquare className="h-6 w-6" />
           <BiSupport className="h-6 w-6" />
         )}
       </button>
@@ -562,34 +600,44 @@ const TeacherDashboard_Page = () => {
           {/* Chat Messages */}
           <div className="h-80 overflow-y-auto p-4 bg-gray-50">
             <div className="space-y-4">
-              {chatMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-lg px-3 py-2 ${msg.sender === 'user'
-                      ? 'bg-sky-600 text-white rounded-br-none'
-                      : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
-                      }`}
-                  >
-                    <p className="text-sm">{msg.text}</p>
-                    <p className="text-xs mt-1 opacity-70">
-                      {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
-                    </p>
-                  </div>
+              {chatMessages.length === 0 ? (
+                <div className="text-center py-8">
+                  <FiMessageSquare className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                  <p className="text-gray-500 text-sm">No messages yet</p>
+                  <p className="text-gray-400 text-xs mt-1">Start a conversation!</p>
                 </div>
-              ))}
-              {isSending && (
-                <div className="flex justify-start">
-                  <div className="bg-white border border-gray-200 text-gray-800 rounded-lg rounded-bl-none px-3 py-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              ) : (
+                <>
+                  {chatMessages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-lg px-3 py-2 ${msg.sender === 'user'
+                          ? 'bg-sky-600 text-white rounded-br-none'
+                          : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                          }`}
+                      >
+                        <p className="text-sm">{msg.text}</p>
+                        <p className="text-xs mt-1 opacity-70">
+                          {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  ))}
+                  {isSending && (
+                    <div className="flex justify-start">
+                      <div className="bg-white border border-gray-200 text-gray-800 rounded-lg rounded-bl-none px-3 py-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
               {/* Invisible element for auto-scroll */}
               <div ref={messagesEndRef} />
