@@ -201,40 +201,6 @@ const TeacherDashboard_Page = () => {
   }
 
   // Chat functions
-  // const handleSendMessage = async () => {
-  //   if (!message.trim()) return
-
-  //   const userMessage = {
-  //     id: chatMessages.length + 1,
-  //     text: message,
-  //     sender: 'user',
-  //     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  //   }
-
-  //   setChatMessages(prev => [...prev, userMessage])
-  //   setMessage('')
-  //   setIsSending(true)
-
-  //   // Simulate AI response (replace with actual API call)
-  //   setTimeout(() => {
-  //     const aiResponse = {
-  //       id: chatMessages.length + 2,
-  //       text: `I've received your query: "${userMessage.text}". This is a simulated response. In a real application, this would connect to a support system.`,
-  //       sender: 'assistant',
-  //       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  //     }
-  //     setChatMessages(prev => [...prev, aiResponse])
-  //     setIsSending(false)
-
-  //     // Focus input after response
-  //     setTimeout(() => {
-  //       if (inputRef.current) {
-  //         inputRef.current.focus()
-  //       }
-  //     }, 100)
-  //   }, 1000)
-  // }
-
   const handleSendMessage = async () => {
     if (!message.trim()) return
 
@@ -249,58 +215,15 @@ const TeacherDashboard_Page = () => {
     setMessage('')
     setIsSending(true)
 
-    try {
-      // Replace with your actual API endpoint
-      const response = await fetch('https://your-api.com/support/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}` // Add auth if needed
-        },
-        body: JSON.stringify({
-          message: userMessage.text,
-          userId: user?.id,
-          context: {
-            role: 'teacher',
-            currentSubject: selectedSubjectData?.name,
-            page: 'dashboard'
-          }
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to get response')
-      }
-
-      const data = await response.json()
-
+    // Simulate AI response (replace with actual API call)
+    setTimeout(() => {
       const aiResponse = {
         id: chatMessages.length + 2,
-        text: data.message || data.text || data.response, // API might use different field names
-        sender: 'assistant',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        // Add any additional fields from API
-        ...(data.suggestions && { suggestions: data.suggestions }),
-        ...(data.actions && { actions: data.actions })
-      }
-
-      setChatMessages(prev => [...prev, aiResponse])
-
-    } catch (error) {
-      console.error('Chat error:', error)
-
-      // Fallback error response
-      const errorResponse = {
-        id: chatMessages.length + 2,
-        text: "Sorry, I'm having trouble connecting to support. Please try again later or contact support@example.com",
+        text: `I've received your query: "${userMessage.text}". This is a simulated response. In a real application, this would connect to a support system.`,
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
-
-      setChatMessages(prev => [...prev, errorResponse])
-      toast.error('Failed to send message')
-
-    } finally {
+      setChatMessages(prev => [...prev, aiResponse])
       setIsSending(false)
 
       // Focus input after response
@@ -309,7 +232,7 @@ const TeacherDashboard_Page = () => {
           inputRef.current.focus()
         }
       }, 100)
-    }
+    }, 1000)
   }
 
   const handleKeyPress = (e) => {
