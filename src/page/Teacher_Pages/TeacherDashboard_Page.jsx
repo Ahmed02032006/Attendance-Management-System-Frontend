@@ -9,7 +9,11 @@ import {
   FiUsers,
   FiTrendingUp,
   FiChevronLeft,
-  FiChevronRight
+  FiChevronRight,
+  FiMessageSquare,
+  FiSend,
+  FiX,
+  FiHelpCircle
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
@@ -31,6 +35,19 @@ const TeacherDashboard_Page = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage] = useState(5)
   const [dataLoaded, setDataLoaded] = useState(false)
+  
+  // Chat state variables
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const [message, setMessage] = useState('')
+  const [chatMessages, setChatMessages] = useState([
+    {
+      id: 1,
+      text: "Hello! I'm your virtual assistant. How can I help you today?",
+      sender: 'assistant',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
+  ])
+  const [isSending, setIsSending] = useState(false)
 
   const { user } = useSelector((state) => state.auth)
 
@@ -156,6 +173,52 @@ const TeacherDashboard_Page = () => {
       'bg-pink-500', 'bg-teal-500', 'bg-cyan-500', 'bg-amber-500'
     ]
     return colors[index % colors.length]
+  }
+
+  // Chat functions
+  const handleSendMessage = async () => {
+    if (!message.trim()) return
+
+    const userMessage = {
+      id: chatMessages.length + 1,
+      text: message,
+      sender: 'user',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
+
+    setChatMessages(prev => [...prev, userMessage])
+    setMessage('')
+    setIsSending(true)
+
+    // Simulate AI response (replace with actual API call)
+    setTimeout(() => {
+      const aiResponse = {
+        id: chatMessages.length + 2,
+        text: `I've received your query: "${message}". This is a simulated response. In a real application, this would connect to a support system.`,
+        sender: 'assistant',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+      setChatMessages(prev => [...prev, aiResponse])
+      setIsSending(false)
+    }, 1000)
+  }
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSendMessage()
+    }
+  }
+
+  const clearChat = () => {
+    setChatMessages([
+      {
+        id: 1,
+        text: "Hello! I'm your virtual assistant. How can I help you today?",
+        sender: 'assistant',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ])
   }
 
   // Show loader when data is still loading
@@ -427,6 +490,104 @@ const TeacherDashboard_Page = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Chat Button */}
+      <button
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-sky-600 hover:bg-sky-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-105"
+        aria-label="Open customer support chat"
+      >
+        {isChatOpen ? (
+          <FiX className="h-6 w-6" />
+        ) : (
+          <FiMessageSquare className="h-6 w-6" />
+        )}
+      </button>
+
+      {/* Chat Assistant Box */}
+      {isChatOpen && (
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+          {/* Chat Header */}
+          <div className="bg-sky-600 px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <FiHelpCircle className="h-5 w-5 text-sky-600" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">Customer Support</h3>
+                <p className="text-sky-100 text-xs">Virtual Assistant</p>
+              </div>
+            </div>
+            <button
+              onClick={clearChat}
+              className="text-sky-100 hover:text-white text-sm font-medium px-2 py-1 rounded hover:bg-sky-700 transition-colors"
+            >
+              Clear
+            </button>
+          </div>
+
+          {/* Chat Messages */}
+          <div className="h-80 overflow-y-auto p-4 bg-gray-50">
+            <div className="space-y-4">
+              {chatMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-lg px-3 py-2 ${msg.sender === 'user'
+                        ? 'bg-sky-600 text-white rounded-br-none'
+                        : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                      }`}
+                  >
+                    <p className="text-sm">{msg.text}</p>
+                    <p className="text-xs mt-1 opacity-70">
+                      {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {isSending && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-gray-200 text-gray-800 rounded-lg rounded-bl-none px-3 py-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Chat Input */}
+          <div className="border-t border-gray-200 p-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message here..."
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                disabled={isSending}
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!message.trim() || isSending}
+                className="bg-sky-600 hover:bg-sky-700 text-white rounded-lg p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Send message"
+              >
+                <FiSend className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Type your query and press Enter to send
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
