@@ -23,14 +23,6 @@ import {
   clearDashboard
 } from '../../store/Teacher-Slicer/Dashboard-Slicer.js'
 
-// Default welcome message
-const DEFAULT_WELCOME_MESSAGE = [{
-  id: 1,
-  text: "Hello! I'm your virtual assistant. How can I help you today?",
-  sender: 'assistant',
-  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-}]
-
 const TeacherDashboard_Page = () => {
   const dispatch = useDispatch()
   const {
@@ -45,12 +37,18 @@ const TeacherDashboard_Page = () => {
   const [recordsPerPage] = useState(5)
   const [dataLoaded, setDataLoaded] = useState(false)
 
-  // Chat state variables - initialize as empty array
+  // Chat state variables
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [message, setMessage] = useState('')
-  const [chatMessages, setChatMessages] = useState([]) // Start with empty array
+  const [chatMessages, setChatMessages] = useState([
+    {
+      id: 1,
+      text: "Hello! I'm your virtual assistant. How can I help you today?",
+      sender: 'assistant',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
+  ])
   const [isSending, setIsSending] = useState(false)
-  const [isChatInitialized, setIsChatInitialized] = useState(false) // Track if chat is loaded
 
   // Refs for auto-focus and auto-scroll
   const inputRef = useRef(null)
@@ -59,43 +57,6 @@ const TeacherDashboard_Page = () => {
   const { user } = useSelector((state) => state.auth)
 
   const userId = user?.id
-
-  // Load chat messages from localStorage ONLY ONCE on component mount
-  useEffect(() => {
-    const loadChatMessages = () => {
-      try {
-        const savedMessages = localStorage.getItem('teacher_dashboard_chat_messages')
-        if (savedMessages) {
-          const parsedMessages = JSON.parse(savedMessages)
-          if (Array.isArray(parsedMessages) && parsedMessages.length > 0) {
-            setChatMessages(parsedMessages)
-          } else {
-            setChatMessages(DEFAULT_WELCOME_MESSAGE)
-          }
-        } else {
-          setChatMessages(DEFAULT_WELCOME_MESSAGE)
-        }
-      } catch (error) {
-        console.error('Error loading chat messages:', error)
-        setChatMessages(DEFAULT_WELCOME_MESSAGE)
-      } finally {
-        setIsChatInitialized(true)
-      }
-    }
-
-    loadChatMessages()
-  }, []) // Empty dependency array - runs only once on mount
-
-  // Save chat messages to localStorage whenever they change AND chat is initialized
-  useEffect(() => {
-    if (isChatInitialized && chatMessages.length > 0) {
-      try {
-        localStorage.setItem('teacher_dashboard_chat_messages', JSON.stringify(chatMessages))
-      } catch (error) {
-        console.error('Error saving chat messages:', error)
-      }
-    }
-  }, [chatMessages, isChatInitialized])
 
   // Fetch data on component mount
   useEffect(() => {
@@ -148,9 +109,7 @@ const TeacherDashboard_Page = () => {
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
-    if (chatMessages.length > 0) {
-      scrollToBottom()
-    }
+    scrollToBottom()
   }, [chatMessages])
 
   // Scroll to bottom function
@@ -243,24 +202,23 @@ const TeacherDashboard_Page = () => {
 
   // Chat functions
   const handleSendMessage = async () => {
-    if (!message.trim() || !isChatInitialized) return
+    if (!message.trim()) return
 
     const userMessage = {
-      id: Date.now(), // Use timestamp for unique ID
+      id: chatMessages.length + 1,
       text: message,
       sender: 'user',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
-    const updatedMessages = [...chatMessages, userMessage]
-    setChatMessages(updatedMessages)
+    setChatMessages(prev => [...prev, userMessage])
     setMessage('')
     setIsSending(true)
 
     // Simulate AI response (replace with actual API call)
     setTimeout(() => {
       const aiResponse = {
-        id: Date.now() + 1, // Use timestamp for unique ID
+        id: chatMessages.length + 2,
         text: `I've received your query: "${userMessage.text}". This is a simulated response. In a real application, this would connect to a support system.`,
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -285,11 +243,17 @@ const TeacherDashboard_Page = () => {
   }
 
   const clearChat = () => {
-    // Clear both state and localStorage
-    setChatMessages(DEFAULT_WELCOME_MESSAGE)
+    setChatMessages([
+      {
+        id: 1,
+        text: "Hello! I'm your virtual assistant. How can I help you today?",
+        sender: 'assistant',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ])
   }
 
-  // Show loader when data is still loading OR chat is not initialized
+  // Show loader when data is still loading
   if (isLoading || !dataLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -568,6 +532,7 @@ const TeacherDashboard_Page = () => {
         {isChatOpen ? (
           <FiX className="h-6 w-6" />
         ) : (
+          // <FiMessageSquare className="h-6 w-6" />
           <BiSupport className="h-6 w-6" />
         )}
       </button>
@@ -597,49 +562,34 @@ const TeacherDashboard_Page = () => {
           {/* Chat Messages */}
           <div className="h-80 overflow-y-auto p-4 bg-gray-50">
             <div className="space-y-4">
-              {!isChatInitialized ? (
-                <div className="text-center py-8">
-                  <div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                  <p className="text-gray-500 text-sm">Loading chat...</p>
+              {chatMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-lg px-3 py-2 ${msg.sender === 'user'
+                      ? 'bg-sky-600 text-white rounded-br-none'
+                      : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                      }`}
+                  >
+                    <p className="text-sm">{msg.text}</p>
+                    <p className="text-xs mt-1 opacity-70">
+                      {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
+                    </p>
+                  </div>
                 </div>
-              ) : chatMessages.length === 0 ? (
-                <div className="text-center py-8">
-                  <FiMessageSquare className="mx-auto h-10 w-10 text-gray-400 mb-3" />
-                  <p className="text-gray-500 text-sm">No messages yet</p>
-                  <p className="text-gray-400 text-xs mt-1">Start a conversation!</p>
+              ))}
+              {isSending && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-gray-200 text-gray-800 rounded-lg rounded-bl-none px-3 py-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <>
-                  {chatMessages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[80%] rounded-lg px-3 py-2 ${msg.sender === 'user'
-                          ? 'bg-sky-600 text-white rounded-br-none'
-                          : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
-                          }`}
-                      >
-                        <p className="text-sm">{msg.text}</p>
-                        <p className="text-xs mt-1 opacity-70">
-                          {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  {isSending && (
-                    <div className="flex justify-start">
-                      <div className="bg-white border border-gray-200 text-gray-800 rounded-lg rounded-bl-none px-3 py-2">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                          <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
               )}
               {/* Invisible element for auto-scroll */}
               <div ref={messagesEndRef} />
@@ -657,11 +607,11 @@ const TeacherDashboard_Page = () => {
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message here..."
                 className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                disabled={isSending || !isChatInitialized}
+                disabled={isSending}
               />
               <button
                 onClick={handleSendMessage}
-                disabled={!message.trim() || isSending || !isChatInitialized}
+                disabled={!message.trim() || isSending}
                 className="bg-sky-600 hover:bg-sky-700 text-white rounded-lg p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Send message"
               >
