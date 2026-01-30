@@ -24,10 +24,10 @@ const TeacherDashboardLayout = () => {
     if (!email) return '';
     const atIndex = email.indexOf('@');
     if (atIndex === -1) return email;
-    
+
     const username = email.substring(0, atIndex);
     const domain = email.substring(atIndex);
-    
+
     // Show first 3 characters of username + ... + @ + domain
     return `${username.substring(0, 3)}...${domain}`;
   };
@@ -108,7 +108,7 @@ const TeacherDashboardLayout = () => {
   const handleCloseInactiveModal = () => {
     setShowInactiveModal(false);
     // Log out the user immediately when they close the modal
-    handleOnLogOut({ preventDefault: () => {} });
+    handleOnLogOut({ preventDefault: () => { } });
   };
 
   // If user is inactive, don't render any dashboard content
@@ -298,9 +298,13 @@ const TeacherDashboardLayout = () => {
                     <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
                   </div>
                   <div className="flex flex-col leading-tight">
-                    <span className="text-[13px] font-medium text-slate-900">{user.userName}</span>
+                    {/* <span className="text-[13px] font-medium text-slate-900">{user.userName}</span>
                     <span className="text-[11px] text-slate-500" title={user.userEmail}>
                       {formatEmail(user.userEmail)}
+                    </span> */}
+                    <span className="text-[13px] font-medium text-slate-900">username</span>
+                    <span className="text-[11px] text-slate-500" title={"userEmail"}>
+                      userEmail
                     </span>
                   </div>
                 </div>
