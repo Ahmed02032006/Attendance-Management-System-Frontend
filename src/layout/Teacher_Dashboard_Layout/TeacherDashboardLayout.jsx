@@ -291,7 +291,7 @@ const TeacherDashboardLayout = () => {
                 <div className="flex items-center space-x-2.5">
                   <div className="relative">
                     <img
-                      src={user.profilePicture}
+                      src={user.profilePicture ?? 'picture'}
                       alt="User Avatar"
                       className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
                     />
