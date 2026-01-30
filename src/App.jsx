@@ -31,7 +31,7 @@ const App = () => {
     <>
       <ToastContainer
         position="bottom-right"
-        autoClose={1000} 
+        autoClose={1000}
         // hideProgressBar={true} 
         pauseOnHover={false}
         toastStyle={{ fontFamily: "Poppins" }}
@@ -52,9 +52,10 @@ const App = () => {
         </Route>
 
         {/* =====>] All Teacher Admin Routes [<===== */}
-        <Route path='/teacher' element={<CheckAuth isInitialAuthCheckComplete={isInitialAuthCheckComplete} isAuthenticated={isAuthenticated} user={user} >
+        {/* <Route path='/teacher' element={<CheckAuth isInitialAuthCheckComplete={isInitialAuthCheckComplete} isAuthenticated={isAuthenticated} user={user} >
           <TeacherDashboardLayout />
-        </CheckAuth>}>
+        </CheckAuth>}> */}
+        <Route path='/teacher' element={<TeacherDashboardLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<TeacherDashboard_Page />} />
           <Route path="subject" element={<TeacherSubjects_Page />} />

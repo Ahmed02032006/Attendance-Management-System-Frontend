@@ -358,7 +358,7 @@ const TeacherDashboard_Page = () => {
                   <button
                     onClick={() => navigateDate('next')}
                     disabled={currentDateIndex <= 0}
-                    className={`p-2 rounded-lg transition-colors flex-shrink-0 ${currentDateIndex <= 0
+                    className={`p-2 rounded-lg transition-colors shrink-0 ${currentDateIndex <= 0
                       ? 'text-gray-300 cursor-not-allowed'
                       : 'text-gray-600 hover:bg-gray-100'
                       }`}
