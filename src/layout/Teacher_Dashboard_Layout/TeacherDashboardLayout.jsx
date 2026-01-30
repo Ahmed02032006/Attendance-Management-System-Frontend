@@ -290,11 +290,11 @@ const TeacherDashboardLayout = () => {
               <div className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors duration-150">
                 <div className="flex items-center space-x-2.5">
                   <div className="relative">
-                    <img
-                      src={user.profilePicture ? 'https://picture1' : 'https://picture1'}
+                    {/* <img
+                      src={user.profilePicture}
                       alt="User Avatar"
                       className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
-                    />
+                    /> */}
                     <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
                   </div>
                   <div className="flex flex-col leading-tight">
