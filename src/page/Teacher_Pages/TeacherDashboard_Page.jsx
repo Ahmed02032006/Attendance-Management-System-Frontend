@@ -197,11 +197,9 @@ const TeacherDashboard_Page = () => {
     return colors[index % colors.length]
   }
 
-  // Function to call the AI API with better error handling
+  // Function to call the AI API
   const callAIApi = async (userQuery) => {
     try {
-      console.log('Sending query to AI API:', userQuery);
-      
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
@@ -210,156 +208,115 @@ const TeacherDashboard_Page = () => {
         body: JSON.stringify({
           query: userQuery
         })
-      });
+      })
 
-      console.log('API Response status:', response.status);
-      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API error response:', errorText);
-        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+        throw new Error(`API request failed with status ${response.status}`)
       }
 
-      const data = await response.json();
-      console.log('API response data:', data);
+      const data = await response.json()
       
-      // Check if response contains the expected data
-      if (!data || !data.response) {
-        console.warn('API response missing expected data:', data);
-        throw new Error('Invalid API response format');
-      }
+      // Extract the response text from the API response
+      // The API returns { "response": "text here" }
+      let aiResponseText = data.response || "I'm sorry, I couldn't process your request. Please try again."
       
-      let aiResponseText = data.response;
-      
-      // Format the response
+      // Format the response (remove markdown if present)
       aiResponseText = aiResponseText
         .replace(/## /g, '') // Remove markdown headers
         .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
         .replace(/\n\n/g, '\n') // Clean up newlines
-        .trim();
+        .trim()
 
-      console.log('Formatted AI response:', aiResponseText);
-      return aiResponseText;
-      
+      return aiResponseText
     } catch (error) {
-      console.error('Error calling AI API:', error);
-      console.error('Error details:', error.message);
+      console.error('Error calling AI API:', error)
       
-      // For network errors, show a more specific message
-      if (error.message.includes('Failed to fetch')) {
-        throw new Error('Network error: Unable to connect to the AI service. Please check your internet connection.');
+      // Return fallback responses based on common queries
+      const lowerQuery = userQuery.toLowerCase()
+      
+      if (lowerQuery.includes('attendance') && lowerQuery.includes('add')) {
+        return "To add attendance:\n1. Go to the Attendance section\n2. Select a subject\n3. Choose the date\n4. Mark students as present/absent\n5. Save the attendance"
+      } else if (lowerQuery.includes('dashboard')) {
+        return "Your dashboard shows an overview of your subjects and attendance records. You can select a subject to view detailed attendance data for specific dates."
+      } else if (lowerQuery.includes('subject') || lowerQuery.includes('course')) {
+        return "Subjects are listed on the left side of your dashboard. Click on any subject to view its attendance records."
+      } else {
+        return "I apologize, but I'm having trouble connecting to the support system. Please try again later or contact your system administrator for assistance."
       }
-      
-      // For other errors, re-throw with context
-      throw new Error(`AI service error: ${error.message}`);
     }
-  };
+  }
 
-  // Main chat function with improved error handling
+  // Main chat function
   const handleSendMessage = async () => {
-    if (!message.trim()) return;
+    if (!message.trim()) return
 
     const userMessage = {
       id: chatMessages.length + 1,
       text: message,
       sender: 'user',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
+    }
 
-    setChatMessages(prev => [...prev, userMessage]);
-    setMessage('');
-    setIsSending(true);
+    setChatMessages(prev => [...prev, userMessage])
+    setMessage('')
+    setIsSending(true)
 
     try {
       // Call the AI API with user's message
-      const aiResponseText = await callAIApi(message);
+      const aiResponseText = await callAIApi(message)
 
       const aiResponse = {
         id: chatMessages.length + 2,
         text: aiResponseText,
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setChatMessages(prev => [...prev, aiResponse]);
-      
-      // Show success toast
-      toast.success('Assistant replied successfully!', {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      
-    } catch (error) {
-      console.error('Error in chat processing:', error);
-      
-      // Check for CORS or network issues
-      let errorMessage = error.message || 'Unknown error occurred';
-      
-      // Provide more helpful error messages
-      if (errorMessage.includes('Network error') || errorMessage.includes('Failed to fetch')) {
-        errorMessage = 'Network error: Unable to connect to AI service. Please check:\n1. Your internet connection\n2. If the AI service is available\n3. Try again in a moment';
-      } else if (errorMessage.includes('CORS')) {
-        errorMessage = 'Connection blocked by browser security. Please try a different browser or contact support.';
       }
+
+      setChatMessages(prev => [...prev, aiResponse])
       
-      const errorResponse = {
+      // Show success toast for important actions
+      if (message.toLowerCase().includes('attendance') || 
+          message.toLowerCase().includes('add') || 
+          message.toLowerCase().includes('how')) {
+        toast.success('Assistant has provided guidance!', {
+          position: "top-right",
+          autoClose: 3000,
+        })
+      }
+    } catch (error) {
+      console.error('Error in chat:', error)
+      
+      // Fallback response if API fails
+      const fallbackResponse = {
         id: chatMessages.length + 2,
-        text: `I encountered an issue: ${errorMessage}\n\nFor now, here's what I can tell you about your query:\n\n${getFallbackResponse(message)}`,
+        text: "I'm having trouble connecting right now. Here are some common actions:\n\n1. To add attendance: Go to Attendance page\n2. To view records: Select a subject above\n3. To see student details: Check the table below\n\nPlease try your query again or contact support if the issue persists.",
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
+      }
       
-      setChatMessages(prev => [...prev, errorResponse]);
-      toast.error('Connection issue with AI service', {
+      setChatMessages(prev => [...prev, fallbackResponse])
+      toast.error('Connection issue. Using fallback responses.', {
         position: "top-right",
-        autoClose: 4000,
-      });
+        autoClose: 3000,
+      })
     } finally {
-      setIsSending(false);
+      setIsSending(false)
       
       // Focus input after response
       setTimeout(() => {
         if (inputRef.current) {
-          inputRef.current.focus();
+          inputRef.current.focus()
         }
-      }, 100);
+      }, 100)
     }
-  };
-
-  // Enhanced fallback responses
-  const getFallbackResponse = (query) => {
-    const lowerQuery = query.toLowerCase();
-    
-    // Attendance-related queries
-    if (lowerQuery.includes('attendance') && lowerQuery.includes('add')) {
-      return "To add attendance in this system:\n1. Navigate to the 'Attendance' section from the main menu\n2. Select the subject you want to mark attendance for\n3. Choose the date and class time\n4. Mark students as Present/Absent/Late\n5. Click 'Save Attendance' to record";
-    } 
-    else if (lowerQuery.includes('attendance') && (lowerQuery.includes('view') || lowerQuery.includes('see'))) {
-      return "To view attendance records:\n1. On this dashboard, select a subject from the left panel\n2. Use the date navigation to browse different dates\n3. The table shows students who were marked present\n4. For detailed reports, go to the 'Reports' section";
-    }
-    else if (lowerQuery.includes('dashboard') || lowerQuery.includes('overview')) {
-      return "Your Teacher Dashboard shows:\n• Your assigned subjects on the left\n• Attendance records for selected subjects\n• Date-wise attendance navigation\n• Student attendance details in the table\n• Quick access to manage your classes";
-    }
-    else if (lowerQuery.includes('subject') || lowerQuery.includes('course')) {
-      return "Subjects:\n• Your subjects are listed on the left panel\n• Each shows student count\n• Click any subject to view its attendance\n• Subject codes help identify specific courses";
-    }
-    else if (lowerQuery.includes('student') && lowerQuery.includes('record')) {
-      return "Student records show:\n• Student name and roll number\n• Attendance time for each session\n• Present/Absent status\n• Historical attendance data by date";
-    }
-    else if (lowerQuery.includes('help') || lowerQuery.includes('support')) {
-      return "I'm here to help with:\n• Adding and managing attendance\n• Viewing attendance records\n• Understanding your dashboard\n• Navigating the system\n• Troubleshooting common issues\n\nTry asking specific questions about attendance management!";
-    }
-    else {
-      return "I can help you with:\n• Attendance management\n• Subject information\n• Dashboard navigation\n• Student records\n• System features\n\nPlease ask a specific question about the attendance system.";
-    }
-  };
+  }
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+      e.preventDefault()
+      handleSendMessage()
     }
-  };
+  }
 
   const clearChat = () => {
     setChatMessages([
@@ -369,21 +326,20 @@ const TeacherDashboard_Page = () => {
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
-    ]);
+    ])
     toast.info('Chat cleared', {
       position: "top-right",
       autoClose: 2000,
-    });
-  };
+    })
+  }
 
   // Quick suggestions for common queries
   const quickSuggestions = [
     "How do I add attendance?",
-    "How to view attendance records?",
-    "What does this dashboard show?",
-    "How to navigate between dates?",
-    "What are my subjects?"
-  ];
+    "Where can I see attendance records?",
+    "How to navigate the dashboard?",
+    "What does this dashboard show?"
+  ]
 
   // Show loader when data is still loading
   if (isLoading || !dataLoaded) {
@@ -678,8 +634,8 @@ const TeacherDashboard_Page = () => {
                 <FiHelpCircle className="h-5 w-5 text-sky-600" />
               </div>
               <div>
-                <h3 className="text-white font-semibold">AI Support Assistant</h3>
-                <p className="text-sky-100 text-xs">Powered by AI</p>
+                <h3 className="text-white font-semibold">Attendance Support</h3>
+                <p className="text-sky-100 text-xs">AI Assistant</p>
               </div>
             </div>
             <button
@@ -777,7 +733,7 @@ const TeacherDashboard_Page = () => {
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              Ask questions about attendance management
+              Ask about attendance management, subjects, or dashboard features
             </p>
           </div>
         </div>
