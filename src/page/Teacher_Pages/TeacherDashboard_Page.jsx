@@ -58,7 +58,9 @@ const TeacherDashboard_Page = () => {
   const userId = user?.id
 
   // API configuration
-  const API_URL = "https://api-api-rosy.vercel.app/api/query"
+  const API_URL = process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5000/api/v1/ai/query' // Your backend URL
+    : '/api/v1/ai/query'; // Relative path in production
 
   // Fetch data on component mount
   useEffect(() => {
@@ -197,55 +199,73 @@ const TeacherDashboard_Page = () => {
     return colors[index % colors.length]
   }
 
-  // Function to call the AI API
+  // Function to call the AI API via your backend proxy
   const callAIApi = async (userQuery) => {
     try {
+      console.log('Sending query to AI service via proxy:', userQuery);
+
       const response = await fetch(API_URL, {
         method: 'POST',
-        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
+          // Add auth token if needed
+          ...(user?.token && { Authorization: `Bearer ${user.token}` })
         },
         body: JSON.stringify({
-          query: userQuery
+          query: userQuery,
+          userId: userId,
+          // Add context about the current dashboard state
+          context: {
+            currentSubject: selectedSubjectData?.name,
+            currentDate: currentDate,
+            totalSubjects: dashboardSubjects.length,
+            hasAttendanceData: currentAttendanceRecords.length > 0
+          }
         })
-      })
+      });
 
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`)
+      const data = await response.json();
+
+      if (!data.success) {
+        console.warn('AI service returned non-success:', data);
+        return data.response || "I couldn't process your request at the moment.";
       }
 
-      const data = await response.json()
-      
-      // Extract the response text from the API response
-      // The API returns { "response": "text here" }
-      let aiResponseText = data.response || "I'm sorry, I couldn't process your request. Please try again."
-      
-      // Format the response (remove markdown if present)
-      aiResponseText = aiResponseText
-        .replace(/## /g, '') // Remove markdown headers
-        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
-        .replace(/\n\n/g, '\n') // Clean up newlines
-        .trim()
+      // Format the response
+      let aiResponseText = data.response;
 
-      return aiResponseText
+      // Clean up markdown formatting if present
+      aiResponseText = aiResponseText
+        .replace(/##\s*/g, '') // Remove markdown headers
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+        .replace(/\n{3,}/g, '\n\n') // Limit multiple newlines
+        .trim();
+
+      return aiResponseText;
+
     } catch (error) {
-      console.error('Error calling AI API:', error)
-      
-      // Return fallback responses based on common queries
-      const lowerQuery = userQuery.toLowerCase()
-      
+      console.error('Error calling AI proxy:', error);
+
+      // Smart fallback responses based on query
+      const lowerQuery = userQuery.toLowerCase();
+
       if (lowerQuery.includes('attendance') && lowerQuery.includes('add')) {
-        return "To add attendance:\n1. Go to the Attendance section\n2. Select a subject\n3. Choose the date\n4. Mark students as present/absent\n5. Save the attendance"
-      } else if (lowerQuery.includes('dashboard')) {
-        return "Your dashboard shows an overview of your subjects and attendance records. You can select a subject to view detailed attendance data for specific dates."
+        return `To add attendance:\n\n1. Navigate to the Attendance page from the main menu\n2. Select a subject\n3. Choose the date for attendance\n4. Mark students as present/absent\n5. Click "Save Attendance"\n\nYou currently have ${dashboardSubjects.length} subjects assigned.`;
+
+      } else if (lowerQuery.includes('view') && lowerQuery.includes('record')) {
+        return `To view attendance records:\n\n1. Select a subject from the left panel\n2. Use date navigation to select a specific date\n3. View student records in the table\n4. Use pagination if there are many students\n\nCurrently showing ${currentAttendanceRecords.length} records for ${selectedSubjectData?.name || 'selected subject'}.`;
+
+      } else if (lowerQuery.includes('dashboard') || lowerQuery.includes('overview')) {
+        return `Your dashboard shows:\n\n• ${dashboardSubjects.length} assigned subjects on the left\n• Attendance records for selected subject on the right\n• Date navigation for historical records\n• Student details with roll numbers and timestamps\n\nSelect a subject to see detailed attendance.`;
+
       } else if (lowerQuery.includes('subject') || lowerQuery.includes('course')) {
-        return "Subjects are listed on the left side of your dashboard. Click on any subject to view its attendance records."
+        return `You have ${dashboardSubjects.length} subjects:\n${dashboardSubjects.map((sub, i) => `${i + 1}. ${sub.name} (${sub.code}) - ${sub.students || 0} students`).join('\n')}\n\nClick on any subject to view its attendance records.`;
+
       } else {
-        return "I apologize, but I'm having trouble connecting to the support system. Please try again later or contact your system administrator for assistance."
+        return `I'm having trouble connecting to the AI service. Here's what you can do:\n\n1. Check your internet connection\n2. Try asking about:\n   • How to add attendance\n   • Viewing attendance records\n   • Understanding the dashboard\n   • Your assigned subjects\n3. Contact support if the issue persists\n\nError: ${error.message}`;
       }
     }
-  }
+  };
 
   // Main chat function
   const handleSendMessage = async () => {
@@ -274,11 +294,11 @@ const TeacherDashboard_Page = () => {
       }
 
       setChatMessages(prev => [...prev, aiResponse])
-      
+
       // Show success toast for important actions
-      if (message.toLowerCase().includes('attendance') || 
-          message.toLowerCase().includes('add') || 
-          message.toLowerCase().includes('how')) {
+      if (message.toLowerCase().includes('attendance') ||
+        message.toLowerCase().includes('add') ||
+        message.toLowerCase().includes('how')) {
         toast.success('Assistant has provided guidance!', {
           position: "top-right",
           autoClose: 3000,
@@ -286,7 +306,7 @@ const TeacherDashboard_Page = () => {
       }
     } catch (error) {
       console.error('Error in chat:', error)
-      
+
       // Fallback response if API fails
       const fallbackResponse = {
         id: chatMessages.length + 2,
@@ -294,7 +314,7 @@ const TeacherDashboard_Page = () => {
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
-      
+
       setChatMessages(prev => [...prev, fallbackResponse])
       toast.error('Connection issue. Using fallback responses.', {
         position: "top-right",
@@ -302,7 +322,7 @@ const TeacherDashboard_Page = () => {
       })
     } finally {
       setIsSending(false)
-      
+
       // Focus input after response
       setTimeout(() => {
         if (inputRef.current) {
@@ -682,7 +702,7 @@ const TeacherDashboard_Page = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Quick Suggestions */}
               {chatMessages.length <= 2 && (
                 <div className="mt-4">
@@ -705,7 +725,7 @@ const TeacherDashboard_Page = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Invisible element for auto-scroll */}
               <div ref={messagesEndRef} />
             </div>
