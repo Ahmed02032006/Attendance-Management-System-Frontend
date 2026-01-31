@@ -13,7 +13,8 @@ import {
   FiMessageSquare,
   FiSend,
   FiX,
-  FiHelpCircle
+  FiHelpCircle,
+  FiTrash2
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { BiSupport } from "react-icons/bi";
@@ -87,6 +88,16 @@ const TeacherDashboard_Page = () => {
     }
   }, [chatMessages]);
 
+  // Auto-scroll to bottom when chat opens or new messages are added
+  useEffect(() => {
+    if (isChatOpen) {
+      // Small delay to ensure chat container is fully rendered
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  }, [isChatOpen, chatMessages]);
+
   // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
@@ -128,18 +139,16 @@ const TeacherDashboard_Page = () => {
     if (isChatOpen && inputRef.current) {
       setTimeout(() => {
         inputRef.current.focus()
-      }, 100)
+      }, 150)
     }
   }, [isChatOpen])
 
-  // Auto-scroll to bottom when new messages are added
-  useEffect(() => {
-    scrollToBottom()
-  }, [chatMessages])
-
   // Scroll to bottom function
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    messagesEndRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'end'
+    });
   }
 
   // Get available dates for selected subject
@@ -676,9 +685,11 @@ const TeacherDashboard_Page = () => {
             </div>
             <button
               onClick={clearChat}
-              className="text-sky-100 hover:text-white text-sm font-medium px-2 py-1 rounded hover:bg-sky-700 transition-colors"
+              className="text-sky-100 hover:text-white p-2 rounded-full hover:bg-sky-700 transition-colors"
+              aria-label="Clear chat history"
+              title="Clear Chat"
             >
-              Clear Chat
+              <FiTrash2 className="h-5 w-5" />
             </button>
           </div>
 
