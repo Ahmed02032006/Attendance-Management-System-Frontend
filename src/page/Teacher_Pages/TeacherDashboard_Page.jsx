@@ -59,8 +59,8 @@ const TeacherDashboard_Page = () => {
 
   // API configuration
   const API_URL = process.env.NODE_ENV === 'development'
-    ? 'http://localhost:5000/api/v1/ai/query' // Your backend URL
-    : '/api/v1/ai/query'; // Relative path in production
+    ? 'http://localhost:5000/api/v1/ai/query'
+    : 'https://attendance-management-system-backen.vercel.app/api/v1/ai/query';
 
   // Fetch data on component mount
   useEffect(() => {
