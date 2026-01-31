@@ -43,7 +43,7 @@ const TeacherDashboard_Page = () => {
   const [chatMessages, setChatMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your virtual assistant. How can I help you today?",
+      text: "Hello! I'm your virtual assistant. How can I help you with attendance management today?",
       sender: 'assistant',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -55,8 +55,10 @@ const TeacherDashboard_Page = () => {
   const messagesEndRef = useRef(null)
 
   const { user } = useSelector((state) => state.auth)
-
   const userId = user?.id
+
+  // API configuration
+  const API_URL = "https://api-api-rosy.vercel.app/api/query"
 
   // Fetch data on component mount
   useEffect(() => {
@@ -70,14 +72,12 @@ const TeacherDashboard_Page = () => {
         setDataLoaded(true)
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
-        setDataLoaded(true) // Set to true even on error to stop loading
-        // toast.error('Failed to load dashboard data')
+        setDataLoaded(true)
       }
     }
 
     fetchData()
 
-    // Cleanup on unmount
     return () => {
       dispatch(clearDashboard())
     }
@@ -88,7 +88,6 @@ const TeacherDashboard_Page = () => {
     if (dashboardSubjects.length > 0 && !selectedSubject && dataLoaded) {
       setSelectedSubject(dashboardSubjects[0].id)
 
-      // Set initial date to the latest available date for the first subject
       const subjectAttendance = dashboardAttendance[dashboardSubjects[0].id]
       if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
         const latestDate = Object.keys(subjectAttendance).sort().reverse()[0]
@@ -100,7 +99,6 @@ const TeacherDashboard_Page = () => {
   // Auto-focus input when chat opens
   useEffect(() => {
     if (isChatOpen && inputRef.current) {
-      // Small delay to ensure chat is fully rendered
       setTimeout(() => {
         inputRef.current.focus()
       }, 100)
@@ -175,7 +173,6 @@ const TeacherDashboard_Page = () => {
     setSelectedSubject(subjectId)
     setCurrentPage(1)
 
-    // Set to latest date for the selected subject
     const subjectAttendance = dashboardAttendance[subjectId]
     if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
       const latestDate = Object.keys(subjectAttendance).sort().reverse()[0]
@@ -190,7 +187,7 @@ const TeacherDashboard_Page = () => {
     setCurrentPage(1)
   }, [selectedSubject, currentDate])
 
-  // Color mapping for subjects (you can modify this based on your needs)
+  // Color mapping for subjects
   const getSubjectColor = (index) => {
     const colors = [
       'bg-blue-500', 'bg-green-500', 'bg-purple-500',
@@ -200,7 +197,56 @@ const TeacherDashboard_Page = () => {
     return colors[index % colors.length]
   }
 
-  // Chat functions
+  // Function to call the AI API
+  const callAIApi = async (userQuery) => {
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: userQuery
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      // Extract the response text from the API response
+      // The API returns { "response": "text here" }
+      let aiResponseText = data.response || "I'm sorry, I couldn't process your request. Please try again."
+      
+      // Format the response (remove markdown if present)
+      aiResponseText = aiResponseText
+        .replace(/## /g, '') // Remove markdown headers
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\n\n/g, '\n') // Clean up newlines
+        .trim()
+
+      return aiResponseText
+    } catch (error) {
+      console.error('Error calling AI API:', error)
+      
+      // Return fallback responses based on common queries
+      const lowerQuery = userQuery.toLowerCase()
+      
+      if (lowerQuery.includes('attendance') && lowerQuery.includes('add')) {
+        return "To add attendance:\n1. Go to the Attendance section\n2. Select a subject\n3. Choose the date\n4. Mark students as present/absent\n5. Save the attendance"
+      } else if (lowerQuery.includes('dashboard')) {
+        return "Your dashboard shows an overview of your subjects and attendance records. You can select a subject to view detailed attendance data for specific dates."
+      } else if (lowerQuery.includes('subject') || lowerQuery.includes('course')) {
+        return "Subjects are listed on the left side of your dashboard. Click on any subject to view its attendance records."
+      } else {
+        return "I apologize, but I'm having trouble connecting to the support system. Please try again later or contact your system administrator for assistance."
+      }
+    }
+  }
+
+  // Main chat function
   const handleSendMessage = async () => {
     if (!message.trim()) return
 
@@ -215,24 +261,54 @@ const TeacherDashboard_Page = () => {
     setMessage('')
     setIsSending(true)
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
+    try {
+      // Call the AI API with user's message
+      const aiResponseText = await callAIApi(message)
+
       const aiResponse = {
         id: chatMessages.length + 2,
-        text: `I've received your query: "${userMessage.text}". This is a simulated response. In a real application, this would connect to a support system.`,
+        text: aiResponseText,
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
-      setChatMessages(prev => [...prev, aiResponse])
-      setIsSending(false)
 
+      setChatMessages(prev => [...prev, aiResponse])
+      
+      // Show success toast for important actions
+      if (message.toLowerCase().includes('attendance') || 
+          message.toLowerCase().includes('add') || 
+          message.toLowerCase().includes('how')) {
+        toast.success('Assistant has provided guidance!', {
+          position: "top-right",
+          autoClose: 3000,
+        })
+      }
+    } catch (error) {
+      console.error('Error in chat:', error)
+      
+      // Fallback response if API fails
+      const fallbackResponse = {
+        id: chatMessages.length + 2,
+        text: "I'm having trouble connecting right now. Here are some common actions:\n\n1. To add attendance: Go to Attendance page\n2. To view records: Select a subject above\n3. To see student details: Check the table below\n\nPlease try your query again or contact support if the issue persists.",
+        sender: 'assistant',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+      
+      setChatMessages(prev => [...prev, fallbackResponse])
+      toast.error('Connection issue. Using fallback responses.', {
+        position: "top-right",
+        autoClose: 3000,
+      })
+    } finally {
+      setIsSending(false)
+      
       // Focus input after response
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus()
         }
       }, 100)
-    }, 1000)
+    }
   }
 
   const handleKeyPress = (e) => {
@@ -246,12 +322,24 @@ const TeacherDashboard_Page = () => {
     setChatMessages([
       {
         id: 1,
-        text: "Hello! I'm your virtual assistant. How can I help you today?",
+        text: "Hello! I'm your virtual assistant. How can I help you with attendance management today?",
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ])
+    toast.info('Chat cleared', {
+      position: "top-right",
+      autoClose: 2000,
+    })
   }
+
+  // Quick suggestions for common queries
+  const quickSuggestions = [
+    "How do I add attendance?",
+    "Where can I see attendance records?",
+    "How to navigate the dashboard?",
+    "What does this dashboard show?"
+  ]
 
   // Show loader when data is still loading
   if (isLoading || !dataLoaded) {
@@ -532,7 +620,6 @@ const TeacherDashboard_Page = () => {
         {isChatOpen ? (
           <FiX className="h-6 w-6" />
         ) : (
-          // <FiMessageSquare className="h-6 w-6" />
           <BiSupport className="h-6 w-6" />
         )}
       </button>
@@ -547,8 +634,8 @@ const TeacherDashboard_Page = () => {
                 <FiHelpCircle className="h-5 w-5 text-sky-600" />
               </div>
               <div>
-                <h3 className="text-white font-semibold">Customer Support</h3>
-                <p className="text-sky-100 text-xs">Virtual Assistant</p>
+                <h3 className="text-white font-semibold">Attendance Support</h3>
+                <p className="text-sky-100 text-xs">AI Assistant</p>
               </div>
             </div>
             <button
@@ -573,7 +660,7 @@ const TeacherDashboard_Page = () => {
                       : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
                       }`}
                   >
-                    <p className="text-sm">{msg.text}</p>
+                    <p className="text-sm whitespace-pre-line">{msg.text}</p>
                     <p className="text-xs mt-1 opacity-70">
                       {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
                     </p>
@@ -584,13 +671,40 @@ const TeacherDashboard_Page = () => {
                 <div className="flex justify-start">
                   <div className="bg-white border border-gray-200 text-gray-800 rounded-lg rounded-bl-none px-3 py-2">
                     <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                      <div className="text-sm text-gray-600">Thinking...</div>
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
+              
+              {/* Quick Suggestions */}
+              {chatMessages.length <= 2 && (
+                <div className="mt-4">
+                  <p className="text-xs text-gray-500 mb-2">Try asking:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {quickSuggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setMessage(suggestion)
+                          if (inputRef.current) {
+                            inputRef.current.focus()
+                          }
+                        }}
+                        className="text-xs bg-sky-50 hover:bg-sky-100 text-sky-700 px-3 py-1.5 rounded-full border border-sky-200 transition-colors"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               {/* Invisible element for auto-scroll */}
               <div ref={messagesEndRef} />
             </div>
@@ -605,7 +719,7 @@ const TeacherDashboard_Page = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Type your message here..."
+                placeholder="Ask about attendance, subjects, or dashboard..."
                 className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                 disabled={isSending}
               />
@@ -619,7 +733,7 @@ const TeacherDashboard_Page = () => {
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              Type your query and press Enter to send
+              Ask about attendance management, subjects, or dashboard features
             </p>
           </div>
         </div>
