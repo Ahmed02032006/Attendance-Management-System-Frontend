@@ -23,6 +23,9 @@ import {
   clearDashboard
 } from '../../store/Teacher-Slicer/Dashboard-Slicer.js'
 
+// Key for localStorage
+const CHAT_STORAGE_KEY = 'teacher_dashboard_chat_history';
+
 const TeacherDashboard_Page = () => {
   const dispatch = useDispatch()
   const {
@@ -61,6 +64,28 @@ const TeacherDashboard_Page = () => {
   const API_URL = process.env.NODE_ENV === 'development'
     ? 'http://localhost:5000/api/v1/ai/query'
     : 'https://attendance-management-system-backen.vercel.app/api/v1/ai/query';
+
+  // Load chat history from localStorage on component mount
+  useEffect(() => {
+    const savedChat = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (savedChat) {
+      try {
+        const parsedChat = JSON.parse(savedChat);
+        setChatMessages(parsedChat);
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+        // If there's an error parsing, use default chat
+        localStorage.removeItem(CHAT_STORAGE_KEY);
+      }
+    }
+  }, []);
+
+  // Save chat messages to localStorage whenever they change
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chatMessages));
+    }
+  }, [chatMessages]);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -272,7 +297,7 @@ const TeacherDashboard_Page = () => {
     if (!message.trim()) return
 
     const userMessage = {
-      id: chatMessages.length + 1,
+      id: Date.now(), // Use timestamp for unique ID
       text: message,
       sender: 'user',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -287,39 +312,31 @@ const TeacherDashboard_Page = () => {
       const aiResponseText = await callAIApi(message)
 
       const aiResponse = {
-        id: chatMessages.length + 2,
+        id: Date.now() + 1, // Use timestamp for unique ID
         text: aiResponseText,
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
 
       setChatMessages(prev => [...prev, aiResponse])
+      
+      // Removed the toast notification as requested
 
-      // Show success toast for important actions
-      if (message.toLowerCase().includes('attendance') ||
-        message.toLowerCase().includes('add') ||
-        message.toLowerCase().includes('how')) {
-        toast.success('Assistant has provided guidance!', {
-          position: "top-right",
-          autoClose: 3000,
-        })
-      }
     } catch (error) {
       console.error('Error in chat:', error)
 
       // Fallback response if API fails
       const fallbackResponse = {
-        id: chatMessages.length + 2,
+        id: Date.now() + 1,
         text: "I'm having trouble connecting right now. Here are some common actions:\n\n1. To add attendance: Go to Attendance page\n2. To view records: Select a subject above\n3. To see student details: Check the table below\n\nPlease try your query again or contact support if the issue persists.",
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
 
       setChatMessages(prev => [...prev, fallbackResponse])
-      toast.error('Connection issue. Using fallback responses.', {
-        position: "top-right",
-        autoClose: 3000,
-      })
+      
+      // Removed the toast notification as requested
+      
     } finally {
       setIsSending(false)
 
@@ -340,27 +357,25 @@ const TeacherDashboard_Page = () => {
   }
 
   const clearChat = () => {
-    setChatMessages([
+    // Reset to initial message only
+    const initialChat = [
       {
         id: 1,
         text: "Hello! I'm your virtual assistant. How can I help you with attendance management today?",
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
-    ])
+    ];
+    
+    setChatMessages(initialChat);
+    // Also clear from localStorage
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(initialChat));
+    
     toast.info('Chat cleared', {
       position: "top-right",
       autoClose: 2000,
     })
   }
-
-  // Quick suggestions for common queries
-  const quickSuggestions = [
-    "How do I add attendance?",
-    "Where can I see attendance records?",
-    "How to navigate the dashboard?",
-    "What does this dashboard show?"
-  ]
 
   // Show loader when data is still loading
   if (isLoading || !dataLoaded) {
@@ -663,7 +678,7 @@ const TeacherDashboard_Page = () => {
               onClick={clearChat}
               className="text-sky-100 hover:text-white text-sm font-medium px-2 py-1 rounded hover:bg-sky-700 transition-colors"
             >
-              Clear
+              Clear Chat
             </button>
           </div>
 
@@ -699,29 +714,6 @@ const TeacherDashboard_Page = () => {
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Quick Suggestions */}
-              {chatMessages.length <= 2 && (
-                <div className="mt-4">
-                  <p className="text-xs text-gray-500 mb-2">Try asking:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {quickSuggestions.map((suggestion, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          setMessage(suggestion)
-                          if (inputRef.current) {
-                            inputRef.current.focus()
-                          }
-                        }}
-                        className="text-xs bg-sky-50 hover:bg-sky-100 text-sky-700 px-3 py-1.5 rounded-full border border-sky-200 transition-colors"
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
                   </div>
                 </div>
               )}
