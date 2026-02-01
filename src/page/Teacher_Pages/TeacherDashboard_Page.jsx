@@ -14,8 +14,7 @@ import {
   FiSend,
   FiX,
   FiHelpCircle,
-  FiTrash2,
-  FiExternalLink
+  FiTrash2
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { BiSupport } from "react-icons/bi";
@@ -27,13 +26,6 @@ import {
 
 // Key for localStorage
 const CHAT_STORAGE_KEY = 'teacher_dashboard_chat_history';
-
-// Page navigation configurations
-const PAGE_ROUTES = {
-  dashboard: '/teacher/dashboard',
-  subject: '/teacher/subject',
-  attendance: '/teacher/attendance'
-};
 
 const TeacherDashboard_Page = () => {
   const dispatch = useDispatch()
@@ -73,81 +65,6 @@ const TeacherDashboard_Page = () => {
   const API_URL = process.env.NODE_ENV === 'development'
     ? 'http://localhost:5000/api/v1/ai/query'
     : 'https://attendance-management-system-backen.vercel.app/api/v1/ai/query';
-
-  // Function to navigate to a page
-  const navigateToPage = (pageName) => {
-    const route = PAGE_ROUTES[pageName];
-    if (route) {
-      window.open(route, '_blank');
-    }
-  }
-
-  // Component for rendering clickable page links in chat messages
-  const PageLink = ({ pageName, label }) => (
-    <button
-      onClick={() => navigateToPage(pageName)}
-      className="inline-flex items-center text-sky-600 hover:text-sky-700 font-medium underline underline-offset-2 hover:no-underline transition-all my-1 px-2 py-1 rounded hover:bg-sky-50"
-      title={`Open ${label} page`}
-    >
-      {label}
-      <FiExternalLink className="ml-1 h-3 w-3" />
-    </button>
-  );
-
-  // Process AI response to replace URLs with clickable page links
-  const processAIResponse = (text) => {
-    // Remove full URLs and replace with page names
-    let processedText = text
-      .replace(/https:\/\/attendance-management-system-fronte-two\.vercel\.app\/teacher\/dashboard/g, 'Dashboard page')
-      .replace(/https:\/\/attendance-management-system-fronte-two\.vercel\.app\/teacher\/subject/g, 'Subjects page')
-      .replace(/https:\/\/attendance-management-system-fronte-two\.vercel\.app\/teacher\/attendance/g, 'Attendance page')
-      .replace(/teacher dashboard/g, 'Dashboard page')
-      .replace(/subject page/g, 'Subjects page')
-      .replace(/attendance page/g, 'Attendance page')
-      .replace(/dashboard page/gi, 'Dashboard page')
-      .replace(/subject page/gi, 'Subjects page')
-      .replace(/attendance page/gi, 'Attendance page');
-
-    // Split the text into parts to insert clickable links
-    const parts = [];
-    let lastIndex = 0;
-
-    // Find page references and create clickable links
-    const pagePatterns = [
-      { pattern: /Dashboard page/g, pageName: 'dashboard', label: 'Dashboard' },
-      { pattern: /Subjects page/g, pageName: 'subject', label: 'Subjects' },
-      { pattern: /Attendance page/g, pageName: 'attendance', label: 'Attendance' }
-    ];
-
-    pagePatterns.forEach(({ pattern, pageName, label }) => {
-      let match;
-      while ((match = pattern.exec(processedText)) !== null) {
-        // Add text before the match
-        if (match.index > lastIndex) {
-          parts.push(processedText.substring(lastIndex, match.index));
-        }
-        
-        // Add the clickable link component
-        parts.push(
-          <PageLink key={`${pageName}-${match.index}`} pageName={pageName} label={label} />
-        );
-        
-        lastIndex = match.index + match[0].length;
-      }
-    });
-
-    // Add remaining text after the last match
-    if (lastIndex < processedText.length) {
-      parts.push(processedText.substring(lastIndex));
-    }
-
-    // If no page links were found, return the original text as string
-    if (parts.length === 0) {
-      return processedText;
-    }
-
-    return parts;
-  };
 
   // Load chat history from localStorage on component mount
   useEffect(() => {
@@ -367,7 +284,7 @@ const TeacherDashboard_Page = () => {
       const lowerQuery = userQuery.toLowerCase();
 
       if (lowerQuery.includes('attendance') && lowerQuery.includes('add')) {
-        return `To add attendance:\n\n1. Navigate to the Attendance page\n2. Select a subject\n3. Choose the date for attendance\n4. Mark students as present/absent\n5. Click "Save Attendance"\n\nYou currently have ${dashboardSubjects.length} subjects assigned.`;
+        return `To add attendance:\n\n1. Navigate to the Attendance page from the main menu\n2. Select a subject\n3. Choose the date for attendance\n4. Mark students as present/absent\n5. Click "Save Attendance"\n\nYou currently have ${dashboardSubjects.length} subjects assigned.`;
 
       } else if (lowerQuery.includes('view') && lowerQuery.includes('record')) {
         return `To view attendance records:\n\n1. Select a subject from the left panel\n2. Use date navigation to select a specific date\n3. View student records in the table\n4. Use pagination if there are many students\n\nCurrently showing ${currentAttendanceRecords.length} records for ${selectedSubjectData?.name || 'selected subject'}.`;
@@ -378,11 +295,8 @@ const TeacherDashboard_Page = () => {
       } else if (lowerQuery.includes('subject') || lowerQuery.includes('course')) {
         return `You have ${dashboardSubjects.length} subjects:\n${dashboardSubjects.map((sub, i) => `${i + 1}. ${sub.name} (${sub.code}) - ${sub.students || 0} students`).join('\n')}\n\nClick on any subject to view its attendance records.`;
 
-      } else if (lowerQuery.includes('navigate') || lowerQuery.includes('go to')) {
-        return `You can navigate to:\n\n• Dashboard page: Your main dashboard with overview\n• Subjects page: Manage your assigned subjects\n• Attendance page: Add and manage attendance records\n\nClick on any page name to open it in a new tab.`;
-
       } else {
-        return `I'm having trouble connecting to the AI service. Here's what you can do:\n\n1. Check your internet connection\n2. Try asking about:\n   • How to add attendance\n   • Viewing attendance records\n   • Understanding the dashboard\n   • Your assigned subjects\n   • Page navigation\n3. Contact support if the issue persists\n\nError: ${error.message}`;
+        return `I'm having trouble connecting to the AI service. Here's what you can do:\n\n1. Check your internet connection\n2. Try asking about:\n   • How to add attendance\n   • Viewing attendance records\n   • Understanding the dashboard\n   • Your assigned subjects\n3. Contact support if the issue persists\n\nError: ${error.message}`;
       }
     }
   };
@@ -788,13 +702,7 @@ const TeacherDashboard_Page = () => {
                       : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
                       }`}
                   >
-                    {msg.sender === 'assistant' ? (
-                      <div className="text-sm whitespace-pre-line">
-                        {processAIResponse(msg.text)}
-                      </div>
-                    ) : (
-                      <p className="text-sm whitespace-pre-line">{msg.text}</p>
-                    )}
+                    <p className="text-sm whitespace-pre-line">{msg.text}</p>
                     <p className="text-xs mt-1 opacity-70">
                       {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
                     </p>
