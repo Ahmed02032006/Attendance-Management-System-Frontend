@@ -507,8 +507,8 @@ const QRScanner_Page = () => {
 
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 mt-1">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="h-4 w-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                <div className="w-6 h-6 bg-sky-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 14a2 2 0 100-4 2 2 0 000 4z" />
                     <path fillRule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" clipRule="evenodd" />
                   </svg>
