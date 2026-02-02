@@ -213,7 +213,7 @@ const TeacherDashboard_Page = () => {
             href={url} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline font-medium transition-colors"
+            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline transition-colors"
           >
             {pageName}
           </a>
