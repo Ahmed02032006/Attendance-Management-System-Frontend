@@ -64,7 +64,7 @@ const TeacherAttendance_Page = () => {
   useEffect(() => {
     console.log("1");
     if (subjectsWithAttendance.length > 0 && !selectedSubject) {
-      setSelectedSubject(subjectsWithAttendance[0].id)
+      // setSelectedSubject(subjectsWithAttendance[0].id)
     }
   }, [subjectsWithAttendance, selectedSubject])
 
