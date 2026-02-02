@@ -14,10 +14,8 @@ import {
   FiSend,
   FiX,
   FiHelpCircle,
-  FiTrash2,
-  FiExternalLink
+  FiTrash2
 } from 'react-icons/fi'
-import { toast } from 'react-toastify'
 import { BiSupport } from "react-icons/bi";
 import {
   getDashboardSubjects,
@@ -80,11 +78,39 @@ const TeacherDashboard_Page = () => {
     ? 'http://localhost:5000/api/v1/ai/query'
     : 'https://attendance-management-system-backen.vercel.app/api/v1/ai/query';
 
+  // Function to split text into numbered list items
+  const splitNumberedList = (text) => {
+    // Regex to match numbered list items like "1. ", "2. ", etc.
+    const numberedListRegex = /(\d+\.\s+)/g;
+    const parts = text.split(numberedListRegex);
+    
+    if (parts.length <= 1) {
+      // No numbered list found
+      return [text];
+    }
+    
+    const result = [];
+    for (let i = 0; i < parts.length; i++) {
+      if (numberedListRegex.test(parts[i])) {
+        // This is a number prefix (e.g., "1. ")
+        const numberPart = parts[i];
+        const contentPart = parts[i + 1] || '';
+        result.push(numberPart + contentPart);
+        i++; // Skip the next part since we've combined it
+      } else if (parts[i].trim()) {
+        // Non-numbered content
+        result.push(parts[i]);
+      }
+    }
+    
+    return result;
+  };
+
   // Function to format AI response with clickable page names and styled headings
   const formatAIResponse = (text) => {
     if (!text) return text;
     
-    // Split text by lines to process headings
+    // First, handle numbered lists that might be concatenated
     const lines = text.split('\n');
     const formattedLines = [];
     
@@ -95,15 +121,58 @@ const TeacherDashboard_Page = () => {
         const headingText = line.replace(/^#+\s*/, '').trim();
         if (headingText) {
           formattedLines.push(
-            <div key={`heading-${formattedLines.length}`} className="font-semibold text-base text-gray-900 mt-2 mb-1">
+            <div key={`heading-${formattedLines.length}`} className="font-semibold text-base text-gray-900 mt-3 mb-2">
               {headingText}
             </div>
           );
         }
       } else {
-        // Process non-heading lines for URLs
-        const processedLine = processLineForURLs(line);
-        formattedLines.push(processedLine);
+        // Check if this line contains numbered list items without proper line breaks
+        if (line.match(/\d+\.\s+/)) {
+          // Split the line into individual numbered items
+          const listItems = splitNumberedList(line);
+          
+          listItems.forEach((item, index) => {
+            if (item.trim()) {
+              // Check if it's a numbered item
+              if (item.match(/^\d+\.\s+/)) {
+                formattedLines.push(
+                  <div key={`list-${formattedLines.length}-${index}`} className="flex items-start ml-2 my-1">
+                    <span className="font-medium text-gray-700 mr-2 min-w-[20px]">{item.match(/^\d+/)[0]}.</span>
+                    <span className="flex-1">{processLineForURLs(item.replace(/^\d+\.\s+/, ''))}</span>
+                  </div>
+                );
+              } else {
+                // Regular text (not a numbered item)
+                const processedLine = processLineForURLs(item);
+                formattedLines.push(
+                  <div key={`line-${formattedLines.length}-${index}`} className="my-1">
+                    {processedLine}
+                  </div>
+                );
+              }
+            }
+          });
+        } else {
+          // Regular line - check for bullet points
+          const trimmedLine = line.trim();
+          if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
+            formattedLines.push(
+              <div key={`bullet-${formattedLines.length}`} className="flex items-start ml-2 my-1">
+                <span className="mr-2">•</span>
+                <span className="flex-1">{processLineForURLs(trimmedLine.substring(1).trim())}</span>
+              </div>
+            );
+          } else {
+            // Regular text line
+            const processedLine = processLineForURLs(line);
+            formattedLines.push(
+              <div key={`line-${formattedLines.length}`} className="my-1">
+                {processedLine}
+              </div>
+            );
+          }
+        }
       }
     }
     
@@ -132,12 +201,14 @@ const TeacherDashboard_Page = () => {
 
     // If no URLs found, return the line as is
     if (matches.length === 0) {
-      return <span key={`line-${Date.now()}-${Math.random()}`}>{cleanedLine}</span>;
+      return cleanedLine;
     }
 
     // Reconstruct with clickable links
     const elements = parts.reduce((acc, part, index) => {
-      acc.push(part);
+      if (part) {
+        acc.push(part);
+      }
       if (index < matches.length) {
         const url = matches[index];
         const pageName = PAGE_NAME_MAPPING[url];
@@ -147,17 +218,16 @@ const TeacherDashboard_Page = () => {
             href={url} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline font-medium transition-colors"
+            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline font-medium transition-colors mx-1"
           >
             {pageName}
-            <FiExternalLink className="h-3 w-3" />
           </a>
         );
       }
       return acc;
     }, []);
 
-    return <span key={`line-${Date.now()}-${Math.random()}`}>{elements}</span>;
+    return elements;
   };
 
   // Function to render message content with formatting
@@ -172,7 +242,7 @@ const TeacherDashboard_Page = () => {
     // Check if we have React elements (from formatting)
     if (Array.isArray(formattedContent)) {
       return (
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           {formattedContent.map((item, index) => (
             <React.Fragment key={index}>
               {item}
