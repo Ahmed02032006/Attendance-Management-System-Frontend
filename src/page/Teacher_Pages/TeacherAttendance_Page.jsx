@@ -65,9 +65,20 @@ const TeacherAttendance_Page = () => {
     console.log("======================");
     console.log("subjectsWithAttendance");
     console.log(subjectsWithAttendance);
-    
-    if (subjectsWithAttendance.length > 0 && !selectedSubject) {
-      setSelectedSubject(subjectsWithAttendance[0].id)
+
+    // Filter only active subjects
+    const activeSubjects = subjectsWithAttendance.filter(
+      subject => subject.status === "Active"
+    );
+
+    console.log("Active subjects:", activeSubjects);
+
+    if (activeSubjects.length > 0 && !selectedSubject) {
+      // Set the first active subject as selected
+      setSelectedSubject(activeSubjects[0].id)
+    } else if (activeSubjects.length === 0 && selectedSubject) {
+      // If no active subjects, clear the selected subject
+      setSelectedSubject('');
     }
   }, [subjectsWithAttendance, selectedSubject])
 
