@@ -53,7 +53,7 @@ const TeacherAttendance_Page = () => {
 
   // Filter active subjects
   const activeSubjects = subjectsWithAttendance.filter(subject => 
-    subject.status === "Active"
+    subject.status === "active"
   );
 
   // Fetch subjects with attendance on component mount
