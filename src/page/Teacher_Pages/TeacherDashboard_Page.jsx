@@ -80,56 +80,107 @@ const TeacherDashboard_Page = () => {
     ? 'http://localhost:5000/api/v1/ai/query'
     : 'https://attendance-management-system-backen.vercel.app/api/v1/ai/query';
 
-  // Function to format AI response with clickable page names
+  // Function to format AI response with clickable page names and styled headings
   const formatAIResponse = (text) => {
     if (!text) return text;
     
-    // Clean up markdown formatting first
-    let cleanedText = text
-      .replace(/##\s*/g, '') // Remove markdown headers
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-      .replace(/`/g, '') // Remove backticks
-      .replace(/\n{3,}/g, '\n\n') // Limit multiple newlines
-      .trim();
-
-    // Create a regex pattern to match all known URLs
-    const urlPattern = new RegExp(
-      Object.keys(PAGE_NAME_MAPPING)
-        .map(url => url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-        .join('|'),
-      'g'
-    );
-
-    // Split the text by URLs
-    const parts = cleanedText.split(urlPattern);
-    const matches = cleanedText.match(urlPattern) || [];
-
-    // If no URLs found, return the text as is
-    if (matches.length === 0) {
-      return cleanedText;
-    }
-
-    // Reconstruct with clickable links
-    return parts.reduce((acc, part, index) => {
-      acc.push(part);
-      if (index < matches.length) {
-        const url = matches[index];
-        const pageName = PAGE_NAME_MAPPING[url];
-        acc.push(
-          <a 
-            key={`link-${index}`}
-            href={url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline font-medium transition-colors"
-          >
-            {pageName}
-            {/* <FiExternalLink className="h-3 w-3" /> */}
-          </a>
+    // Clean up the text and split into lines
+    const lines = text.split('\n');
+    const formattedLines = [];
+    
+    // Process each line for formatting
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i].trim();
+      
+      // Handle headings (lines starting with # followed by text)
+      if (line.startsWith('# ')) {
+        // Extract heading text (remove # and any extra spaces)
+        const headingText = line.replace(/^#+\s*/, '');
+        formattedLines.push(
+          <div key={`heading-${i}`} className="font-semibold text-gray-900 text-sm mb-1 mt-2 first:mt-0">
+            {headingText}
+          </div>
         );
       }
-      return acc;
-    }, []);
+      // Handle numbered lists
+      else if (/^\d+\.\s/.test(line)) {
+        formattedLines.push(
+          <div key={`list-${i}`} className="flex items-start space-x-2 ml-1 my-1">
+            <span className="text-gray-600 font-medium text-xs mt-0.5">{line.match(/^\d+/)[0]}.</span>
+            <span className="text-gray-700 text-sm flex-1">{line.replace(/^\d+\.\s*/, '')}</span>
+          </div>
+        );
+      }
+      // Handle bullet points (starting with •, -, or *)
+      else if (/^[•\-\*]\s/.test(line)) {
+        formattedLines.push(
+          <div key={`bullet-${i}`} className="flex items-start space-x-2 ml-1 my-1">
+            <span className="text-gray-400 mt-0.5">•</span>
+            <span className="text-gray-700 text-sm flex-1">{line.replace(/^[•\-\*]\s*/, '')}</span>
+          </div>
+        );
+      }
+      // Handle URLs in the line
+      else if (line.includes('http')) {
+        // Check for known URLs in this line
+        let processedLine = line;
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const urls = line.match(urlRegex) || [];
+        
+        if (urls.length > 0) {
+          const parts = line.split(urlRegex);
+          const elements = [];
+          
+          parts.forEach((part, index) => {
+            elements.push(<span key={`text-${index}`}>{part}</span>);
+            
+            if (index < urls.length) {
+              const url = urls[index];
+              const pageName = PAGE_NAME_MAPPING[url];
+              
+              if (pageName) {
+                elements.push(
+                  <a
+                    key={`link-${index}`}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline font-medium transition-colors"
+                  >
+                    {pageName}
+                  </a>
+                );
+              } else {
+                elements.push(<span key={`url-${index}`}>{url}</span>);
+              }
+            }
+          });
+          
+          formattedLines.push(
+            <div key={`line-${i}`} className="text-gray-700 text-sm my-1">
+              {elements}
+            </div>
+          );
+        } else {
+          // Regular text line
+          formattedLines.push(
+            <div key={`line-${i}`} className="text-gray-700 text-sm my-1">
+              {line || <br />}
+            </div>
+          );
+        }
+      }
+      // Regular text line (including empty lines for spacing)
+      else {
+        formattedLines.push(
+          <div key={`line-${i}`} className="text-gray-700 text-sm my-1">
+            {line || <br />}
+          </div>
+        );
+      }
+    }
+    
+    return formattedLines;
   };
 
   // Function to render message content with formatting
@@ -138,28 +189,14 @@ const TeacherDashboard_Page = () => {
       return text;
     }
     
-    // For assistant messages, apply URL formatting
+    // For assistant messages, apply formatting
     const formattedContent = formatAIResponse(text);
     
-    // Check if we have React elements (from formatting)
-    if (Array.isArray(formattedContent) && formattedContent.some(item => React.isValidElement(item))) {
-      return (
-        <>
-          {formattedContent.map((item, index) => (
-            <React.Fragment key={index}>
-              {typeof item === 'string' ? (
-                <span>{item}</span>
-              ) : (
-                item
-              )}
-            </React.Fragment>
-          ))}
-        </>
-      );
-    }
-    
-    // If it's just a string, return it
-    return formattedContent;
+    return (
+      <div className="space-y-1">
+        {formattedContent}
+      </div>
+    );
   };
 
   // Load chat history from localStorage on component mount
