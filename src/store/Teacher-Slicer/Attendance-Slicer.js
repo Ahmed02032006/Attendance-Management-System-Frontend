@@ -107,6 +107,8 @@ const attendanceSlicer = createSlice({
             .addCase(getSubjectsWithAttendance.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.subjectsWithAttendance = action.payload.data || [];
+                console.log("================== slicer");
+                console.log(action.payload.data);
             })
             .addCase(getSubjectsWithAttendance.rejected, (state, action) => {
                 state.isLoading = false;

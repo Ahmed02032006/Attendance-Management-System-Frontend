@@ -67,8 +67,6 @@ const TeacherAttendance_Page = () => {
       console.log(subjectsWithAttendance);
       setSelectedSubject(subjectsWithAttendance[0].id)
     }
-    // console.log("outside the if else");
-    // console.log(subjectsWithAttendance);
   }, [subjectsWithAttendance, selectedSubject])
 
   // QR Auto-refresh useEffect
