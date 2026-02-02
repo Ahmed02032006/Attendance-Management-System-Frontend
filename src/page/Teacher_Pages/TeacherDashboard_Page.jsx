@@ -3,14 +3,9 @@ import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import {
   FiBook,
-  FiBarChart2,
   FiEye,
-  FiArrowRight,
-  FiUsers,
-  FiTrendingUp,
   FiChevronLeft,
   FiChevronRight,
-  FiMessageSquare,
   FiSend,
   FiX,
   FiHelpCircle,
@@ -138,7 +133,7 @@ const TeacherDashboard_Page = () => {
               if (item.match(/^\d+\.\s+/)) {
                 formattedLines.push(
                   <div key={`list-${formattedLines.length}-${index}`} className="flex items-start ml-2 my-1">
-                    <span className="font-medium text-gray-700 mr-2 min-w-[20px]">{item.match(/^\d+/)[0]}.</span>
+                    <span className="font-medium text-gray-700 mr-2 min-w-5">{item.match(/^\d+/)[0]}.</span>
                     <span className="flex-1">{processLineForURLs(item.replace(/^\d+\.\s+/, ''))}</span>
                   </div>
                 );
@@ -218,7 +213,7 @@ const TeacherDashboard_Page = () => {
             href={url} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline font-medium transition-colors mx-1"
+            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline font-medium transition-colors"
           >
             {pageName}
           </a>
