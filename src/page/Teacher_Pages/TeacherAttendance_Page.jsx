@@ -51,10 +51,34 @@ const TeacherAttendance_Page = () => {
   const { user } = useSelector((state) => state.auth)
   const userId = user?.id
 
-  // Filter active subjects
-  const activeSubjects = subjectsWithAttendance.filter(subject => 
-    subject.status === "active"
-  );
+  // Debug: Log the subjects data structure
+  useEffect(() => {
+    if (subjectsWithAttendance.length > 0) {
+      console.log('Subjects with Attendance structure:', subjectsWithAttendance);
+      console.log('First subject:', subjectsWithAttendance[0]);
+      console.log('All subjects status:', subjectsWithAttendance.map(s => ({
+        id: s.id,
+        name: s.name || s.subjectName,
+        status: s.status,
+        subjectTitle: s.subjectTitle,
+        subjectCode: s.subjectCode
+      })));
+    }
+  }, [subjectsWithAttendance]);
+
+  // Filter active subjects - try multiple possible status field names
+  const activeSubjects = subjectsWithAttendance.filter(subject => {
+    // Try different possible field names for status
+    const status = subject.status || subject.Status || subject.subjectStatus;
+    return status === "Active" || status === "active";
+  });
+
+  // Debug: Log filtered results
+  useEffect(() => {
+    console.log('Total subjects:', subjectsWithAttendance.length);
+    console.log('Active subjects:', activeSubjects.length);
+    console.log('Inactive subjects:', subjectsWithAttendance.length - activeSubjects.length);
+  }, [subjectsWithAttendance, activeSubjects]);
 
   // Fetch subjects with attendance on component mount
   useEffect(() => {
@@ -248,7 +272,7 @@ const TeacherAttendance_Page = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
 
-      const subjectName = activeSubjects.find(s => s.id === selectedSubject)?.name || 'attendance';
+      const subjectName = activeSubjects.find(s => s.id === selectedSubject)?.name || activeSubjects.find(s => s.id === selectedSubject)?.subjectName || 'attendance';
       const fileName = `attendance_${subjectName}_${currentDateString}.csv`;
 
       link.setAttribute('href', url);
@@ -290,8 +314,17 @@ const TeacherAttendance_Page = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
+  // Helper function to get subject name
+  const getSubjectName = (subject) => {
+    return subject.name || subject.subjectName || subject.subjectTitle || 'Unknown Subject';
+  };
+
+  // Helper function to get subject status
+  const getSubjectStatus = (subject) => {
+    return subject.status || subject.Status || subject.subjectStatus || 'Unknown';
+  };
+
   // New function to generate QR with timestamp
-  // Silent refresh version
   const handleQRGeneration = (isInitial = false) => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
@@ -305,7 +338,7 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
-    const subjectName = subject?.name;
+    const subjectName = getSubjectName(subject);
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000); // 1 minute 60 seconds from now
 
@@ -316,29 +349,18 @@ const TeacherAttendance_Page = () => {
     const originalCode = attendanceForm.uniqueCode;
 
     // Create a simplified URL with query parameters instead of JSON
-    // This makes the QR code much less dense and easier to scan
     const baseUrl = `${window.location.origin}/student-attendance`;
 
     // Create URL with only essential parameters
     const url = new URL(baseUrl);
-    url.searchParams.append('code', originalCode); // Use original code, not the timestamped one
+    url.searchParams.append('code', originalCode);
     url.searchParams.append('subject', attendanceForm.subject);
-    url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('timestamp', currentTime.getTime()); // For uniqueness
-    url.searchParams.append('expiry', expiryTime.getTime()); // For expiry check
+    url.searchParams.append('subjectName', subjectName);
+    url.searchParams.append('timestamp', currentTime.getTime());
+    url.searchParams.append('expiry', expiryTime.getTime());
 
-    // Use the URL string as QR data - much simpler than JSON
+    // Use the URL string as QR data
     const qrData = url.toString();
-
-    // Store the full data separately for internal use if needed
-    const fullQrData = {
-      url: qrData,
-      originalCode: originalCode,
-      subject: attendanceForm.subject,
-      subjectName: subjectName,
-      timestamp: currentTime.getTime(),
-      expiry: expiryTime.getTime()
-    };
 
     setCurrentQrCode(qrData);
     setQrExpiryTime(expiryTime);
@@ -349,7 +371,7 @@ const TeacherAttendance_Page = () => {
       });
     }
 
-    console.log('QR Data length:', qrData.length, 'characters'); // Debug log
+    console.log('QR Data length:', qrData.length, 'characters');
   };
 
   const handleGenerateQR = async () => {
@@ -520,6 +542,15 @@ const TeacherAttendance_Page = () => {
       <HeaderComponent heading={"Teacher Attendance"} subHeading={"View and manage teacher attendance"} role='' />
 
       <div className="container max-w-full p-6">
+        {/* Debug Info - Remove in production */}
+        {process.env.NODE_ENV === 'development' && subjectsWithAttendance.length > 0 && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              Debug Info: {subjectsWithAttendance.length} total subjects, {activeSubjects.length} active
+            </p>
+          </div>
+        )}
+
         {/* Date Navigation - Centered */}
         {selectedSubject && (
           <div className="flex justify-center items-center mb-8">
@@ -538,7 +569,8 @@ const TeacherAttendance_Page = () => {
                   {formatDisplayDate(currentDate)}
                 </h2>
                 <p className="text-xs text-gray-600">
-                  {activeSubjects.find(s => s.id === selectedSubject)?.name}
+                  {selectedSubject && activeSubjects.find(s => s.id === selectedSubject) && 
+                   getSubjectName(activeSubjects.find(s => s.id === selectedSubject))}
                 </p>
               </div>
 
@@ -835,27 +867,39 @@ const TeacherAttendance_Page = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Active Subjects Found</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              {subjectsWithAttendance.length > 0 ? "No Active Subjects Found" : "No Subjects Found"}
+            </h3>
             <p className="text-gray-600 mb-4">
-              You don't have any active subjects with attendance data. 
-              {subjectsWithAttendance.length > 0 && (
-                <span className="block mt-1 text-sm">
-                  You have {subjectsWithAttendance.length} subject(s) in total, 
-                  but {subjectsWithAttendance.filter(s => s.status === "Inactive").length} are marked as inactive.
-                </span>
-              )}
+              {subjectsWithAttendance.length > 0 ? (
+                <>
+                  You have {subjectsWithAttendance.length} subject(s), but none are marked as active.
+                  <div className="mt-3 text-sm">
+                    <p>Subjects with status:</p>
+                    <ul className="mt-1 space-y-1">
+                      {subjectsWithAttendance.map(subject => (
+                        <li key={subject.id} className="flex justify-center items-center gap-2">
+                          <span>{getSubjectName(subject)}</span>
+                          <span className={`px-2 py-0.5 text-xs rounded-full ${getSubjectStatus(subject) === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {getSubjectStatus(subject)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              ) : "You don't have any subjects with attendance data yet"}
             </p>
             <div className="flex gap-3 justify-center">
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => handleRefresh()}
                 className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
               >
                 Refresh Data
               </button>
-              {subjectsWithAttendance.filter(s => s.status === "Inactive").length > 0 && (
+              {subjectsWithAttendance.filter(s => getSubjectStatus(s) === "Inactive").length > 0 && (
                 <button
                   onClick={() => {
-                    // You might want to navigate to subject management page
                     toast.info('Navigate to subject management to activate subjects');
                   }}
                   className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
@@ -876,25 +920,28 @@ const TeacherAttendance_Page = () => {
               <div className="px-6 py-4 border-b border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-800">Select Active Subject</h3>
                 <p className="text-sm text-gray-600 mt-1">Choose an active subject to view attendance records</p>
-                {subjectsWithAttendance.filter(s => s.status === "Inactive").length > 0 && (
+                {subjectsWithAttendance.filter(s => getSubjectStatus(s) === "Inactive").length > 0 && (
                   <p className="text-xs text-amber-600 mt-1">
-                    Note: {subjectsWithAttendance.filter(s => s.status === "Inactive").length} inactive subject(s) are hidden
+                    Note: {subjectsWithAttendance.filter(s => getSubjectStatus(s) === "Inactive").length} inactive subject(s) are hidden
                   </p>
                 )}
               </div>
               <div className="p-6">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   {activeSubjects.map((subject) => (
                     <div
                       key={subject.id}
-                      className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center"
+                      className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center min-w-[200px]"
                       onClick={() => handleSubjectSelect(subject.id)}
                     >
-                      <h4 className="font-light text-sm text-gray-700">
-                        {subject.name}
+                      <h4 className="font-medium text-gray-800">
+                        {getSubjectName(subject)}
                       </h4>
-                      <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full">
-                        Active
+                      <p className="text-xs text-gray-500 mt-1">
+                        Code: {subject.subjectCode || 'N/A'}
+                      </p>
+                      <span className="inline-block mt-2 px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full">
+                        {getSubjectStatus(subject)}
                       </span>
                     </div>
                   ))}
@@ -933,7 +980,7 @@ const TeacherAttendance_Page = () => {
                     <option value="">Select Subject</option>
                     {activeSubjects.map((subject) => (
                       <option key={subject.id} value={subject.id}>
-                        {subject.name} {subject.status === "Active" && "✓"}
+                        {getSubjectName(subject)} ({getSubjectStatus(subject)})
                       </option>
                     ))}
                   </select>
@@ -976,7 +1023,7 @@ const TeacherAttendance_Page = () => {
         )
       }
 
-      {/* QR Code Modal - UPDATED WITH ZOOM FEATURE */}
+      {/* QR Code Modal */}
       {
         showQRModal && (
           <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -985,13 +1032,10 @@ const TeacherAttendance_Page = () => {
                 <div className='flex items-center justify-between gap-3'>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    {/* <span className="text-xs text-green-600 font-medium">Live</span> */}
                   </div>
                   <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
                 </div>
                 <div className="flex items-center space-x-4">
-
-                  {/* Zoom Toggle Button */}
                   <button
                     onClick={toggleQrZoom}
                     className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
@@ -1028,16 +1072,13 @@ const TeacherAttendance_Page = () => {
                   <p className="text-sm text-gray-600">
                     Students can scan this QR code to mark their attendance
                   </p>
-                  {/* <p className="text-xs text-gray-500 mt-1">
-                    {isQrZoomed ? "Click minimize icon to reduce size" : "Click maximize icon to enlarge"}
-                  </p> */}
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={() => {
                     setShowQRModal(false);
-                    setIsQrZoomed(false); // Reset zoom state when closing
+                    setIsQrZoomed(false);
                     if (qrRefreshInterval) {
                       clearInterval(qrRefreshInterval);
                       setQrRefreshInterval(null);
