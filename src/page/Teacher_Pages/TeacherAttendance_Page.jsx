@@ -62,23 +62,8 @@ const TeacherAttendance_Page = () => {
 
   // Set initial selected subject when data is loaded
   useEffect(() => {
-    console.log("======================");
-    console.log("subjectsWithAttendance");
-    console.log(subjectsWithAttendance);
-
-    // Filter only active subjects
-    const activeSubjects = subjectsWithAttendance.filter(
-      subject => subject.status === "Active"
-    );
-
-    console.log("Active subjects:", activeSubjects);
-
-    if (activeSubjects.length > 0 && !selectedSubject) {
-      // Set the first active subject as selected
-      setSelectedSubject(activeSubjects[0].id)
-    } else if (activeSubjects.length === 0 && selectedSubject) {
-      // If no active subjects, clear the selected subject
-      setSelectedSubject('');
+    if (subjectsWithAttendance.length > 0 && !selectedSubject) {
+      setSelectedSubject(subjectsWithAttendance[0].id)
     }
   }, [subjectsWithAttendance, selectedSubject])
 
@@ -293,7 +278,6 @@ const TeacherAttendance_Page = () => {
   };
 
   const handleSubjectSelect = (subjectId) => {
-    console.log("2");
     setSelectedSubject(subjectId);
     setShowSubjectModal(false);
     setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
@@ -855,7 +839,7 @@ const TeacherAttendance_Page = () => {
               </div>
               <div className="p-6">
                 <div className="flex items-center gap-3">
-                  {selectedSubject.map((subject) => (
+                  {subjectsWithAttendance.map((subject) => (
                     <div
                       key={subject.id}
                       className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center"
