@@ -53,16 +53,57 @@ const TeacherAttendance_Page = () => {
 
   // Fetch subjects with attendance on component mount
   useEffect(() => {
-    dispatch(getSubjectsWithAttendance(userId)).unwrap();
+    const fetchSubjects = async () => {
+      try {
+        const result = await dispatch(getSubjectsWithAttendance(userId)).unwrap();
+        
+        // Log all subjects to console when data is fetched
+        console.log('=== ALL SUBJECTS WITH ATTENDANCE ===');
+        console.log('Total subjects:', result.length);
+        
+        result.forEach((subject, index) => {
+          console.log(`Subject ${index + 1}:`);
+          console.log('  - ID:', subject.id);
+          console.log('  - Name:', subject.name);
+          console.log('  - Attendance data:', subject.attendance);
+          
+          // Log attendance dates if available
+          if (subject.attendance) {
+            const dates = Object.keys(subject.attendance);
+            console.log('  - Dates with attendance:', dates);
+            
+            dates.forEach(date => {
+              const records = subject.attendance[date];
+              console.log(`    ${date}: ${records.length} records`);
+            });
+          }
+        });
+        
+        console.log('=== END SUBJECTS LOG ===');
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+      }
+    };
+    
+    fetchSubjects();
+    
     // Cleanup on unmount
     return () => {
       dispatch(clearAttendance())
     }
-  }, [dispatch])
+  }, [dispatch, userId])
+
+  // Also log subjects when Redux state updates
+  useEffect(() => {
+    if (subjectsWithAttendance && subjectsWithAttendance.length > 0) {
+      console.log('Redux state updated with subjects:', subjectsWithAttendance.length);
+    }
+  }, [subjectsWithAttendance]);
 
   // Set initial selected subject when data is loaded
   useEffect(() => {
     if (subjectsWithAttendance.length > 0 && !selectedSubject) {
+      console.log('Setting initial selected subject to:', subjectsWithAttendance[0].id, subjectsWithAttendance[0].name);
       setSelectedSubject(subjectsWithAttendance[0].id)
     }
   }, [subjectsWithAttendance, selectedSubject])
@@ -114,6 +155,13 @@ const TeacherAttendance_Page = () => {
   const getCurrentAttendanceRecords = () => {
     if (!selectedSubject) return [];
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+    
+    // Log current subject info for debugging
+    if (subject) {
+      console.log('Current subject:', subject.name);
+      console.log('Attendance data for selected date:', currentDateString, ':', subject.attendance?.[currentDateString]);
+    }
+    
     return subject && subject.attendance ? subject.attendance[currentDateString] || [] : [];
   };
 
@@ -278,6 +326,12 @@ const TeacherAttendance_Page = () => {
   };
 
   const handleSubjectSelect = (subjectId) => {
+    console.log('Subject selected:', subjectId);
+    const subject = subjectsWithAttendance.find(s => s.id === subjectId);
+    if (subject) {
+      console.log('Selected subject details:', subject.name);
+    }
+    
     setSelectedSubject(subjectId);
     setShowSubjectModal(false);
     setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
@@ -345,6 +399,9 @@ const TeacherAttendance_Page = () => {
       toast.error('Please fill all fields');
       return;
     }
+
+    console.log('Generating QR for subject:', attendanceForm.subject);
+    console.log('With unique code:', attendanceForm.uniqueCode);
 
     setShowCreateModal(false);
     setShowQRModal(true);
@@ -478,7 +535,9 @@ const TeacherAttendance_Page = () => {
 
   const handleRefresh = async () => {
     try {
+      console.log('Refreshing attendance data...');
       await dispatch(getSubjectsWithAttendance(userId)).unwrap();
+      toast.success('Data refreshed successfully');
     } catch (error) {
       toast.error('Failed to refresh data');
     }
