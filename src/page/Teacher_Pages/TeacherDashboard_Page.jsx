@@ -118,7 +118,7 @@ const TeacherDashboard_Page = () => {
       // Check if line starts with # (heading)
       if (line.trim().startsWith('#')) {
         // Remove the # and trim, then wrap in heading element
-        const headingText = line.replace(/^#+\s--/, '').trim();
+        const headingText = line.replace(/^#+\s*/, '').trim();
         if (headingText) {
           formattedLines.push(
             <div key={`heading-${formattedLines.length}`} className="font-semibold text-base text-gray-900 mt-3 mb-2">
