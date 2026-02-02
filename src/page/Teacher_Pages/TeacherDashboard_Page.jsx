@@ -121,10 +121,10 @@ const TeacherDashboard_Page = () => {
             href={url} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline font-medium px-1.5 py-0.5 rounded hover:bg-sky-50 transition-colors"
+            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline font-medium px-1.5 py-0.5 transition-colors"
           >
             {pageName}
-            <FiExternalLink className="h-3 w-3" />
+            {/* <FiExternalLink className="h-3 w-3" /> */}
           </a>
         );
       }
