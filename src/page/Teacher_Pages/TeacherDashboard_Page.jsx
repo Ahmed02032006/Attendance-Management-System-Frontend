@@ -14,8 +14,7 @@ import {
   FiSend,
   FiX,
   FiHelpCircle,
-  FiTrash2,
-  FiExternalLink
+  FiTrash2
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { BiSupport } from "react-icons/bi";
@@ -27,16 +26,6 @@ import {
 
 // Key for localStorage
 const CHAT_STORAGE_KEY = 'teacher_dashboard_chat_history';
-
-// URL to page name mapping
-const PAGE_NAME_MAPPING = {
-  'https://attendance-management-system-fronte-two.vercel.app/teacher/dashboard': 'Dashboard Page',
-  'https://attendance-management-system-fronte-two.vercel.app/teacher/subject': 'Subject Page',
-  'https://attendance-management-system-fronte-two.vercel.app/teacher/attendance': 'Attendance Page',
-  'http://localhost:5000/teacher/dashboard': 'Dashboard Page',
-  'http://localhost:5000/teacher/subject': 'Subject Page',
-  'http://localhost:5000/teacher/attendance': 'Attendance Page',
-};
 
 const TeacherDashboard_Page = () => {
   const dispatch = useDispatch()
@@ -76,77 +65,6 @@ const TeacherDashboard_Page = () => {
   const API_URL = process.env.NODE_ENV === 'development'
     ? 'http://localhost:5000/api/v1/ai/query'
     : 'https://attendance-management-system-backen.vercel.app/api/v1/ai/query';
-
-  // Function to format AI response with clickable page names
-  const formatAIResponse = (text) => {
-    // First clean up markdown formatting
-    let formattedText = text
-      .replace(/##\s*/g, '') // Remove markdown headers
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-      .replace(/\n{3,}/g, '\n\n') // Limit multiple newlines
-      .trim();
-
-    // Replace URLs with clickable page names
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const parts = formattedText.split(urlRegex);
-    
-    return parts.map((part, index) => {
-      // Check if this part is a URL
-      if (urlRegex.test(part)) {
-        const url = part.trim();
-        const pageName = PAGE_NAME_MAPPING[url] || url;
-        
-        // Return a clickable span for known URLs, otherwise return the URL as is
-        if (PAGE_NAME_MAPPING[url]) {
-          return (
-            <React.Fragment key={index}>
-              <a 
-                href={url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline font-medium px-2 py-1 rounded-md hover:bg-sky-50 transition-colors"
-              >
-                {pageName}
-                <FiExternalLink className="h-3 w-3" />
-              </a>
-            </React.Fragment>
-          );
-        }
-        return part;
-      }
-      return part;
-    });
-  };
-
-  // Function to render message content with formatting
-  const renderMessageContent = (text, sender) => {
-    if (sender === 'user') {
-      return text;
-    }
-    
-    // For assistant messages, apply formatting
-    const formattedContent = formatAIResponse(text);
-    
-    // If formattedContent is an array (contains React elements), render it
-    if (Array.isArray(formattedContent)) {
-      return (
-        <div className="space-y-2">
-          {formattedContent.map((item, index) => (
-            <React.Fragment key={index}>
-              {typeof item === 'string' ? (
-                <span>{item}</span>
-              ) : (
-                item
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      );
-    }
-    
-    // If it's just a string, return it
-    return formattedContent;
-  };
 
   // Load chat history from localStorage on component mount
   useEffect(() => {
@@ -366,7 +284,7 @@ const TeacherDashboard_Page = () => {
       const lowerQuery = userQuery.toLowerCase();
 
       if (lowerQuery.includes('attendance') && lowerQuery.includes('add')) {
-        return `To add attendance:\n\n1. Navigate to the Attendance Page\n2. Select a subject\n3. Choose the date for attendance\n4. Mark students as present/absent\n5. Click "Save Attendance"\n\nYou currently have ${dashboardSubjects.length} subjects assigned.`;
+        return `To add attendance:\n\n1. Navigate to the Attendance page from the main menu\n2. Select a subject\n3. Choose the date for attendance\n4. Mark students as present/absent\n5. Click "Save Attendance"\n\nYou currently have ${dashboardSubjects.length} subjects assigned.`;
 
       } else if (lowerQuery.includes('view') && lowerQuery.includes('record')) {
         return `To view attendance records:\n\n1. Select a subject from the left panel\n2. Use date navigation to select a specific date\n3. View student records in the table\n4. Use pagination if there are many students\n\nCurrently showing ${currentAttendanceRecords.length} records for ${selectedSubjectData?.name || 'selected subject'}.`;
@@ -410,6 +328,8 @@ const TeacherDashboard_Page = () => {
       }
 
       setChatMessages(prev => [...prev, aiResponse])
+      
+      // Removed the toast notification as requested
 
     } catch (error) {
       console.error('Error in chat:', error)
@@ -417,12 +337,14 @@ const TeacherDashboard_Page = () => {
       // Fallback response if API fails
       const fallbackResponse = {
         id: Date.now() + 1,
-        text: "I'm having trouble connecting right now. Here are some common actions:\n\n1. To add attendance: Go to Attendance Page\n2. To view records: Select a subject above\n3. To see student details: Check the table below\n\nPlease try your query again or contact support if the issue persists.",
+        text: "I'm having trouble connecting right now. Here are some common actions:\n\n1. To add attendance: Go to Attendance page\n2. To view records: Select a subject above\n3. To see student details: Check the table below\n\nPlease try your query again or contact support if the issue persists.",
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
 
       setChatMessages(prev => [...prev, fallbackResponse])
+      
+      // Removed the toast notification as requested
       
     } finally {
       setIsSending(false)
@@ -780,9 +702,7 @@ const TeacherDashboard_Page = () => {
                       : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
                       }`}
                   >
-                    <div className="text-sm whitespace-pre-line">
-                      {renderMessageContent(msg.text, msg.sender)}
-                    </div>
+                    <p className="text-sm whitespace-pre-line">{msg.text}</p>
                     <p className="text-xs mt-1 opacity-70">
                       {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
                     </p>
