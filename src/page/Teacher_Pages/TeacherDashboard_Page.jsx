@@ -145,7 +145,7 @@ const TeacherDashboard_Page = () => {
 
   // Scroll to bottom function
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ 
+    messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'end'
     });
@@ -268,11 +268,39 @@ const TeacherDashboard_Page = () => {
       // Format the response
       let aiResponseText = data.response;
 
-      // Clean up markdown formatting if present
+      // Replace URLs with clickable page names
+      aiResponseText = aiResponseText.replace(
+        /https:\/\/attendance-management-system-fronte-two\.vercel\.app\/teacher\/([^\s)]+)/g,
+        (match, pageName) => {
+          const pageMap = {
+            'dashboard': 'Dashboard Page',
+            'subject': 'Subject Page',
+            'attendance': 'Attendance Page',
+            'analytics': 'Analytics Page',
+            'reports': 'Reports Page',
+            'profile': 'Profile Page'
+          };
+
+          const displayName = pageMap[pageName] || `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page`;
+          return `<a href="${match}" class="text-sky-600 hover:text-sky-800 underline" target="_blank" rel="noopener noreferrer">${displayName}</a>`;
+        }
+      );
+
+      // Remove markdown headers (#) and format as headings
+      aiResponseText = aiResponseText.replace(/#{1,6}\s*(.*)/g, '<strong class="block mt-3 mb-2 text-gray-900 font-semibold">$1</strong>');
+
+      // Remove markdown bold formatting
+      aiResponseText = aiResponseText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      // Format numbered lists
+      aiResponseText = aiResponseText.replace(/(\d+\.\s+.*(?:\n|$))/g, '<div class="ml-4 my-1">$1</div>');
+
+      // Format bullet points (assuming * or - for bullets)
+      aiResponseText = aiResponseText.replace(/^[\*\-]\s+(.*)/gm, '<div class="ml-4 my-1">• $1</div>');
+
+      // Preserve line breaks and clean up
       aiResponseText = aiResponseText
-        .replace(/##\s*/g, '') // Remove markdown headers
-        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-        .replace(/\n{3,}/g, '\n\n') // Limit multiple newlines
+        .replace(/\n{3,}/g, '\n\n')
         .trim();
 
       return aiResponseText;
@@ -284,19 +312,50 @@ const TeacherDashboard_Page = () => {
       const lowerQuery = userQuery.toLowerCase();
 
       if (lowerQuery.includes('attendance') && lowerQuery.includes('add')) {
-        return `To add attendance:\n\n1. Navigate to the Attendance page from the main menu\n2. Select a subject\n3. Choose the date for attendance\n4. Mark students as present/absent\n5. Click "Save Attendance"\n\nYou currently have ${dashboardSubjects.length} subjects assigned.`;
+        return `To add attendance:<br><br>
+      <div class="ml-4 my-1">1. Navigate to the <a href="https://attendance-management-system-fronte-two.vercel.app/teacher/attendance" class="text-sky-600 hover:text-sky-800 underline" target="_blank" rel="noopener noreferrer">Attendance Page</a></div>
+      <div class="ml-4 my-1">2. Select a subject</div>
+      <div class="ml-4 my-1">3. Choose the date for attendance</div>
+      <div class="ml-4 my-1">4. Mark students as present/absent</div>
+      <div class="ml-4 my-1">5. Click "Save Attendance"</div><br>
+      You currently have ${dashboardSubjects.length} subjects assigned.`;
 
       } else if (lowerQuery.includes('view') && lowerQuery.includes('record')) {
-        return `To view attendance records:\n\n1. Select a subject from the left panel\n2. Use date navigation to select a specific date\n3. View student records in the table\n4. Use pagination if there are many students\n\nCurrently showing ${currentAttendanceRecords.length} records for ${selectedSubjectData?.name || 'selected subject'}.`;
+        return `To view attendance records:<br><br>
+      <div class="ml-4 my-1">1. Select a subject from the left panel</div>
+      <div class="ml-4 my-1">2. Use date navigation to select a specific date</div>
+      <div class="ml-4 my-1">3. View student records in the table</div>
+      <div class="ml-4 my-1">4. Use pagination if there are many students</div><br>
+      Currently showing ${currentAttendanceRecords.length} records for ${selectedSubjectData?.name || 'selected subject'}.`;
 
       } else if (lowerQuery.includes('dashboard') || lowerQuery.includes('overview')) {
-        return `Your dashboard shows:\n\n• ${dashboardSubjects.length} assigned subjects on the left\n• Attendance records for selected subject on the right\n• Date navigation for historical records\n• Student details with roll numbers and timestamps\n\nSelect a subject to see detailed attendance.`;
+        return `<strong class="block mb-2 text-gray-900 font-semibold">Your Dashboard Overview</strong>
+      Your dashboard shows:<br><br>
+      <div class="ml-4 my-1">• ${dashboardSubjects.length} assigned subjects on the left</div>
+      <div class="ml-4 my-1">• Attendance records for selected subject on the right</div>
+      <div class="ml-4 my-1">• Date navigation for historical records</div>
+      <div class="ml-4 my-1">• Student details with roll numbers and timestamps</div><br>
+      Select a subject to see detailed attendance.`;
 
       } else if (lowerQuery.includes('subject') || lowerQuery.includes('course')) {
-        return `You have ${dashboardSubjects.length} subjects:\n${dashboardSubjects.map((sub, i) => `${i + 1}. ${sub.name} (${sub.code}) - ${sub.students || 0} students`).join('\n')}\n\nClick on any subject to view its attendance records.`;
+        const subjectsList = dashboardSubjects.map((sub, i) =>
+          `<div class="ml-4 my-1">${i + 1}. ${sub.name} (${sub.code}) - ${sub.students || 0} students</div>`
+        ).join('');
+
+        return `You have ${dashboardSubjects.length} subjects:<br>${subjectsList}<br>
+      Click on any subject to view its attendance records.`;
 
       } else {
-        return `I'm having trouble connecting to the AI service. Here's what you can do:\n\n1. Check your internet connection\n2. Try asking about:\n   • How to add attendance\n   • Viewing attendance records\n   • Understanding the dashboard\n   • Your assigned subjects\n3. Contact support if the issue persists\n\nError: ${error.message}`;
+        return `<strong class="block mb-2 text-gray-900 font-semibold">Connection Issue</strong>
+      I'm having trouble connecting to the AI service. Here's what you can do:<br><br>
+      <div class="ml-4 my-1">1. Check your internet connection</div>
+      <div class="ml-4 my-1">2. Try asking about:</div>
+      <div class="ml-8 my-1">• How to add attendance</div>
+      <div class="ml-8 my-1">• Viewing attendance records</div>
+      <div class="ml-8 my-1">• Understanding the dashboard</div>
+      <div class="ml-8 my-1">• Your assigned subjects</div>
+      <div class="ml-4 my-1">3. Contact support if the issue persists</div><br>
+      Error: ${error.message}`;
       }
     }
   };
@@ -328,7 +387,7 @@ const TeacherDashboard_Page = () => {
       }
 
       setChatMessages(prev => [...prev, aiResponse])
-      
+
       // Removed the toast notification as requested
 
     } catch (error) {
@@ -343,9 +402,9 @@ const TeacherDashboard_Page = () => {
       }
 
       setChatMessages(prev => [...prev, fallbackResponse])
-      
+
       // Removed the toast notification as requested
-      
+
     } finally {
       setIsSending(false)
 
@@ -375,7 +434,7 @@ const TeacherDashboard_Page = () => {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ];
-    
+
     setChatMessages(initialChat);
     // Also clear from localStorage
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(initialChat));
@@ -702,7 +761,14 @@ const TeacherDashboard_Page = () => {
                       : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
                       }`}
                   >
-                    <p className="text-sm whitespace-pre-line">{msg.text}</p>
+                    {msg.sender === 'user' ? (
+                      <p className="text-sm whitespace-pre-line">{msg.text}</p>
+                    ) : (
+                      <div
+                        className="text-sm whitespace-pre-line"
+                        dangerouslySetInnerHTML={{ __html: msg.text }}
+                      />
+                    )}
                     <p className="text-xs mt-1 opacity-70">
                       {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
                     </p>
