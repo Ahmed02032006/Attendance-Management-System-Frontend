@@ -63,9 +63,24 @@ const TeacherAttendance_Page = () => {
   // Set initial selected subject when data is loaded
   useEffect(() => {
     if (subjectsWithAttendance.length > 0 && !selectedSubject) {
-      console.log("inside the if else");
+      console.log("Subject Attendance Records");
       console.log(subjectsWithAttendance);
-      setSelectedSubject(subjectsWithAttendance[0].id)
+
+      // Filter to only show active subjects
+      const activeSubjects = subjectsWithAttendance.filter(subject =>
+        subject.status === 'Active' || subject.status === 'active'
+      );
+
+      console.log("Active subjects:", activeSubjects);
+
+      // If there are active subjects, select the first one
+      if (activeSubjects.length > 0) {
+        setSelectedSubject(activeSubjects[0].id);
+        console.log("Set initial subject to:", activeSubjects[0].id, activeSubjects[0].name);
+      } else {
+        console.log("No active subjects found");
+        // You might want to show a message to the user here
+      }
     }
   }, [subjectsWithAttendance, selectedSubject])
 
