@@ -63,12 +63,12 @@ const TeacherAttendance_Page = () => {
   // Set initial selected subject when data is loaded
   useEffect(() => {
     if (subjectsWithAttendance.length > 0 && !selectedSubject) {
-      console.log(subjectsWithAttendance[0].id);
       console.log("inside the if else");
+      console.log(subjectsWithAttendance);
       setSelectedSubject(subjectsWithAttendance[0].id)
     }
-    console.log("outside the if else");
-    console.log(subjectsWithAttendance);
+    // console.log("outside the if else");
+    // console.log(subjectsWithAttendance);
   }, [subjectsWithAttendance, selectedSubject])
 
   // QR Auto-refresh useEffect
