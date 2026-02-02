@@ -62,23 +62,9 @@ const TeacherAttendance_Page = () => {
 
   // Set initial selected subject when data is loaded
   useEffect(() => {
-    console.log("======================");
-    console.log("subjectsWithAttendance");
-    console.log(subjectsWithAttendance);
-
-    // Filter only active subjects
-    const activeSubjects = subjectsWithAttendance.filter(
-      subject => subject.status === "Active"
-    );
-
-    console.log("Active subjects:", activeSubjects);
-
-    if (activeSubjects.length > 0 && !selectedSubject) {
-      // Set the first active subject as selected
-      setSelectedSubject(activeSubjects[0].id)
-    } else if (activeSubjects.length === 0 && selectedSubject) {
-      // If no active subjects, clear the selected subject
-      setSelectedSubject('');
+    console.log("1");
+    if (subjectsWithAttendance.length > 0 && !selectedSubject) {
+      setSelectedSubject(subjectsWithAttendance[0].id)
     }
   }, [subjectsWithAttendance, selectedSubject])
 
@@ -293,6 +279,7 @@ const TeacherAttendance_Page = () => {
   };
 
   const handleSubjectSelect = (subjectId) => {
+    console.log("2");
     setSelectedSubject(subjectId);
     setShowSubjectModal(false);
     setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
