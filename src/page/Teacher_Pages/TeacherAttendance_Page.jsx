@@ -51,17 +51,6 @@ const TeacherAttendance_Page = () => {
   const { user } = useSelector((state) => state.auth)
   const userId = user?.id
 
-  // Filter active subjects
-  const activeSubjects = subjectsWithAttendance.filter(subject => 
-    subject.status === "Active"
-  );
-
-  // Get the selected subject's current status
-  const selectedSubjectData = selectedSubject ? 
-    subjectsWithAttendance.find(s => s.id === selectedSubject) : null;
-  
-  const isSelectedSubjectActive = selectedSubjectData?.status === "Active";
-
   // Fetch subjects with attendance on component mount
   useEffect(() => {
     dispatch(getSubjectsWithAttendance(userId)).unwrap();
@@ -71,25 +60,12 @@ const TeacherAttendance_Page = () => {
     }
   }, [dispatch])
 
-  // Check if selected subject is still active when data refreshes
-  useEffect(() => {
-    if (selectedSubject && subjectsWithAttendance.length > 0) {
-      const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
-      if (!subject || subject.status !== "Active") {
-        // If selected subject is no longer active or doesn't exist
-        setSelectedSubject('');
-        setShowSubjectModal(true);
-        toast.warning('Previously selected subject is no longer active. Please select an active subject.');
-      }
-    }
-  }, [subjectsWithAttendance, selectedSubject]);
-
   // Set initial selected subject when data is loaded
   useEffect(() => {
-    if (activeSubjects.length > 0 && !selectedSubject) {
-      setSelectedSubject(activeSubjects[0].id)
+    if (subjectsWithAttendance.length > 0 && !selectedSubject) {
+      setSelectedSubject(subjectsWithAttendance[0].id)
     }
-  }, [subjectsWithAttendance, selectedSubject, activeSubjects])
+  }, [subjectsWithAttendance, selectedSubject])
 
   // QR Auto-refresh useEffect
   useEffect(() => {
@@ -136,8 +112,8 @@ const TeacherAttendance_Page = () => {
 
   // Get current attendance records from Redux state
   const getCurrentAttendanceRecords = () => {
-    if (!selectedSubject || !isSelectedSubjectActive) return [];
-    const subject = activeSubjects.find(s => s.id === selectedSubject);
+    if (!selectedSubject) return [];
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
     return subject && subject.attendance ? subject.attendance[currentDateString] || [] : [];
   };
 
@@ -267,7 +243,7 @@ const TeacherAttendance_Page = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
 
-      const subjectName = activeSubjects.find(s => s.id === selectedSubject)?.name || 'attendance';
+      const subjectName = subjectsWithAttendance.find(s => s.id === selectedSubject)?.name || 'attendance';
       const fileName = `attendance_${subjectName}_${currentDateString}.csv`;
 
       link.setAttribute('href', url);
@@ -317,14 +293,7 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
-    // Check if selected subject is active
-    const subject = activeSubjects.find(s => s.id === attendanceForm.subject);
-    if (!subject) {
-      toast.error('Selected subject is not active');
-      return;
-    }
-
-    const subjectName = subject?.name;
+    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000); // 1 minute 60 seconds from now
 
@@ -374,13 +343,6 @@ const TeacherAttendance_Page = () => {
   const handleGenerateQR = async () => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
-      return;
-    }
-
-    // Check if selected subject is active
-    const subject = activeSubjects.find(s => s.id === attendanceForm.subject);
-    if (!subject) {
-      toast.error('Selected subject is not active');
       return;
     }
 
@@ -468,9 +430,9 @@ const TeacherAttendance_Page = () => {
 
   // Helper functions for student attendance data
   const getStudentPreviousAttendance = (student) => {
-    if (!student || !selectedSubject || !isSelectedSubjectActive) return [];
+    if (!student || !selectedSubject) return [];
 
-    const subject = activeSubjects.find(s => s.id === selectedSubject);
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
     if (!subject || !subject.attendance) return [];
 
     const allAttendance = [];
@@ -540,7 +502,7 @@ const TeacherAttendance_Page = () => {
 
       <div className="container max-w-full p-6">
         {/* Date Navigation - Centered */}
-        {selectedSubject && isSelectedSubjectActive && (
+        {selectedSubject && (
           <div className="flex justify-center items-center mb-8">
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-white rounded-lg border border-gray-200 px-6 py-4">
               <button
@@ -556,14 +518,9 @@ const TeacherAttendance_Page = () => {
                 <h2 className="text-xl font-semibold text-gray-800">
                   {formatDisplayDate(currentDate)}
                 </h2>
-                <div className="flex flex-col sm:flex-row items-center gap-2">
-                  <p className="text-xs text-gray-600">
-                    {activeSubjects.find(s => s.id === selectedSubject)?.name}
-                  </p>
-                  <span className="inline-block px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full">
-                    Active
-                  </span>
-                </div>
+                <p className="text-xs text-gray-600">
+                  {subjectsWithAttendance.find(s => s.id === selectedSubject)?.name}
+                </p>
               </div>
 
               <button
@@ -582,36 +539,8 @@ const TeacherAttendance_Page = () => {
           </div>
         )}
 
-        {/* Subject Inactive Warning */}
-        {selectedSubject && !isSelectedSubjectActive && selectedSubjectData && (
-          <div className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-medium text-amber-800">Subject is Inactive</h3>
-                  <p className="text-sm text-amber-600">
-                    The subject "{selectedSubjectData.name}" is currently inactive. 
-                    Please select an active subject to continue.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowSubjectModal(true)}
-                className="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 font-medium transition-colors"
-              >
-                Select Active Subject
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Attendance Table Section */}
-        {selectedSubject && isSelectedSubjectActive && (
+        {selectedSubject && (
           <div className="space-y-6">
             {/* Search and Date Picker */}
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -861,7 +790,7 @@ const TeacherAttendance_Page = () => {
         )}
 
         {/* No Subject Selected State */}
-        {!selectedSubject && !showSubjectModal && activeSubjects.length > 0 && (
+        {!selectedSubject && !showSubjectModal && subjectsWithAttendance.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <div className="text-gray-400 mb-4">
               <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -879,64 +808,38 @@ const TeacherAttendance_Page = () => {
           </div>
         )}
 
-        {/* No Active Subjects State */}
-        {activeSubjects.length === 0 && !isLoading && (
+        {/* No Data State */}
+        {subjectsWithAttendance.length === 0 && !isLoading && (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <div className="text-gray-400 mb-4">
               <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Active Subjects Found</h3>
-            <p className="text-gray-600 mb-4">
-              You don't have any active subjects with attendance data. 
-              {subjectsWithAttendance.length > 0 && (
-                <span className="block mt-1 text-sm">
-                  You have {subjectsWithAttendance.length} subject(s) in total, 
-                  but {subjectsWithAttendance.filter(s => s.status === "Inactive").length} are marked as inactive.
-                </span>
-              )}
-            </p>
-            <div className="flex gap-3 justify-center">
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
-              >
-                Refresh Data
-              </button>
-              {subjectsWithAttendance.filter(s => s.status === "Inactive").length > 0 && (
-                <button
-                  onClick={() => {
-                    // You might want to navigate to subject management page
-                    toast.info('Navigate to subject management to activate subjects');
-                  }}
-                  className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
-                >
-                  Manage Subjects
-                </button>
-              )}
-            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Subjects Found</h3>
+            <p className="text-gray-600 mb-4">You don't have any subjects with attendance data yet</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+            >
+              Refresh Data
+            </button>
           </div>
         )}
       </div>
 
       {/* Subject Selection Modal */}
       {
-        showSubjectModal && activeSubjects.length > 0 && (
+        showSubjectModal && subjectsWithAttendance.length > 0 && (
           <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-auto">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800">Select Active Subject</h3>
-                <p className="text-sm text-gray-600 mt-1">Choose an active subject to view attendance records</p>
-                {subjectsWithAttendance.filter(s => s.status === "Inactive").length > 0 && (
-                  <p className="text-xs text-amber-600 mt-1">
-                    Note: {subjectsWithAttendance.filter(s => s.status === "Inactive").length} inactive subject(s) are hidden
-                  </p>
-                )}
+                <h3 className="text-lg font-semibold text-gray-800">Select Subject</h3>
+                <p className="text-sm text-gray-600 mt-1">Choose a subject to view attendance records</p>
               </div>
               <div className="p-6">
                 <div className="flex items-center gap-3">
-                  {activeSubjects.map((subject) => (
+                  {subjectsWithAttendance.map((subject) => (
                     <div
                       key={subject.id}
                       className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center"
@@ -945,16 +848,13 @@ const TeacherAttendance_Page = () => {
                       <h4 className="font-light text-sm text-gray-700">
                         {subject.name}
                       </h4>
-                      <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full">
-                        Active
-                      </span>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
                 <p className="text-sm text-gray-600 text-center">
-                  Select an active subject to continue to the attendance dashboard
+                  Select a subject to continue to the attendance dashboard
                 </p>
               </div>
             </div>
@@ -969,7 +869,6 @@ const TeacherAttendance_Page = () => {
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-800">Create New Attendance</h3>
-                <p className="text-sm text-gray-600 mt-1">Only active subjects are shown</p>
               </div>
               <div className="p-6 space-y-4">
                 <div>
@@ -983,15 +882,12 @@ const TeacherAttendance_Page = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                   >
                     <option value="">Select Subject</option>
-                    {activeSubjects.map((subject) => (
+                    {subjectsWithAttendance.map((subject) => (
                       <option key={subject.id} value={subject.id}>
-                        {subject.name} {subject.status === "Active" && "✓"}
+                        {subject.name}
                       </option>
                     ))}
                   </select>
-                  {activeSubjects.length === 0 && (
-                    <p className="text-sm text-red-600 mt-1">No active subjects available</p>
-                  )}
                 </div>
 
                 <div>
@@ -1017,7 +913,7 @@ const TeacherAttendance_Page = () => {
                 </button>
                 <button
                   onClick={handleGenerateQR}
-                  disabled={isLoading || activeSubjects.length === 0}
+                  disabled={isLoading}
                   className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Creating...' : 'Generate QR'}
@@ -1037,6 +933,7 @@ const TeacherAttendance_Page = () => {
                 <div className='flex items-center justify-between gap-3'>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    {/* <span className="text-xs text-green-600 font-medium">Live</span> */}
                   </div>
                   <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
                 </div>
@@ -1079,6 +976,9 @@ const TeacherAttendance_Page = () => {
                   <p className="text-sm text-gray-600">
                     Students can scan this QR code to mark their attendance
                   </p>
+                  {/* <p className="text-xs text-gray-500 mt-1">
+                    {isQrZoomed ? "Click minimize icon to reduce size" : "Click maximize icon to enlarge"}
+                  </p> */}
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
