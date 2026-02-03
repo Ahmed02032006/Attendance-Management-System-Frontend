@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiUserCheck, FiUserX } from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 
 // You'll need to create these Redux actions/slices for teachers
@@ -26,8 +26,7 @@ const AdminTeachers_Page = () => {
       status: 'Active',
       createdAt: '2024-01-15T10:30:00Z',
       subjects: 5,
-      role: 'Senior Lecturer',
-      department: 'Computer Science'
+      role: 'Teacher'
     },
     {
       _id: '2',
@@ -37,8 +36,7 @@ const AdminTeachers_Page = () => {
       status: 'Active',
       createdAt: '2024-02-20T14:45:00Z',
       subjects: 3,
-      role: 'Assistant Professor',
-      department: 'Mathematics'
+      role: 'Teacher'
     },
     {
       _id: '3',
@@ -48,8 +46,7 @@ const AdminTeachers_Page = () => {
       status: 'Inactive',
       createdAt: '2024-01-05T09:15:00Z',
       subjects: 2,
-      role: 'Lecturer',
-      department: 'Physics'
+      role: 'Teacher'
     },
   ])
 
@@ -69,8 +66,6 @@ const AdminTeachers_Page = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'Lecturer',
-    department: '',
     status: 'Active'
   })
 
@@ -83,9 +78,7 @@ const AdminTeachers_Page = () => {
   const filteredTeachers = teachers.filter(teacher => {
     const matchesSearch =
       teacher.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.department?.toLowerCase().includes(searchTerm.toLowerCase())
+      teacher.email?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesFilter = statusFilter === 'All' || teacher.status === statusFilter
 
@@ -127,6 +120,7 @@ const AdminTeachers_Page = () => {
       const newTeacher = {
         _id: Date.now().toString(),
         ...teacherForm,
+        role: 'Teacher',
         profilePicture: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face',
         createdAt: new Date().toISOString(),
         subjects: 0
@@ -159,7 +153,7 @@ const AdminTeachers_Page = () => {
       // Mock update
       setTeachers(prev => prev.map(teacher => 
         teacher._id === selectedTeacher._id 
-          ? { ...teacher, ...teacherForm }
+          ? { ...teacher, ...teacherForm, role: 'Teacher' }
           : teacher
       ))
 
@@ -196,8 +190,6 @@ const AdminTeachers_Page = () => {
     setTeacherForm({
       name: teacher.name,
       email: teacher.email,
-      role: teacher.role || 'Lecturer',
-      department: teacher.department || '',
       status: teacher.status
     })
     setShowEditModal(true)
@@ -214,8 +206,6 @@ const AdminTeachers_Page = () => {
       email: '',
       password: '',
       confirmPassword: '',
-      role: 'Lecturer',
-      department: '',
       status: 'Active'
     })
     setSelectedTeacher(null)
@@ -262,7 +252,7 @@ const AdminTeachers_Page = () => {
             </div>
             <input
               type="text"
-              placeholder="Search teachers by name, email or department..."
+              placeholder="Search teachers by name or email..."
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -358,11 +348,6 @@ const AdminTeachers_Page = () => {
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                             }`}>
-                            {teacher.status === "Active" ? (
-                              <FiUserCheck className="inline mr-1" size={12} />
-                            ) : (
-                              <FiUserX className="inline mr-1" size={12} />
-                            )}
                             {teacher.status}
                           </span>
                         </td>
@@ -584,40 +569,6 @@ const AdminTeachers_Page = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Role
-                  </label>
-                  <select
-                    name="role"
-                    value={teacherForm.role}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    disabled={isLoading}
-                  >
-                    <option value="Lecturer">Lecturer</option>
-                    <option value="Assistant Professor">Assistant Professor</option>
-                    <option value="Associate Professor">Associate Professor</option>
-                    <option value="Professor">Professor</option>
-                    <option value="Senior Lecturer">Senior Lecturer</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Department
-                  </label>
-                  <input
-                    type="text"
-                    name="department"
-                    value={teacherForm.department}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Computer Science"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Status
                   </label>
                   <select
@@ -707,40 +658,6 @@ const AdminTeachers_Page = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Role
-                  </label>
-                  <select
-                    name="role"
-                    value={teacherForm.role}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    disabled={isLoading}
-                  >
-                    <option value="Lecturer">Lecturer</option>
-                    <option value="Assistant Professor">Assistant Professor</option>
-                    <option value="Associate Professor">Associate Professor</option>
-                    <option value="Professor">Professor</option>
-                    <option value="Senior Lecturer">Senior Lecturer</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Department
-                  </label>
-                  <input
-                    type="text"
-                    name="department"
-                    value={teacherForm.department}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Computer Science"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Status
                   </label>
                   <select
@@ -808,7 +725,7 @@ const AdminTeachers_Page = () => {
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900">{selectedTeacher?.name}</h4>
                   <p className="text-sm text-gray-600">{selectedTeacher?.email}</p>
-                  <p className="text-xs text-gray-500">{selectedTeacher?.role}</p>
+                  <p className="text-xs text-gray-500">Teacher</p>
                 </div>
               </div>
               <p className="text-gray-600 text-center mb-2">
