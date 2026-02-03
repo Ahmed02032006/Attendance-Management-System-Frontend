@@ -16,41 +16,9 @@ import { toast } from 'react-toastify'
 const AdminTeachers_Page = () => {
   const dispatch = useDispatch()
   
-  // Mock data for demonstration - replace with actual Redux state
-  const [teachers, setTeachers] = useState([
-    {
-      _id: '1',
-      profilePicture: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face',
-      name: 'John Smith',
-      email: 'john.smith@example.com',
-      status: 'Active',
-      createdAt: '2024-01-15T10:30:00Z',
-      subjects: 5,
-      role: 'Teacher'
-    },
-    {
-      _id: '2',
-      profilePicture: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face',
-      name: 'Sarah Johnson',
-      email: 'sarah.j@example.com',
-      status: 'Active',
-      createdAt: '2024-02-20T14:45:00Z',
-      subjects: 3,
-      role: 'Teacher'
-    },
-    {
-      _id: '3',
-      profilePicture: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=150&h=150&fit=crop&crop=face',
-      name: 'Michael Chen',
-      email: 'michael.chen@example.com',
-      status: 'Inactive',
-      createdAt: '2024-01-05T09:15:00Z',
-      subjects: 2,
-      role: 'Teacher'
-    },
-  ])
+  const [teachers, setTeachers] = useState([])
 
-  const isLoading = false // Replace with actual loading state from Redux
+  const isLoading = false;
 
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -116,17 +84,6 @@ const AdminTeachers_Page = () => {
       // Uncomment when you have Redux setup
       // await dispatch(createTeacher(teacherForm)).unwrap()
       
-      // Mock success
-      const newTeacher = {
-        _id: Date.now().toString(),
-        ...teacherForm,
-        role: 'Teacher',
-        profilePicture: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face',
-        createdAt: new Date().toISOString(),
-        subjects: 0
-      }
-      setTeachers(prev => [...prev, newTeacher])
-      
       setShowCreateModal(false)
       resetForm()
       toast.success('Teacher created successfully!')
@@ -150,12 +107,6 @@ const AdminTeachers_Page = () => {
       //   formData: teacherForm
       // })).unwrap()
 
-      // Mock update
-      setTeachers(prev => prev.map(teacher => 
-        teacher._id === selectedTeacher._id 
-          ? { ...teacher, ...teacherForm, role: 'Teacher' }
-          : teacher
-      ))
 
       setShowEditModal(false)
       resetForm()
@@ -169,9 +120,6 @@ const AdminTeachers_Page = () => {
     try {
       // Uncomment when you have Redux setup
       // await dispatch(deleteTeacher(selectedTeacher._id)).unwrap()
-      
-      // Mock delete
-      setTeachers(prev => prev.filter(teacher => teacher._id !== selectedTeacher._id))
       
       setShowDeleteModal(false)
       toast.success('Teacher deleted successfully!')
