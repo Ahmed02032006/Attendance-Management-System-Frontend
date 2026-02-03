@@ -263,8 +263,8 @@ const TeacherSubjects_Page = () => {
                       <tr key={subject._id} className="hover:bg-gray-50">
                         <td className="px-6 py-3.5 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="shrink-0 h-10 w-10 rounded-full bg-blue-100 overflow-hidden border border-gray-300 flex items-center justify-center">
-                              <span className="text-blue-600 font-semibold text-sm">
+                            <div className="shrink-0 h-10 w-10 rounded-full bg-sky-100 overflow-hidden border border-gray-300 flex items-center justify-center">
+                              <span className="text-sky-600 font-semibold text-sm">
                                 {subject.subjectTitle?.charAt(0)}
                               </span>
                             </div>
