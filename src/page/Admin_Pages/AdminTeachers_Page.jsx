@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiUserCheck, FiUserX, FiRefreshCcw } from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiUserCheck, FiUserX } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 
 // You'll need to create these Redux actions/slices for teachers
@@ -26,7 +26,8 @@ const AdminTeachers_Page = () => {
       status: 'Active',
       createdAt: '2024-01-15T10:30:00Z',
       subjects: 5,
-      role: 'Senior Lecturer'
+      role: 'Senior Lecturer',
+      department: 'Computer Science'
     },
     {
       _id: '2',
@@ -36,7 +37,8 @@ const AdminTeachers_Page = () => {
       status: 'Active',
       createdAt: '2024-02-20T14:45:00Z',
       subjects: 3,
-      role: 'Assistant Professor'
+      role: 'Assistant Professor',
+      department: 'Mathematics'
     },
     {
       _id: '3',
@@ -46,7 +48,8 @@ const AdminTeachers_Page = () => {
       status: 'Inactive',
       createdAt: '2024-01-05T09:15:00Z',
       subjects: 2,
-      role: 'Lecturer'
+      role: 'Lecturer',
+      department: 'Physics'
     },
   ])
 
@@ -55,7 +58,6 @@ const AdminTeachers_Page = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showStatusModal, setShowStatusModal] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
@@ -184,28 +186,6 @@ const AdminTeachers_Page = () => {
     }
   }
 
-  const handleStatusChange = async (newStatus) => {
-    try {
-      // Uncomment when you have Redux setup
-      // await dispatch(updateTeacherStatus({
-      //   id: selectedTeacher._id,
-      //   status: newStatus
-      // })).unwrap()
-
-      // Mock status update
-      setTeachers(prev => prev.map(teacher => 
-        teacher._id === selectedTeacher._id 
-          ? { ...teacher, status: newStatus }
-          : teacher
-      ))
-
-      setShowStatusModal(false)
-      toast.success(`Teacher status updated to ${newStatus}`)
-    } catch (error) {
-      toast.error(error?.message || 'Failed to update teacher status')
-    }
-  }
-
   const openCreateModal = () => {
     resetForm()
     setShowCreateModal(true)
@@ -226,11 +206,6 @@ const AdminTeachers_Page = () => {
   const openDeleteModal = (teacher) => {
     setSelectedTeacher(teacher)
     setShowDeleteModal(true)
-  }
-
-  const openStatusModal = (teacher) => {
-    setSelectedTeacher(teacher)
-    setShowStatusModal(true)
   }
 
   const resetForm = () => {
@@ -379,20 +354,17 @@ const AdminTeachers_Page = () => {
                           {formatDate(teacher.createdAt)}
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center">
-                          <button
-                            onClick={() => openStatusModal(teacher)}
-                            className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors ${teacher.status === "Active"
-                              ? "bg-green-100 text-green-800 hover:bg-green-200"
-                              : "bg-red-100 text-red-800 hover:bg-red-200"
-                              }`}
-                          >
+                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${teacher.status === "Active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                            }`}>
                             {teacher.status === "Active" ? (
                               <FiUserCheck className="inline mr-1" size={12} />
                             ) : (
                               <FiUserX className="inline mr-1" size={12} />
                             )}
                             {teacher.status}
-                          </button>
+                          </span>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                           <div className="flex justify-center space-x-2 lg:space-x-3">
@@ -401,7 +373,7 @@ const AdminTeachers_Page = () => {
                               className="text-sky-600 hover:text-sky-900 transition-colors p-1"
                               title="Edit Teacher"
                             >
-                              <FiEdit2 className="h-4 w-4 lg:h-5 lg:w-5" />
+                              <FiEdit className="h-4 w-4 lg:h-5 lg:w-5" />
                             </button>
 
                             <button
@@ -643,6 +615,22 @@ const AdminTeachers_Page = () => {
                     disabled={isLoading}
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    value={teacherForm.status}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    disabled={isLoading}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 sticky bottom-0 bg-white">
                 <button
@@ -673,7 +661,7 @@ const AdminTeachers_Page = () => {
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
-                  <FiEdit2 className="h-4 w-4 text-sky-600" />
+                  <FiEdit className="h-4 w-4 text-sky-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800">Edit Teacher</h3>
               </div>
@@ -749,6 +737,22 @@ const AdminTeachers_Page = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                     disabled={isLoading}
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    value={teacherForm.status}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    disabled={isLoading}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
@@ -829,100 +833,6 @@ const AdminTeachers_Page = () => {
                 disabled={isLoading}
               >
                 {isLoading ? 'Deleting...' : 'Delete Teacher'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Status Change Modal */}
-      {showStatusModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedTeacher?.status === 'Active' ? 'bg-red-100' : 'bg-green-100'}`}>
-                  {selectedTeacher?.status === 'Active' ? (
-                    <FiUserX className="h-4 w-4 text-red-600" />
-                  ) : (
-                    <FiUserCheck className="h-4 w-4 text-green-600" />
-                  )}
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Update Teacher Status
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowStatusModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                disabled={isLoading}
-              >
-                <FiX className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <div className="mx-auto w-20 h-20 rounded-full overflow-hidden border-4 border-gray-200 mb-4">
-                  <img
-                    src={selectedTeacher?.profilePicture}
-                    alt={selectedTeacher?.name}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <h4 className="text-xl font-semibold text-gray-900">{selectedTeacher?.name}</h4>
-                <p className="text-gray-600">{selectedTeacher?.email}</p>
-                <p className="text-sm text-gray-500">{selectedTeacher?.role}</p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <FiUserCheck className="h-5 w-5 text-green-600" />
-                    <div>
-                      <p className="font-medium text-gray-900">Active</p>
-                      <p className="text-sm text-gray-500">Teacher can access the system</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleStatusChange('Active')}
-                    disabled={selectedTeacher?.status === 'Active' || isLoading}
-                    className={`px-4 py-2 rounded-md font-medium ${selectedTeacher?.status === 'Active'
-                        ? 'bg-green-100 text-green-800 cursor-default'
-                        : 'bg-green-600 text-white hover:bg-green-700'
-                      } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    {selectedTeacher?.status === 'Active' ? 'Current' : 'Set Active'}
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <FiUserX className="h-5 w-5 text-red-600" />
-                    <div>
-                      <p className="font-medium text-gray-900">Inactive</p>
-                      <p className="text-sm text-gray-500">Teacher cannot access the system</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleStatusChange('Inactive')}
-                    disabled={selectedTeacher?.status === 'Inactive' || isLoading}
-                    className={`px-4 py-2 rounded-md font-medium ${selectedTeacher?.status === 'Inactive'
-                        ? 'bg-red-100 text-red-800 cursor-default'
-                        : 'bg-red-600 text-white hover:bg-red-700'
-                      } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    {selectedTeacher?.status === 'Inactive' ? 'Current' : 'Set Inactive'}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => setShowStatusModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-                disabled={isLoading}
-              >
-                Close
               </button>
             </div>
           </div>
