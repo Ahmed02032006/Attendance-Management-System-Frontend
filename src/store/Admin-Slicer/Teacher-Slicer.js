@@ -112,7 +112,7 @@ const teacherSlicer = createSlice({
         state.isLoading = false;
         state.teachers = action.payload.data || [];
         console.log("action.payload");
-        console.log(action.payload);
+        console.log(action.payload.data);
         
       })
       .addCase(getTeachersByUser.rejected, (state, action) => {
