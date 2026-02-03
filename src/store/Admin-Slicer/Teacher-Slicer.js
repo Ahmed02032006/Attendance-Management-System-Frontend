@@ -11,18 +11,15 @@ export const getTeachersByUser = createAsyncThunk(
   "teachers/getByUser",
   async ({ rejectWithValue }) => {
     try {
+      console.log("check 123");
+      
       const response = await axios.get(
         'https://attendance-management-system-backen.vercel.app/api/v1/admin/teachers/users'
       );
-
-      console.log("=========================");
       console.log("=========================");
       console.log("IN SLICER");
       console.log("=========================");
-      console.log("=========================");
       console.log(response);
-
-
       if (response.status !== 200) {
         return rejectWithValue(response.data);
       }
@@ -97,7 +94,7 @@ export const deleteTeacher = createAsyncThunk(
 );
 
 const teacherSlicer = createSlice({
-  name: "teacher",
+  name: "adminTeacher",
   initialState: initialState,
   reducers: {},
   extraReducers: (builder) => {

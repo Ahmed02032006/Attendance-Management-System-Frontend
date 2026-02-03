@@ -34,12 +34,6 @@ const AdminTeachers_Page = () => {
 
   // Fetch teachers on component mount
   useEffect(() => {
-    console.log("=========================");
-    console.log("=========================");
-    console.log("IN ADMIN TEACHER PAGE");
-    console.log("=========================");
-    console.log("=========================");
-    
     dispatch(getTeachersByUser())
   }, [dispatch])
 
