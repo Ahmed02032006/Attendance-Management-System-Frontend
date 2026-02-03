@@ -12,7 +12,7 @@ export const getTeachersByUser = createAsyncThunk(
   async ({ rejectWithValue }) => {
     try {
       const response = await axios.get(
-        'https://attendance-management-system-backen.vercel.app/api/v1/admin/users'
+        'https://attendance-management-system-backen.vercel.app/api/v1/admin/teachers/users'
       );
 
       if (response.status !== 200) {
@@ -32,7 +32,7 @@ export const createTeacher = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "https://attendance-management-system-backen.vercel.app/api/v1/admin/users",
+        "https://attendance-management-system-backen.vercel.app/api/v1/admin/teachers/users",
         formData
       );
 
@@ -53,7 +53,7 @@ export const updateTeacher = createAsyncThunk(
   async ({ id, formData }, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `https://attendance-management-system-backen.vercel.app/api/v1/admin/users/${id}`,
+        `https://attendance-management-system-backen.vercel.app/api/v1/admin/teachers/users/${id}`,
         formData
       );
 
@@ -74,7 +74,7 @@ export const deleteTeacher = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await axios.delete(
-        `https://attendance-management-system-backen.vercel.app/api/v1/admin/users/${id}`
+        `https://attendance-management-system-backen.vercel.app/api/v1/admin/teachers/users/${id}`
       );
 
       if (response.status !== 200) {
