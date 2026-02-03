@@ -67,7 +67,7 @@ const App = () => {
         <Route path='/admin' element={<CheckAuth isInitialAuthCheckComplete={isInitialAuthCheckComplete} isAuthenticated={isAuthenticated} user={user} >
           <AdminDashboardLayout />
         </CheckAuth>}>
-          <Route index element={<Navigate to="teacher" replace />} />
+          <Route index element={<Navigate to="teachers" replace />} />
           <Route path="teachers" element={<AdminTeachers_Page />} />
         </Route>
 
