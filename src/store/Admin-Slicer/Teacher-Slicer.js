@@ -6,7 +6,7 @@ const initialState = {
   isLoading: false,
 };
 
-// Get teachers by user ID
+// Get All teachers
 export const getTeachersByUser = createAsyncThunk(
   "teachers/getByUser",
   async ({ rejectWithValue }) => {
@@ -14,6 +14,9 @@ export const getTeachersByUser = createAsyncThunk(
       const response = await axios.get(
         'https://attendance-management-system-backen.vercel.app/api/v1/admin/teachers/users'
       );
+
+      console.log(response);
+      
 
       if (response.status !== 200) {
         return rejectWithValue(response.data);
