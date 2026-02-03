@@ -35,11 +35,6 @@ const AdminTeachers_Page = () => {
   // Fetch teachers on component mount
   useEffect(() => {
     dispatch(getTeachersByUser())
-    console.log("------------------------------------");
-    console.log("teachers");
-    console.log(teachers);
-    console.log("------------------------------------");
-    
   }, [dispatch])
 
   // Filter teachers based on search and filter
