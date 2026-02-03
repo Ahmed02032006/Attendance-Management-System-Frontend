@@ -14,6 +14,8 @@ import TeacherSubjects_Page from './page/Teacher_Pages/TeacherSubjects_Page';
 import TeacherAttendance_Page from './page/Teacher_Pages/TeacherAttendance_Page';
 import StudentAttendance_Page from './page/Student_Pages/StudentAttendance_Page';
 import QRScanner_Page from './page/Student_Pages/QR_Scanner';
+import AdminTeachers_Page from './page/Admin_Pages/AdminTeachers_Page';
+import AdminDashboardLayout from './layout/Admin_Dashboard_Layout/AdminDashboardLayout';
 
 const App = () => {
 
@@ -51,7 +53,7 @@ const App = () => {
           <Route path="forgotPassword" element={<ForgotPasswordPage />} />
         </Route>
 
-        {/* =====>] All Teacher Admin Routes [<===== */}
+        {/* =====>] Teachers Routes [<===== */}
         <Route path='/teacher' element={<CheckAuth isInitialAuthCheckComplete={isInitialAuthCheckComplete} isAuthenticated={isAuthenticated} user={user} >
           <TeacherDashboardLayout />
         </CheckAuth>}>
@@ -61,6 +63,15 @@ const App = () => {
           <Route path="attendance" element={<TeacherAttendance_Page />} />
         </Route>
 
+        {/* =====>] Admin Routes [<===== */}
+        <Route path='/admin' element={<CheckAuth isInitialAuthCheckComplete={isInitialAuthCheckComplete} isAuthenticated={isAuthenticated} user={user} >
+          <AdminDashboardLayout />
+        </CheckAuth>}>
+          <Route index element={<Navigate to="teacher" replace />} />
+          <Route path="teacher" element={<AdminTeachers_Page />} />
+        </Route>
+
+        {/* =====>] Students Routes [<===== */}
         <Route path="scan-attendance" element={<QRScanner_Page />} />
         <Route path="student-attendance" element={<StudentAttendance_Page />} />
       </Routes>
