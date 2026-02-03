@@ -15,8 +15,13 @@ export const getTeachersByUser = createAsyncThunk(
         'https://attendance-management-system-backen.vercel.app/api/v1/admin/teachers/users'
       );
 
+      console.log("=========================");
+      console.log("=========================");
+      console.log("IN SLICER");
+      console.log("=========================");
+      console.log("=========================");
       console.log(response);
-      
+
 
       if (response.status !== 200) {
         return rejectWithValue(response.data);

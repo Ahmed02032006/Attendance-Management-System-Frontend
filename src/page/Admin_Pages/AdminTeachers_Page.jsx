@@ -13,7 +13,6 @@ import {
 const AdminTeachers_Page = () => {
   const dispatch = useDispatch()
   
-  // Get data from Redux store
   const { teachers, isLoading } = useSelector((state) => state.adminTeacher)
   
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -35,6 +34,12 @@ const AdminTeachers_Page = () => {
 
   // Fetch teachers on component mount
   useEffect(() => {
+    console.log("=========================");
+    console.log("=========================");
+    console.log("IN ADMIN TEACHER PAGE");
+    console.log("=========================");
+    console.log("=========================");
+    
     dispatch(getTeachersByUser())
   }, [dispatch])
 
