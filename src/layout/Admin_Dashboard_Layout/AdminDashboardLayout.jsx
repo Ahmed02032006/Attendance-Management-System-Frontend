@@ -42,9 +42,9 @@ const AdminDashboardLayout = () => {
 
   const tabs = [
     {
-      name: "Teachers",
+      name: "Manage Teachers",
       icon: Users, // Changed from LayoutDashboard to Users
-      label: "Teachers",
+      label: "Manage Teachers",
       path: "/admin/teachers"
     },
   ];

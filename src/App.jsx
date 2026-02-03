@@ -68,7 +68,7 @@ const App = () => {
           <AdminDashboardLayout />
         </CheckAuth>}>
           <Route index element={<Navigate to="teacher" replace />} />
-          <Route path="teacher" element={<AdminTeachers_Page />} />
+          <Route path="teachers" element={<AdminTeachers_Page />} />
         </Route>
 
         {/* =====>] Students Routes [<===== */}
