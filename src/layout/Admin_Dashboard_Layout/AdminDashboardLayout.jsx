@@ -1,9 +1,10 @@
-import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, MapPin, Menu, MessageSquare, UserCheck, Users, X } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Menu, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuthUser, logOutUser } from '../../store/Auth-Slicer/Auth-Slicer';
 import { toast } from 'react-toastify';
+import { Users } from 'lucide-react'; // Changed from LayoutDashboard to Users
 
 const AdminDashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -41,10 +42,10 @@ const AdminDashboardLayout = () => {
 
   const tabs = [
     {
-      name: "Teacher",
-      icon: LayoutDashboard,
-      label: "Teacher",
-      path: "/admin/teacher"
+      name: "Teachers",
+      icon: Users, // Changed from LayoutDashboard to Users
+      label: "Teachers",
+      path: "/admin/teachers"
     },
   ];
 
@@ -100,8 +101,8 @@ const AdminDashboardLayout = () => {
 
       {/* Sidebar Container */}
       <div className={`${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"} 
-				md:translate-x-0 fixed md:relative inset-y-0 left-0 z-40 transition-transform duration-300
-				${sidebarOpen ? 'w-64' : 'w-20'}`}>
+        md:translate-x-0 fixed md:relative inset-y-0 left-0 z-40 transition-transform duration-300
+        ${sidebarOpen ? 'w-64' : 'w-20'}`}>
 
         {/* Sidebar with toggle button */}
         <aside
@@ -129,7 +130,6 @@ const AdminDashboardLayout = () => {
               {
                 sidebarOpen ? (
                   <p className='text-2xl'>TRACK EASE</p>
-                  // <p className='text-2xl'>DAILY MARK</p>
                 ) :
                   <img
                     src="https://repository-images.githubusercontent.com/266040586/ea7a9500-cd19-11ea-9ec9-c7a5474b81af"
@@ -151,7 +151,7 @@ const AdminDashboardLayout = () => {
                       setMobileMenuOpen(false);
                     }}
                     className={`group relative cursor-pointer flex items-center ${sidebarOpen ? 'justify-start' : 'justify-center'} w-full p-2 rounded-sm transition-all duration-200
-											${isActive(path)
+                      ${isActive(path)
                         ? "text-slate-700 font-medium bg-slate-200"
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-600"
                       }`}
@@ -168,7 +168,7 @@ const AdminDashboardLayout = () => {
                     <button
                       onClick={() => toggleSubItems(name)}
                       className={`group relative cursor-pointer flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'} w-full p-2 rounded-sm transition-all duration-200
-												${isActive(path)
+                        ${isActive(path)
                           ? "text-slate-700 font-medium bg-slate-200"
                           : "text-slate-600 hover:bg-slate-50 hover:text-slate-600"
                         }`}
@@ -198,12 +198,12 @@ const AdminDashboardLayout = () => {
                               setMobileMenuOpen(false);
                             }}
                             className={`
-															w-full text-left py-2 px-4 text-sm rounded transition-all duration-200
-															${isActive(subItem.path)
+                              w-full text-left py-2 px-4 text-sm rounded transition-all duration-200
+                              ${isActive(subItem.path)
                                 ? "bg-slate-200 text-slate-800 font-medium"
                                 : "text-slate-600 hover:bg-slate-100"
                               }
-														`}
+                            `}
                           >
                             <div className="flex items-center">
                               <ChevronRight className={`w-3 h-3 mr-2 ${isActive(subItem.path) ? 'text-slate-700' : 'text-slate-500'}`} />
