@@ -3,23 +3,19 @@ import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-
-// You'll need to create these Redux actions/slices for teachers
-// import {
-//   getTeachers,
-//   createTeacher,
-//   updateTeacher,
-//   deleteTeacher,
-//   updateTeacherStatus
-// } from '../../store/Admin-Slicer/Teacher-Slicer.js'
+import { 
+  getTeachersByUser, 
+  createTeacher, 
+  updateTeacher, 
+  deleteTeacher 
+} from '../../store/Admin-Slicer/Teacher-Slicer.js'
 
 const AdminTeachers_Page = () => {
   const dispatch = useDispatch()
   
-  const [teachers, setTeachers] = useState([])
-
-  const isLoading = false;
-
+  // Get data from Redux store
+  const { teachers, isLoading } = useSelector((state) => state.adminTeacher)
+  
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -37,10 +33,10 @@ const AdminTeachers_Page = () => {
     status: 'Active'
   })
 
-  // Uncomment when you have Redux setup
-  // useEffect(() => {
-  //   dispatch(getTeachers())
-  // }, [dispatch])
+  // Fetch teachers on component mount
+  useEffect(() => {
+    dispatch(getTeachersByUser())
+  }, [dispatch])
 
   // Filter teachers based on search and filter
   const filteredTeachers = teachers.filter(teacher => {
@@ -81,14 +77,23 @@ const AdminTeachers_Page = () => {
     }
 
     try {
-      // Uncomment when you have Redux setup
-      // await dispatch(createTeacher(teacherForm)).unwrap()
+      // Prepare form data for API
+      const formData = {
+        name: teacherForm.name,
+        email: teacherForm.email,
+        password: teacherForm.password,
+        status: teacherForm.status,
+        role: 'Teacher' // Assuming you need to specify role
+      }
+
+      await dispatch(createTeacher(formData)).unwrap()
       
       setShowCreateModal(false)
       resetForm()
       toast.success('Teacher created successfully!')
     } catch (error) {
-      toast.error(error?.message || 'Failed to create teacher')
+      console.error('Create teacher error:', error)
+      toast.error(error?.message || error?.data?.message || 'Failed to create teacher')
     }
   }
 
@@ -101,30 +106,36 @@ const AdminTeachers_Page = () => {
     }
 
     try {
-      // Uncomment when you have Redux setup
-      // await dispatch(updateTeacher({
-      //   id: selectedTeacher._id,
-      //   formData: teacherForm
-      // })).unwrap()
+      // Prepare form data for API
+      const formData = {
+        name: teacherForm.name,
+        email: teacherForm.email,
+        status: teacherForm.status
+      }
 
+      await dispatch(updateTeacher({
+        id: selectedTeacher._id,
+        formData: formData
+      })).unwrap()
 
       setShowEditModal(false)
       resetForm()
       toast.success('Teacher updated successfully!')
     } catch (error) {
-      toast.error(error?.message || 'Failed to update teacher')
+      console.error('Update teacher error:', error)
+      toast.error(error?.message || error?.data?.message || 'Failed to update teacher')
     }
   }
 
   const handleDeleteTeacher = async () => {
     try {
-      // Uncomment when you have Redux setup
-      // await dispatch(deleteTeacher(selectedTeacher._id)).unwrap()
+      await dispatch(deleteTeacher(selectedTeacher._id)).unwrap()
       
       setShowDeleteModal(false)
       toast.success('Teacher deleted successfully!')
     } catch (error) {
-      toast.error(error?.message || 'Failed to delete teacher')
+      console.error('Delete teacher error:', error)
+      toast.error(error?.message || error?.data?.message || 'Failed to delete teacher')
     }
   }
 
@@ -136,9 +147,11 @@ const AdminTeachers_Page = () => {
   const openEditModal = (teacher) => {
     setSelectedTeacher(teacher)
     setTeacherForm({
-      name: teacher.name,
-      email: teacher.email,
-      status: teacher.status
+      name: teacher.name || '',
+      email: teacher.email || '',
+      password: '',
+      confirmPassword: '',
+      status: teacher.status || 'Active'
     })
     setShowEditModal(true)
   }
@@ -165,11 +178,16 @@ const AdminTeachers_Page = () => {
 
   // Format date for display
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    if (!dateString) return 'N/A'
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    } catch (error) {
+      return 'Invalid Date'
+    }
   }
 
   if (isLoading && teachers.length === 0) {
@@ -260,14 +278,17 @@ const AdminTeachers_Page = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {currentTeachers.length > 0 ? (
                     currentTeachers.map((teacher) => (
-                      <tr key={teacher._id} className="hover:bg-gray-50">
+                      <tr key={teacher._id || teacher.id} className="hover:bg-gray-50">
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300">
                               <img
-                                src={teacher.profilePicture}
+                                src={teacher.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.name || 'Teacher')}&background=random`}
                                 alt={teacher.name}
                                 className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.name || 'Teacher')}&background=random`
+                                }}
                               />
                             </div>
                             <div className="ml-4">
@@ -286,13 +307,13 @@ const AdminTeachers_Page = () => {
                           </div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                          {teacher.role}
+                          {teacher.role || 'Teacher'}
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
                           {formatDate(teacher.createdAt)}
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center">
-                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${teacher.status === "Active"
+                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${(teacher.status === "Active" || teacher.status === "active")
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                             }`}>
@@ -305,6 +326,7 @@ const AdminTeachers_Page = () => {
                               onClick={() => openEditModal(teacher)}
                               className="text-sky-600 hover:text-sky-900 transition-colors p-1"
                               title="Edit Teacher"
+                              disabled={isLoading}
                             >
                               <FiEdit className="h-4 w-4 lg:h-5 lg:w-5" />
                             </button>
@@ -313,6 +335,7 @@ const AdminTeachers_Page = () => {
                               onClick={() => openDeleteModal(teacher)}
                               className="text-red-600 hover:text-red-900 transition-colors p-1"
                               title="Delete Teacher"
+                              disabled={isLoading}
                             >
                               <FiTrash2 className="h-4 w-4 lg:h-5 lg:w-5" />
                             </button>
@@ -665,7 +688,7 @@ const AdminTeachers_Page = () => {
               <div className="flex items-center space-x-4 mb-4">
                 <div className="shrink-0 h-16 w-16 rounded-full overflow-hidden border border-gray-300">
                   <img
-                    src={selectedTeacher?.profilePicture}
+                    src={selectedTeacher?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedTeacher?.name || 'Teacher')}&background=random`}
                     alt={selectedTeacher?.name}
                     className="h-full w-full object-cover"
                   />
