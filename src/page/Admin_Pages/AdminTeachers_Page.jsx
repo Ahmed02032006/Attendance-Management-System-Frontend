@@ -394,7 +394,7 @@ const AdminTeachers_Page = () => {
                             {formatDate(teacher.createdAt)}
                           </td>
                           <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
-                            D-2
+                            {teacher.subjectCount}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-center">
                             <span className={`px-1 py-1 text-xs font-semibold rounded-full flex items-center justify-center w-[75px] mx-auto ${teacher.status === "Active"
