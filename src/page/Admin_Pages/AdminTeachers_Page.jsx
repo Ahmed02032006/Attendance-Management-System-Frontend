@@ -106,7 +106,7 @@ const AdminTeachers_Page = () => {
         userEmail: teacherForm.userEmail,
         userPassword: teacherForm.userPassword,
         userRole: 'Teacher', // Always set role as Teacher when creating
-        status: teacherForm.status
+        status: 'Active'
       }
 
       await dispatch(createTeacher(formData)).unwrap()
@@ -364,9 +364,6 @@ const AdminTeachers_Page = () => {
                                   <div className="text-sm font-medium text-gray-900">
                                     {teacher.userName}
                                   </div>
-                                  {isAdmin && (
-                                    <FiShield className="h-3 w-3 ml-2 text-purple-600" title="Administrator" />
-                                  )}
                                 </div>
                                 <div className="text-xs text-gray-500 flex items-center mt-0.5">
                                   <FiMail className="h-3 w-3 mr-1" />
@@ -630,38 +627,6 @@ const AdminTeachers_Page = () => {
                       required
                       disabled={isLoading}
                     />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Status
-                  </label>
-                  <div className="flex space-x-3">
-                    <button
-                      type="button"
-                      onClick={() => handleStatusToggle('Active')}
-                      className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Active'
-                          ? 'bg-green-50 border-green-500 text-green-700 shadow-sm'
-                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-                        }`}
-                      disabled={isLoading}
-                    >
-                      <FiCheck className={`h-4 w-4 mr-2 ${teacherForm.status === 'Active' ? 'opacity-100' : 'opacity-60'}`} />
-                      Active
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleStatusToggle('Inactive')}
-                      className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Inactive'
-                          ? 'bg-red-50 border-red-500 text-red-700 shadow-sm'
-                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-                        }`}
-                      disabled={isLoading}
-                    >
-                      <FiSlash className={`h-4 w-4 mr-2 ${teacherForm.status === 'Inactive' ? 'opacity-100' : 'opacity-60'}`} />
-                      Inactive
-                    </button>
                   </div>
                 </div>
               </div>
