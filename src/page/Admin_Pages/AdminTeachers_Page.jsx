@@ -393,6 +393,9 @@ const AdminTeachers_Page = () => {
                           <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
                             {formatDate(teacher.createdAt)}
                           </td>
+                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
+                            D-2
+                          </td>
                           <td className="px-4 py-4 whitespace-nowrap text-center">
                             <span className={`px-2 py-1.5 text-xs font-semibold rounded-full flex items-center justify-center w-24 mx-auto ${teacher.status === "Active"
                               ? "bg-green-50 text-green-700 border border-green-200"
@@ -410,9 +413,6 @@ const AdminTeachers_Page = () => {
                                 </>
                               )}
                             </span>
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-center">
-                            D-2
                           </td>
                           <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                             <div className="flex justify-center space-x-2 lg:space-x-3">
