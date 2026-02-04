@@ -48,7 +48,7 @@ const App = () => {
         <Route path='/auth' element={<CheckAuth isInitialAuthCheckComplete={isInitialAuthCheckComplete} isAuthenticated={isAuthenticated} user={user} >
           <AuthLayout />
         </CheckAuth>}>
-          {/* <Route path="register" element={<RegisterPage />} /> */}
+          <Route path="register" element={<RegisterPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="forgotPassword" element={<ForgotPasswordPage />} />
         </Route>
