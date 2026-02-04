@@ -32,6 +32,17 @@ const TeacherDashboardLayout = () => {
     return `${username.substring(0, 3)}...${domain}`;
   };
 
+  // Function to get user's first letter capitalized
+  const getInitial = () => {
+    if (!user?.userName) return 'U';
+    return user.userName.charAt(0).toUpperCase();
+  };
+
+  // Function to check if user has profile picture
+  const hasProfilePicture = () => {
+    return user?.profilePicture && user.profilePicture.trim() !== '';
+  };
+
   // Check if user is inactive and show modal
   useEffect(() => {
     if (user?.status === 'Inactive') {
@@ -290,12 +301,25 @@ const TeacherDashboardLayout = () => {
               <div className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors duration-150">
                 <div className="flex items-center space-x-2.5">
                   <div className="relative">
-                    <img
-                      src={user.profilePicture}
-                      alt="User Avatar"
-                      className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
-                    />
-                    <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                    {hasProfilePicture() ? (
+                      // Show profile picture if exists
+                      <>
+                        <img
+                          src={user.profilePicture}
+                          alt="User Avatar"
+                          className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                        />
+                        <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                      </>
+                    ) : (
+                      // Show fallback avatar with background color and initial
+                      <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
+                        <span className="text-white font-semibold text-sm">
+                          {getInitial()}
+                        </span>
+                        <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col leading-tight">
                     <span className="text-[13px] font-medium text-slate-900">{user.userName}</span>
@@ -314,6 +338,25 @@ const TeacherDashboardLayout = () => {
               </div>
             ) : (
               <div className="flex justify-center">
+                {hasProfilePicture() ? (
+                  // Show profile picture thumbnail in collapsed sidebar
+                  <div className="relative">
+                    <img
+                      src={user.profilePicture}
+                      alt="User Avatar"
+                      className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                    />
+                    <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                  </div>
+                ) : (
+                  // Show fallback avatar in collapsed sidebar
+                  <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
+                    <span className="text-white font-semibold text-sm">
+                      {getInitial()}
+                    </span>
+                    <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                  </div>
+                )}
                 <button
                   className="p-2 rounded-full hover:bg-slate-200 text-slate-500 hover:text-red-500 transition-colors duration-200"
                   title="Logout"
