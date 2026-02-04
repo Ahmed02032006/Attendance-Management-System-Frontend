@@ -72,7 +72,7 @@ const AdminTeachers_Page = () => {
 
   // Get first letter of username for avatar
   const getAvatarLetter = (name) => {
-    if (!name) return 'E'
+    if (!name) return 'T'
     return name.charAt(0).toUpperCase()
   }
 
@@ -96,7 +96,7 @@ const AdminTeachers_Page = () => {
         userEmail: teacherForm.userEmail,
         userPassword: teacherForm.userPassword,
         userRole: 'Teacher',
-        status: 'Active'
+        status: teacherForm.status
       }
 
       await dispatch(createTeacher(formData)).unwrap()
@@ -330,8 +330,8 @@ const AdminTeachers_Page = () => {
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
                           {formatDate(teacher.createdAt)}
                         </td>
-                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center">
-                          <span className={`px-3 py-1.5 text-xs font-semibold rounded-full flex items-center justify-center w-24 mx-auto ${teacher.status === "Active"
+                        <td className="px-4 py-4 whitespace-nowrap text-center">
+                          <span className={`px-2 py-1.5 text-xs font-semibold rounded-full flex items-center justify-center w-24 mx-auto ${teacher.status === "Active"
                             ? "bg-green-50 text-green-700 border border-green-200"
                             : "bg-red-50 text-red-700 border border-red-200"
                             }`}>
@@ -563,38 +563,6 @@ const AdminTeachers_Page = () => {
                       required
                       disabled={isLoading}
                     />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Status
-                  </label>
-                  <div className="flex space-x-3">
-                    <button
-                      type="button"
-                      onClick={() => handleStatusToggle('Active')}
-                      className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Active'
-                          ? 'bg-green-50 border-green-500 text-green-700 shadow-sm'
-                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-                        }`}
-                      disabled={isLoading}
-                    >
-                      <FiCheck className={`h-4 w-4 mr-2 ${teacherForm.status === 'Active' ? 'opacity-100' : 'opacity-60'}`} />
-                      Active
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleStatusToggle('Inactive')}
-                      className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Inactive'
-                          ? 'bg-red-50 border-red-500 text-red-700 shadow-sm'
-                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-                        }`}
-                      disabled={isLoading}
-                    >
-                      <FiSlash className={`h-4 w-4 mr-2 ${teacherForm.status === 'Inactive' ? 'opacity-100' : 'opacity-60'}`} />
-                      Inactive
-                    </button>
                   </div>
                 </div>
               </div>
