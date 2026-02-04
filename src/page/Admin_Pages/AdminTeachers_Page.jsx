@@ -3,18 +3,18 @@ import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-import { 
-  getTeachersByUser, 
-  createTeacher, 
-  updateTeacher, 
-  deleteTeacher 
+import {
+  getTeachersByUser,
+  createTeacher,
+  updateTeacher,
+  deleteTeacher
 } from '../../store/Admin-Slicer/Teacher-Slicer.js'
 
 const AdminTeachers_Page = () => {
   const dispatch = useDispatch()
-  
+
   const { teachers, isLoading } = useSelector((state) => state.adminTeacher)
-  
+
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -45,7 +45,7 @@ const AdminTeachers_Page = () => {
       teacher.userEmail?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus = statusFilter === 'All' || teacher.status === statusFilter
-    
+
     // Only show teachers by default, but allow filtering by role
     const matchesRole = roleFilter === 'All' || teacher.userRole === roleFilter
 
@@ -110,7 +110,7 @@ const AdminTeachers_Page = () => {
       }
 
       await dispatch(createTeacher(formData)).unwrap()
-      
+
       setShowCreateModal(false)
       resetForm()
       toast.success('Teacher created successfully!')
@@ -152,7 +152,7 @@ const AdminTeachers_Page = () => {
 
   const handleDeleteTeacher = async () => {
     if (!selectedTeacher) return
-    
+
     // Double check - don't allow deleting admin users
     if (!canDeleteTeacher(selectedTeacher)) {
       toast.error('Cannot delete admin users from this page')
@@ -162,7 +162,7 @@ const AdminTeachers_Page = () => {
 
     try {
       await dispatch(deleteTeacher(selectedTeacher._id)).unwrap()
-      
+
       setShowDeleteModal(false)
       toast.success('Teacher deleted successfully!')
     } catch (error) {
@@ -194,7 +194,7 @@ const AdminTeachers_Page = () => {
       toast.error('Cannot delete admin users')
       return
     }
-    
+
     setSelectedTeacher(teacher)
     setShowDeleteModal(true)
   }
@@ -255,10 +255,10 @@ const AdminTeachers_Page = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderComponent 
-        heading={"Teachers Management"} 
-        subHeading={"Manage all faculty members and their profiles"} 
-        role='admin' 
+      <HeaderComponent
+        heading={"Teachers Management"}
+        subHeading={"Manage all faculty members and their profiles"}
+        role='admin'
       />
 
       <div className="container max-w-full mx-auto p-4 lg:p-6">
@@ -325,6 +325,9 @@ const AdminTeachers_Page = () => {
                     </th>
                     <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       Joined Date
+                    </th>
+                    <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                      Subjects Count
                     </th>
                     <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
@@ -408,6 +411,9 @@ const AdminTeachers_Page = () => {
                               )}
                             </span>
                           </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-center">
+                            D-2
+                          </td>
                           <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                             <div className="flex justify-center space-x-2 lg:space-x-3">
                               <button
@@ -421,10 +427,10 @@ const AdminTeachers_Page = () => {
 
                               <button
                                 onClick={() => openDeleteModal(teacher)}
-                                className={`transition-colors p-1 ${!canDeleteTeacher(teacher) 
-                                  ? 'text-gray-400 cursor-not-allowed' 
+                                className={`transition-colors p-1 ${!canDeleteTeacher(teacher)
+                                  ? 'text-gray-400 cursor-not-allowed'
                                   : 'text-red-600 hover:text-red-900'
-                                }`}
+                                  }`}
                                 title={!canDeleteTeacher(teacher) ? "Cannot delete admin users" : "Delete User"}
                                 disabled={isLoading || !canDeleteTeacher(teacher)}
                               >
@@ -714,8 +720,8 @@ const AdminTeachers_Page = () => {
                       type="button"
                       onClick={() => handleStatusToggle('Active')}
                       className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Active'
-                          ? 'bg-green-50 border-green-500 text-green-700 shadow-sm'
-                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                        ? 'bg-green-50 border-green-500 text-green-700 shadow-sm'
+                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
                         }`}
                       disabled={isLoading}
                     >
@@ -726,8 +732,8 @@ const AdminTeachers_Page = () => {
                       type="button"
                       onClick={() => handleStatusToggle('Inactive')}
                       className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Inactive'
-                          ? 'bg-red-50 border-red-500 text-red-700 shadow-sm'
-                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                        ? 'bg-red-50 border-red-500 text-red-700 shadow-sm'
+                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
                         }`}
                       disabled={isLoading}
                     >
