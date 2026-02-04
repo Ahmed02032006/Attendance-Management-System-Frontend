@@ -397,7 +397,7 @@ const AdminTeachers_Page = () => {
                             D-2
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-center">
-                            <span className={`px-1 py-1 text-xs font-semibold rounded-full flex items-center justify-center w-20 mx-auto ${teacher.status === "Active"
+                            <span className={`px-1 py-1 text-xs font-semibold rounded-full flex items-center justify-center w-[75px] mx-auto ${teacher.status === "Active"
                               ? "bg-green-50 text-green-700 border border-green-200"
                               : "bg-red-50 text-red-700 border border-red-200"
                               }`}>
