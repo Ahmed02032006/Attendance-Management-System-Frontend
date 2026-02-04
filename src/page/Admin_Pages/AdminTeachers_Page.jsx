@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail } from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiCheck, FiSlash } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { 
   getTeachersByUser, 
@@ -37,11 +37,6 @@ const AdminTeachers_Page = () => {
     dispatch(getTeachersByUser())
   }, [dispatch])
 
-  // Debug: Log teachers to see what data is coming
-  useEffect(() => {
-    console.log('Teachers data:', teachers)
-  }, [teachers])
-
   // Filter teachers based on search and filter
   const filteredTeachers = teachers.filter(teacher => {
     const matchesSearch =
@@ -65,6 +60,20 @@ const AdminTeachers_Page = () => {
       ...prev,
       [name]: value
     }))
+  }
+
+  // Handle status toggle in form
+  const handleStatusToggle = (status) => {
+    setTeacherForm(prev => ({
+      ...prev,
+      status: status
+    }))
+  }
+
+  // Get first letter of username for avatar
+  const getAvatarLetter = (name) => {
+    if (!name) return 'T'
+    return name.charAt(0).toUpperCase()
   }
 
   const handleCreateTeacher = async (e) => {
@@ -233,7 +242,7 @@ const AdminTeachers_Page = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white"
             >
               <option value="All">All Status</option>
               <option value="Active">Active</option>
@@ -285,20 +294,26 @@ const AdminTeachers_Page = () => {
                       <tr key={teacher._id || teacher.id} className="hover:bg-gray-50">
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300">
-                              <img
-                                src={teacher.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.userName || 'Teacher')}&background=random`}
-                                alt={teacher.userName}
-                                className="h-full w-full object-cover"
-                                onError={(e) => {
-                                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.userName || 'Teacher')}&background=random`
-                                }}
-                              />
+                            <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
+                              {teacher.profilePicture ? (
+                                <img
+                                  src={teacher.profilePicture}
+                                  alt={teacher.userName}
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => {
+                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.userName || 'Teacher')}&background=random`
+                                    e.target.className = 'h-full w-full object-cover'
+                                  }}
+                                />
+                              ) : (
+                                <span className="text-white font-bold text-lg">
+                                  {getAvatarLetter(teacher.userName)}
+                                </span>
+                              )}
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">{teacher.userName}</div>
                               <div className="text-xs text-gray-500 sm:hidden">
-                                <FiMail className="inline mr-1" size={12} />
                                 {teacher.userEmail}
                               </div>
                             </div>
@@ -306,7 +321,6 @@ const AdminTeachers_Page = () => {
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden sm:table-cell">
                           <div className="flex items-center justify-center">
-                            <FiMail className="mr-2" size={14} />
                             {teacher.userEmail}
                           </div>
                         </td>
@@ -317,11 +331,21 @@ const AdminTeachers_Page = () => {
                           {formatDate(teacher.createdAt)}
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center">
-                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${(teacher.status === "Active" || teacher.status === "active")
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                          <span className={`px-3 py-1.5 text-xs font-semibold rounded-full flex items-center justify-center w-24 mx-auto ${teacher.status === "Active"
+                            ? "bg-green-50 text-green-700 border border-green-200"
+                            : "bg-red-50 text-red-700 border border-red-200"
                             }`}>
-                            {teacher.status}
+                            {teacher.status === "Active" ? (
+                              <>
+                                <FiCheck className="h-3 w-3 mr-1.5" />
+                                Active
+                              </>
+                            ) : (
+                              <>
+                                <FiSlash className="h-3 w-3 mr-1.5" />
+                                Inactive
+                              </>
+                            )}
                           </span>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -455,7 +479,7 @@ const AdminTeachers_Page = () => {
         )}
       </div>
 
-      {/* Create Teacher Modal - Updated form field names */}
+      {/* Create Teacher Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -486,7 +510,7 @@ const AdminTeachers_Page = () => {
                     value={teacherForm.userName}
                     onChange={handleInputChange}
                     placeholder="Enter full name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
                     required
                     disabled={isLoading}
                   />
@@ -502,7 +526,7 @@ const AdminTeachers_Page = () => {
                     value={teacherForm.userEmail}
                     onChange={handleInputChange}
                     placeholder="teacher@example.com"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
                     required
                     disabled={isLoading}
                   />
@@ -519,7 +543,7 @@ const AdminTeachers_Page = () => {
                       value={teacherForm.userPassword}
                       onChange={handleInputChange}
                       placeholder="••••••••"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
                       required
                       disabled={isLoading}
                     />
@@ -535,7 +559,7 @@ const AdminTeachers_Page = () => {
                       value={teacherForm.confirmPassword}
                       onChange={handleInputChange}
                       placeholder="••••••••"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
                       required
                       disabled={isLoading}
                     />
@@ -543,33 +567,49 @@ const AdminTeachers_Page = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Status
                   </label>
-                  <select
-                    name="status"
-                    value={teacherForm.status}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    disabled={isLoading}
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => handleStatusToggle('Active')}
+                      className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Active'
+                          ? 'bg-green-50 border-green-500 text-green-700 shadow-sm'
+                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                        }`}
+                      disabled={isLoading}
+                    >
+                      <FiCheck className={`h-4 w-4 mr-2 ${teacherForm.status === 'Active' ? 'opacity-100' : 'opacity-60'}`} />
+                      Active
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleStatusToggle('Inactive')}
+                      className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Inactive'
+                          ? 'bg-red-50 border-red-500 text-red-700 shadow-sm'
+                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                        }`}
+                      disabled={isLoading}
+                    >
+                      <FiSlash className={`h-4 w-4 mr-2 ${teacherForm.status === 'Inactive' ? 'opacity-100' : 'opacity-60'}`} />
+                      Inactive
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 sticky bottom-0 bg-white">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                  className="px-4 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition-colors rounded-lg hover:bg-gray-100"
                   disabled={isLoading}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Creating...' : 'Add Teacher'}
@@ -580,7 +620,7 @@ const AdminTeachers_Page = () => {
         </div>
       )}
 
-      {/* Edit Teacher Modal - Updated form field names */}
+      {/* Edit Teacher Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -610,7 +650,7 @@ const AdminTeachers_Page = () => {
                     name="userName"
                     value={teacherForm.userName}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
                     required
                     disabled={isLoading}
                   />
@@ -625,40 +665,56 @@ const AdminTeachers_Page = () => {
                     name="userEmail"
                     value={teacherForm.userEmail}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
                     required
                     disabled={isLoading}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Status
                   </label>
-                  <select
-                    name="status"
-                    value={teacherForm.status}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    disabled={isLoading}
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => handleStatusToggle('Active')}
+                      className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Active'
+                          ? 'bg-green-50 border-green-500 text-green-700 shadow-sm'
+                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                        }`}
+                      disabled={isLoading}
+                    >
+                      <FiCheck className={`h-4 w-4 mr-2 ${teacherForm.status === 'Active' ? 'opacity-100' : 'opacity-60'}`} />
+                      Active
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleStatusToggle('Inactive')}
+                      className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Inactive'
+                          ? 'bg-red-50 border-red-500 text-red-700 shadow-sm'
+                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                        }`}
+                      disabled={isLoading}
+                    >
+                      <FiSlash className={`h-4 w-4 mr-2 ${teacherForm.status === 'Inactive' ? 'opacity-100' : 'opacity-60'}`} />
+                      Inactive
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                  className="px-4 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition-colors rounded-lg hover:bg-gray-100"
                   disabled={isLoading}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Updating...' : 'Update Teacher'}
@@ -669,7 +725,7 @@ const AdminTeachers_Page = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal - Updated field names */}
+      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -690,12 +746,18 @@ const AdminTeachers_Page = () => {
             </div>
             <div className="p-6">
               <div className="flex items-center space-x-4 mb-4">
-                <div className="shrink-0 h-16 w-16 rounded-full overflow-hidden border border-gray-300">
-                  <img
-                    src={selectedTeacher?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedTeacher?.userName || 'Teacher')}&background=random`}
-                    alt={selectedTeacher?.userName}
-                    className="h-full w-full object-cover"
-                  />
+                <div className="shrink-0 h-16 w-16 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
+                  {selectedTeacher?.profilePicture ? (
+                    <img
+                      src={selectedTeacher.profilePicture}
+                      alt={selectedTeacher.userName}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white font-bold text-2xl">
+                      {getAvatarLetter(selectedTeacher?.userName)}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900">{selectedTeacher?.userName}</h4>
@@ -714,14 +776,14 @@ const AdminTeachers_Page = () => {
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                className="px-4 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition-colors rounded-lg hover:bg-gray-100"
                 disabled={isLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteTeacher}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 disabled={isLoading}
               >
                 {isLoading ? 'Deleting...' : 'Delete Teacher'}
