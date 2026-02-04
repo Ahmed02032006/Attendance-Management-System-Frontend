@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiCheck, FiSlash } from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { 
   getTeachersByUser, 
@@ -21,6 +21,7 @@ const AdminTeachers_Page = () => {
   const [selectedTeacher, setSelectedTeacher] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
+  const [roleFilter, setRoleFilter] = useState('Teacher') // Default filter to show only teachers
   const [currentPage, setCurrentPage] = useState(1)
   const [teachersPerPage] = useState(5)
 
@@ -37,16 +38,25 @@ const AdminTeachers_Page = () => {
     dispatch(getTeachersByUser())
   }, [dispatch])
 
-  // Filter teachers based on search and filter
+  // Filter teachers based on search, filter, and role
   const filteredTeachers = teachers.filter(teacher => {
     const matchesSearch =
       teacher.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       teacher.userEmail?.toLowerCase().includes(searchTerm.toLowerCase())
 
-    const matchesFilter = statusFilter === 'All' || teacher.status === statusFilter
+    const matchesStatus = statusFilter === 'All' || teacher.status === statusFilter
+    
+    // Only show teachers by default, but allow filtering by role
+    const matchesRole = roleFilter === 'All' || teacher.userRole === roleFilter
 
-    return matchesSearch && matchesFilter
+    return matchesSearch && matchesStatus && matchesRole
   })
+
+  // Separate function to check if a teacher can be deleted
+  const canDeleteTeacher = (teacher) => {
+    // Don't allow deleting admin users from teacher management page
+    return teacher.userRole !== 'Admin'
+  }
 
   // Pagination
   const indexOfLastTeacher = currentPage * teachersPerPage
@@ -95,7 +105,7 @@ const AdminTeachers_Page = () => {
         userName: teacherForm.userName,
         userEmail: teacherForm.userEmail,
         userPassword: teacherForm.userPassword,
-        userRole: 'Teacher',
+        userRole: 'Teacher', // Always set role as Teacher when creating
         status: teacherForm.status
       }
 
@@ -141,6 +151,15 @@ const AdminTeachers_Page = () => {
   }
 
   const handleDeleteTeacher = async () => {
+    if (!selectedTeacher) return
+    
+    // Double check - don't allow deleting admin users
+    if (!canDeleteTeacher(selectedTeacher)) {
+      toast.error('Cannot delete admin users from this page')
+      setShowDeleteModal(false)
+      return
+    }
+
     try {
       await dispatch(deleteTeacher(selectedTeacher._id)).unwrap()
       
@@ -158,6 +177,12 @@ const AdminTeachers_Page = () => {
   }
 
   const openEditModal = (teacher) => {
+    // Don't allow editing admin users
+    if (teacher.userRole === 'Admin') {
+      toast.error('Cannot edit admin users from this page')
+      return
+    }
+    
     setSelectedTeacher(teacher)
     setTeacherForm({
       userName: teacher.userName || '',
@@ -170,6 +195,12 @@ const AdminTeachers_Page = () => {
   }
 
   const openDeleteModal = (teacher) => {
+    // Don't allow deleting admin users
+    if (!canDeleteTeacher(teacher)) {
+      toast.error('Cannot delete admin users')
+      return
+    }
+    
     setSelectedTeacher(teacher)
     setShowDeleteModal(true)
   }
@@ -200,6 +231,20 @@ const AdminTeachers_Page = () => {
       })
     } catch (error) {
       return 'Invalid Date'
+    }
+  }
+
+  // Get role badge color
+  const getRoleBadgeColor = (role) => {
+    switch (role) {
+      case 'Admin':
+        return 'bg-purple-100 text-purple-800 border-purple-200'
+      case 'Teacher':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'Student':
+        return 'bg-green-100 text-green-800 border-green-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
@@ -239,7 +284,7 @@ const AdminTeachers_Page = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {/* <select
+            <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white"
@@ -247,7 +292,17 @@ const AdminTeachers_Page = () => {
               <option value="All">All Status</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
-            </select> */}
+            </select>
+
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white"
+            >
+              <option value="Teacher">Teachers Only</option>
+              <option value="All">All Roles</option>
+              <option value="Admin">Admins</option>
+            </select>
 
             {/* Create Teacher Button */}
             <button
@@ -269,7 +324,7 @@ const AdminTeachers_Page = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Teacher Profile
+                      User Profile
                     </th>
                     <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                       Email
@@ -290,95 +345,121 @@ const AdminTeachers_Page = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {currentTeachers.length > 0 ? (
-                    currentTeachers.map((teacher) => (
-                      <tr key={teacher._id || teacher.id} className="hover:bg-gray-50">
-                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
-                              {teacher.profilePicture ? (
-                                <img
-                                  src={teacher.profilePicture}
-                                  alt={teacher.userName}
-                                  className="h-full w-full object-cover"
-                                  onError={(e) => {
-                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.userName || 'Teacher')}&background=random`
-                                    e.target.className = 'h-full w-full object-cover'
-                                  }}
-                                />
-                              ) : (
-                                <span className="text-white font-bold text-lg">
-                                  {getAvatarLetter(teacher.userName)}
-                                </span>
-                              )}
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{teacher.userName}</div>
-                              <div className="text-xs text-gray-500 sm:hidden">
-                                {teacher.userEmail}
+                    currentTeachers.map((teacher) => {
+                      const isAdmin = teacher.userRole === 'Admin'
+                      return (
+                        <tr key={teacher._id || teacher.id} className="hover:bg-gray-50">
+                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
+                                {teacher.profilePicture ? (
+                                  <img
+                                    src={teacher.profilePicture}
+                                    alt={teacher.userName}
+                                    className="h-full w-full object-cover"
+                                    onError={(e) => {
+                                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.userName || 'Teacher')}&background=random`
+                                      e.target.className = 'h-full w-full object-cover'
+                                    }}
+                                  />
+                                ) : (
+                                  <span className="text-white font-bold text-lg">
+                                    {getAvatarLetter(teacher.userName)}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900 flex items-center">
+                                  {teacher.userName}
+                                  {isAdmin && (
+                                    <FiShield className="h-3 w-3 ml-2 text-purple-600" title="Administrator" />
+                                  )}
+                                </div>
+                                <div className="text-xs text-gray-500 sm:hidden">
+                                  {teacher.userEmail}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden sm:table-cell">
-                          <div className="flex items-center justify-center">
-                            {teacher.userEmail}
-                          </div>
-                        </td>
-                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                          {teacher.userRole || 'Teacher'}
-                        </td>
-                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
-                          {formatDate(teacher.createdAt)}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-center">
-                          <span className={`px-2 py-1.5 text-xs font-semibold rounded-full flex items-center justify-center w-24 mx-auto ${teacher.status === "Active"
-                            ? "bg-green-50 text-green-700 border border-green-200"
-                            : "bg-red-50 text-red-700 border border-red-200"
-                            }`}>
-                            {teacher.status === "Active" ? (
-                              <>
-                                <FiCheck className="h-3 w-3 mr-1.5" />
-                                Active
-                              </>
-                            ) : (
-                              <>
-                                <FiSlash className="h-3 w-3 mr-1.5" />
-                                Inactive
-                              </>
-                            )}
-                          </span>
-                        </td>
-                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                          <div className="flex justify-center space-x-2 lg:space-x-3">
-                            <button
-                              onClick={() => openEditModal(teacher)}
-                              className="text-sky-600 hover:text-sky-900 transition-colors p-1"
-                              title="Edit Teacher"
-                              disabled={isLoading}
-                            >
-                              <FiEdit className="h-4 w-4 lg:h-5 lg:w-5" />
-                            </button>
+                          </td>
+                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden sm:table-cell">
+                            <div className="flex items-center justify-center">
+                              {teacher.userEmail}
+                            </div>
+                          </td>
+                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center">
+                            <span className={`px-3 py-1.5 text-xs font-semibold rounded-full inline-flex items-center ${getRoleBadgeColor(teacher.userRole)}`}>
+                              {teacher.userRole === 'Admin' ? (
+                                <>
+                                  <FiShield className="h-3 w-3 mr-1.5" />
+                                  Admin
+                                </>
+                              ) : (
+                                <>
+                                  <FiUsers className="h-3 w-3 mr-1.5" />
+                                  {teacher.userRole}
+                                </>
+                              )}
+                            </span>
+                          </td>
+                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
+                            {formatDate(teacher.createdAt)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-center">
+                            <span className={`px-2 py-1.5 text-xs font-semibold rounded-full flex items-center justify-center w-24 mx-auto ${teacher.status === "Active"
+                              ? "bg-green-50 text-green-700 border border-green-200"
+                              : "bg-red-50 text-red-700 border border-red-200"
+                              }`}>
+                              {teacher.status === "Active" ? (
+                                <>
+                                  <FiCheck className="h-3 w-3 mr-1.5" />
+                                  Active
+                                </>
+                              ) : (
+                                <>
+                                  <FiSlash className="h-3 w-3 mr-1.5" />
+                                  Inactive
+                                </>
+                              )}
+                            </span>
+                          </td>
+                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                            <div className="flex justify-center space-x-2 lg:space-x-3">
+                              <button
+                                onClick={() => openEditModal(teacher)}
+                                className={`transition-colors p-1 ${isAdmin 
+                                  ? 'text-gray-400 cursor-not-allowed' 
+                                  : 'text-sky-600 hover:text-sky-900'
+                                }`}
+                                title={isAdmin ? "Cannot edit admin users" : "Edit Teacher"}
+                                disabled={isLoading || isAdmin}
+                              >
+                                <FiEdit className="h-4 w-4 lg:h-5 lg:w-5" />
+                              </button>
 
-                            <button
-                              onClick={() => openDeleteModal(teacher)}
-                              className="text-red-600 hover:text-red-900 transition-colors p-1"
-                              title="Delete Teacher"
-                              disabled={isLoading}
-                            >
-                              <FiTrash2 className="h-4 w-4 lg:h-5 lg:w-5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                              <button
+                                onClick={() => openDeleteModal(teacher)}
+                                className={`transition-colors p-1 ${!canDeleteTeacher(teacher) 
+                                  ? 'text-gray-400 cursor-not-allowed' 
+                                  : 'text-red-600 hover:text-red-900'
+                                }`}
+                                title={!canDeleteTeacher(teacher) ? "Cannot delete admin users" : "Delete Teacher"}
+                                disabled={isLoading || !canDeleteTeacher(teacher)}
+                              >
+                                <FiTrash2 className="h-4 w-4 lg:h-5 lg:w-5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })
                   ) : (
                     <tr>
                       <td colSpan="6" className="px-6 py-8 text-center">
                         <div className="text-gray-500">
                           <FiUser className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                          <p className="text-lg font-medium">No teachers found</p>
+                          <p className="text-lg font-medium">No users found</p>
                           <p className="mt-1">
-                            {searchTerm || statusFilter !== 'All'
+                            {searchTerm || statusFilter !== 'All' || roleFilter !== 'Teacher'
                               ? 'Try adjusting your search or filter'
                               : 'Get started by adding your first teacher'
                             }
@@ -397,7 +478,7 @@ const AdminTeachers_Page = () => {
                   <p className="text-sm text-gray-700">
                     Showing <span className="font-medium">{indexOfFirstTeacher + 1}</span> to{' '}
                     <span className="font-medium">{Math.min(indexOfLastTeacher, filteredTeachers.length)}</span> of{' '}
-                    <span className="font-medium">{filteredTeachers.length}</span> teachers
+                    <span className="font-medium">{filteredTeachers.length}</span> {roleFilter === 'Teacher' ? 'teachers' : 'users'}
                   </p>
                 </div>
                 <div className="flex items-center space-x-1">
@@ -694,7 +775,7 @@ const AdminTeachers_Page = () => {
       )}
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+      {showDeleteModal && selectedTeacher && canDeleteTeacher(selectedTeacher) && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
