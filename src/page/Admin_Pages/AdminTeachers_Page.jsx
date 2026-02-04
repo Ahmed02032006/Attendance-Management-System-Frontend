@@ -398,8 +398,8 @@ const AdminTeachers_Page = () => {
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-center">
                             <span className={`px-1 py-1 text-xs font-semibold rounded-full flex items-center justify-center w-[75px] mx-auto ${teacher.status === "Active"
-                              ? "bg-green-50 text-green-700 border border-green-200"
-                              : "bg-red-50 text-red-700 border border-red-200"
+                              ? "bg-green-50 text-green-800 border border-green-200"
+                              : "bg-red-50 text-red-800 border border-red-200"
                               }`}>
                               {teacher.status === "Active" ? (
                                 <>
