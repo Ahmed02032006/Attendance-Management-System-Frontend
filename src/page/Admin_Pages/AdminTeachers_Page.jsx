@@ -785,7 +785,7 @@ const AdminTeachers_Page = () => {
               </button>
             </div>
             <div className="p-6">
-              {/* <div className="flex items-center space-x-4 mb-4">
+              <div className="flex items-center space-x-4 mb-4">
                 <div className="shrink-0 h-16 w-16 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
                   {selectedTeacher?.profilePicture ? (
                     <img
@@ -804,7 +804,7 @@ const AdminTeachers_Page = () => {
                   <p className="text-sm text-gray-600">{selectedTeacher?.userEmail}</p>
                   <p className="text-xs text-gray-500">{selectedTeacher?.userRole || 'Teacher'}</p>
                 </div>
-              </div> */}
+              </div>
               <p className="text-gray-600 text-center mb-2">
                 Are you sure you want to delete{' '}
                 <strong className="text-gray-900 font-semibold">{selectedTeacher?.userName}</strong>?
