@@ -234,7 +234,7 @@ const AdminTeachers_Page = () => {
       case 'Admin':
         return 'bg-purple-100 text-purple-800 border-purple-200'
       case 'Teacher':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-sky-100 text-sky-800 border-sky-200'
       case 'Student':
         return 'bg-green-100 text-green-800 border-green-200'
       default:
@@ -785,7 +785,7 @@ const AdminTeachers_Page = () => {
               </button>
             </div>
             <div className="p-6">
-              <div className="flex items-center space-x-4 mb-4">
+              {/* <div className="flex items-center space-x-4 mb-4">
                 <div className="shrink-0 h-16 w-16 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
                   {selectedTeacher?.profilePicture ? (
                     <img
@@ -804,7 +804,7 @@ const AdminTeachers_Page = () => {
                   <p className="text-sm text-gray-600">{selectedTeacher?.userEmail}</p>
                   <p className="text-xs text-gray-500">{selectedTeacher?.userRole || 'Teacher'}</p>
                 </div>
-              </div>
+              </div> */}
               <p className="text-gray-600 text-center mb-2">
                 Are you sure you want to delete{' '}
                 <strong className="text-gray-900 font-semibold">{selectedTeacher?.userName}</strong>?
