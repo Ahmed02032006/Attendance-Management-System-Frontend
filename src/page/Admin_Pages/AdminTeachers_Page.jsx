@@ -25,9 +25,9 @@ const AdminTeachers_Page = () => {
   const [teachersPerPage] = useState(5)
 
   const [teacherForm, setTeacherForm] = useState({
-    name: '',
-    email: '',
-    password: '',
+    userName: '',
+    userEmail: '',
+    userPassword: '',
     confirmPassword: '',
     status: 'Active'
   })
@@ -37,11 +37,16 @@ const AdminTeachers_Page = () => {
     dispatch(getTeachersByUser())
   }, [dispatch])
 
+  // Debug: Log teachers to see what data is coming
+  useEffect(() => {
+    console.log('Teachers data:', teachers)
+  }, [teachers])
+
   // Filter teachers based on search and filter
   const filteredTeachers = teachers.filter(teacher => {
     const matchesSearch =
-      teacher.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      teacher.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.userEmail?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesFilter = statusFilter === 'All' || teacher.status === statusFilter
 
@@ -65,24 +70,24 @@ const AdminTeachers_Page = () => {
   const handleCreateTeacher = async (e) => {
     e.preventDefault()
 
-    if (!teacherForm.name || !teacherForm.email || !teacherForm.password || !teacherForm.confirmPassword) {
+    if (!teacherForm.userName || !teacherForm.userEmail || !teacherForm.userPassword || !teacherForm.confirmPassword) {
       toast.error('Please fill all required fields')
       return
     }
 
-    if (teacherForm.password !== teacherForm.confirmPassword) {
+    if (teacherForm.userPassword !== teacherForm.confirmPassword) {
       toast.error('Passwords do not match')
       return
     }
 
     try {
-      // Prepare form data for API
+      // Prepare form data for API using correct field names
       const formData = {
-        name: teacherForm.name,
-        email: teacherForm.email,
-        password: teacherForm.password,
-        status: teacherForm.status,
-        role: 'Teacher' // Assuming you need to specify role
+        userName: teacherForm.userName,
+        userEmail: teacherForm.userEmail,
+        userPassword: teacherForm.userPassword,
+        userRole: 'Teacher',
+        status: teacherForm.status
       }
 
       await dispatch(createTeacher(formData)).unwrap()
@@ -99,7 +104,7 @@ const AdminTeachers_Page = () => {
   const handleEditTeacher = async (e) => {
     e.preventDefault()
 
-    if (!teacherForm.name || !teacherForm.email) {
+    if (!teacherForm.userName || !teacherForm.userEmail) {
       toast.error('Please fill all required fields')
       return
     }
@@ -107,8 +112,8 @@ const AdminTeachers_Page = () => {
     try {
       // Prepare form data for API
       const formData = {
-        name: teacherForm.name,
-        email: teacherForm.email,
+        userName: teacherForm.userName,
+        userEmail: teacherForm.userEmail,
         status: teacherForm.status
       }
 
@@ -146,9 +151,9 @@ const AdminTeachers_Page = () => {
   const openEditModal = (teacher) => {
     setSelectedTeacher(teacher)
     setTeacherForm({
-      name: teacher.name || '',
-      email: teacher.email || '',
-      password: '',
+      userName: teacher.userName || '',
+      userEmail: teacher.userEmail || '',
+      userPassword: '',
       confirmPassword: '',
       status: teacher.status || 'Active'
     })
@@ -162,9 +167,9 @@ const AdminTeachers_Page = () => {
 
   const resetForm = () => {
     setTeacherForm({
-      name: '',
-      email: '',
-      password: '',
+      userName: '',
+      userEmail: '',
+      userPassword: '',
       confirmPassword: '',
       status: 'Active'
     })
@@ -282,19 +287,19 @@ const AdminTeachers_Page = () => {
                           <div className="flex items-center">
                             <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300">
                               <img
-                                src={teacher.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.name || 'Teacher')}&background=random`}
-                                alt={teacher.name}
+                                src={teacher.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.userName || 'Teacher')}&background=random`}
+                                alt={teacher.userName}
                                 className="h-full w-full object-cover"
                                 onError={(e) => {
-                                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.name || 'Teacher')}&background=random`
+                                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.userName || 'Teacher')}&background=random`
                                 }}
                               />
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{teacher.name}</div>
+                              <div className="text-sm font-medium text-gray-900">{teacher.userName}</div>
                               <div className="text-xs text-gray-500 sm:hidden">
                                 <FiMail className="inline mr-1" size={12} />
-                                {teacher.email}
+                                {teacher.userEmail}
                               </div>
                             </div>
                           </div>
@@ -302,11 +307,11 @@ const AdminTeachers_Page = () => {
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden sm:table-cell">
                           <div className="flex items-center justify-center">
                             <FiMail className="mr-2" size={14} />
-                            {teacher.email}
+                            {teacher.userEmail}
                           </div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                          {teacher.role || 'Teacher'}
+                          {teacher.userRole || 'Teacher'}
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
                           {formatDate(teacher.createdAt)}
@@ -450,7 +455,7 @@ const AdminTeachers_Page = () => {
         )}
       </div>
 
-      {/* Create Teacher Modal */}
+      {/* Create Teacher Modal - Updated form field names */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -477,8 +482,8 @@ const AdminTeachers_Page = () => {
                   </label>
                   <input
                     type="text"
-                    name="name"
-                    value={teacherForm.name}
+                    name="userName"
+                    value={teacherForm.userName}
                     onChange={handleInputChange}
                     placeholder="Enter full name"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
@@ -493,8 +498,8 @@ const AdminTeachers_Page = () => {
                   </label>
                   <input
                     type="email"
-                    name="email"
-                    value={teacherForm.email}
+                    name="userEmail"
+                    value={teacherForm.userEmail}
                     onChange={handleInputChange}
                     placeholder="teacher@example.com"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
@@ -510,8 +515,8 @@ const AdminTeachers_Page = () => {
                     </label>
                     <input
                       type="password"
-                      name="password"
-                      value={teacherForm.password}
+                      name="userPassword"
+                      value={teacherForm.userPassword}
                       onChange={handleInputChange}
                       placeholder="••••••••"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
@@ -575,7 +580,7 @@ const AdminTeachers_Page = () => {
         </div>
       )}
 
-      {/* Edit Teacher Modal */}
+      {/* Edit Teacher Modal - Updated form field names */}
       {showEditModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -602,8 +607,8 @@ const AdminTeachers_Page = () => {
                   </label>
                   <input
                     type="text"
-                    name="name"
-                    value={teacherForm.name}
+                    name="userName"
+                    value={teacherForm.userName}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                     required
@@ -617,8 +622,8 @@ const AdminTeachers_Page = () => {
                   </label>
                   <input
                     type="email"
-                    name="email"
-                    value={teacherForm.email}
+                    name="userEmail"
+                    value={teacherForm.userEmail}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                     required
@@ -664,7 +669,7 @@ const AdminTeachers_Page = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Updated field names */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -687,20 +692,20 @@ const AdminTeachers_Page = () => {
               <div className="flex items-center space-x-4 mb-4">
                 <div className="shrink-0 h-16 w-16 rounded-full overflow-hidden border border-gray-300">
                   <img
-                    src={selectedTeacher?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedTeacher?.name || 'Teacher')}&background=random`}
-                    alt={selectedTeacher?.name}
+                    src={selectedTeacher?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedTeacher?.userName || 'Teacher')}&background=random`}
+                    alt={selectedTeacher?.userName}
                     className="h-full w-full object-cover"
                   />
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900">{selectedTeacher?.name}</h4>
-                  <p className="text-sm text-gray-600">{selectedTeacher?.email}</p>
-                  <p className="text-xs text-gray-500">Teacher</p>
+                  <h4 className="text-lg font-semibold text-gray-900">{selectedTeacher?.userName}</h4>
+                  <p className="text-sm text-gray-600">{selectedTeacher?.userEmail}</p>
+                  <p className="text-xs text-gray-500">{selectedTeacher?.userRole || 'Teacher'}</p>
                 </div>
               </div>
               <p className="text-gray-600 text-center mb-2">
                 Are you sure you want to delete{' '}
-                <strong className="text-gray-900 font-semibold">{selectedTeacher?.name}</strong>?
+                <strong className="text-gray-900 font-semibold">{selectedTeacher?.userName}</strong>?
               </p>
               <p className="text-red-600 text-sm text-center mb-6">
                 This action cannot be undone. All teacher data will be permanently removed.
