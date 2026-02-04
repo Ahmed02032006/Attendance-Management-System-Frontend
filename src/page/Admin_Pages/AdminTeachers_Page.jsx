@@ -143,10 +143,10 @@ const AdminTeachers_Page = () => {
 
       setShowEditModal(false)
       resetForm()
-      toast.success('User updated successfully!')
+      toast.success('Teacher updated successfully!')
     } catch (error) {
       console.error('Update teacher error:', error)
-      toast.error(error?.message || error?.data?.message || 'Failed to update user')
+      toast.error(error?.message || error?.data?.message || 'Failed to update teacher')
     }
   }
 
@@ -242,24 +242,12 @@ const AdminTeachers_Page = () => {
     }
   }
 
-  // Get status badge color
-  const getStatusBadgeColor = (status) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-50 text-green-700 border-green-200'
-      case 'Inactive':
-        return 'bg-red-50 text-red-700 border-red-200'
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200'
-    }
-  }
-
   if (isLoading && teachers.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-lg font-medium text-gray-700">Loading Users...</p>
+          <p className="mt-4 text-lg font-medium text-gray-700">Loading Teachers...</p>
         </div>
       </div>
     );
@@ -282,7 +270,7 @@ const AdminTeachers_Page = () => {
             </div>
             <input
               type="text"
-              placeholder="Search users by name or email..."
+              placeholder="Search teachers by name or email..."
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -330,7 +318,7 @@ const AdminTeachers_Page = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      User Profile
+                      Teacher Profile
                     </th>
                     <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                       Role
@@ -380,7 +368,7 @@ const AdminTeachers_Page = () => {
                                     <FiShield className="h-3 w-3 ml-2 text-purple-600" title="Administrator" />
                                   )}
                                 </div>
-                                <div className="text-xs text-gray-500 flex items-center mt-1">
+                                <div className="text-xs text-gray-500 flex items-center mt-0.5">
                                   <FiMail className="h-3 w-3 mr-1" />
                                   {teacher.userEmail}
                                 </div>
@@ -388,15 +376,28 @@ const AdminTeachers_Page = () => {
                             </div>
                           </td>
                           <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center hidden sm:table-cell">
-                            <span className={`px-3 py-1.5 text-xs font-semibold rounded-full inline-flex items-center justify-center ${getRoleBadgeColor(teacher.userRole)}`}>
-                              {teacher.userRole}
+                            <span className={`px-3 py-1.5 text-xs font-semibold rounded-full inline-flex items-center ${getRoleBadgeColor(teacher.userRole)}`}>
+                              {teacher.userRole === 'Admin' ? (
+                                <>
+                                  <FiShield className="h-3 w-3 mr-1.5" />
+                                  Admin
+                                </>
+                              ) : (
+                                <>
+                                  <FiUsers className="h-3 w-3 mr-1.5" />
+                                  {teacher.userRole}
+                                </>
+                              )}
                             </span>
                           </td>
                           <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
                             {formatDate(teacher.createdAt)}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-center">
-                            <span className={`px-2 py-1.5 text-xs font-semibold rounded-full flex items-center justify-center w-24 mx-auto ${getStatusBadgeColor(teacher.status)}`}>
+                            <span className={`px-2 py-1.5 text-xs font-semibold rounded-full flex items-center justify-center w-24 mx-auto ${teacher.status === "Active"
+                              ? "bg-green-50 text-green-700 border border-green-200"
+                              : "bg-red-50 text-red-700 border border-red-200"
+                              }`}>
                               {teacher.status === "Active" ? (
                                 <>
                                   <FiCheck className="h-3 w-3 mr-1.5" />
@@ -631,6 +632,38 @@ const AdminTeachers_Page = () => {
                     />
                   </div>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Status
+                  </label>
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => handleStatusToggle('Active')}
+                      className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Active'
+                          ? 'bg-green-50 border-green-500 text-green-700 shadow-sm'
+                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                        }`}
+                      disabled={isLoading}
+                    >
+                      <FiCheck className={`h-4 w-4 mr-2 ${teacherForm.status === 'Active' ? 'opacity-100' : 'opacity-60'}`} />
+                      Active
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleStatusToggle('Inactive')}
+                      className={`flex-1 flex items-center justify-center py-2.5 rounded-lg border transition-all ${teacherForm.status === 'Inactive'
+                          ? 'bg-red-50 border-red-500 text-red-700 shadow-sm'
+                          : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                        }`}
+                      disabled={isLoading}
+                    >
+                      <FiSlash className={`h-4 w-4 mr-2 ${teacherForm.status === 'Inactive' ? 'opacity-100' : 'opacity-60'}`} />
+                      Inactive
+                    </button>
+                  </div>
+                </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 sticky bottom-0 bg-white">
                 <button
@@ -770,9 +803,7 @@ const AdminTeachers_Page = () => {
                 <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
                   <FiTrash2 className="h-4 w-4 text-red-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Delete {selectedTeacher?.userRole === 'Admin' ? 'Admin' : 'Teacher'}
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-800">Delete Teacher</h3>
               </div>
               <button
                 onClick={() => setShowDeleteModal(false)}
@@ -799,10 +830,7 @@ const AdminTeachers_Page = () => {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900">{selectedTeacher?.userName}</h4>
-                  <p className="text-sm text-gray-600 flex items-center">
-                    <FiMail className="h-3 w-3 mr-1" />
-                    {selectedTeacher?.userEmail}
-                  </p>
+                  <p className="text-sm text-gray-600">{selectedTeacher?.userEmail}</p>
                   <p className="text-xs text-gray-500">{selectedTeacher?.userRole || 'Teacher'}</p>
                 </div>
               </div>
@@ -811,7 +839,7 @@ const AdminTeachers_Page = () => {
                 <strong className="text-gray-900 font-semibold">{selectedTeacher?.userName}</strong>?
               </p>
               <p className="text-red-600 text-sm text-center mb-6">
-                This action cannot be undone. All user data will be permanently removed.
+                This action cannot be undone. All teacher data will be permanently removed.
               </p>
             </div>
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
@@ -827,7 +855,7 @@ const AdminTeachers_Page = () => {
                 className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 disabled={isLoading}
               >
-                {isLoading ? 'Deleting...' : 'Delete'}
+                {isLoading ? 'Deleting...' : 'Delete Teacher'}
               </button>
             </div>
           </div>
