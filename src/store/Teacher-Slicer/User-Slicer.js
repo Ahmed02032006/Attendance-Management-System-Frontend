@@ -13,7 +13,7 @@ export const updateTeacher = createAsyncThunk(
   async ({ id, formData }, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/users/${id}`,
+        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/user/${id}`,
         formData
       );
 
