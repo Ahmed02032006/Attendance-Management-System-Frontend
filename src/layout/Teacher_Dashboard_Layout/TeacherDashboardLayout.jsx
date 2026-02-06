@@ -170,18 +170,6 @@ const TeacherDashboardLayout = () => {
       return;
     }
 
-    if (!profileData.userEmail.trim()) {
-      toast.error("Email is required");
-      return;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(profileData.userEmail)) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-
     try {
       // Here you would typically dispatch an action to update the user profile
       // Example: dispatch(updateUserProfile(profileData));
@@ -462,45 +450,45 @@ const TeacherDashboardLayout = () => {
       {/* Edit Profile Modal */}
       {showEditProfileModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <h2 className="text-xl font-semibold text-slate-800">Edit Profile</h2>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-800">Edit Profile</h2>
               <button
                 onClick={handleCloseEditProfileModal}
                 className="p-1 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Modal Content */}
-            <form onSubmit={handleSaveProfile} className="p-6">
-              {/* Profile Picture Upload */}
-              <div className="mb-6">
+            <form onSubmit={handleSaveProfile} className="p-5">
+              {/* Profile Picture Upload - Compact */}
+              <div className="mb-5">
                 <label className="block text-sm font-medium text-slate-700 mb-3">
                   Profile Picture
                 </label>
-                <div className="flex flex-col items-center">
-                  <div className="relative mb-4">
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
                     {profileData.profilePicture ? (
                       <img
                         src={profileData.profilePicture}
                         alt="Profile"
-                        className="h-32 w-32 rounded-full object-cover border-4 border-slate-100 shadow-md"
+                        className="h-16 w-16 rounded-full object-cover border-2 border-slate-200"
                       />
                     ) : (
-                      <div className="h-32 w-32 rounded-full bg-sky-500 flex items-center justify-center border-4 border-slate-100 shadow-md">
-                        <span className="text-white text-4xl font-semibold">
+                      <div className="h-16 w-16 rounded-full bg-sky-500 flex items-center justify-center border-2 border-slate-200">
+                        <span className="text-white text-xl font-semibold">
                           {profileData.userName ? profileData.userName.charAt(0).toUpperCase() : 'U'}
                         </span>
                       </div>
                     )}
                     <label
                       htmlFor="profile-picture-upload"
-                      className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
+                      className="absolute -bottom-1 -right-1 bg-white p-1.5 rounded-full shadow border border-slate-300 cursor-pointer hover:bg-slate-50 transition-colors"
                     >
-                      <Camera className="w-5 h-5 text-slate-600" />
+                      <Camera className="w-3.5 h-3.5 text-slate-600" />
                     </label>
                     <input
                       id="profile-picture-upload"
@@ -510,9 +498,10 @@ const TeacherDashboardLayout = () => {
                       className="hidden"
                     />
                   </div>
-                  <p className="text-sm text-slate-500 text-center">
-                    Click the camera icon to upload a new profile picture
-                  </p>
+                  <div>
+                    <p className="text-xs text-slate-600 mb-1">Click the camera icon to change picture</p>
+                    <p className="text-xs text-slate-500">JPG, PNG or GIF (Max. 2MB)</p>
+                  </div>
                 </div>
               </div>
 
@@ -527,42 +516,36 @@ const TeacherDashboardLayout = () => {
                   name="userName"
                   value={profileData.userName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all text-sm"
                   placeholder="Enter your full name"
                 />
               </div>
 
-              {/* Email Field */}
+              {/* Email Display (Read-only) */}
               <div className="mb-6">
-                <label htmlFor="userEmail" className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Email Address
                 </label>
-                <input
-                  type="email"
-                  id="userEmail"
-                  name="userEmail"
-                  value={profileData.userEmail}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
-                  placeholder="Enter your email address"
-                />
-                <p className="mt-2 text-xs text-slate-500">
-                  Note: Changing email may require verification
+                <div className="w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-lg text-sm text-slate-600">
+                  {user?.userEmail || 'No email available'}
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  Email cannot be changed
                 </p>
               </div>
 
               {/* Modal Footer */}
-              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+              <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"
                   onClick={handleCloseEditProfileModal}
-                  className="px-5 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-slate-500 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 text-sm font-medium text-white bg-sky-600 rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-sky-600 rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-sky-500 transition-colors"
                 >
                   Save Changes
                 </button>
