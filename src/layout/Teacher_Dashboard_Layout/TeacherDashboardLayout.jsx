@@ -1,4 +1,4 @@
-import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, MapPin, Menu, MessageSquare, UserCheck, Users, X, Camera, Upload } from 'lucide-react';
+import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, MapPin, Menu, MessageSquare, UserCheck, Users, X, Camera } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -171,11 +171,19 @@ const TeacherDashboardLayout = () => {
     }
 
     try {
-      // Here you would typically dispatch an action to update the user profile
-      // Example: dispatch(updateUserProfile(profileData));
+      // Console log the username and profile picture
+      console.log('Profile Data to be saved:');
+      console.log('Username:', profileData.userName);
+      console.log('Profile Picture URL:', profileData.profilePicture);
+      console.log('Email:', profileData.userEmail);
       
-      // For now, we'll just show a success message
+      // Log the entire profile data object
+      console.log('Full Profile Data:', profileData);
+      
+      // Show success message
       toast.success("Profile updated successfully!");
+      
+      // Close the modal
       setShowEditProfileModal(false);
       
       // Note: In a real app, you would update the Redux store with new user data
@@ -259,11 +267,11 @@ const TeacherDashboardLayout = () => {
           </button>
 
           {/* ======================================================== */}
-          <div className='bg-linear-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
+          <div className='bg-gradient-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
           {/* ======================================================== */}
 
           {/* School Header */}
-          <div className="py-[9px] border-b border-slate-200 w-full bg-linear-to-r from-slate-50 to-white">
+          <div className="py-[9px] border-b border-slate-200 w-full bg-gradient-to-r from-slate-50 to-white">
             <div className="flex items-center justify-center">
               {
                 sidebarOpen ? (
@@ -449,7 +457,7 @@ const TeacherDashboardLayout = () => {
 
       {/* Edit Profile Modal */}
       {showEditProfileModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
@@ -554,7 +562,6 @@ const TeacherDashboardLayout = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
