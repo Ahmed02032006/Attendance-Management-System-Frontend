@@ -184,6 +184,10 @@ const TeacherDashboardLayout = () => {
 
       toast.success("Profile updated successfully!");
       setShowEditProfileModal(false);
+
+      setTimeout(() => {
+        dispatch(checkAuthUser());
+      }, 100);
     } catch (error) {
       toast.error(error.message || "Failed to update profile");
     }
