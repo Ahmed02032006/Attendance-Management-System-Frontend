@@ -259,11 +259,11 @@ const TeacherDashboardLayout = () => {
           </button>
 
           {/* ======================================================== */}
-          <div className='bg-gradient-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
+          <div className='bg-linear-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
           {/* ======================================================== */}
 
           {/* School Header */}
-          <div className="py-[9px] border-b border-slate-200 w-full bg-gradient-to-r from-slate-50 to-white">
+          <div className="py-[9px] border-b border-slate-200 w-full bg-linear-to-r from-slate-50 to-white">
             <div className="flex items-center justify-center">
               {
                 sidebarOpen ? (
@@ -295,7 +295,7 @@ const TeacherDashboardLayout = () => {
                       }`}
                   >
                     <div className={`relative p-1.5 rounded-md ${isActive(path) ? 'bg-slate-100 text-slate-600' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-600'}`}>
-                      <Icon className="w-5 h-5 md:w-4 md:h-4 flex-shrink-0" />
+                      <Icon className="w-5 h-5 md:w-4 md:h-4 shrink-0" />
                     </div>
                     {sidebarOpen && (
                       <span className={`ml-3 text-sm ${isActive(path) ? 'text-slate-700' : 'text-slate-600'}`}>{label}</span>
@@ -313,7 +313,7 @@ const TeacherDashboardLayout = () => {
                     >
                       <div className="flex items-center">
                         <div className={`relative p-1.5 rounded-md ${isActive(path) ? 'bg-slate-100 text-slate-600' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-600'}`}>
-                          <Icon className="w-5 h-5 md:w-4 md:h-4 flex-shrink-0" />
+                          <Icon className="w-5 h-5 md:w-4 md:h-4 shrink-0" />
                         </div>
                         {sidebarOpen && (
                           <span className={`ml-3 text-sm ${isActive(path) ? 'text-slate-700' : 'text-slate-600'}`}>{label}</span>
@@ -449,7 +449,7 @@ const TeacherDashboardLayout = () => {
 
       {/* Edit Profile Modal */}
       {showEditProfileModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
@@ -554,6 +554,7 @@ const TeacherDashboardLayout = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
