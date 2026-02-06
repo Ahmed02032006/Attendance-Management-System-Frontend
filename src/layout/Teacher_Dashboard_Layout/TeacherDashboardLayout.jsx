@@ -188,96 +188,97 @@ const TeacherDashboardLayout = () => {
   };
 
   // If user is inactive, don't render any dashboard content
-  if (user?.status === 'Inactive') {
-    return (
-      <div className="flex min-h-screen bg-gray-50 items-center justify-center p-4">
-        {/* Simple Inactive User Modal */}
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-            {/* Modal Header */}
-            <div className="px-6 py-5 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                    <X className="h-5 w-5 text-red-600" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Account Temporarily Inactive</h3>
-                  <p className="text-sm text-gray-500">Teacher Portal Access</p>
+if (user?.status === 'Inactive') {
+  return (
+    <div className="flex min-h-screen bg-slate-50 items-center justify-center p-4">
+      <div className="fixed inset-0 bg-slate-900/30 flex items-center justify-center z-50">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 w-full max-w-md mx-4">
+          {/* Modal Header */}
+          <div className="px-6 py-5 border-b border-slate-100">
+            <div className="flex items-center space-x-3">
+              <div className="shrink-0">
+                <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center">
+                  <svg className="h-4 w-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
               </div>
+              <div>
+                <h3 className="text-base font-semibold text-slate-800">Account Status</h3>
+                <p className="text-sm text-slate-500">Currently unavailable</p>
+              </div>
             </div>
+          </div>
 
-            {/* Modal Content */}
-            <div className="px-6 py-5">
-              <div className="space-y-4">
-                {/* Main Message */}
-                <div className="text-center">
-                  <div className="mb-4">
-                    <svg className="h-12 w-12 text-red-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.272 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                  </div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h4>
-                  <p className="text-gray-600">
-                    Your teacher account has been temporarily deactivated. You cannot access the attendance management system at this time.
-                  </p>
+          {/* Modal Content */}
+          <div className="px-6 py-5">
+            <div className="space-y-5">
+              {/* Status Icon */}
+              <div className="flex justify-center">
+                <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center">
+                  <svg className="h-8 w-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                  </svg>
                 </div>
+              </div>
 
-                {/* Contact Information */}
-                <div className="bg-sky-50 border border-sky-100 rounded p-4 mt-4">
-                  <div className="flex items-start">
-                    <svg className="h-5 w-5 text-sky-500 mt-0.5 mr-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              {/* Message */}
+              <div className="text-center space-y-3">
+                <h4 className="text-lg font-medium text-slate-800">Account Not Active</h4>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Your teacher account is currently inactive. This means you cannot access the attendance management features.
+                </p>
+              </div>
+
+              {/* Contact Section */}
+              <div className="pt-4 border-t border-slate-100">
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <svg className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <div>
-                      <p className="text-sm text-gray-700 mb-2">
-                        Please contact the administration to reactivate your account.
-                      </p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <p className="text-sm font-medium text-gray-600 mb-1">Contact :</p>
-                        <div className="flex items-center">
-                          <svg className="h-4 w-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                          <a
-                            href="mailto:m.ahmedofficial555@gmail.com"
-                            className="text-sky-600 hover:text-sky-800 text-sm hover:underline"
-                          >
-                            m.ahmedofficial555@gmail.com
-                          </a>
-                        </div>
+                    <p className="text-sm text-slate-600">
+                      Please contact the school administration to resolve this matter.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="flex items-start space-x-2">
+                      <svg className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <div>
+                        <p className="text-xs font-medium text-slate-500 mb-1">CONTACT EMAIL</p>
+                        <a
+                          href="mailto:m.ahmedofficial555@gmail.com"
+                          className="text-sky-600 hover:text-sky-700 text-sm font-medium hover:underline transition-colors"
+                        >
+                          m.ahmedofficial555@gmail.com
+                        </a>
                       </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Additional Note */}
-                <div className="mt-4">
-                  <p className="text-sm text-gray-500 text-center">
-                    This is an automated message from the Attendance Management System.
-                  </p>
-                </div>
               </div>
             </div>
+          </div>
 
-            {/* Modal Footer */}
-            <div className="px-6 py-4 bg-gray-50 rounded-b-lg border-t border-gray-200">
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={handleCloseInactiveModal}
-                  className="px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors"
-                >
-                  Return to Login
-                </button>
-              </div>
+          {/* Modal Footer */}
+          <div className="px-6 py-4 bg-slate-50/50 rounded-b-xl border-t border-slate-100">
+            <div className="flex justify-end">
+              <button
+                onClick={handleCloseInactiveModal}
+                className="px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors"
+              >
+                Return to Login
+              </button>
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="flex min-h-screen bg-slate-50">
