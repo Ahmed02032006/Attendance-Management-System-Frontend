@@ -190,114 +190,87 @@ const TeacherDashboardLayout = () => {
   // If user is inactive, don't render any dashboard content
   if (user?.status === 'Inactive') {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 items-center justify-center p-4">
-        {/* Inactive User Modal - Enhanced Design */}
-        <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-gray-200">
-            {/* Modal Header with Gradient */}
-            <div className="bg-gradient-to-r from-red-500 to-red-600 p-6">
-              <div className="flex items-center justify-center space-x-3">
-                <div className="flex items-center justify-center h-14 w-14 rounded-full bg-white/20 backdrop-blur-sm">
-                  <X className="h-8 w-8 text-white" />
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center p-4">
+        {/* Simple Inactive User Modal */}
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+            {/* Modal Header */}
+            <div className="px-6 py-5 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                    <X className="h-5 w-5 text-red-600" />
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-white">Account Suspended</h3>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Account Temporarily Inactive</h3>
+                  <p className="text-sm text-gray-500 mt-1">Teacher Portal Access</p>
+                </div>
               </div>
             </div>
 
             {/* Modal Content */}
-            <div className="p-8">
-              <div className="text-center space-y-6">
-                {/* Warning Icon */}
-                <div className="flex justify-center">
-                  <div className="relative">
-                    <div className="h-20 w-20 rounded-full bg-red-100 flex items-center justify-center animate-pulse">
-                      <div className="h-16 w-16 rounded-full bg-red-200 flex items-center justify-center">
-                        <X className="h-10 w-10 text-red-600" />
-                      </div>
-                    </div>
-                    <div className="absolute -top-2 -right-2">
-                      <div className="h-8 w-8 rounded-full bg-yellow-400 flex items-center justify-center animate-bounce">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    </div>
+            <div className="px-6 py-5">
+              <div className="space-y-4">
+                {/* Main Message */}
+                <div className="text-center">
+                  <div className="mb-4">
+                    <svg className="h-12 w-12 text-red-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.272 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
                   </div>
-                </div>
-
-                {/* Title */}
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Inactive</h2>
-                  <div className="h-1 w-20 bg-gradient-to-r from-red-500 to-red-600 mx-auto rounded-full"></div>
-                </div>
-
-                {/* Message */}
-                <div className="space-y-4">
-                  <p className="text-gray-600 leading-relaxed">
-                    Your account has been <span className="font-semibold text-red-600">temporarily suspended</span> and you are unable to access the portal at this time.
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h4>
+                  <p className="text-gray-600">
+                    Your teacher account has been temporarily deactivated. You cannot access the attendance management system at this time.
                   </p>
-
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm text-yellow-700">
-                          This action was taken by the system administrator. Please contact support for assistance.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Contact Information */}
-                <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm font-medium text-gray-500">Contact Support</p>
-                      <a
-                        href="mailto:m.ahmedofficial555@gmail.com"
-                        className="text-blue-600 hover:text-blue-800 font-medium text-lg hover:underline transition-colors"
-                      >
-                        m.ahmedofficial555@gmail.com
-                      </a>
+                <div className="bg-blue-50 border border-blue-100 rounded p-4 mt-4">
+                  <div className="flex items-start">
+                    <svg className="h-5 w-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <div>
+                      <p className="text-sm text-gray-700 mb-2">
+                        Please contact the administration to reactivate your account.
+                      </p>
+                      <div className="mt-2">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Contact Email:</p>
+                        <div className="flex items-center">
+                          <svg className="h-4 w-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                          <a
+                            href="mailto:m.ahmedofficial555@gmail.com"
+                            className="text-blue-600 hover:text-blue-800 text-sm hover:underline"
+                          >
+                            m.ahmedofficial555@gmail.com
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500 mt-3">
-                    Send an email to the above address with your account details for quick resolution.
-                  </p>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <button
-                    onClick={handleCloseInactiveModal}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-medium rounded-xl hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
-                  >
-                    Return to Login
-                  </button>
-                  <a
-                    href="mailto:m.ahmedofficial555@gmail.com?subject=Account Reactivation Request&body=Hello,%0D%0A%0D%0AI would like to request reactivation of my account.%0D%0A%0D%0AAccount Details:%0D%%0D%0A- Name: %0D%0A- Email: %0D%0A%0D%0AThank you."
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl text-center"
-                  >
-                    Contact Support
-                  </a>
-                </div>
-
-                {/* Additional Help */}
-                <div className="pt-6 border-t border-gray-200">
-                  <p className="text-xs text-gray-500">
-                    Need immediate assistance? Include your account details in the email for faster processing.
+                {/* Additional Note */}
+                <div className="mt-4">
+                  <p className="text-sm text-gray-500 text-center">
+                    This is an automated message from the Attendance Management System.
                   </p>
                 </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-gray-50 rounded-b-lg border-t border-gray-200">
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={handleCloseInactiveModal}
+                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                >
+                  Return to Login
+                </button>
               </div>
             </div>
           </div>
@@ -344,11 +317,11 @@ const TeacherDashboardLayout = () => {
           </button>
 
           {/* ======================================================== */}
-          <div className='bg-gradient-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
+          <div className='bg-linear-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
           {/* ======================================================== */}
 
           {/* School Header */}
-          <div className="py-[9px] border-b border-slate-200 w-full bg-gradient-to-r from-slate-50 to-white">
+          <div className="py-[9px] border-b border-slate-200 w-full bg-linear-to-r from-slate-50 to-white">
             <div className="flex items-center justify-center">
               {
                 sidebarOpen ? (
