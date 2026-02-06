@@ -197,14 +197,14 @@ const TeacherDashboardLayout = () => {
             {/* Modal Header */}
             <div className="px-6 py-5 border-b border-gray-200">
               <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
                     <X className="h-5 w-5 text-red-600" />
                   </div>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Account Temporarily Inactive</h3>
-                  <p className="text-sm text-gray-500 mt-1">Teacher Portal Access</p>
+                  <p className="text-sm text-gray-500 mt-0.5">Teacher Portal Access</p>
                 </div>
               </div>
             </div>
@@ -226,16 +226,16 @@ const TeacherDashboardLayout = () => {
                 </div>
 
                 {/* Contact Information */}
-                <div className="bg-blue-50 border border-blue-100 rounded p-4 mt-4">
+                <div className="bg-sky-50 border border-sky-100 rounded p-4 mt-4">
                   <div className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="h-5 w-5 text-sky-500 mt-0.5 mr-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                     <div>
                       <p className="text-sm text-gray-700 mb-2">
                         Please contact the administration to reactivate your account.
                       </p>
-                      <div className="mt-2">
+                      <div className="mt-1 flex items-center gap-2">
                         <p className="text-sm font-medium text-gray-600 mb-1">Contact Email:</p>
                         <div className="flex items-center">
                           <svg className="h-4 w-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,7 +243,7 @@ const TeacherDashboardLayout = () => {
                           </svg>
                           <a
                             href="mailto:m.ahmedofficial555@gmail.com"
-                            className="text-blue-600 hover:text-blue-800 text-sm hover:underline"
+                            className="text-sky-600 hover:text-sky-800 text-sm hover:underline"
                           >
                             m.ahmedofficial555@gmail.com
                           </a>
@@ -267,7 +267,7 @@ const TeacherDashboardLayout = () => {
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={handleCloseInactiveModal}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  className="px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors"
                 >
                   Return to Login
                 </button>
