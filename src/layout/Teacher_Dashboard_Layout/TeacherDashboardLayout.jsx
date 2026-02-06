@@ -177,16 +177,11 @@ const TeacherDashboardLayout = () => {
     }
 
     try {
-      // await dispatch(updateTeacher({
-      //   id: user._id,
-      //   formData: formData
-      // })).unwrap();
-
-      console.log({
-        id: user,
+      await dispatch(updateTeacher({
+        id: user.id,
         formData: formData
-      });
-      
+      })).unwrap();
+
       toast.success("Profile updated successfully!");
       setShowEditProfileModal(false);
     } catch (error) {
