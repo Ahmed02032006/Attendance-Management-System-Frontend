@@ -183,7 +183,7 @@ const TeacherDashboardLayout = () => {
       // })).unwrap();
 
       console.log({
-        id: user._id,
+        id: user,
         formData: formData
       });
       
