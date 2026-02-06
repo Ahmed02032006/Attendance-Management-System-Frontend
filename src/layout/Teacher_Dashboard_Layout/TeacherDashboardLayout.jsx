@@ -204,7 +204,7 @@ const TeacherDashboardLayout = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Account Temporarily Inactive</h3>
-                  <p className="text-sm text-gray-500 mt-0.5">Teacher Portal Access</p>
+                  <p className="text-sm text-gray-500">Teacher Portal Access</p>
                 </div>
               </div>
             </div>
