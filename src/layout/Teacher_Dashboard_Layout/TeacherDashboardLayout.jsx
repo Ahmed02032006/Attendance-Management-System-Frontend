@@ -1,22 +1,15 @@
-import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, MapPin, Menu, MessageSquare, UserCheck, Users, X, Camera } from 'lucide-react';
+import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, MapPin, Menu, MessageSquare, UserCheck, Users, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuthUser, logOutUser } from '../../store/Auth-Slicer/Auth-Slicer';
 import { toast } from 'react-toastify';
-import { updateTeacher } from '../../store/Teacher-Slicer/User-Slicer';
 
 const TeacherDashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
   const [showInactiveModal, setShowInactiveModal] = useState(false);
-  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
-  const [profileData, setProfileData] = useState({
-    profilePicture: '',
-    userName: '',
-    userEmail: ''
-  });
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,17 +18,6 @@ const TeacherDashboardLayout = () => {
   const { user } = useSelector(
     (state) => state.auth
   );
-
-  // Initialize profile data when user data changes
-  useEffect(() => {
-    if (user) {
-      setProfileData({
-        profilePicture: user.profilePicture || '',
-        userName: user.userName || '',
-        userEmail: user.userEmail || ''
-      });
-    }
-  }, [user]);
 
   // Format email to show ... after @
   const formatEmail = (email) => {
@@ -87,6 +69,22 @@ const TeacherDashboardLayout = () => {
       label: "Attendance",
       path: "/teacher/attendance"
     },
+    // {
+    //   name: "Student Mark Attendance",
+    //   icon: UserCheck,
+    //   label: "Student Mark Attendance",
+    //   path: "/scan-attendance"
+    // },
+    // {
+    //   name: "Exams",
+    //   icon: ClipboardList,
+    //   label: "Exams",
+    //   path: "/teacher/exams",
+    //   subItems: [
+    //     { label: "Manage Tests", path: "/teacher/exams/create" },
+    //     { label: "Exam Grading", path: "/teacher/exams/grading" }
+    //   ]
+    // },
   ];
 
   useEffect(() => {
@@ -122,75 +120,6 @@ const TeacherDashboardLayout = () => {
     setShowInactiveModal(false);
     // Log out the user immediately when they close the modal
     handleOnLogOut({ preventDefault: () => { } });
-  };
-
-  const handleProfileClick = () => {
-    setShowEditProfileModal(true);
-  };
-
-  const handleCloseEditProfileModal = () => {
-    setShowEditProfileModal(false);
-    // Reset to original user data when closing
-    if (user) {
-      setProfileData({
-        profilePicture: user.profilePicture || '',
-        userName: user.userName || '',
-        userEmail: user.userEmail || ''
-      });
-    }
-  };
-
-  const handleProfilePictureChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // For now, we'll just use a URL for the selected file
-      // In a real app, you would upload this to your server
-      const imageUrl = URL.createObjectURL(file);
-      setProfileData(prev => ({
-        ...prev,
-        profilePicture: imageUrl
-      }));
-    }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setProfileData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSaveProfile = async (e) => {
-    e.preventDefault();
-
-    // Validate inputs
-    if (!profileData.userName.trim()) {
-      toast.error("Name is required");
-      return;
-    }
-
-    const formData = {
-      userName: profileData.userName,
-      userEmail: profileData.userEmail,
-      profilePicture: profileData.profilePicture
-    }
-
-    try {
-      await dispatch(updateTeacher({
-        id: user.id,
-        formData: formData
-      })).unwrap();
-
-      toast.success("Profile updated successfully!");
-      setShowEditProfileModal(false);
-
-      setTimeout(() => {
-        dispatch(checkAuthUser());
-      }, 100);
-    } catch (error) {
-      toast.error(error.message || "Failed to update profile");
-    }
   };
 
   // If user is inactive, don't render any dashboard content
@@ -324,18 +253,20 @@ const TeacherDashboardLayout = () => {
           </button>
 
           {/* ======================================================== */}
-          <div className='bg-linear-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
+          <div className='bg-gradient-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
           {/* ======================================================== */}
 
           {/* School Header */}
-          <div className="py-[9px] border-b border-slate-200 w-full bg-linear-to-r from-slate-50 to-white">
+          <div className="py-[9px] border-b border-slate-200 w-full bg-gradient-to-r from-slate-50 to-white">
             <div className="flex items-center justify-center">
               {
                 sidebarOpen ? (
                   <p className='text-2xl'>TRACK EASE</p>
+                  // <p className='text-2xl'>DAILY MARK</p>
                 ) :
                   <img
                     src="https://repository-images.githubusercontent.com/266040586/ea7a9500-cd19-11ea-9ec9-c7a5474b81af"
+                    // src="https://www.shutterstock.com/image-vector/effective-teamwork-icon-black-thin-600nw-2227180861.jpg"
                     alt="CampusTrack X Logo"
                     className={`rounded-md object-cover border border-gray-200 w-14 h-8`}
                   />
@@ -360,7 +291,7 @@ const TeacherDashboardLayout = () => {
                       }`}
                   >
                     <div className={`relative p-1.5 rounded-md ${isActive(path) ? 'bg-slate-100 text-slate-600' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-600'}`}>
-                      <Icon className="w-5 h-5 md:w-4 md:h-4 shrink-0" />
+                      <Icon className="w-5 h-5 md:w-4 md:h-4 flex-shrink-0" />
                     </div>
                     {sidebarOpen && (
                       <span className={`ml-3 text-sm ${isActive(path) ? 'text-slate-700' : 'text-slate-600'}`}>{label}</span>
@@ -378,7 +309,7 @@ const TeacherDashboardLayout = () => {
                     >
                       <div className="flex items-center">
                         <div className={`relative p-1.5 rounded-md ${isActive(path) ? 'bg-slate-100 text-slate-600' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-600'}`}>
-                          <Icon className="w-5 h-5 md:w-4 md:h-4 shrink-0" />
+                          <Icon className="w-5 h-5 md:w-4 md:h-4 flex-shrink-0" />
                         </div>
                         {sidebarOpen && (
                           <span className={`ml-3 text-sm ${isActive(path) ? 'text-slate-700' : 'text-slate-600'}`}>{label}</span>
@@ -425,75 +356,65 @@ const TeacherDashboardLayout = () => {
           {/* User Profile Section */}
           <div className="p-3 border-t border-slate-200 bg-slate-50/50">
             {sidebarOpen ? (
-              <div className="px-2 py-1.5">
-                <div
-                  className="flex items-center justify-between rounded-lg hover:bg-slate-100 transition-colors duration-150 cursor-pointer"
-                  onClick={handleProfileClick}
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <div className="relative">
-                      {hasProfilePicture() ? (
-                        // Show profile picture if exists
-                        <>
-                          <img
-                            src={user.profilePicture}
-                            alt="User Avatar"
-                            className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
-                          />
-                          <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
-                        </>
-                      ) : (
-                        // Show fallback avatar with background color and initial
-                        <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
-                          <span className="text-white font-semibold text-sm">
-                            {getInitial()}
-                          </span>
-                          <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col leading-tight">
-                      <span className="text-[13px] font-medium text-slate-900">{user.userName}</span>
-                      <span className="text-[11px] text-slate-500" title={user.userEmail}>
-                        {formatEmail(user.userEmail)}
-                      </span>
-                    </div>
+              <div className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors duration-150">
+                <div className="flex items-center space-x-2.5">
+                  <div className="relative">
+                    {hasProfilePicture() ? (
+                      // Show profile picture if exists
+                      <>
+                        <img
+                          src={user.profilePicture}
+                          alt="User Avatar"
+                          className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                        />
+                        <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                      </>
+                    ) : (
+                      // Show fallback avatar with background color and initial
+                      <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
+                        <span className="text-white font-semibold text-sm">
+                          {getInitial()}
+                        </span>
+                        <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                      </div>
+                    )}
                   </div>
-                  <button
-                    className="p-1.5 rounded-full hover:bg-slate-200 text-slate-500 hover:text-red-500 transition-colors duration-200"
-                    title="Logout"
-                    onClick={(e) => handleOnLogOut(e)}
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </button>
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-[13px] font-medium text-slate-900">{user.userName}</span>
+                    <span className="text-[11px] text-slate-500" title={user.userEmail}>
+                      {formatEmail(user.userEmail)}
+                    </span>
+                  </div>
                 </div>
+                <button
+                  className="p-1.5 rounded-full hover:bg-slate-200 text-slate-500 hover:text-red-500 transition-colors duration-200"
+                  title="Logout"
+                  onClick={(e) => handleOnLogOut(e)}
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             ) : (
               <div className="flex justify-center">
-                <div
-                  className="relative cursor-pointer"
-                  onClick={handleProfileClick}
-                >
-                  {hasProfilePicture() ? (
-                    // Show profile picture thumbnail in collapsed sidebar
-                    <div className="relative">
-                      <img
-                        src={user.profilePicture}
-                        alt="User Avatar"
-                        className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
-                      />
-                      <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
-                    </div>
-                  ) : (
-                    // Show fallback avatar in collapsed sidebar
-                    <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
-                      <span className="text-white font-semibold text-sm">
-                        {getInitial()}
-                      </span>
-                      <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
-                    </div>
-                  )}
-                </div>
+                {hasProfilePicture() ? (
+                  // Show profile picture thumbnail in collapsed sidebar
+                  <div className="relative">
+                    <img
+                      src={user.profilePicture}
+                      alt="User Avatar"
+                      className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                    />
+                    <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                  </div>
+                ) : (
+                  // Show fallback avatar in collapsed sidebar
+                  <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
+                    <span className="text-white font-semibold text-sm">
+                      {getInitial()}
+                    </span>
+                    <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                  </div>
+                )}
                 <button
                   className="p-2 rounded-full hover:bg-slate-200 text-slate-500 hover:text-red-500 transition-colors duration-200"
                   title="Logout"
@@ -511,114 +432,6 @@ const TeacherDashboardLayout = () => {
       <main className="flex-1 overflow-x-hidden">
         <Outlet />
       </main>
-
-      {/* Edit Profile Modal */}
-      {showEditProfileModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-800">Edit Profile</h2>
-              <button
-                onClick={handleCloseEditProfileModal}
-                className="p-1 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <form onSubmit={handleSaveProfile} className="p-5">
-              {/* Profile Picture Upload - Compact */}
-              <div className="mb-5">
-                <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Profile Picture
-                </label>
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    {profileData.profilePicture ? (
-                      <img
-                        src={profileData.profilePicture}
-                        alt="Profile"
-                        className="h-16 w-16 rounded-full object-cover border-2 border-slate-200"
-                      />
-                    ) : (
-                      <div className="h-16 w-16 rounded-full bg-sky-500 flex items-center justify-center border-2 border-slate-200">
-                        <span className="text-white text-xl font-semibold">
-                          {profileData.userName ? profileData.userName.charAt(0).toUpperCase() : 'U'}
-                        </span>
-                      </div>
-                    )}
-                    <label
-                      htmlFor="profile-picture-upload"
-                      className="absolute -bottom-1 -right-1 bg-white p-1.5 rounded-full shadow border border-slate-300 cursor-pointer hover:bg-slate-50 transition-colors"
-                    >
-                      <Camera className="w-3.5 h-3.5 text-slate-600" />
-                    </label>
-                    <input
-                      id="profile-picture-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProfilePictureChange}
-                      className="hidden"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-600 mb-1">Click the camera icon to change picture</p>
-                    <p className="text-xs text-slate-500">JPG, PNG or GIF (Max. 2MB)</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Name Field */}
-              <div className="mb-5">
-                <label htmlFor="userName" className="block text-sm font-medium text-slate-700 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="userName"
-                  name="userName"
-                  value={profileData.userName}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all text-sm"
-                  placeholder="Enter your full name"
-                />
-              </div>
-
-              {/* Email Display (Read-only) */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Email Address
-                </label>
-                <div className="w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-lg text-sm text-slate-600">
-                  {user?.userEmail || 'No email available'}
-                </div>
-                <p className="mt-1 text-xs text-slate-500">
-                  Email cannot be changed
-                </p>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={handleCloseEditProfileModal}
-                  className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-slate-500 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-sky-600 rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-sky-500 transition-colors"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
