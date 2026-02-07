@@ -53,12 +53,12 @@ const AdminDashboardLayout = () => {
       label: "Manage Teachers",
       path: "/admin/teachers"
     },
-    {
-      name: "System Configuration",
-      icon: Cog,
-      label: "System Configuration",
-      path: "/admin/configuration"
-    }
+    // {
+    //   name: "System Configuration",
+    //   icon: Cog,
+    //   label: "System Configuration",
+    //   path: "/admin/configuration"
+    // }
   ];
 
   useEffect(() => {

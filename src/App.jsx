@@ -72,7 +72,6 @@ const App = () => {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard_Page />} />
           <Route path="teachers" element={<AdminTeachers_Page />} />
-          <Route path="configuration" element={<AdminConfiguration_Page />} />
         </Route>
 
         {/* =====>] Students Routes [<===== */}
