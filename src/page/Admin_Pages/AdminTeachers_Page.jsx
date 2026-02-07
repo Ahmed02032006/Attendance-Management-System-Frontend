@@ -345,17 +345,28 @@ const AdminTeachers_Page = () => {
                         <tr key={teacher._id || teacher.id} className="hover:bg-gray-50">
                           <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
+                              <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center">
                                 {teacher.profilePicture ? (
                                   <img
                                     src={teacher.profilePicture}
                                     alt={teacher.userName}
                                     className="h-full w-full object-cover"
+                                    onError={(e) => {
+                                      // Fallback to avatar letter if image fails to load
+                                      e.target.style.display = 'none';
+                                      const parent = e.target.parentNode;
+                                      const fallback = document.createElement('div');
+                                      fallback.className = 'h-full w-full flex items-center justify-center bg-sky-500';
+                                      fallback.innerHTML = `<span class="text-white font-bold text-lg">${getAvatarLetter(teacher.userName)}</span>`;
+                                      parent.appendChild(fallback);
+                                    }}
                                   />
                                 ) : (
-                                  <span className="text-white font-bold text-lg">
-                                    {getAvatarLetter(teacher.userName)}
-                                  </span>
+                                  <div className="h-full w-full flex items-center justify-center bg-sky-500">
+                                    <span className="text-white font-bold text-lg">
+                                      {getAvatarLetter(teacher.userName)}
+                                    </span>
+                                  </div>
                                 )}
                               </div>
                               <div className="ml-4">
