@@ -16,6 +16,8 @@ import StudentAttendance_Page from './page/Student_Pages/StudentAttendance_Page'
 import QRScanner_Page from './page/Student_Pages/QR_Scanner';
 import AdminTeachers_Page from './page/Admin_Pages/AdminTeachers_Page';
 import AdminDashboardLayout from './layout/Admin_Dashboard_Layout/AdminDashboardLayout';
+import AdminDashboard_Page from './page/Admin_Pages/AdminDashboard_Page';
+import AdminConfiguration_Page from './page/Admin_Pages/AdminConfiguration_Page';
 
 const App = () => {
 
@@ -67,8 +69,10 @@ const App = () => {
         <Route path='/admin' element={<CheckAuth isInitialAuthCheckComplete={isInitialAuthCheckComplete} isAuthenticated={isAuthenticated} user={user} >
           <AdminDashboardLayout />
         </CheckAuth>}>
-          <Route index element={<Navigate to="teachers" replace />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard_Page />} />
           <Route path="teachers" element={<AdminTeachers_Page />} />
+          <Route path="configuration" element={<AdminConfiguration_Page />} />
         </Route>
 
         {/* =====>] Students Routes [<===== */}

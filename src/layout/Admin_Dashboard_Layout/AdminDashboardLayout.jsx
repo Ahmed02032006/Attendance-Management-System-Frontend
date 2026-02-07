@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Menu, X } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Menu, X, LayoutDashboard,Cog } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,10 +25,10 @@ const AdminDashboardLayout = () => {
     if (!email) return '';
     const atIndex = email.indexOf('@');
     if (atIndex === -1) return email;
-    
+
     const username = email.substring(0, atIndex);
     const domain = email.substring(atIndex);
-    
+
     // Show first 3 characters of username + ... + @ + domain
     return `${username.substring(0, 3)}...${domain}`;
   };
@@ -42,11 +42,23 @@ const AdminDashboardLayout = () => {
 
   const tabs = [
     {
+      name: "Dashboard",
+      icon: LayoutDashboard,
+      label: "Dashboard",
+      path: "/admin/dashboard"
+    },
+    {
       name: "Manage Teachers",
       icon: Users,
       label: "Manage Teachers",
       path: "/admin/teachers"
     },
+    {
+      name: "System Configuration",
+      icon: Cog,
+      label: "System Configuration",
+      path: "/admin/configuration"
+    }
   ];
 
   useEffect(() => {
@@ -80,7 +92,7 @@ const AdminDashboardLayout = () => {
 
   const handleCloseInactiveModal = () => {
     setShowInactiveModal(false);
-    handleOnLogOut({ preventDefault: () => {} });
+    handleOnLogOut({ preventDefault: () => { } });
   };
 
   return (

@@ -69,22 +69,6 @@ const TeacherDashboardLayout = () => {
       label: "Attendance",
       path: "/teacher/attendance"
     },
-    // {
-    //   name: "Student Mark Attendance",
-    //   icon: UserCheck,
-    //   label: "Student Mark Attendance",
-    //   path: "/scan-attendance"
-    // },
-    // {
-    //   name: "Exams",
-    //   icon: ClipboardList,
-    //   label: "Exams",
-    //   path: "/teacher/exams",
-    //   subItems: [
-    //     { label: "Manage Tests", path: "/teacher/exams/create" },
-    //     { label: "Exam Grading", path: "/teacher/exams/grading" }
-    //   ]
-    // },
   ];
 
   useEffect(() => {

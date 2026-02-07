@@ -351,10 +351,6 @@ const AdminTeachers_Page = () => {
                                     src={teacher.profilePicture}
                                     alt={teacher.userName}
                                     className="h-full w-full object-cover"
-                                    onError={(e) => {
-                                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.userName || 'Teacher')}&background=random`
-                                      e.target.className = 'h-full w-full object-cover'
-                                    }}
                                   />
                                 ) : (
                                   <span className="text-white font-bold text-lg">
