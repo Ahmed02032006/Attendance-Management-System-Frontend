@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiUsers, FiBookOpen, FiTrendingUp, FiActivity, FiChevronRight, FiChevronLeft, FiEdit, FiTrash2, FiMail, FiCheck, FiSlash } from 'react-icons/fi';
+import { FiUsers, FiBookOpen, FiCheck, FiSlash, FiMail, FiEdit, FiTrash2, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
 import HeaderComponent from '../../components/HeaderComponent';
 
 const AdminDashboard_Page = () => {
@@ -7,8 +7,8 @@ const AdminDashboard_Page = () => {
   const [stats, setStats] = useState({
     allTeachers: 0,
     activeTeachers: 0,
-    activeSubjects: 0,
-    allSubjects: 0
+    allSubjects: 0,
+    activeSubjects: 0
   });
 
   // Teachers data
@@ -36,8 +36,8 @@ const AdminDashboard_Page = () => {
       const mockStats = {
         allTeachers: 45,
         activeTeachers: 38,
-        activeSubjects: 28,
-        allSubjects: 32
+        allSubjects: 32,
+        activeSubjects: 28
       };
 
       const mockTeachers = [
@@ -176,109 +176,69 @@ const AdminDashboard_Page = () => {
       />
 
       <div className="container max-w-full mx-auto p-4 lg:p-6">
-        {/* Stats Cards */}
+        {/* Stats Cards - Reordered as requested */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
           {/* All Teachers Card */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-sky-100 rounded-xl">
+          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+            <div className="flex items-center mb-4">
+              <div className="p-3 bg-sky-100 rounded-lg mr-4">
                 <FiUsers className="h-6 w-6 text-sky-600" />
               </div>
-              <div className="text-right">
+              <div>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allTeachers}</div>
-                <div className="text-sm text-gray-600 mt-1">Total</div>
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">All Teachers</h3>
-            <p className="text-sm text-gray-600">Total number of faculty members</p>
-            <div className="mt-4 pt-3 border-t border-gray-100">
-              <div className="flex items-center text-sm">
-                <FiTrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-green-600 font-medium">+12%</span>
-                <span className="text-gray-500 ml-2">from last month</span>
+                <div className="text-sm font-medium text-gray-600">All Teachers</div>
               </div>
             </div>
           </div>
 
           {/* Active Teachers Card */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-green-100 rounded-xl">
-                <FiActivity className="h-6 w-6 text-green-600" />
+          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+            <div className="flex items-center mb-4">
+              <div className="p-3 bg-green-100 rounded-lg mr-4">
+                <FiUsers className="h-6 w-6 text-green-600" />
               </div>
-              <div className="text-right">
+              <div>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeTeachers}</div>
-                <div className="text-sm text-gray-600 mt-1">Active</div>
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Active Teachers</h3>
-            <p className="text-sm text-gray-600">Currently active faculty members</p>
-            <div className="mt-4 pt-3 border-t border-gray-100">
-              <div className="flex items-center text-sm">
-                <span className="text-green-600 font-medium">{Math.round((stats.activeTeachers / stats.allTeachers) * 100)}%</span>
-                <span className="text-gray-500 ml-2">active rate</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Active Subjects Card */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-purple-100 rounded-xl">
-                <FiBookOpen className="h-6 w-6 text-purple-600" />
-              </div>
-              <div className="text-right">
-                <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeSubjects}</div>
-                <div className="text-sm text-gray-600 mt-1">Active</div>
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Active Subjects</h3>
-            <p className="text-sm text-gray-600">Currently running courses</p>
-            <div className="mt-4 pt-3 border-t border-gray-100">
-              <div className="flex items-center text-sm">
-                <FiTrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-green-600 font-medium">+8%</span>
-                <span className="text-gray-500 ml-2">from last month</span>
+                <div className="text-sm font-medium text-gray-600">Active Teachers</div>
               </div>
             </div>
           </div>
 
           {/* All Subjects Card */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-orange-100 rounded-xl">
-                <FiBookOpen className="h-6 w-6 text-orange-600" />
+          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+            <div className="flex items-center mb-4">
+              <div className="p-3 bg-purple-100 rounded-lg mr-4">
+                <FiBookOpen className="h-6 w-6 text-purple-600" />
               </div>
-              <div className="text-right">
+              <div>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allSubjects}</div>
-                <div className="text-sm text-gray-600 mt-1">Total</div>
+                <div className="text-sm font-medium text-gray-600">All Subjects</div>
               </div>
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">All Subjects</h3>
-            <p className="text-sm text-gray-600">Total courses in institution</p>
-            <div className="mt-4 pt-3 border-t border-gray-100">
-              <div className="flex items-center text-sm">
-                <span className="text-green-600 font-medium">{Math.round((stats.activeSubjects / stats.allSubjects) * 100)}%</span>
-                <span className="text-gray-500 ml-2">active rate</span>
+          </div>
+
+          {/* Active Subjects Card */}
+          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+            <div className="flex items-center mb-4">
+              <div className="p-3 bg-orange-100 rounded-lg mr-4">
+                <FiBookOpen className="h-6 w-6 text-orange-600" />
+              </div>
+              <div>
+                <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeSubjects}</div>
+                <div className="text-sm font-medium text-gray-600">Active Subjects</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Tables Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* Teachers Table */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        {/* Tables in different columns */}
+        <div className="grid grid-cols-1 gap-6 lg:gap-8">
+          {/* Teachers Table Column */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Recent Teachers</h3>
-                  <p className="text-sm text-gray-600 mt-1">Latest faculty members</p>
-                </div>
-                <button className="text-sky-600 hover:text-sky-800 font-medium text-sm flex items-center">
-                  View All
-                  <FiChevronRight className="h-4 w-4 ml-1" />
-                </button>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Teachers List</h3>
+                <p className="text-sm text-gray-600 mt-1">Manage faculty members</p>
               </div>
             </div>
 
@@ -397,18 +357,12 @@ const AdminDashboard_Page = () => {
             )}
           </div>
 
-          {/* Subjects Table */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          {/* Subjects Table Column */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Recent Subjects</h3>
-                  <p className="text-sm text-gray-600 mt-1">Latest courses</p>
-                </div>
-                <button className="text-sky-600 hover:text-sky-800 font-medium text-sm flex items-center">
-                  View All
-                  <FiChevronRight className="h-4 w-4 ml-1" />
-                </button>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Subjects List</h3>
+                <p className="text-sm text-gray-600 mt-1">Manage courses and subjects</p>
               </div>
             </div>
 
@@ -524,45 +478,6 @@ const AdminDashboard_Page = () => {
                 {renderPagination(currentSubjectPage, subjectTotalPages, subjectPaginate)}
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Quick Actions Section */}
-        <div className="mt-8 bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button className="bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg p-4 flex items-center justify-center transition-colors group">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-sky-200 transition-colors">
-                  <FiUsers className="h-6 w-6 text-sky-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-800">Add New Teacher</span>
-              </div>
-            </button>
-            <button className="bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg p-4 flex items-center justify-center transition-colors group">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors">
-                  <FiBookOpen className="h-6 w-6 text-green-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-800">Create Subject</span>
-              </div>
-            </button>
-            <button className="bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg p-4 flex items-center justify-center transition-colors group">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-200 transition-colors">
-                  <FiUsers className="h-6 w-6 text-purple-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-800">Manage Students</span>
-              </div>
-            </button>
-            <button className="bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg p-4 flex items-center justify-center transition-colors group">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-200 transition-colors">
-                  <FiActivity className="h-6 w-6 text-orange-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-800">View Reports</span>
-              </div>
-            </button>
           </div>
         </div>
       </div>
