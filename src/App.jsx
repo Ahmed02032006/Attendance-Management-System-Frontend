@@ -17,7 +17,6 @@ import QRScanner_Page from './page/Student_Pages/QR_Scanner';
 import AdminTeachers_Page from './page/Admin_Pages/AdminTeachers_Page';
 import AdminDashboardLayout from './layout/Admin_Dashboard_Layout/AdminDashboardLayout';
 import AdminDashboard_Page from './page/Admin_Pages/AdminDashboard_Page';
-import AdminConfiguration_Page from './page/Admin_Pages/AdminConfiguration_Page';
 
 const App = () => {
 
