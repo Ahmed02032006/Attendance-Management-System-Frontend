@@ -236,105 +236,114 @@ const TeacherSubjects_Page = () => {
         {/* Subjects Table */}
         {!isLoading && (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto hide-scrollbar">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Subject Info
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Created Date
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Subject Semester
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {currentSubjects.length > 0 ? (
-                    currentSubjects.map((subject) => (
-                      <tr key={subject._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-3.5 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="shrink-0 h-10 w-10 rounded-full bg-sky-100 overflow-hidden border border-gray-300 flex items-center justify-center">
-                              <span className="text-sky-600 font-bold text-sm">
-                                {subject.subjectTitle?.charAt(0)}
-                              </span>
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{subject.subjectName}</div>
-                              <div className="text-xs text-gray-500">Course Code : <span className='border-b border-gray-400'>{subject.subjectCode}</span></div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
-                          {formatDate(subject.createdAt)}
-                        </td>
-                        <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
-                          {subject.semester}
-                        </td>
-                        <td className="px-6 py-3.5 whitespace-nowrap text-center">
-                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${subject.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                            }`}>
-                            {subject.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm font-medium">
-                          <div className="flex justify-center space-x-3">
-                            <button
-                              onClick={() => openEditModal(subject)}
-                              className="text-sky-600 hover:text-sky-900 transition-colors"
-                              title="Edit Subject"
-                            >
-                              <FiEdit className="h-5 w-5" />
-                            </button>
-
-                            <button
-                              onClick={() => openDeleteModal(subject)}
-                              className="text-red-600 hover:text-red-900 transition-colors"
-                              title="Delete Subject"
-                            >
-                              <FiTrash2 className="h-5 w-5" />
-                            </button>
-
-                            <button
-                              onClick={() => openResetModal(subject)}
-                              className="text-yellow-600 hover:text-yellow-900 transition-colors"
-                              title="Reset Subject Attendance"
-                            >
-                              <FiRefreshCcw className="h-5 w-5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
+            {/* Table Container with Fixed Height */}
+            <div className="overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center">
-                        <div className="text-gray-500">
-                          <FiSearch className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                          <p className="text-lg font-medium">No subjects found</p>
-                          <p className="mt-1">
-                            {searchTerm || statusFilter !== 'All'
-                              ? 'Try adjusting your search or filter'
-                              : 'Get started by creating your first subject'
-                            }
-                          </p>
-                        </div>
-                      </td>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Subject Info
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Created Date
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Subject Semester
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                </table>
+                
+                {/* Scrollable Table Body */}
+                <div className="overflow-y-auto max-h-[400px]">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {currentSubjects.length > 0 ? (
+                        currentSubjects.map((subject) => (
+                          <tr key={subject._id} className="hover:bg-gray-50">
+                            <td className="px-6 py-3.5 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="shrink-0 h-10 w-10 rounded-full bg-sky-100 overflow-hidden border border-gray-300 flex items-center justify-center">
+                                  <span className="text-sky-600 font-bold text-sm">
+                                    {subject.subjectTitle?.charAt(0)}
+                                  </span>
+                                </div>
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">{subject.subjectName}</div>
+                                  <div className="text-xs text-gray-500">Course Code : <span className='border-b border-gray-400'>{subject.subjectCode}</span></div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
+                              {formatDate(subject.createdAt)}
+                            </td>
+                            <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
+                              {subject.semester}
+                            </td>
+                            <td className="px-6 py-3.5 whitespace-nowrap text-center">
+                              <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${subject.status === "Active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                                }`}>
+                                {subject.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm font-medium">
+                              <div className="flex justify-center space-x-3">
+                                <button
+                                  onClick={() => openEditModal(subject)}
+                                  className="text-sky-600 hover:text-sky-900 transition-colors"
+                                  title="Edit Subject"
+                                >
+                                  <FiEdit className="h-5 w-5" />
+                                </button>
+
+                                <button
+                                  onClick={() => openDeleteModal(subject)}
+                                  className="text-red-600 hover:text-red-900 transition-colors"
+                                  title="Delete Subject"
+                                >
+                                  <FiTrash2 className="h-5 w-5" />
+                                </button>
+
+                                <button
+                                  onClick={() => openResetModal(subject)}
+                                  className="text-yellow-600 hover:text-yellow-900 transition-colors"
+                                  title="Reset Subject Attendance"
+                                >
+                                  <FiRefreshCcw className="h-5 w-5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="px-6 py-8 text-center">
+                            <div className="text-gray-500">
+                              <FiSearch className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                              <p className="text-lg font-medium">No subjects found</p>
+                              <p className="mt-1">
+                                {searchTerm || statusFilter !== 'All'
+                                  ? 'Try adjusting your search or filter'
+                                  : 'Get started by creating your first subject'
+                                }
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
 
             {filteredSubjects.length > 0 && (
