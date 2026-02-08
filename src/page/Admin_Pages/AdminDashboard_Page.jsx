@@ -14,12 +14,7 @@ const AdminDashboard_Page = () => {
   // Teachers data
   const [teachers, setTeachers] = useState([]);
   const [currentTeacherPage, setCurrentTeacherPage] = useState(1);
-  const [teachersPerPage] = useState(5);
-
-  // Subjects data
-  const [subjects, setSubjects] = useState([]);
-  const [currentSubjectPage, setCurrentSubjectPage] = useState(1);
-  const [subjectsPerPage] = useState(5);
+  const [teachersPerPage] = useState(4);
 
   // Loading states
   const [loading, setLoading] = useState(true);
@@ -50,19 +45,8 @@ const AdminDashboard_Page = () => {
         { id: 7, name: "David Miller", email: "david@example.com", subjects: 8, status: "Inactive", joined: "2023-10-15" }
       ];
 
-      const mockSubjects = [
-        { id: 1, name: "Mathematics", code: "MATH101", teacher: "John Doe", students: 45, status: "Active" },
-        { id: 2, name: "Physics", code: "PHY201", teacher: "Jane Smith", students: 38, status: "Active" },
-        { id: 3, name: "Chemistry", code: "CHEM101", teacher: "Robert Johnson", students: 42, status: "Active" },
-        { id: 4, name: "Biology", code: "BIO101", teacher: "Emily Davis", students: 35, status: "Inactive" },
-        { id: 5, name: "Computer Science", code: "CS101", teacher: "Michael Wilson", students: 50, status: "Active" },
-        { id: 6, name: "English", code: "ENG101", teacher: "Sarah Brown", students: 40, status: "Active" },
-        { id: 7, name: "History", code: "HIST101", teacher: "David Miller", students: 30, status: "Inactive" }
-      ];
-
       setStats(mockStats);
       setTeachers(mockTeachers);
-      setSubjects(mockSubjects);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -92,21 +76,10 @@ const AdminDashboard_Page = () => {
   const currentTeachers = teachers.slice(indexOfFirstTeacher, indexOfLastTeacher);
   const teacherTotalPages = Math.ceil(teachers.length / teachersPerPage);
 
-  // Subjects pagination
-  const indexOfLastSubject = currentSubjectPage * subjectsPerPage;
-  const indexOfFirstSubject = indexOfLastSubject - subjectsPerPage;
-  const currentSubjects = subjects.slice(indexOfFirstSubject, indexOfLastSubject);
-  const subjectTotalPages = Math.ceil(subjects.length / subjectsPerPage);
-
   // Teacher pagination functions
   const teacherPaginate = (pageNumber) => setCurrentTeacherPage(pageNumber);
   const teacherNextPage = () => setCurrentTeacherPage(prev => Math.min(prev + 1, teacherTotalPages));
   const teacherPrevPage = () => setCurrentTeacherPage(prev => Math.max(prev - 1, 1));
-
-  // Subject pagination functions
-  const subjectPaginate = (pageNumber) => setCurrentSubjectPage(pageNumber);
-  const subjectNextPage = () => setCurrentSubjectPage(prev => Math.min(prev + 1, subjectTotalPages));
-  const subjectPrevPage = () => setCurrentSubjectPage(prev => Math.max(prev - 1, 1));
 
   // Render pagination buttons
   const renderPagination = (currentPage, totalPages, paginateFunction) => {
@@ -295,8 +268,8 @@ const AdminDashboard_Page = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs font-semibold rounded-full inline-flex items-center ${teacher.status === "Active"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
                             }`}>
                             {teacher.status === "Active" ? (
                               <>
@@ -353,129 +326,6 @@ const AdminDashboard_Page = () => {
                   </p>
                 </div>
                 {renderPagination(currentTeacherPage, teacherTotalPages, teacherPaginate)}
-              </div>
-            )}
-          </div>
-
-          {/* Subjects Table Column */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Subjects List</h3>
-                <p className="text-sm text-gray-600 mt-1">Manage courses and subjects</p>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Subject
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                      Teacher
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                      Students
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {currentSubjects.length > 0 ? (
-                    currentSubjects.map((subject) => (
-                      <tr key={subject.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {subject.name}
-                            </div>
-                            <div className="text-xs text-gray-500 mt-0.5">
-                              Code: {subject.code}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
-                          <div className="flex items-center">
-                            <div className="shrink-0 h-8 w-8 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500 mr-2">
-                              <span className="text-white font-bold text-sm">
-                                {getAvatarLetter(subject.teacher)}
-                              </span>
-                            </div>
-                            {subject.teacher}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
-                          <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
-                            {subject.students} students
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full inline-flex items-center ${subject.status === "Active"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                            }`}>
-                            {subject.status === "Active" ? (
-                              <>
-                                <FiCheck className="h-3 w-3 mr-1.5" />
-                                Active
-                              </>
-                            ) : (
-                              <>
-                                <FiSlash className="h-3 w-3 mr-1.5" />
-                                Inactive
-                              </>
-                            )}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <button
-                              className="text-sky-600 hover:text-sky-900 transition-colors p-1"
-                              title="Edit Subject"
-                            >
-                              <FiEdit className="h-4 w-4" />
-                            </button>
-                            <button
-                              className="text-red-600 hover:text-red-900 transition-colors p-1"
-                              title="Delete Subject"
-                            >
-                              <FiTrash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center">
-                        <div className="text-gray-500">
-                          <FiBookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                          <p className="text-lg font-medium">No subjects found</p>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {subjects.length > 0 && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between">
-                <div className="mb-3 sm:mb-0">
-                  <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{indexOfFirstSubject + 1}</span> to{' '}
-                    <span className="font-medium">{Math.min(indexOfLastSubject, subjects.length)}</span> of{' '}
-                    <span className="font-medium">{subjects.length}</span> subjects
-                  </p>
-                </div>
-                {renderPagination(currentSubjectPage, subjectTotalPages, subjectPaginate)}
               </div>
             )}
           </div>
