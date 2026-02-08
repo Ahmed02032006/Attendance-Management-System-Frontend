@@ -10,6 +10,7 @@ const TeacherDashboardLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
   const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [profileImageError, setProfileImageError] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,10 +39,24 @@ const TeacherDashboardLayout = () => {
     return user.userName.charAt(0).toUpperCase();
   };
 
-  // Function to check if user has profile picture
-  const hasProfilePicture = () => {
-    return user?.profilePicture && user.profilePicture.trim() !== '';
+  // Function to check if user has a valid profile picture URL
+  const hasValidProfilePicture = () => {
+    return user?.profilePicture && 
+           user.profilePicture.trim() !== '' && 
+           !profileImageError;
   };
+
+  // Function to handle image loading error
+  const handleImageError = () => {
+    setProfileImageError(true);
+  };
+
+  // Reset profile image error when user changes
+  useEffect(() => {
+    if (user?.profilePicture) {
+      setProfileImageError(false);
+    }
+  }, [user?.profilePicture]);
 
   // Check if user is inactive and show modal
   useEffect(() => {
@@ -246,11 +261,9 @@ const TeacherDashboardLayout = () => {
               {
                 sidebarOpen ? (
                   <p className='text-2xl'>TRACK EASE</p>
-                  // <p className='text-2xl'>DAILY MARK</p>
                 ) :
                   <img
                     src="https://repository-images.githubusercontent.com/266040586/ea7a9500-cd19-11ea-9ec9-c7a5474b81af"
-                    // src="https://www.shutterstock.com/image-vector/effective-teamwork-icon-black-thin-600nw-2227180861.jpg"
                     alt="CampusTrack X Logo"
                     className={`rounded-md object-cover border border-gray-200 w-14 h-8`}
                   />
@@ -343,13 +356,14 @@ const TeacherDashboardLayout = () => {
               <div className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors duration-150">
                 <div className="flex items-center space-x-2.5">
                   <div className="relative">
-                    {hasProfilePicture() ? (
-                      // Show profile picture if exists
+                    {hasValidProfilePicture() ? (
+                      // Show profile picture if exists and loads successfully
                       <>
                         <img
                           src={user.profilePicture}
                           alt="User Avatar"
                           className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                          onError={handleImageError}
                         />
                         <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
                       </>
@@ -380,13 +394,14 @@ const TeacherDashboardLayout = () => {
               </div>
             ) : (
               <div className="flex justify-center">
-                {hasProfilePicture() ? (
+                {hasValidProfilePicture() ? (
                   // Show profile picture thumbnail in collapsed sidebar
                   <div className="relative">
                     <img
                       src={user.profilePicture}
                       alt="User Avatar"
                       className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                      onError={handleImageError}
                     />
                     <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
                   </div>
