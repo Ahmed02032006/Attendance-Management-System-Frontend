@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'react-toastify'
-import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2, FiMaximize2, FiMinimize2 } from 'react-icons/fi'
+import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowUp, FiArrowDown, FiTrash2, FiMaximize2, FiMinimize2, FiGrid } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
   deleteAttendance,
@@ -801,9 +801,10 @@ const TeacherAttendance_Page = () => {
             <p className="text-gray-600 mb-4">Please select a subject to view attendance records</p>
             <button
               onClick={() => setShowSubjectModal(true)}
-              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center mx-auto space-x-2"
             >
-              Select Subject
+              <FiGrid className="w-4 h-4" />
+              <span>Select Subject</span>
             </button>
           </div>
         )}
@@ -828,39 +829,49 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal */}
-      {
-        showSubjectModal && subjectsWithAttendance.length > 0 && (
-          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-auto">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800">Select Subject</h3>
-                <p className="text-sm text-gray-600 mt-1">Choose a subject to view attendance records</p>
+      {/* Subject Selection Modal - FIXED VERSION */}
+      {showSubjectModal && subjectsWithAttendance.length > 0 && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-auto my-8">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Select Subject</h3>
+              <p className="text-sm text-gray-600 mt-1">Choose a subject to view attendance records</p>
+            </div>
+            
+            <div className="p-6">
+              {/* Responsive grid for subjects */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {subjectsWithAttendance.map((subject) => (
+                  <div
+                    key={subject.id}
+                    className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center min-h-[80px] flex items-center justify-center"
+                    onClick={() => handleSubjectSelect(subject.id)}
+                  >
+                    <h4 className="font-medium text-sm text-gray-700 line-clamp-2">
+                      {subject.name}
+                    </h4>
+                  </div>
+                ))}
               </div>
-              <div className="p-6">
-                <div className="flex items-center gap-3">
-                  {subjectsWithAttendance.map((subject) => (
-                    <div
-                      key={subject.id}
-                      className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center"
-                      onClick={() => handleSubjectSelect(subject.id)}
-                    >
-                      <h4 className="font-light text-sm text-gray-700">
-                        {subject.name}
-                      </h4>
-                    </div>
-                  ))}
+              
+              {/* Scrollable container alternative for very large lists */}
+              {subjectsWithAttendance.length > 12 && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 text-center">
+                    Showing {subjectsWithAttendance.length} subjects. Select one to continue.
+                  </p>
                 </div>
-              </div>
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                <p className="text-sm text-gray-600 text-center">
-                  Select a subject to continue to the attendance dashboard
-                </p>
-              </div>
+              )}
+            </div>
+            
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <p className="text-sm text-gray-600 text-center">
+                Select a subject to continue to the attendance dashboard
+              </p>
             </div>
           </div>
-        )
-      }
+        </div>
+      )}
 
       {/* Create Attendance Modal */}
       {
