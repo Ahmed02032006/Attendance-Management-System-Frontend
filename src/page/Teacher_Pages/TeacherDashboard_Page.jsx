@@ -78,12 +78,12 @@ const TeacherDashboard_Page = () => {
     // Regex to match numbered list items like "1. ", "2. ", etc.
     const numberedListRegex = /(\d+\.\s+)/g;
     const parts = text.split(numberedListRegex);
-    
+
     if (parts.length <= 1) {
       // No numbered list found
       return [text];
     }
-    
+
     const result = [];
     for (let i = 0; i < parts.length; i++) {
       if (numberedListRegex.test(parts[i])) {
@@ -97,18 +97,18 @@ const TeacherDashboard_Page = () => {
         result.push(parts[i]);
       }
     }
-    
+
     return result;
   };
 
   // Function to format AI response with clickable page names and styled headings
   const formatAIResponse = (text) => {
     if (!text) return text;
-    
+
     // First, handle numbered lists that might be concatenated
     const lines = text.split('\n');
     const formattedLines = [];
-    
+
     for (let line of lines) {
       // Check if line starts with # (heading)
       if (line.trim().startsWith('#')) {
@@ -126,7 +126,7 @@ const TeacherDashboard_Page = () => {
         if (line.match(/\d+\.\s+/)) {
           // Split the line into individual numbered items
           const listItems = splitNumberedList(line);
-          
+
           listItems.forEach((item, index) => {
             if (item.trim()) {
               // Check if it's a numbered item
@@ -170,7 +170,7 @@ const TeacherDashboard_Page = () => {
         }
       }
     }
-    
+
     return formattedLines;
   };
 
@@ -208,10 +208,10 @@ const TeacherDashboard_Page = () => {
         const url = matches[index];
         const pageName = PAGE_NAME_MAPPING[url];
         acc.push(
-          <a 
+          <a
             key={`link-${index}`}
-            href={url} 
-            target="_blank" 
+            href={url}
+            target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline transition-colors"
           >
@@ -230,10 +230,10 @@ const TeacherDashboard_Page = () => {
     if (sender === 'user') {
       return text;
     }
-    
+
     // For assistant messages, apply URL formatting
     const formattedContent = formatAIResponse(text);
-    
+
     // Check if we have React elements (from formatting)
     if (Array.isArray(formattedContent)) {
       return (
@@ -246,7 +246,7 @@ const TeacherDashboard_Page = () => {
         </div>
       );
     }
-    
+
     // If it's just a string, return it
     return formattedContent;
   };
@@ -330,7 +330,7 @@ const TeacherDashboard_Page = () => {
 
   // Scroll to bottom function
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ 
+    messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'end'
     });
@@ -517,7 +517,7 @@ const TeacherDashboard_Page = () => {
       }
 
       setChatMessages(prev => [...prev, fallbackResponse])
-      
+
     } finally {
       setIsSending(false)
 
@@ -547,7 +547,7 @@ const TeacherDashboard_Page = () => {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ];
-    
+
     setChatMessages(initialChat);
     // Also clear from localStorage
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(initialChat));
@@ -588,42 +588,45 @@ const TeacherDashboard_Page = () => {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2 sm:space-y-3">
-                  {dashboardSubjects.map((subject, index) => (
-                    <div
-                      key={subject.id}
-                      className={`flex items-center justify-between p-3 rounded-lg transition-all cursor-pointer ${selectedSubject === subject.id
-                        ? 'bg-sky-50 border border-sky-200'
-                        : 'hover:bg-gray-50 border border-transparent'
-                        }`}
-                      onClick={() => handleSubjectSelect(subject.id)}
-                    >
-                      <div className="flex items-center space-x-3 flex-1 min-w-0">
-                        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${getSubjectColor(index)} flex items-center justify-center shrink-0`}>
-                          <span className="text-white font-semibold text-xs sm:text-sm">
-                            {subject.name?.charAt(0) || 'S'}
-                          </span>
+                // Updated container with scrollbar
+                <div className="max-h-[calc(100vh-200px)] overflow-y-auto pr-2"> {/* Add this wrapper */}
+                  <div className="space-y-2 sm:space-y-3">
+                    {dashboardSubjects.map((subject, index) => (
+                      <div
+                        key={subject.id}
+                        className={`flex items-center justify-between p-3 rounded-lg transition-all cursor-pointer ${selectedSubject === subject.id
+                          ? 'bg-sky-50 border border-sky-200'
+                          : 'hover:bg-gray-50 border border-transparent'
+                          }`}
+                        onClick={() => handleSubjectSelect(subject.id)}
+                      >
+                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${getSubjectColor(index)} flex items-center justify-center shrink-0`}>
+                            <span className="text-white font-semibold text-xs sm:text-sm">
+                              {subject.name?.charAt(0) || 'S'}
+                            </span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className={`text-xs font-medium truncate ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                                }`}
+                              title={subject.name}
+                            >
+                              {subject.name}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">{subject.code}</p>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p
-                            className={`text-xs font-medium truncate ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
-                              }`}
-                            title={subject.name}
-                          >
-                            {subject.name}
+                        <div className="text-right shrink-0 ml-2">
+                          <p className={`text-sm font-medium ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                            }`}>
+                            {subject.students || 0}
                           </p>
-                          <p className="text-xs text-gray-500 truncate">{subject.code}</p>
+                          <p className="text-xs text-gray-500">students</p>
                         </div>
                       </div>
-                      <div className="text-right shrink-0 ml-2">
-                        <p className={`text-sm font-medium ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
-                          }`}>
-                          {subject.students || 0}
-                        </p>
-                        <p className="text-xs text-gray-500">students</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
