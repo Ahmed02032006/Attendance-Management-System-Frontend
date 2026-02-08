@@ -63,27 +63,5 @@
   animation: wave 1.5s infinite;
 }
 
-/* Hide Scrollbar */
+/* ====================================================== */
 
-/* Ultra thin scrollbar */
-.thin-scrollbar::-webkit-scrollbar {
-  width: 3px; /* Ultra thin */
-}
-
-/* Or even thinner with minimal appearance */
-.minimal-scrollbar::-webkit-scrollbar {
-  width: 3px;
-}
-
-.minimal-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.minimal-scrollbar::-webkit-scrollbar-thumb {
-  background: #94a3b8; /* slate-400 */
-  border-radius: 3px;
-}
-
-.minimal-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #64748b; /* slate-500 */
-}
