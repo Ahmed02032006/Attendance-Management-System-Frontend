@@ -588,8 +588,8 @@ const TeacherDashboard_Page = () => {
                   </p>
                 </div>
               ) : (
-                // Updated container with scrollbar
-                <div className="max-h-[calc(100vh-200px)] overflow-y-auto pr-2"> {/* Add this wrapper */}
+                // Updated container with scrollbar and custom styling
+                <div className="max-h-[calc(100vh-200px)] overflow-y-auto thin-scrollbar pr-1"> {/* Changed pr-2 to pr-1 and added thin-scrollbar class */}
                   <div className="space-y-2 sm:space-y-3">
                     {dashboardSubjects.map((subject, index) => (
                       <div
