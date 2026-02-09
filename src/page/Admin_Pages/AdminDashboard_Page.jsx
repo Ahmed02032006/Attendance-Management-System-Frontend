@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { FiUsers, FiBookOpen, FiCheck, FiSlash, FiMail, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
+import { FiUsers, FiBookOpen, FiCheck, FiSlash, FiMail, FiEdit, FiTrash2, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
 import HeaderComponent from '../../components/HeaderComponent';
-import { getTeachersByUser } from '../../store/Admin-Slicer/Teacher-Slicer.js';
 
 const AdminDashboard_Page = () => {
-  const dispatch = useDispatch();
-  const { teachers } = useSelector((state) => state.adminTeacher);
-  
   // Stats data
   const [stats, setStats] = useState({
     allTeachers: 0,
@@ -17,9 +12,11 @@ const AdminDashboard_Page = () => {
   });
 
   // Teachers data
-  const [dashboardTeachers, setDashboardTeachers] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [currentTeacherPage, setCurrentTeacherPage] = useState(1);
   const [teachersPerPage] = useState(4);
+
+  // Loading states
   const [loading, setLoading] = useState(true);
 
   // Fetch data on component mount
@@ -30,68 +27,32 @@ const AdminDashboard_Page = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      // Fetch real teachers data
-      await dispatch(getTeachersByUser());
+      // Mock data - replace with actual API calls
+      const mockStats = {
+        allTeachers: 45,
+        activeTeachers: 38,
+        allSubjects: 32,
+        activeSubjects: 28
+      };
 
-      // Calculate stats from real data
-      const allTeachersCount = teachers.length;
-      const activeTeachersCount = teachers.filter(teacher => teacher.status === 'Active').length;
-      
-      // Calculate total subjects count from all teachers
-      const allSubjectsCount = teachers.reduce((total, teacher) => {
-        return total + (teacher.subjectCount || 0);
-      }, 0);
-      
-      // For active subjects, we can use a placeholder or calculate from active teachers
-      // Since we don't have subject status in teacher data, we'll use a placeholder
-      const activeSubjectsCount = allSubjectsCount; // This can be adjusted based on actual requirements
+      const mockTeachers = [
+        { id: 1, name: "John Doe", email: "john@example.com", subjects: 5, status: "Active", joined: "2024-01-15" },
+        { id: 2, name: "Jane Smith", email: "jane@example.com", subjects: 3, status: "Active", joined: "2024-02-20" },
+        { id: 3, name: "Robert Johnson", email: "robert@example.com", subjects: 7, status: "Active", joined: "2023-11-05" },
+        { id: 4, name: "Emily Davis", email: "emily@example.com", subjects: 4, status: "Inactive", joined: "2024-03-10" },
+        { id: 5, name: "Michael Wilson", email: "michael@example.com", subjects: 6, status: "Active", joined: "2023-12-01" },
+        { id: 6, name: "Sarah Brown", email: "sarah@example.com", subjects: 2, status: "Active", joined: "2024-01-25" },
+        { id: 7, name: "David Miller", email: "david@example.com", subjects: 8, status: "Inactive", joined: "2023-10-15" }
+      ];
 
-      setStats({
-        allTeachers: allTeachersCount,
-        activeTeachers: activeTeachersCount,
-        allSubjects: allSubjectsCount,
-        activeSubjects: activeSubjectsCount
-      });
-
-      // Get only teacher role users for dashboard
-      const teacherUsers = teachers.filter(teacher => 
-        teacher.userRole === 'Teacher' || !teacher.userRole
-      );
-      setDashboardTeachers(teacherUsers);
-
+      setStats(mockStats);
+      setTeachers(mockTeachers);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
     }
   };
-
-  // Refresh data when teachers change
-  useEffect(() => {
-    if (teachers.length > 0) {
-      // Calculate stats from real data
-      const allTeachersCount = teachers.length;
-      const activeTeachersCount = teachers.filter(teacher => teacher.status === 'Active').length;
-      
-      const allSubjectsCount = teachers.reduce((total, teacher) => {
-        return total + (teacher.subjectCount || 0);
-      }, 0);
-      
-      const activeSubjectsCount = allSubjectsCount;
-
-      setStats({
-        allTeachers: allTeachersCount,
-        activeTeachers: activeTeachersCount,
-        allSubjects: allSubjectsCount,
-        activeSubjects: activeSubjectsCount
-      });
-
-      const teacherUsers = teachers.filter(teacher => 
-        teacher.userRole === 'Teacher' || !teacher.userRole
-      );
-      setDashboardTeachers(teacherUsers);
-    }
-  }, [teachers]);
 
   // Get first letter of name for avatar
   const getAvatarLetter = (name) => {
@@ -102,49 +63,18 @@ const AdminDashboard_Page = () => {
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch (error) {
-      return 'Invalid Date';
-    }
-  };
-
-  // Calculate time ago for last login
-  const timeAgo = (dateString) => {
-    if (!dateString) return 'Never';
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
-
-    const intervals = [
-      { label: 'year', seconds: 31536000 },
-      { label: 'month', seconds: 2592000 },
-      { label: 'day', seconds: 86400 },
-      { label: 'hour', seconds: 3600 },
-      { label: 'minute', seconds: 60 },
-    ];
-
-    for (const interval of intervals) {
-      const count = Math.floor(seconds / interval.seconds);
-      if (count >= 1) {
-        return new Intl.RelativeTimeFormat('en', {
-          numeric: 'auto',
-        }).format(-count, interval.label);
-      }
-    }
-
-    return 'just now';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   // Teachers pagination
   const indexOfLastTeacher = currentTeacherPage * teachersPerPage;
   const indexOfFirstTeacher = indexOfLastTeacher - teachersPerPage;
-  const currentTeachers = dashboardTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher);
-  const teacherTotalPages = Math.ceil(dashboardTeachers.length / teachersPerPage);
+  const currentTeachers = teachers.slice(indexOfFirstTeacher, indexOfLastTeacher);
+  const teacherTotalPages = Math.ceil(teachers.length / teachersPerPage);
 
   // Teacher pagination functions
   const teacherPaginate = (pageNumber) => setCurrentTeacherPage(pageNumber);
@@ -210,24 +140,6 @@ const AdminDashboard_Page = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <HeaderComponent
-          heading={"Admin Dashboard"}
-          subHeading={"Overview of your institution's performance"}
-          role='admin'
-        />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-4 text-lg font-medium text-gray-700">Loading Dashboard...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderComponent
@@ -237,7 +149,7 @@ const AdminDashboard_Page = () => {
       />
 
       <div className="container max-w-full mx-auto p-4 lg:p-6">
-        {/* Stats Cards */}
+        {/* Stats Cards - Reordered as requested */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
           {/* All Teachers Card */}
           <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
@@ -292,116 +204,118 @@ const AdminDashboard_Page = () => {
           </div>
         </div>
 
-        {/* Teachers Table Column */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800">Teachers List</h3>
-              <p className="text-sm text-gray-600 mt-1">Manage faculty members</p>
+        {/* Tables in different columns */}
+        <div className="grid grid-cols-1 gap-6 lg:gap-8">
+          {/* Teachers Table Column */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Teachers List</h3>
+                <p className="text-sm text-gray-600 mt-1">Manage faculty members</p>
+              </div>
             </div>
-          </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Teacher
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                    Subjects
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                    Joined
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                    Last Login
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentTeachers.length > 0 ? (
-                  currentTeachers.map((teacher) => (
-                    <tr key={teacher._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
-                            <span className="text-white font-bold text-lg">
-                              {getAvatarLetter(teacher.userName)}
-                            </span>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {teacher.userName}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Teacher
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                      Subjects
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                      Joined
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                      Last Login
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {currentTeachers.length > 0 ? (
+                    currentTeachers.map((teacher) => (
+                      <tr key={teacher.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
+                              <span className="text-white font-bold text-lg">
+                                {getAvatarLetter(teacher.name)}
+                              </span>
                             </div>
-                            <div className="text-xs text-gray-500 flex items-center mt-0.5">
-                              <FiMail className="h-3 w-3 mr-1" />
-                              {teacher.userEmail}
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {teacher.name}
+                              </div>
+                              <div className="text-xs text-gray-500 flex items-center mt-0.5">
+                                <FiMail className="h-3 w-3 mr-1" />
+                                {teacher.email}
+                              </div>
                             </div>
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                          <span className="px-2 py-1 bg-sky-100 text-sky-800 rounded-full text-xs font-medium">
+                            {teacher.subjects} subjects
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
+                          {formatDate(teacher.joined)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
+                          1d Ago
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full inline-flex items-center ${teacher.status === "Active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                            }`}>
+                            {teacher.status === "Active" ? (
+                              <>
+                                <FiCheck className="h-3 w-3 mr-1.5" />
+                                Active
+                              </>
+                            ) : (
+                              <>
+                                <FiSlash className="h-3 w-3 mr-1.5" />
+                                Inactive
+                              </>
+                            )}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-8 text-center">
+                        <div className="text-gray-500">
+                          <FiUsers className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                          <p className="text-lg font-medium">No teachers found</p>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
-                        <span className="px-2 py-1 bg-sky-100 text-sky-800 rounded-full text-xs font-medium">
-                          {teacher.subjectCount || 0} subjects
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
-                        {formatDate(teacher.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
-                        {timeAgo(teacher.lastLogin || teacher.updatedAt)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full inline-flex items-center ${teacher.status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                          }`}>
-                          {teacher.status === "Active" ? (
-                            <>
-                              <FiCheck className="h-3 w-3 mr-1.5" />
-                              Active
-                            </>
-                          ) : (
-                            <>
-                              <FiSlash className="h-3 w-3 mr-1.5" />
-                              Inactive
-                            </>
-                          )}
-                        </span>
-                      </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="px-6 py-8 text-center">
-                      <div className="text-gray-500">
-                        <FiUsers className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <p className="text-lg font-medium">No teachers found</p>
-                        <p className="text-sm mt-1">Add teachers to get started</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {dashboardTeachers.length > 0 && (
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between">
-              <div className="mb-3 sm:mb-0">
-                <p className="text-sm text-gray-700">
-                  Showing <span className="font-medium">{indexOfFirstTeacher + 1}</span> to{' '}
-                  <span className="font-medium">{Math.min(indexOfLastTeacher, dashboardTeachers.length)}</span> of{' '}
-                  <span className="font-medium">{dashboardTeachers.length}</span> teachers
-                </p>
-              </div>
-              {renderPagination(currentTeacherPage, teacherTotalPages, teacherPaginate)}
+                  )}
+                </tbody>
+              </table>
             </div>
-          )}
+
+            {teachers.length > 0 && (
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between">
+                <div className="mb-3 sm:mb-0">
+                  <p className="text-sm text-gray-700">
+                    Showing <span className="font-medium">{indexOfFirstTeacher + 1}</span> to{' '}
+                    <span className="font-medium">{Math.min(indexOfLastTeacher, teachers.length)}</span> of{' '}
+                    <span className="font-medium">{teachers.length}</span> teachers
+                  </p>
+                </div>
+                {renderPagination(currentTeacherPage, teacherTotalPages, teacherPaginate)}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
