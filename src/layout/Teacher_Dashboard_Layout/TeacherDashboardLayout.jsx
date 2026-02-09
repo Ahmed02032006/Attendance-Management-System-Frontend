@@ -64,7 +64,7 @@ const TeacherDashboardLayout = () => {
     if (user?.status === 'Inactive') {
       setShowInactiveModal(true);
     } else {
-      dispatch(updateTeacherLastLogin(user.id));
+      dispatch(updateTeacherLastLogin({userId:user.id}));
     }
   }, [user]);
 
