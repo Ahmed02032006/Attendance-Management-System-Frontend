@@ -307,7 +307,7 @@ const AdminDashboard_Page = () => {
         {/* Stats Cards - Modern Design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
           {/* All Teachers Card */}
-          <div className="bg-linear-to-br from-white to-sky-50 rounded-xl p-5 border border-sky-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-linear-to-br from-white to-sky-50 rounded-xl p-5 border border-sky-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-sky-700 mb-1">Total Teachers</p>
@@ -320,26 +320,26 @@ const AdminDashboard_Page = () => {
           </div>
 
           {/* Active Teachers Card */}
-          <div className="bg-linear-to-br from-white to-green-50 rounded-xl p-5 border border-green-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-linear-to-br from-white to-green-50 rounded-xl p-5 border border-green-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-green-700 mb-1">Active Teachers</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeTeachers}</div>
               </div>
-              <div className="p-3 bg-green-100 rounded-lg">
+              <div className="p-3 border border-green-200 bg-green-100 rounded-lg">
                 <FiUsers className="h-6 w-6 text-green-600" />
               </div>
             </div>
           </div>
 
           {/* All Subjects Card */}
-          <div className="bg-linear-to-br from-white to-orange-50 rounded-xl p-5 border border-orange-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-linear-to-br from-white to-orange-50 rounded-xl p-5 border border-orange-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-orange-700 mb-1">All Subjects</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allSubjects}</div>
               </div>
-              <div className="p-3 bg-orange-100 rounded-lg">
+              <div className="p-3 border border-orange-200 bg-orange-100 rounded-lg">
                 <FiBookOpen className="h-6 w-6 text-orange-600" />
               </div>
             </div>
