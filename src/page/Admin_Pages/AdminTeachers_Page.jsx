@@ -304,7 +304,7 @@ const AdminTeachers_Page = () => {
             {/* Create Teacher Button */}
             <button
               onClick={openCreateModal}
-              disabled={isLoading}
+              disabled={isTeacherLoading}
               className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FiPlus className="h-4 w-4" />
@@ -314,7 +314,7 @@ const AdminTeachers_Page = () => {
         </div>
 
         {/* Teachers Table */}
-        {!isLoading && (
+        {!isTeacherLoading && (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto hide-scrollbar">
               <table className="min-w-full divide-y divide-gray-200">
@@ -436,7 +436,7 @@ const AdminTeachers_Page = () => {
                                 onClick={() => openEditModal(teacher)}
                                 className="text-sky-600 hover:text-sky-900 transition-colors p-1"
                                 title="Edit User"
-                                disabled={isLoading}
+                                disabled={isTeacherLoading}
                               >
                                 <FiEdit className="h-4 w-4 lg:h-5 lg:w-5" />
                               </button>
@@ -448,7 +448,7 @@ const AdminTeachers_Page = () => {
                                   : 'text-red-600 hover:text-red-900'
                                   }`}
                                 title={!canDeleteTeacher(teacher) ? "Cannot delete admin users" : "Delete User"}
-                                disabled={isLoading || !canDeleteTeacher(teacher)}
+                                disabled={isTeacherLoading || !canDeleteTeacher(teacher)}
                               >
                                 <FiTrash2 className="h-4 w-4 lg:h-5 lg:w-5" />
                               </button>
