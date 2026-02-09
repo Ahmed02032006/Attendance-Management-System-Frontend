@@ -16,7 +16,7 @@ const AdminTeachers_Page = () => {
   const { teachers, isLoading } = useSelector((state) => state.adminTeacher)
 
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [isTeacherLoading, setIsTeacherLoading] = useState(false)
+  const [isTeacherLoading, setIsTeacherLoading] = useState(true) // Changed to true initially
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState(null)
@@ -36,9 +36,22 @@ const AdminTeachers_Page = () => {
 
   // Fetch teachers on component mount
   useEffect(() => {
-    setIsTeacherLoading(true);
-    dispatch(getTeachersByUser())
-    setIsTeacherLoading(false);
+    const fetchTeachers = async () => {
+      try {
+        setIsTeacherLoading(true);
+        await dispatch(getTeachersByUser());
+      } catch (error) {
+        console.error('Error fetching teachers:', error);
+        toast.error('Failed to load teachers');
+      } finally {
+        // Add a small delay to ensure data is properly set before hiding loader
+        setTimeout(() => {
+          setIsTeacherLoading(false);
+        }, 300);
+      }
+    };
+
+    fetchTeachers();
   }, [dispatch])
 
   // Filter teachers based on search, filter, and role
@@ -245,12 +258,66 @@ const AdminTeachers_Page = () => {
     }
   }
 
-  if (isTeacherLoading && teachers.length === 0) {
+  // Show loading state while fetching data
+  if (isTeacherLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-lg font-medium text-gray-700">Loading Teachers...</p>
+      <div className="min-h-screen bg-gray-50">
+        <HeaderComponent
+          heading={"Teachers Management"}
+          subHeading={"Manage all faculty members and their profiles"}
+          role='admin'
+        />
+        
+        <div className="container max-w-full mx-auto p-4 lg:p-6">
+          {/* Search and Filter Section with Skeleton */}
+          <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="relative w-full sm:w-auto sm:flex-1 max-w-xl">
+              <div className="h-10 bg-gray-200 rounded-md animate-pulse"></div>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+              <div className="h-10 w-28 bg-gray-200 rounded-md animate-pulse"></div>
+              <div className="h-10 w-28 bg-gray-200 rounded-md animate-pulse"></div>
+              <div className="h-10 w-32 bg-gray-200 rounded-md animate-pulse"></div>
+            </div>
+          </div>
+          
+          {/* Table Skeleton */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="p-6">
+              <div className="animate-pulse space-y-4">
+                {/* Table Header Skeleton */}
+                <div className="grid grid-cols-7 gap-4 mb-4">
+                  <div className="h-4 bg-gray-200 rounded col-span-2"></div>
+                  <div className="h-4 bg-gray-200 rounded hidden sm:block"></div>
+                  <div className="h-4 bg-gray-200 rounded hidden md:block"></div>
+                  <div className="h-4 bg-gray-200 rounded hidden md:block"></div>
+                  <div className="h-4 bg-gray-200 rounded hidden md:block"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                </div>
+                
+                {/* Table Rows Skeleton */}
+                {[...Array(5)].map((_, index) => (
+                  <div key={index} className="grid grid-cols-7 gap-4 py-4 border-t border-gray-200">
+                    <div className="col-span-2 flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                      <div className="space-y-2">
+                        <div className="h-3 w-32 bg-gray-200 rounded"></div>
+                        <div className="h-2 w-24 bg-gray-200 rounded"></div>
+                      </div>
+                    </div>
+                    <div className="h-6 w-20 bg-gray-200 rounded-full hidden sm:block mx-auto"></div>
+                    <div className="h-3 w-24 bg-gray-200 rounded hidden md:block mx-auto"></div>
+                    <div className="h-3 w-12 bg-gray-200 rounded hidden md:block mx-auto"></div>
+                    <div className="h-3 w-20 bg-gray-200 rounded hidden md:block mx-auto"></div>
+                    <div className="h-6 w-20 bg-gray-200 rounded-full mx-auto"></div>
+                    <div className="h-8 w-16 bg-gray-200 rounded mx-auto"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -314,255 +381,253 @@ const AdminTeachers_Page = () => {
         </div>
 
         {/* Teachers Table */}
-        {!isLoading && (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto hide-scrollbar">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto hide-scrollbar">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Teacher Profile
+                  </th>
+                  <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                    Role
+                  </th>
+                  <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    Joined Date
+                  </th>
+                  <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    Subjects Count
+                  </th>
+                  <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    Last Login
+                  </th>
+                  <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {currentTeachers.length > 0 ? (
+                  currentTeachers.map((teacher) => {
+                    const isAdmin = teacher.userRole === 'Admin'
+                    return (
+                      <tr key={teacher._id || teacher.id} className="hover:bg-gray-50">
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center">
+                              {teacher.profilePicture ? (
+                                <img
+                                  src={teacher.profilePicture}
+                                  alt={teacher.userName}
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => {
+                                    // Fallback to avatar letter if image fails to load
+                                    e.target.style.display = 'none';
+                                    const parent = e.target.parentNode;
+                                    const fallback = document.createElement('div');
+                                    fallback.className = 'h-full w-full flex items-center justify-center bg-sky-500';
+                                    fallback.innerHTML = `<span class="text-white font-bold text-lg">${getAvatarLetter(teacher.userName)}</span>`;
+                                    parent.appendChild(fallback);
+                                  }}
+                                />
+                              ) : (
+                                <div className="h-full w-full flex items-center justify-center bg-sky-500">
+                                  <span className="text-white font-bold text-lg">
+                                    {getAvatarLetter(teacher.userName)}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="ml-4">
+                              <div className="flex items-center">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {teacher.userName}
+                                </div>
+                              </div>
+                              <div className="text-xs text-gray-500 flex items-center mt-0.5">
+                                <FiMail className="h-3 w-3 mr-1" />
+                                {teacher.userEmail}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center hidden sm:table-cell">
+                          <span className={`px-3 py-1.5 text-xs font-semibold rounded-full inline-flex items-center ${getRoleBadgeColor(teacher.userRole)}`}>
+                            {teacher.userRole === 'Admin' ? (
+                              <>
+                                <FiShield className="h-3 w-3 mr-1.5" />
+                                Admin
+                              </>
+                            ) : (
+                              <>
+                                <FiUsers className="h-3 w-3 mr-1.5" />
+                                {teacher.userRole}
+                              </>
+                            )}
+                          </span>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
+                          {formatDate(teacher.createdAt)}
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
+                          {teacher.subjectCount}
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
+                          1d Ago
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-center">
+                          <span className={`px-1 py-1 text-xs font-semibold rounded-full flex items-center justify-center w-[75px] mx-auto ${teacher.status === "Active"
+                            ? "bg-green-50 text-green-800 border border-green-200"
+                            : "bg-red-50 text-red-800 border border-red-200"
+                            }`}>
+                            {teacher.status === "Active" ? (
+                              <>
+                                <FiCheck className="h-3 w-3 mr-1.5" />
+                                Active
+                              </>
+                            ) : (
+                              <>
+                                <FiSlash className="h-3 w-3 mr-1.5" />
+                                Inactive
+                              </>
+                            )}
+                          </span>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                          <div className="flex justify-center space-x-2 lg:space-x-3">
+                            <button
+                              onClick={() => openEditModal(teacher)}
+                              className="text-sky-600 hover:text-sky-900 transition-colors p-1"
+                              title="Edit User"
+                              disabled={isLoading}
+                            >
+                              <FiEdit className="h-4 w-4 lg:h-5 lg:w-5" />
+                            </button>
+
+                            <button
+                              onClick={() => openDeleteModal(teacher)}
+                              className={`transition-colors p-1 ${!canDeleteTeacher(teacher)
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-red-600 hover:text-red-900'
+                                }`}
+                              title={!canDeleteTeacher(teacher) ? "Cannot delete admin users" : "Delete User"}
+                              disabled={isLoading || !canDeleteTeacher(teacher)}
+                            >
+                              <FiTrash2 className="h-4 w-4 lg:h-5 lg:w-5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
+                ) : (
                   <tr>
-                    <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Teacher Profile
-                    </th>
-                    <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                      Role
-                    </th>
-                    <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                      Joined Date
-                    </th>
-                    <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                      Subjects Count
-                    </th>
-                    <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                      Last Login
-                    </th>
-                    <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    <td colSpan="7" className="px-6 py-8 text-center">
+                      <div className="text-gray-500">
+                        <FiUser className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <p className="text-lg font-medium">No users found</p>
+                        <p className="mt-1">
+                          {searchTerm || statusFilter !== 'All' || roleFilter !== 'Teacher'
+                            ? 'Try adjusting your search or filter'
+                            : 'Get started by adding your first teacher'
+                          }
+                        </p>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {currentTeachers.length > 0 ? (
-                    currentTeachers.map((teacher) => {
-                      const isAdmin = teacher.userRole === 'Admin'
-                      return (
-                        <tr key={teacher._id || teacher.id} className="hover:bg-gray-50">
-                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center">
-                                {teacher.profilePicture ? (
-                                  <img
-                                    src={teacher.profilePicture}
-                                    alt={teacher.userName}
-                                    className="h-full w-full object-cover"
-                                    onError={(e) => {
-                                      // Fallback to avatar letter if image fails to load
-                                      e.target.style.display = 'none';
-                                      const parent = e.target.parentNode;
-                                      const fallback = document.createElement('div');
-                                      fallback.className = 'h-full w-full flex items-center justify-center bg-sky-500';
-                                      fallback.innerHTML = `<span class="text-white font-bold text-lg">${getAvatarLetter(teacher.userName)}</span>`;
-                                      parent.appendChild(fallback);
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="h-full w-full flex items-center justify-center bg-sky-500">
-                                    <span className="text-white font-bold text-lg">
-                                      {getAvatarLetter(teacher.userName)}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="ml-4">
-                                <div className="flex items-center">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {teacher.userName}
-                                  </div>
-                                </div>
-                                <div className="text-xs text-gray-500 flex items-center mt-0.5">
-                                  <FiMail className="h-3 w-3 mr-1" />
-                                  {teacher.userEmail}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center hidden sm:table-cell">
-                            <span className={`px-3 py-1.5 text-xs font-semibold rounded-full inline-flex items-center ${getRoleBadgeColor(teacher.userRole)}`}>
-                              {teacher.userRole === 'Admin' ? (
-                                <>
-                                  <FiShield className="h-3 w-3 mr-1.5" />
-                                  Admin
-                                </>
-                              ) : (
-                                <>
-                                  <FiUsers className="h-3 w-3 mr-1.5" />
-                                  {teacher.userRole}
-                                </>
-                              )}
-                            </span>
-                          </td>
-                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
-                            {formatDate(teacher.createdAt)}
-                          </td>
-                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
-                            {teacher.subjectCount}
-                          </td>
-                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
-                            1d Ago
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-center">
-                            <span className={`px-1 py-1 text-xs font-semibold rounded-full flex items-center justify-center w-[75px] mx-auto ${teacher.status === "Active"
-                              ? "bg-green-50 text-green-800 border border-green-200"
-                              : "bg-red-50 text-red-800 border border-red-200"
-                              }`}>
-                              {teacher.status === "Active" ? (
-                                <>
-                                  <FiCheck className="h-3 w-3 mr-1.5" />
-                                  Active
-                                </>
-                              ) : (
-                                <>
-                                  <FiSlash className="h-3 w-3 mr-1.5" />
-                                  Inactive
-                                </>
-                              )}
-                            </span>
-                          </td>
-                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                            <div className="flex justify-center space-x-2 lg:space-x-3">
-                              <button
-                                onClick={() => openEditModal(teacher)}
-                                className="text-sky-600 hover:text-sky-900 transition-colors p-1"
-                                title="Edit User"
-                                disabled={isLoading}
-                              >
-                                <FiEdit className="h-4 w-4 lg:h-5 lg:w-5" />
-                              </button>
-
-                              <button
-                                onClick={() => openDeleteModal(teacher)}
-                                className={`transition-colors p-1 ${!canDeleteTeacher(teacher)
-                                  ? 'text-gray-400 cursor-not-allowed'
-                                  : 'text-red-600 hover:text-red-900'
-                                  }`}
-                                title={!canDeleteTeacher(teacher) ? "Cannot delete admin users" : "Delete User"}
-                                disabled={isLoading || !canDeleteTeacher(teacher)}
-                              >
-                                <FiTrash2 className="h-4 w-4 lg:h-5 lg:w-5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center">
-                        <div className="text-gray-500">
-                          <FiUser className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                          <p className="text-lg font-medium">No users found</p>
-                          <p className="mt-1">
-                            {searchTerm || statusFilter !== 'All' || roleFilter !== 'Teacher'
-                              ? 'Try adjusting your search or filter'
-                              : 'Get started by adding your first teacher'
-                            }
-                          </p>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {filteredTeachers.length > 0 && (
-              <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                <div className="mb-3 sm:mb-0">
-                  <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{indexOfFirstTeacher + 1}</span> to{' '}
-                    <span className="font-medium">{Math.min(indexOfLastTeacher, filteredTeachers.length)}</span> of{' '}
-                    <span className="font-medium">{filteredTeachers.length}</span> {roleFilter === 'Teacher' ? 'teachers' : 'users'}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <button
-                    onClick={prevPage}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
-                  >
-                    <FiChevronLeft className="h-4 w-4 mr-1" />
-                  </button>
-
-                  {totalPages <= 6 ? (
-                    Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
-                      <button
-                        key={number}
-                        onClick={() => paginate(number)}
-                        className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
-                          ? 'border-sky-600 bg-sky-600 text-white'
-                          : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                          } rounded-md transition-colors`}
-                      >
-                        {number}
-                      </button>
-                    ))
-                  ) : (
-                    <>
-                      {currentPage > 3 && (
-                        <button
-                          onClick={() => paginate(1)}
-                          className="px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-md transition-colors"
-                        >
-                          1
-                        </button>
-                      )}
-                      {currentPage > 4 && <span className="px-2 text-gray-500">...</span>}
-                      {[
-                        currentPage - 2,
-                        currentPage - 1,
-                        currentPage,
-                        currentPage + 1,
-                        currentPage + 2
-                      ]
-                        .filter(num => num > 0 && num <= totalPages)
-                        .map(number => (
-                          <button
-                            key={number}
-                            onClick={() => paginate(number)}
-                            className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
-                              ? 'border-sky-600 bg-sky-600 text-white'
-                              : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                              } rounded-md transition-colors`}
-                          >
-                            {number}
-                          </button>
-                        ))}
-                      {currentPage < totalPages - 3 && <span className="px-2 text-gray-500">...</span>}
-                      {currentPage < totalPages - 2 && (
-                        <button
-                          onClick={() => paginate(totalPages)}
-                          className="px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-md transition-colors"
-                        >
-                          {totalPages}
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  <button
-                    onClick={nextPage}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
-                  >
-                    <FiChevronRight className="h-4 w-4 ml-1" />
-                  </button>
-                </div>
-              </div>
-            )}
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {filteredTeachers.length > 0 && (
+            <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <div className="mb-3 sm:mb-0">
+                <p className="text-sm text-gray-700">
+                  Showing <span className="font-medium">{indexOfFirstTeacher + 1}</span> to{' '}
+                  <span className="font-medium">{Math.min(indexOfLastTeacher, filteredTeachers.length)}</span> of{' '}
+                  <span className="font-medium">{filteredTeachers.length}</span> {roleFilter === 'Teacher' ? 'teachers' : 'users'}
+                </p>
+              </div>
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                >
+                  <FiChevronLeft className="h-4 w-4 mr-1" />
+                </button>
+
+                {totalPages <= 6 ? (
+                  Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                    <button
+                      key={number}
+                      onClick={() => paginate(number)}
+                      className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
+                        ? 'border-sky-600 bg-sky-600 text-white'
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                        } rounded-md transition-colors`}
+                    >
+                      {number}
+                    </button>
+                  ))
+                ) : (
+                  <>
+                    {currentPage > 3 && (
+                      <button
+                        onClick={() => paginate(1)}
+                        className="px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-md transition-colors"
+                      >
+                        1
+                      </button>
+                    )}
+                    {currentPage > 4 && <span className="px-2 text-gray-500">...</span>}
+                    {[
+                      currentPage - 2,
+                      currentPage - 1,
+                      currentPage,
+                      currentPage + 1,
+                      currentPage + 2
+                    ]
+                      .filter(num => num > 0 && num <= totalPages)
+                      .map(number => (
+                        <button
+                          key={number}
+                          onClick={() => paginate(number)}
+                          className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
+                            ? 'border-sky-600 bg-sky-600 text-white'
+                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                            } rounded-md transition-colors`}
+                        >
+                          {number}
+                        </button>
+                      ))}
+                    {currentPage < totalPages - 3 && <span className="px-2 text-gray-500">...</span>}
+                    {currentPage < totalPages - 2 && (
+                      <button
+                        onClick={() => paginate(totalPages)}
+                        className="px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-md transition-colors"
+                      >
+                        {totalPages}
+                      </button>
+                    )}
+                  </>
+                )}
+
+                <button
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                >
+                  <FiChevronRight className="h-4 w-4 ml-1" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Create Teacher Modal */}
