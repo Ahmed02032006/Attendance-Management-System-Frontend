@@ -3,392 +3,201 @@ import { FiMessageSquare, FiFilter, FiRefreshCw, FiDownload, FiAlertCircle, FiCh
 import HeaderComponent from '../../components/HeaderComponent';
 
 const AdminComplaints_Page = () => {
-  const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [refreshCount, setRefreshCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [iframeKey, setIframeKey] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [filter, setFilter] = useState('All');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [refreshCount, setRefreshCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [iframeKey, setIframeKey] = useState(0);
 
-  // Mock data for statistics
-  const [stats, setStats] = useState({
-    total: 0,
-    pending: 0,
-    resolved: 0,
-    inProgress: 0
-  });
-
-  // Refresh iframe function
-  const handleRefresh = () => {
-    setRefreshCount(prev => prev + 1);
-    setIframeKey(prev => prev + 1);
-    setLoading(true);
-    
-    // Simulate loading
-    setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-  };
-
-  // Filter options
-  const filters = [
-    { value: 'All', label: 'All Complaints', color: 'bg-gray-100 text-gray-800' },
-    { value: 'Pending', label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'Resolved', label: 'Resolved', color: 'bg-green-100 text-green-800' },
-    { value: 'In Progress', label: 'In Progress', color: 'bg-blue-100 text-blue-800' },
-    { value: 'Urgent', label: 'Urgent', color: 'bg-red-100 text-red-800' }
-  ];
-
-  // Export function
-  const handleExport = () => {
-    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRi7Gv4sPMG5bVYyal3Wtku0i1nDnFWx5bMJVxKUOQhRhL_-AAvxAEmWI-ueduk0CvwIWg6WlF2SpiZ/pub?output=csv';
-    window.open(sheetUrl, '_blank');
-  };
-
-  // Format date for last refresh
-  const formatLastRefresh = () => {
-    const now = new Date();
-    return now.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
+    // Mock data for statistics
+    const [stats, setStats] = useState({
+        total: 0,
+        pending: 0,
+        resolved: 0,
+        inProgress: 0
     });
-  };
 
-  // Mock stats data - In real app, you would fetch this from your API
-  useEffect(() => {
-    // Simulate fetching stats
-    setStats({
-      total: 156,
-      pending: 24,
-      resolved: 125,
-      inProgress: 7
-    });
-  }, [refreshCount]);
+    // Refresh iframe function
+    const handleRefresh = () => {
+        setRefreshCount(prev => prev + 1);
+        setIframeKey(prev => prev + 1);
+        setLoading(true);
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <HeaderComponent
-        heading={"Complaints Management"}
-        subHeading={"Monitor and manage user complaints from Google Sheet"}
-        role='admin'
-      />
+        // Simulate loading
+        setTimeout(() => {
+            setLoading(false);
+        }, 1500);
+    };
 
-      <div className="container max-w-full mx-auto p-4 lg:p-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
-          {/* Total Complaints */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <FiMessageSquare className="h-6 w-6 text-blue-600" />
-              </div>
-              <span className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.total}</span>
-            </div>
-            <div className="text-sm font-medium text-gray-600">Total Complaints</div>
-            <div className="text-xs text-gray-500 mt-1">Updated: {formatLastRefresh()}</div>
-          </div>
+    // Filter options
+    const filters = [
+        { value: 'All', label: 'All Complaints', color: 'bg-gray-100 text-gray-800' },
+        { value: 'Pending', label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
+        { value: 'Resolved', label: 'Resolved', color: 'bg-green-100 text-green-800' },
+        { value: 'In Progress', label: 'In Progress', color: 'bg-sky-100 text-sky-800' },
+        { value: 'Urgent', label: 'Urgent', color: 'bg-red-100 text-red-800' }
+    ];
 
-          {/* Pending Complaints */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <FiClock className="h-6 w-6 text-yellow-600" />
-              </div>
-              <span className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.pending}</span>
-            </div>
-            <div className="text-sm font-medium text-gray-600">Pending</div>
-            <div className="text-xs text-gray-500 mt-1">Awaiting action</div>
-          </div>
+    // Export function
+    const handleExport = () => {
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRi7Gv4sPMG5bVYyal3Wtku0i1nDnFWx5bMJVxKUOQhRhL_-AAvxAEmWI-ueduk0CvwIWg6WlF2SpiZ/pub?output=csv';
+        window.open(sheetUrl, '_blank');
+    };
 
-          {/* Resolved Complaints */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <FiCheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-              <span className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.resolved}</span>
-            </div>
-            <div className="text-sm font-medium text-gray-600">Resolved</div>
-            <div className="text-xs text-gray-500 mt-1">Completed cases</div>
-          </div>
+    // Format date for last refresh
+    const formatLastRefresh = () => {
+        const now = new Date();
+        return now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    };
 
-          {/* In Progress */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <FiAlertCircle className="h-6 w-6 text-purple-600" />
-              </div>
-              <span className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.inProgress}</span>
-            </div>
-            <div className="text-sm font-medium text-gray-600">In Progress</div>
-            <div className="text-xs text-gray-500 mt-1">Currently being addressed</div>
-          </div>
-        </div>
+    // Mock stats data - In real app, you would fetch this from your API
+    useEffect(() => {
+        // Simulate fetching stats
+        setStats({
+            total: 156,
+            pending: 24,
+            resolved: 125,
+            inProgress: 7
+        });
+    }, [refreshCount]);
 
-        {/* Controls Section */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 lg:p-6 mb-6 lg:mb-8 shadow-sm">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800">Complaints Dashboard</h3>
-              <p className="text-sm text-gray-600 mt-1">Real-time view from Google Sheets</p>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Search Input */}
-              <div className="relative w-full lg:w-64">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiSearch className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search complaints..."
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <HeaderComponent
+                heading={"Complaints Management"}
+                subHeading={"Monitor and manage user complaints from Google Sheet"}
+                role='admin'
+            />
 
-              {/* Filter Dropdown */}
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-              >
-                {filters.map((filterOption) => (
-                  <option key={filterOption.value} value={filterOption.value}>
-                    {filterOption.label}
-                  </option>
-                ))}
-              </select>
+            <div className="container max-w-full mx-auto p-4 lg:p-6">
+                {/* Google Sheet Embed Section */}
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-800">Live Complaints Sheet</h3>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    Direct integration with Google Sheets • Auto-refreshes every 30 seconds
+                                </p>
+                            </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleRefresh}
-                  disabled={loading}
-                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <FiRefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                  <span>{loading ? 'Refreshing...' : 'Refresh'}</span>
-                </button>
-
-                <button
-                  onClick={handleExport}
-                  className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
-                >
-                  <FiDownload className="h-4 w-4" />
-                  <span>Export</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Filter Chips */}
-          <div className="flex flex-wrap gap-2">
-            {filters.map((filterOption) => (
-              <button
-                key={filterOption.value}
-                onClick={() => setFilter(filterOption.value)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${filter === filterOption.value
-                  ? filterOption.color
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-              >
-                {filterOption.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Google Sheet Embed Section */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Live Complaints Sheet</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Direct integration with Google Sheets • Auto-refreshes every 30 seconds
-                </p>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-600">Live Connected</span>
-                </div>
-                <button
-                  onClick={() => window.open('https://docs.google.com/spreadsheets/d/1Ri7Gv4sPMG5bVYyal3Wtku0i1nDnFWx5bMJVxKUOQhRhL/edit', '_blank')}
-                  className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                >
-                  Open in Sheets
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Loading State */}
-          {loading ? (
-            <div className="p-8 lg:p-12 flex flex-col items-center justify-center">
-              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-              <p className="text-lg font-medium text-gray-700">Refreshing complaints data...</p>
-              <p className="text-sm text-gray-500 mt-2">Loading latest updates from Google Sheets</p>
-            </div>
-          ) : (
-            <div className="p-0">
-              {/* Info Banner */}
-              <div className="bg-blue-50 border-b border-blue-200 px-4 lg:px-6 py-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <FiAlertCircle className="h-4 w-4 text-blue-600" />
-                    <p className="text-sm text-blue-700">
-                      This is a live view of your Google Sheet. Scroll to see all complaints.
-                    </p>
-                  </div>
-                  <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                    Last updated: {formatLastRefresh()}
-                  </span>
-                </div>
-              </div>
-
-              {/* Google Sheet Iframe */}
-              <div className="relative w-full overflow-hidden bg-gray-100">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                
-                <div key={iframeKey} className="iframe-container">
-                  <iframe
-                    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRi7Gv4sPMG5bVYyal3Wtku0i1nDnFWx5bMJVxKUOQhRhL_-AAvxAEmWI-ueduk0CvwIWg6WlF2SpiZ/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false"
-                    title="Complaints Google Sheet"
-                    className="w-full h-[600px] lg:h-[700px] border-0"
-                    loading="lazy"
-                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                
-                <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent"></div>
-              </div>
-
-              {/* Instructions */}
-              <div className="px-4 lg:px-6 py-4 border-t border-gray-200 bg-gray-50">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-bold">1</span>
+                            <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                    <span className="text-xs text-gray-600">Live Connected</span>
+                                </div>
+                                <button
+                                    onClick={() => window.open('https://docs.google.com/spreadsheets/d/1Ri7Gv4sPMG5bVYyal3Wtku0i1nDnFWx5bMJVxKUOQhRhL/edit', '_blank')}
+                                    className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                                >
+                                    Open in Sheets
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">View Complaints</p>
-                      <p className="text-xs text-gray-600 mt-1">Scroll through the sheet to view all complaints</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3">
-                    <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-bold">2</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">Update Status</p>
-                      <p className="text-xs text-gray-600 mt-1">Edit directly in Google Sheets to update complaint status</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3">
-                    <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-bold">3</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">Refresh Data</p>
-                      <p className="text-xs text-gray-600 mt-1">Click refresh button to sync latest changes</p>
-                    </div>
-                  </div>
+
+                    {/* Loading State */}
+                    {loading ? (
+                        <div className="p-8 lg:p-12 flex flex-col items-center justify-center">
+                            <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <p className="text-lg font-medium text-gray-700">Refreshing complaints data...</p>
+                            <p className="text-sm text-gray-500 mt-2">Loading latest updates from Google Sheets</p>
+                        </div>
+                    ) : (
+                        <div className="p-0">
+                            {/* Info Banner */}
+                            <div className="bg-sky-50 border-b border-sky-200 px-4 lg:px-6 py-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                        <FiAlertCircle className="h-4 w-4 text-sky-600" />
+                                        <p className="text-sm text-sky-700">
+                                            This is a live view of your Google Sheet. Scroll to see all complaints.
+                                        </p>
+                                    </div>
+                                    <span className="text-xs text-sky-600 bg-sky-100 px-2 py-1 rounded">
+                                        Last updated: {formatLastRefresh()}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Google Sheet Iframe */}
+                            <div className="relative w-full overflow-hidden bg-gray-100">
+                                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-sky-500 to-purple-500"></div>
+
+                                <div key={iframeKey} className="iframe-container">
+                                    <iframe
+                                        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRi7Gv4sPMG5bVYyal3Wtku0i1nDnFWx5bMJVxKUOQhRhL_-AAvxAEmWI-ueduk0CvwIWg6WlF2SpiZ/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false"
+                                        title="Complaints Google Sheet"
+                                        className="w-full h-[600px] lg:h-[700px] border-0"
+                                        loading="lazy"
+                                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                                        referrerPolicy="no-referrer"
+                                    />
+                                </div>
+
+                                <div className="absolute bottom-0 left-0 right-0 h-4 bg-linear-to-t from-white to-transparent"></div>
+                            </div>
+
+                            {/* Instructions */}
+                            <div className="px-4 lg:px-6 py-4 border-t border-gray-200 bg-gray-50">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="flex items-start space-x-3">
+                                        <div className="shrink-0 w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
+                                            <span className="text-sky-600 font-bold">1</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-800">View Complaints</p>
+                                            <p className="text-xs text-gray-600 mt-1">Scroll through the sheet to view all complaints</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start space-x-3">
+                                        <div className="shrink-0 w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
+                                            <span className="text-sky-600 font-bold">2</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-800">Update Status</p>
+                                            <p className="text-xs text-gray-600 mt-1">Edit directly in Google Sheets to update complaint status</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start space-x-3">
+                                        <div className="shrink-0 w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
+                                            <span className="text-sky-600 font-bold">3</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-800">Refresh Data</p>
+                                            <p className="text-xs text-gray-600 mt-1">Click refresh button to sync latest changes</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
-              </div>
+
+                {/* Footer Note */}
+                <div className="mt-6 lg:mt-8 p-4 bg-sky-50 rounded-lg border border-sky-200">
+                    <div className="flex items-start space-x-3">
+                        <FiAlertCircle className="h-5 w-5 text-sky-600 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-sm text-sky-800 font-medium">Note:</p>
+                            <p className="text-sm text-sky-700 mt-1">
+                                This dashboard provides a real-time view of your Google Sheet. Any changes made directly in Google Sheets
+                                will be reflected here automatically. For editing complaints, please use the Google Sheets interface directly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
-          )}
-        </div>
 
-        {/* Additional Information */}
-        <div className="mt-6 lg:mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* Quick Actions Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 lg:p-6 shadow-sm">
-            <h4 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h4>
-            <div className="space-y-3">
-              <button
-                onClick={() => window.open('https://docs.google.com/spreadsheets/d/1Ri7Gv4sPMG5bVYyal3Wtku0i1nDnFWx5bMJVxKUOQhRhL/edit#gid=0', '_blank')}
-                className="w-full px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-left flex items-center justify-between"
-              >
-                <span className="font-medium">Add New Complaint</span>
-                <span className="text-sm opacity-75">Go to Sheet →</span>
-              </button>
-              
-              <button
-                onClick={handleExport}
-                className="w-full px-4 py-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors text-left flex items-center justify-between"
-              >
-                <span className="font-medium">Download CSV Report</span>
-                <span className="text-sm opacity-75">Export Data →</span>
-              </button>
-              
-              <button
-                onClick={handleRefresh}
-                disabled={loading}
-                className="w-full px-4 py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg transition-colors text-left flex items-center justify-between disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="font-medium">Force Refresh Now</span>
-                <FiRefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
-          </div>
-
-          {/* Tips Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 lg:p-6 shadow-sm">
-            <h4 className="text-lg font-semibold text-gray-800 mb-4">Tips & Best Practices</h4>
-            <ul className="space-y-3">
-              <li className="flex items-start space-x-3">
-                <div className="shrink-0 w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                  <FiAlertCircle className="h-3 w-3 text-blue-600" />
-                </div>
-                <p className="text-sm text-gray-700">Check the sheet daily to ensure no complaints are missed</p>
-              </li>
-              <li className="flex items-start space-x-3">
-                <div className="shrink-0 w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                  <FiClock className="h-3 w-3 text-blue-600" />
-                </div>
-                <p className="text-sm text-gray-700">Update status within 24 hours of receiving a complaint</p>
-              </li>
-              <li className="flex items-start space-x-3">
-                <div className="shrink-0 w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                  <FiCheckCircle className="h-3 w-3 text-blue-600" />
-                </div>
-                <p className="text-sm text-gray-700">Mark as resolved only after confirming with the user</p>
-              </li>
-              <li className="flex items-start space-x-3">
-                <div className="shrink-0 w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                  <FiMessageSquare className="h-3 w-3 text-blue-600" />
-                </div>
-                <p className="text-sm text-gray-700">Use the comments column in Google Sheets for internal notes</p>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Footer Note */}
-        <div className="mt-6 lg:mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="flex items-start space-x-3">
-            <FiAlertCircle className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm text-blue-800 font-medium">Note:</p>
-              <p className="text-sm text-blue-700 mt-1">
-                This dashboard provides a real-time view of your Google Sheet. Any changes made directly in Google Sheets 
-                will be reflected here automatically. For editing complaints, please use the Google Sheets interface directly.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Custom Styles for iframe */}
-      <style jsx>{`
+            {/* Custom Styles for iframe */}
+            <style jsx>{`
         .iframe-container {
           position: relative;
           width: 100%;
@@ -407,8 +216,8 @@ const AdminComplaints_Page = () => {
           border: none;
         }
       `}</style>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default AdminComplaints_Page;
