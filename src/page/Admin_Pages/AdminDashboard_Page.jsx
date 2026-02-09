@@ -23,6 +23,9 @@ const AdminDashboard_Page = () => {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Use a ref to track initial mount
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
   // Fetch data on component mount
   useEffect(() => {
     fetchDashboardData();
@@ -32,106 +35,8 @@ const AdminDashboard_Page = () => {
     try {
       setLoading(true);
       setErrorMessage('');
-      console.log('Fetching teachers data...');
       
-      // Fetch real teachers data
-      const result = await dispatch(getTeachersByUser());
-      console.log('Teachers data fetched:', result);
-      console.log('Teachers from Redux:', teachers);
-      
-      // Check if teachers data is available
-      if (!teachers || !Array.isArray(teachers)) {
-        console.log('Teachers data is not an array:', teachers);
-        setErrorMessage('No teachers data available');
-        return;
-      }
-      
-      console.log('Total teachers fetched:', teachers.length);
-      console.log('Sample teacher data:', teachers[0]);
-
-      // Filter only Teacher role users
-      const teacherUsers = teachers.filter(teacher => {
-        const role = teacher.userRole || teacher.role || '';
-        return role === 'Teacher' || role === '' || !role;
-      });
-      
-      console.log('Filtered teacher users:', teacherUsers.length);
-
-      // Calculate stats from teacher data only
-      const allTeachersCount = teacherUsers.length;
-      const activeTeachersCount = teacherUsers.filter(teacher => {
-        const status = teacher.status || teacher.userStatus || 'Active';
-        return status === 'Active';
-      }).length;
-      
-      // Calculate total subjects count from teachers only
-      const allSubjectsCount = teacherUsers.reduce((total, teacher) => {
-        return total + (teacher.subjectCount || teacher.subjectsCount || teacher.subjects?.length || 0);
-      }, 0);
-      
-      // For active subjects, we can use a placeholder or calculate from active teachers
-      const activeSubjectsCount = allSubjectsCount;
-
-      setStats({
-        allTeachers: allTeachersCount,
-        activeTeachers: activeTeachersCount,
-        allSubjects: allSubjectsCount,
-        activeSubjects: activeSubjectsCount
-      });
-
-      setDashboardTeachers(teacherUsers);
-
-      console.log('Stats calculated:', {
-        allTeachers: allTeachersCount,
-        activeTeachers: activeTeachersCount,
-        allSubjects: allSubjectsCount,
-        activeSubjects: activeSubjectsCount
-      });
-
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      setErrorMessage(error.message || 'Failed to load dashboard data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Refresh data when teachers change
-  useEffect(() => {
-    if (teachers && Array.isArray(teachers) && teachers.length > 0) {
-      console.log('Teachers updated, refreshing dashboard data...');
-      
-      // Filter only Teacher role users
-      const teacherUsers = teachers.filter(teacher => {
-        const role = teacher.userRole || teacher.role || '';
-        return role === 'Teacher' || role === '' || !role;
-      });
-      
-      console.log('Updated filtered teacher users:', teacherUsers.length);
-
-      // Calculate stats from teacher data only
-      const allTeachersCount = teacherUsers.length;
-      const activeTeachersCount = teacherUsers.filter(teacher => {
-        const status = teacher.status || teacher.userStatus || 'Active';
-        return status === 'Active';
-      }).length;
-      
-      const allSubjectsCount = teacherUsers.reduce((total, teacher) => {
-        return total + (teacher.subjectCount || teacher.subjectsCount || teacher.subjects?.length || 0);
-      }, 0);
-      
-      const activeSubjectsCount = allSubjectsCount;
-
-      setStats({
-        allTeachers: allTeachersCount,
-        activeTeachers: activeTeachersCount,
-        allSubjects: allSubjectsCount,
-        activeSubjects: activeSubjectsCount
-      });
-
-      setDashboardTeachers(teacherUsers);
-    } else {
-      console.log('No teachers data available');
+      // Clear previous data
       setDashboardTeachers([]);
       setStats({
         allTeachers: 0,
@@ -139,8 +44,61 @@ const AdminDashboard_Page = () => {
         allSubjects: 0,
         activeSubjects: 0
       });
+
+      // Fetch real teachers data - unwrap the promise to wait for completion
+      await dispatch(getTeachersByUser()).unwrap();
+      
+      // Mark initial load as complete
+      setInitialLoadComplete(true);
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      setErrorMessage(error?.message || 'Failed to load dashboard data');
+      setInitialLoadComplete(true);
+    } finally {
+      setLoading(false);
     }
-  }, [teachers]);
+  };
+
+  // Calculate and update stats whenever teachers data changes
+  useEffect(() => {
+    if (!teachers || !Array.isArray(teachers)) {
+      return;
+    }
+
+    // Filter only Teacher role users
+    const teacherUsers = teachers.filter(teacher => {
+      const role = teacher.userRole || teacher.role || '';
+      return role === 'Teacher' || role === '' || !role;
+    });
+    
+    // Calculate stats from teacher data only
+    const allTeachersCount = teacherUsers.length;
+    const activeTeachersCount = teacherUsers.filter(teacher => {
+      const status = teacher.status || teacher.userStatus || 'Active';
+      return status === 'Active';
+    }).length;
+    
+    // Calculate total subjects count from teachers only
+    const allSubjectsCount = teacherUsers.reduce((total, teacher) => {
+      return total + (teacher.subjectCount || teacher.subjectsCount || teacher.subjects?.length || 0);
+    }, 0);
+    
+    const activeSubjectsCount = allSubjectsCount;
+
+    setStats({
+      allTeachers: allTeachersCount,
+      activeTeachers: activeTeachersCount,
+      allSubjects: allSubjectsCount,
+      activeSubjects: activeSubjectsCount
+    });
+
+    setDashboardTeachers(teacherUsers);
+    
+    // Reset to first page when data changes
+    setCurrentTeacherPage(1);
+
+  }, [teachers]); // This will run whenever teachers data updates
 
   // Get first letter of name for avatar
   const getAvatarLetter = (name) => {
@@ -298,7 +256,7 @@ const AdminDashboard_Page = () => {
     fetchDashboardData();
   };
 
-  if (loading) {
+  if (loading && !initialLoadComplete) {
     return (
       <div className="min-h-screen bg-gray-50">
         <HeaderComponent
@@ -346,87 +304,86 @@ const AdminDashboard_Page = () => {
           </div>
         )}
 
-        {/* Debug Info - Remove in production */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-4 p-3 bg-gray-100 rounded text-xs">
-            <div className="font-semibold mb-1">Debug Info:</div>
-            <div>Total teachers from API: {teachers?.length || 0}</div>
-            <div>Filtered teachers for dashboard: {dashboardTeachers.length}</div>
-            <div>Current page teachers: {currentTeachers.length}</div>
-            {teachers.length > 0 && (
-              <div className="mt-2">
-                <div>Sample teacher fields:</div>
-                <pre className="text-xs mt-1 overflow-auto">
-                  {JSON.stringify(teachers[0], null, 2)}
-                </pre>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Stats Cards */}
+        {/* Stats Cards - Modern Design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
           {/* All Teachers Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="p-3 bg-sky-100 rounded-lg mr-4">
-                <FiUsers className="h-6 w-6 text-sky-600" />
-              </div>
+          <div className="bg-gradient-to-br from-white to-sky-50 rounded-xl p-5 border border-sky-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-sky-700 mb-1">All Teachers</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allTeachers}</div>
-                <div className="text-sm font-medium text-gray-600">All Teachers</div>
+              </div>
+              <div className="p-3 bg-sky-100 rounded-lg">
+                <FiUsers className="h-6 w-6 text-sky-600" />
               </div>
             </div>
           </div>
 
           {/* Active Teachers Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="p-3 bg-green-100 rounded-lg mr-4">
-                <FiUsers className="h-6 w-6 text-green-600" />
-              </div>
+          <div className="bg-gradient-to-br from-white to-green-50 rounded-xl p-5 border border-green-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-green-700 mb-1">Active Teachers</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeTeachers}</div>
-                <div className="text-sm font-medium text-gray-600">Active Teachers</div>
+              </div>
+              <div className="p-3 bg-green-100 rounded-lg">
+                <FiUsers className="h-6 w-6 text-green-600" />
               </div>
             </div>
           </div>
 
           {/* All Subjects Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="p-3 bg-purple-100 rounded-lg mr-4">
-                <FiBookOpen className="h-6 w-6 text-purple-600" />
-              </div>
+          <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl p-5 border border-purple-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-purple-700 mb-1">All Subjects</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allSubjects}</div>
-                <div className="text-sm font-medium text-gray-600">All Subjects</div>
+              </div>
+              <div className="p-3 bg-purple-100 rounded-lg">
+                <FiBookOpen className="h-6 w-6 text-purple-600" />
               </div>
             </div>
           </div>
 
           {/* Active Subjects Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="p-3 bg-orange-100 rounded-lg mr-4">
-                <FiBookOpen className="h-6 w-6 text-orange-600" />
-              </div>
+          <div className="bg-gradient-to-br from-white to-orange-50 rounded-xl p-5 border border-orange-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-orange-700 mb-1">Active Subjects</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeSubjects}</div>
-                <div className="text-sm font-medium text-gray-600">Active Subjects</div>
+              </div>
+              <div className="p-3 bg-orange-100 rounded-lg">
+                <FiBookOpen className="h-6 w-6 text-orange-600" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Teachers Table Column */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">Teachers List</h3>
                 <p className="text-sm text-gray-600 mt-1">Manage faculty members</p>
               </div>
+              <button
+                onClick={handleRetry}
+                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors text-sm font-medium flex items-center"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <FiUsers className="h-4 w-4 mr-2" />
+                    Refresh
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
@@ -462,7 +419,7 @@ const AdminDashboard_Page = () => {
                     const status = getStatus(teacher);
 
                     return (
-                      <tr key={teacher._id || teacher.id || `teacher-${index}`} className="hover:bg-gray-50">
+                      <tr key={teacher._id || teacher.id || `teacher-${index}`} className="hover:bg-gray-50 transition-colors duration-150">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
@@ -520,16 +477,21 @@ const AdminDashboard_Page = () => {
                         <FiUsers className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                         <p className="text-lg font-medium">No teachers found</p>
                         <p className="text-sm mt-1">
-                          {teachers.length === 0 
-                            ? "No teachers available in the system" 
-                            : "No teachers match the criteria. Try refreshing or check if teachers have the 'Teacher' role."}
+                          {isLoading 
+                            ? "Loading teachers..." 
+                            : teachers.length === 0 
+                              ? "No teachers available in the system" 
+                              : "No teachers match the criteria. Try refreshing or check if teachers have the 'Teacher' role."
+                            }
                         </p>
-                        <button
-                          onClick={handleRetry}
-                          className="mt-4 px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors text-sm font-medium"
-                        >
-                          Refresh Data
-                        </button>
+                        {!isLoading && (
+                          <button
+                            onClick={handleRetry}
+                            className="mt-4 px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors text-sm font-medium"
+                          >
+                            Refresh Data
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
