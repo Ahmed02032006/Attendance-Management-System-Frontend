@@ -264,7 +264,7 @@ const AdminDashboard_Page = () => {
           subHeading={"Overview of your institution's performance"}
           role='admin'
         />
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-4 text-lg font-medium text-gray-700">Loading Dashboard...</p>
