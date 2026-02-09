@@ -276,12 +276,10 @@ const AdminDashboard_Page = () => {
                             }`}>
                             {teacher.status === "Active" ? (
                               <>
-                                <FiCheck className="h-3 w-3 mr-1.5" />
                                 Active
                               </>
                             ) : (
                               <>
-                                <FiSlash className="h-3 w-3 mr-1.5" />
                                 Inactive
                               </>
                             )}
