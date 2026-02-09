@@ -313,7 +313,7 @@ const AdminDashboard_Page = () => {
                 <p className="text-sm font-medium text-sky-700 mb-1">Total Teachers</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allTeachers}</div>
               </div>
-              <div className="p-3 border border-sky-300 bg-sky-100 rounded-lg">
+              <div className="p-3 border border-sky-200 bg-sky-100 rounded-lg">
                 <FiUsers className="h-6 w-6 text-sky-600" />
               </div>
             </div>
