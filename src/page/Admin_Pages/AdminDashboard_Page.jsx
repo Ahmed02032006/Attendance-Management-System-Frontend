@@ -307,7 +307,7 @@ const AdminDashboard_Page = () => {
         {/* Stats Cards - Modern Design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
           {/* All Teachers Card */}
-          <div className="bg-linear-to-br from-white to-sky-50 rounded-xl p-5 border border-sky-200">
+          <div className="bg-linear-to-br from-white to-sky-50 rounded-xl p-5 border border-sky-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-sky-700 mb-1">Total Teachers</p>
@@ -320,7 +320,7 @@ const AdminDashboard_Page = () => {
           </div>
 
           {/* Active Teachers Card */}
-          <div className="bg-linear-to-br from-white to-green-50 rounded-xl p-5 border border-green-200">
+          <div className="bg-linear-to-br from-white to-green-50 rounded-xl p-5 border border-green-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-green-700 mb-1">Active Teachers</p>
@@ -333,7 +333,7 @@ const AdminDashboard_Page = () => {
           </div>
 
           {/* All Subjects Card */}
-          <div className="bg-linear-to-br from-white to-orange-50 rounded-xl p-5 border border-orange-200">
+          <div className="bg-linear-to-br from-white to-orange-50 rounded-xl p-5 border border-orange-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-orange-700 mb-1">All Subjects</p>
