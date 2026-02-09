@@ -180,20 +180,6 @@ const AdminComplaints_Page = () => {
                         </div>
                     )}
                 </div>
-
-                {/* Footer Note */}
-                <div className="mt-6 lg:mt-8 p-4 bg-sky-50 rounded-lg border border-sky-200">
-                    <div className="flex items-start space-x-3">
-                        <FiAlertCircle className="h-5 w-5 text-sky-600 shrink-0 mt-0.5" />
-                        <div>
-                            <p className="text-sm text-sky-800 font-medium">Note:</p>
-                            <p className="text-sm text-sky-700 mt-1">
-                                This dashboard provides a real-time view of your Google Sheet. Any changes made directly in Google Sheets
-                                will be reflected here automatically. For editing complaints, please use the Google Sheets interface directly.
-                            </p>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {/* Custom Styles for iframe */}
