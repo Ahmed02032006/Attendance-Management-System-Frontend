@@ -310,10 +310,10 @@ const AdminDashboard_Page = () => {
           <div className="bg-linear-to-br from-white to-sky-50 rounded-xl p-5 border border-sky-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-sky-700 mb-1">All Teachers</p>
+                <p className="text-sm font-medium text-sky-700 mb-1">Total Teachers</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allTeachers}</div>
               </div>
-              <div className="p-3 bg-sky-100 rounded-lg">
+              <div className="p-3 border border-sky-500 bg-sky-100 rounded-lg">
                 <FiUsers className="h-6 w-6 text-sky-600" />
               </div>
             </div>
