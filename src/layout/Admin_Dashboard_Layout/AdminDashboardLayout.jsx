@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Menu, X, LayoutDashboard,Cog } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Menu, X, LayoutDashboard, MessageSquareWarning } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -53,12 +53,12 @@ const AdminDashboardLayout = () => {
       label: "Manage Teachers",
       path: "/admin/teachers"
     },
-    // {
-    //   name: "System Configuration",
-    //   icon: Cog,
-    //   label: "System Configuration",
-    //   path: "/admin/configuration"
-    // }
+    {
+      name: "View Complaints",
+      icon: MessageSquareWarning,
+      label: "Complaints",
+      path: "/admin/complaints",
+    },
   ];
 
   useEffect(() => {

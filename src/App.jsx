@@ -17,6 +17,7 @@ import QRScanner_Page from './page/Student_Pages/QR_Scanner';
 import AdminTeachers_Page from './page/Admin_Pages/AdminTeachers_Page';
 import AdminDashboardLayout from './layout/Admin_Dashboard_Layout/AdminDashboardLayout';
 import AdminDashboard_Page from './page/Admin_Pages/AdminDashboard_Page';
+import AdminComplaints_Page from './page/Admin_Pages/AdminComplaints_Page';
 
 const App = () => {
 
@@ -71,6 +72,7 @@ const App = () => {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard_Page />} />
           <Route path="teachers" element={<AdminTeachers_Page />} />
+          <Route path="complaints" element={<AdminComplaints_Page />} />
         </Route>
 
         {/* =====>] Students Routes [<===== */}
