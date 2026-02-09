@@ -91,12 +91,6 @@ const AdminComplaints_Page = () => {
                                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                     <span className="text-xs text-gray-600">Live Connected</span>
                                 </div>
-                                <button
-                                    onClick={() => window.open('https://docs.google.com/spreadsheets/d/1Ri7Gv4sPMG5bVYyal3Wtku0i1nDnFWx5bMJVxKUOQhRhL/edit', '_blank')}
-                                    className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                                >
-                                    Open in Sheets
-                                </button>
                             </div>
                         </div>
                     </div>
