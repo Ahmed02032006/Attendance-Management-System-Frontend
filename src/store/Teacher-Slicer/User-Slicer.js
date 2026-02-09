@@ -29,6 +29,27 @@ export const updateTeacher = createAsyncThunk(
   }
 );
 
+// Update Teacher Last Login
+export const updateTeacherLastLogin = createAsyncThunk(
+  "teachers/updateLastLogin",
+  async ({ userId }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(
+        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/user/updateLastLogin/${userId}`
+      );
+
+      if (response.status !== 200) {
+        return rejectWithValue(response.data);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error updating teacher last login:", error);
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const teacherSlicer = createSlice({
   name: "TeacherUser",
   initialState: initialState,
@@ -56,6 +77,32 @@ const teacherSlicer = createSlice({
         }
       })
       .addCase(updateTeacher.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // ✅ Update Teacher Last Login
+      .addCase(updateTeacherLastLogin.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateTeacherLastLogin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const updatedTeacher = action.payload.data;
+
+        if (updatedTeacher) {
+          const index = state.teachers.findIndex(
+            (teacher) => teacher._id === updatedTeacher._id
+          );
+
+          if (index !== -1) {
+            state.teachers[index] = {
+              ...state.teachers[index],
+              lastLogin: updatedTeacher.lastLogin,
+            };
+          }
+        }
+      })
+      .addCase(updateTeacherLastLogin.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });
