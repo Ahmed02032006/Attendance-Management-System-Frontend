@@ -231,9 +231,6 @@ const AdminDashboard_Page = () => {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -283,22 +280,6 @@ const AdminDashboard_Page = () => {
                               </>
                             )}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <button
-                              className="text-sky-600 hover:text-sky-900 transition-colors p-1"
-                              title="Edit Teacher"
-                            >
-                              <FiEdit className="h-4 w-4" />
-                            </button>
-                            <button
-                              className="text-red-600 hover:text-red-900 transition-colors p-1"
-                              title="Delete Teacher"
-                            >
-                              <FiTrash2 className="h-4 w-4" />
-                            </button>
-                          </div>
                         </td>
                       </tr>
                     ))

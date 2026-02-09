@@ -329,6 +329,9 @@ const AdminTeachers_Page = () => {
                     <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       Subjects Count
                     </th>
+                    <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                      Last Login
+                    </th>
                     <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
@@ -402,6 +405,9 @@ const AdminTeachers_Page = () => {
                           </td>
                           <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
                             {teacher.subjectCount}
+                          </td>
+                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
+                            1d Ago
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-center">
                             <span className={`px-1 py-1 text-xs font-semibold rounded-full flex items-center justify-center w-[75px] mx-auto ${teacher.status === "Active"
