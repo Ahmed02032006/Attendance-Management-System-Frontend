@@ -354,23 +354,6 @@ const AdminDashboard_Page = () => {
                 <h3 className="text-lg font-semibold text-gray-800">Teachers List</h3>
                 <p className="text-sm text-gray-600 mt-1">Manage faculty members</p>
               </div>
-              <button
-                onClick={handleRetry}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors text-sm font-medium flex items-center"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Refreshing...
-                  </>
-                ) : (
-                  <>
-                    <FiUsers className="h-4 w-4 mr-2" />
-                    Refresh
-                  </>
-                )}
-              </button>
             </div>
           </div>
 
