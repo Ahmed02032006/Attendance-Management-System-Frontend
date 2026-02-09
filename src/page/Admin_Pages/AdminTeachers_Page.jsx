@@ -38,7 +38,7 @@ const AdminTeachers_Page = () => {
   useEffect(() => {
     setIsTeacherLoading(true);
     dispatch(getTeachersByUser())
-    setIsTeacherLoading(true);
+    setIsTeacherLoading(false);
   }, [dispatch])
 
   // Filter teachers based on search, filter, and role
