@@ -33,22 +33,18 @@ const AdminDashboard_Page = () => {
       // Fetch real teachers data
       await dispatch(getTeachersByUser());
 
-      // Filter only Teacher role users
-      const teacherUsers = teachers.filter(teacher => 
-        teacher.userRole === 'Teacher' || !teacher.userRole
-      );
+      // Calculate stats from real data
+      const allTeachersCount = teachers.length;
+      const activeTeachersCount = teachers.filter(teacher => teacher.status === 'Active').length;
       
-      // Calculate stats from teacher data only
-      const allTeachersCount = teacherUsers.length;
-      const activeTeachersCount = teacherUsers.filter(teacher => teacher.status === 'Active').length;
-      
-      // Calculate total subjects count from teachers only
-      const allSubjectsCount = teacherUsers.reduce((total, teacher) => {
+      // Calculate total subjects count from all teachers
+      const allSubjectsCount = teachers.reduce((total, teacher) => {
         return total + (teacher.subjectCount || 0);
       }, 0);
       
       // For active subjects, we can use a placeholder or calculate from active teachers
-      const activeSubjectsCount = allSubjectsCount;
+      // Since we don't have subject status in teacher data, we'll use a placeholder
+      const activeSubjectsCount = allSubjectsCount; // This can be adjusted based on actual requirements
 
       setStats({
         allTeachers: allTeachersCount,
@@ -57,6 +53,10 @@ const AdminDashboard_Page = () => {
         activeSubjects: activeSubjectsCount
       });
 
+      // Get only teacher role users for dashboard
+      const teacherUsers = teachers.filter(teacher => 
+        teacher.userRole === 'Teacher' || !teacher.userRole
+      );
       setDashboardTeachers(teacherUsers);
 
     } catch (error) {
@@ -69,16 +69,11 @@ const AdminDashboard_Page = () => {
   // Refresh data when teachers change
   useEffect(() => {
     if (teachers.length > 0) {
-      // Filter only Teacher role users
-      const teacherUsers = teachers.filter(teacher => 
-        teacher.userRole === 'Teacher' || !teacher.userRole
-      );
+      // Calculate stats from real data
+      const allTeachersCount = teachers.length;
+      const activeTeachersCount = teachers.filter(teacher => teacher.status === 'Active').length;
       
-      // Calculate stats from teacher data only
-      const allTeachersCount = teacherUsers.length;
-      const activeTeachersCount = teacherUsers.filter(teacher => teacher.status === 'Active').length;
-      
-      const allSubjectsCount = teacherUsers.reduce((total, teacher) => {
+      const allSubjectsCount = teachers.reduce((total, teacher) => {
         return total + (teacher.subjectCount || 0);
       }, 0);
       
@@ -91,6 +86,9 @@ const AdminDashboard_Page = () => {
         activeSubjects: activeSubjectsCount
       });
 
+      const teacherUsers = teachers.filter(teacher => 
+        teacher.userRole === 'Teacher' || !teacher.userRole
+      );
       setDashboardTeachers(teacherUsers);
     }
   }, [teachers]);
@@ -310,16 +308,16 @@ const AdminDashboard_Page = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Teacher
                   </th>
-                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Subjects
                   </th>
-                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                     Joined
                   </th>
-                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Last Login
                   </th>
-                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Status
                   </th>
                 </tr>
@@ -346,19 +344,19 @@ const AdminDashboard_Page = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900 hidden md:table-cell">
-                        <span className="px-2 py-1 bg-sky-100 text-sky-800 rounded-full text-xs font-medium inline-block">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                        <span className="px-2 py-1 bg-sky-100 text-sky-800 rounded-full text-xs font-medium">
                           {teacher.subjectCount || 0} subjects
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden lg:table-cell">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
                         {formatDate(teacher.createdAt)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                         {timeAgo(teacher.lastLogin || teacher.updatedAt)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center hidden md:table-cell">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full inline-flex items-center justify-center mx-auto ${teacher.status === "Active"
+                      <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full inline-flex items-center ${teacher.status === "Active"
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                           }`}>
