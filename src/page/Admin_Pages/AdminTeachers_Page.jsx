@@ -16,6 +16,7 @@ const AdminTeachers_Page = () => {
   const { teachers, isLoading } = useSelector((state) => state.adminTeacher)
 
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [isTeacherLoading, setIsTeacherLoading] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState(null)
@@ -35,7 +36,9 @@ const AdminTeachers_Page = () => {
 
   // Fetch teachers on component mount
   useEffect(() => {
+    setIsTeacherLoading(true);
     dispatch(getTeachersByUser())
+    setIsTeacherLoading(true);
   }, [dispatch])
 
   // Filter teachers based on search, filter, and role
@@ -242,7 +245,7 @@ const AdminTeachers_Page = () => {
     }
   }
 
-  if (isLoading && teachers.length === 0) {
+  if (isTeacherLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
