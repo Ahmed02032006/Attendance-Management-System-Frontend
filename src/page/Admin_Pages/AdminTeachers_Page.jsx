@@ -829,67 +829,144 @@ const AdminTeachers_Page = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedTeacher && canDeleteTeacher(selectedTeacher) && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <FiTrash2 className="h-4 w-4 text-red-600" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 animate-scale-in">
+            {/* Header with gradient warning */}
+            <div className="relative px-8 py-6 border-b border-gray-100">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-orange-500 to-red-500 rounded-t-2xl"></div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 rounded-xl flex items-center justify-center">
+                      <FiTrash2 className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                      <FiAlertTriangle className="h-3 w-3 text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">Delete Teacher</h3>
+                    <p className="text-sm text-gray-500 mt-1">Permanent action</p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800">Delete Teacher</h3>
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isLoading}
+                >
+                  <FiX className="h-5 w-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                disabled={isLoading}
-              >
-                <FiX className="h-5 w-5" />
-              </button>
             </div>
-            <div className="p-6">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="shrink-0 h-16 w-16 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
-                  {selectedTeacher?.profilePicture ? (
-                    <img
-                      src={selectedTeacher.profilePicture}
-                      alt={selectedTeacher.userName}
-                      className="h-full w-full object-cover"
-                    />
+
+            {/* Teacher Information Card */}
+            <div className="p-8">
+              <div className="relative">
+                <div className="absolute -top-2 -right-2">
+                  <span className="px-3 py-1 bg-red-50 text-red-700 text-xs font-semibold rounded-full border border-red-200">
+                    To be deleted
+                  </span>
+                </div>
+
+                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-5 border border-gray-200 shadow-sm">
+                  <div className="flex items-center space-x-4">
+                    <div className="relative shrink-0">
+                      <div className="h-20 w-20 rounded-xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center">
+                        {selectedTeacher?.profilePicture ? (
+                          <img
+                            src={selectedTeacher.profilePicture}
+                            alt={selectedTeacher.userName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-white font-bold text-3xl">
+                            {getAvatarLetter(selectedTeacher?.userName)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                        <FiUserX className="h-4 w-4 text-white" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-lg font-bold text-gray-900 truncate">{selectedTeacher?.userName}</h4>
+                      <p className="text-sm text-gray-600 mt-1 flex items-center">
+                        <FiMail className="h-4 w-4 mr-2 text-gray-400" />
+                        {selectedTeacher?.userEmail}
+                      </p>
+                      <div className="mt-2 flex items-center space-x-2">
+                        <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
+                          {selectedTeacher?.userRole || 'Teacher'}
+                        </span>
+                        <span className="text-xs text-gray-500">•</span>
+                        <span className="text-xs text-gray-500">ID: {selectedTeacher?.id?.slice(-8)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Warning Message */}
+              <div className="mt-8">
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                  <div className="flex">
+                    <FiAlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800 font-semibold">Irreversible Action</p>
+                      <p className="text-sm text-red-700 mt-1">
+                        All teacher data, records, and associated information will be <span className="font-bold">permanently deleted</span> and cannot be recovered.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirmation Text */}
+              <div className="mt-6 text-center">
+                <p className="text-gray-700">
+                  Confirm deletion of teacher{' '}
+                  <span className="font-bold text-gray-900 bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                    {selectedTeacher?.userName}
+                  </span>
+                  ?
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="px-8 py-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-6 py-3 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 rounded-xl hover:bg-gray-100 border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteTeacher}
+                  className="relative px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-red-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin h-4 w-4 mr-2 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Deleting...
+                    </span>
                   ) : (
-                    <span className="text-white font-bold text-2xl">
-                      {getAvatarLetter(selectedTeacher?.userName)}
+                    <span className="flex items-center justify-center">
+                      <FiTrash2 className="h-4 w-4 mr-2" />
+                      Delete Teacher
                     </span>
                   )}
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900">{selectedTeacher?.userName}</h4>
-                  <p className="text-sm text-gray-600">{selectedTeacher?.userEmail}</p>
-                  <p className="text-xs text-gray-500">{selectedTeacher?.userRole || 'Teacher'}</p>
-                </div>
+                </button>
               </div>
-              <p className="text-gray-600 text-center mb-2">
-                Are you sure you want to delete{' '}
-                <strong className="text-gray-900 font-semibold">{selectedTeacher?.userName}</strong>?
+              <p className="text-xs text-gray-500 text-center mt-4">
+                This action will take effect immediately
               </p>
-              <p className="text-red-600 text-sm text-center mb-6">
-                This action cannot be undone. All teacher data will be permanently removed.
-              </p>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition-colors rounded-lg hover:bg-gray-100"
-                disabled={isLoading}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteTeacher}
-                className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Deleting...' : 'Delete Teacher'}
-              </button>
             </div>
           </div>
         </div>
