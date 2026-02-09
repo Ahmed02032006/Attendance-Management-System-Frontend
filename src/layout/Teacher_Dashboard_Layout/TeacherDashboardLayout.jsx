@@ -4,6 +4,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuthUser, logOutUser } from '../../store/Auth-Slicer/Auth-Slicer';
 import { toast } from 'react-toastify';
+import { updateTeacherLastLogin } from '../../store/Teacher-Slicer/User-Slicer';
 
 const TeacherDashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -19,11 +20,6 @@ const TeacherDashboardLayout = () => {
   const { user } = useSelector(
     (state) => state.auth
   );
-
-  useEffect(() => {
-    console.log(user);
-  }, []);
-  
 
   // Format email to show ... after @
   const formatEmail = (email) => {
@@ -67,6 +63,8 @@ const TeacherDashboardLayout = () => {
   useEffect(() => {
     if (user?.status === 'Inactive') {
       setShowInactiveModal(true);
+    } else {
+      dispatch(updateTeacherLastLogin(user.id));
     }
   }, [user]);
 
