@@ -16,7 +16,6 @@ const AdminTeachers_Page = () => {
   const { teachers, isLoading } = useSelector((state) => state.adminTeacher)
 
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [isTeacherLoading, setIsTeacherLoading] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState(null)
@@ -36,9 +35,7 @@ const AdminTeachers_Page = () => {
 
   // Fetch teachers on component mount
   useEffect(() => {
-    setIsTeacherLoading(true);
     dispatch(getTeachersByUser())
-    setIsTeacherLoading(false);
   }, [dispatch])
 
   // Filter teachers based on search, filter, and role
@@ -245,7 +242,7 @@ const AdminTeachers_Page = () => {
     }
   }
 
-  if (isTeacherLoading && teachers.length === 0) {
+  if (isLoading && teachers.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
@@ -332,9 +329,6 @@ const AdminTeachers_Page = () => {
                     <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       Subjects Count
                     </th>
-                    <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                      Last Login
-                    </th>
                     <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
@@ -408,9 +402,6 @@ const AdminTeachers_Page = () => {
                           </td>
                           <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
                             {teacher.subjectCount}
-                          </td>
-                          <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
-                            1d Ago
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-center">
                             <span className={`px-1 py-1 text-xs font-semibold rounded-full flex items-center justify-center w-[75px] mx-auto ${teacher.status === "Active"
