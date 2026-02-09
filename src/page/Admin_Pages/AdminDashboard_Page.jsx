@@ -333,7 +333,7 @@ const AdminDashboard_Page = () => {
           </div>
 
           {/* All Subjects Card */}
-          <div className="bg-linear-to-br from-white to-purple-50 rounded-xl p-5 border border-purple-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-linear-to-br from-white to-orange-50 rounded-xl p-5 border border-orange-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-orange-700 mb-1">All Subjects</p>
