@@ -364,60 +364,95 @@ const AdminDashboard_Page = () => {
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
-          {/* All Teachers Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="p-3 bg-sky-100 rounded-lg mr-4">
-                <FiUsers className="h-6 w-6 text-sky-600" />
-              </div>
-              <div>
-                <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allTeachers}</div>
-                <div className="text-sm font-medium text-gray-600">All Teachers</div>
-              </div>
-            </div>
-          </div>
+        {/* Stats Cards - Modern Design */}
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+  {/* All Teachers Card */}
+  <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <div className="flex items-start justify-between mb-4">
+      <div>
+        <p className="text-sm font-medium text-gray-500 mb-1">All Teachers</p>
+        <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allTeachers}</div>
+      </div>
+      <div className="p-3 bg-gradient-to-br from-sky-50 to-sky-100 rounded-xl">
+        <FiUsers className="h-6 w-6 text-sky-600" />
+      </div>
+    </div>
+    <div className="flex items-center text-sm">
+      <div className="flex items-center text-green-600">
+        <span className="font-medium">+12%</span>
+        <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+        </svg>
+      </div>
+      <span className="text-gray-500 ml-2">from last month</span>
+    </div>
+  </div>
 
-          {/* Active Teachers Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="p-3 bg-green-100 rounded-lg mr-4">
-                <FiUsers className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeTeachers}</div>
-                <div className="text-sm font-medium text-gray-600">Active Teachers</div>
-              </div>
-            </div>
-          </div>
+  {/* Active Teachers Card */}
+  <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <div className="flex items-start justify-between mb-4">
+      <div>
+        <p className="text-sm font-medium text-gray-500 mb-1">Active Teachers</p>
+        <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeTeachers}</div>
+      </div>
+      <div className="p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
+        <FiUsers className="h-6 w-6 text-green-600" />
+      </div>
+    </div>
+    <div className="flex items-center">
+      <div className="w-full bg-gray-200 rounded-full h-2">
+        <div 
+          className="bg-gradient-to-r from-green-400 to-green-500 h-2 rounded-full" 
+          style={{ width: `${stats.allTeachers > 0 ? (stats.activeTeachers / stats.allTeachers * 100) : 0}%` }}
+        ></div>
+      </div>
+      <span className="text-sm text-gray-600 font-medium ml-3">
+        {stats.allTeachers > 0 ? Math.round(stats.activeTeachers / stats.allTeachers * 100) : 0}%
+      </span>
+    </div>
+  </div>
 
-          {/* All Subjects Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="p-3 bg-purple-100 rounded-lg mr-4">
-                <FiBookOpen className="h-6 w-6 text-purple-600" />
-              </div>
-              <div>
-                <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allSubjects}</div>
-                <div className="text-sm font-medium text-gray-600">All Subjects</div>
-              </div>
-            </div>
-          </div>
+  {/* All Subjects Card */}
+  <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <div className="flex items-start justify-between mb-4">
+      <div>
+        <p className="text-sm font-medium text-gray-500 mb-1">All Subjects</p>
+        <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allSubjects}</div>
+      </div>
+      <div className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
+        <FiBookOpen className="h-6 w-6 text-purple-600" />
+      </div>
+    </div>
+    <div className="flex items-center text-sm">
+      <div className="flex items-center text-purple-600">
+        <span className="font-medium">Avg: {stats.allTeachers > 0 ? (stats.allSubjects / stats.allTeachers).toFixed(1) : 0}</span>
+      </div>
+      <span className="text-gray-500 ml-2">subjects per teacher</span>
+    </div>
+  </div>
 
-          {/* Active Subjects Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="p-3 bg-orange-100 rounded-lg mr-4">
-                <FiBookOpen className="h-6 w-6 text-orange-600" />
-              </div>
-              <div>
-                <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeSubjects}</div>
-                <div className="text-sm font-medium text-gray-600">Active Subjects</div>
-              </div>
-            </div>
-          </div>
-        </div>
+  {/* Active Subjects Card */}
+  <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <div className="flex items-start justify-between mb-4">
+      <div>
+        <p className="text-sm font-medium text-gray-500 mb-1">Active Subjects</p>
+        <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeSubjects}</div>
+      </div>
+      <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
+        <FiBookOpen className="h-6 w-6 text-orange-600" />
+      </div>
+    </div>
+    <div className="flex items-center text-sm">
+      <div className="flex items-center text-orange-600">
+        <span className="font-medium">+8%</span>
+        <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+        </svg>
+      </div>
+      <span className="text-gray-500 ml-2">from last month</span>
+    </div>
+  </div>
+</div>
 
         {/* Teachers Table Column */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -427,13 +462,6 @@ const AdminDashboard_Page = () => {
                 <h3 className="text-lg font-semibold text-gray-800">Teachers List</h3>
                 <p className="text-sm text-gray-600 mt-1">Manage faculty members</p>
               </div>
-              <button
-                onClick={handleRetry}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors text-sm font-medium flex items-center"
-              >
-                <FiUsers className="h-4 w-4 mr-2" />
-                Refresh
-              </button>
             </div>
           </div>
 
