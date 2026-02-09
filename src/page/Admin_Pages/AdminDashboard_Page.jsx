@@ -7,7 +7,7 @@ import { getTeachersByUser } from '../../store/Admin-Slicer/Teacher-Slicer.js';
 const AdminDashboard_Page = () => {
   const dispatch = useDispatch();
   const { teachers = [], isLoading, error } = useSelector((state) => state.adminTeacher);
-  
+
   // Stats data
   const [stats, setStats] = useState({
     allTeachers: 0,
@@ -35,7 +35,7 @@ const AdminDashboard_Page = () => {
     try {
       setLoading(true);
       setErrorMessage('');
-      
+
       // Clear previous data
       setDashboardTeachers([]);
       setStats({
@@ -47,7 +47,7 @@ const AdminDashboard_Page = () => {
 
       // Fetch real teachers data - unwrap the promise to wait for completion
       await dispatch(getTeachersByUser()).unwrap();
-      
+
       // Mark initial load as complete
       setInitialLoadComplete(true);
 
@@ -71,19 +71,19 @@ const AdminDashboard_Page = () => {
       const role = teacher.userRole || teacher.role || '';
       return role === 'Teacher' || role === '' || !role;
     });
-    
+
     // Calculate stats from teacher data only
     const allTeachersCount = teacherUsers.length;
     const activeTeachersCount = teacherUsers.filter(teacher => {
       const status = teacher.status || teacher.userStatus || 'Active';
       return status === 'Active';
     }).length;
-    
+
     // Calculate total subjects count from teachers only
     const allSubjectsCount = teacherUsers.reduce((total, teacher) => {
       return total + (teacher.subjectCount || teacher.subjectsCount || teacher.subjects?.length || 0);
     }, 0);
-    
+
     const activeSubjectsCount = allSubjectsCount;
 
     setStats({
@@ -94,7 +94,7 @@ const AdminDashboard_Page = () => {
     });
 
     setDashboardTeachers(teacherUsers);
-    
+
     // Reset to first page when data changes
     setCurrentTeacherPage(1);
 
@@ -307,7 +307,7 @@ const AdminDashboard_Page = () => {
         {/* Stats Cards - Modern Design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
           {/* All Teachers Card */}
-          <div className="bg-gradient-to-br from-white to-sky-50 rounded-xl p-5 border border-sky-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-linear-to-br from-white to-sky-50 rounded-xl p-5 border border-sky-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-sky-700 mb-1">All Teachers</p>
@@ -320,7 +320,7 @@ const AdminDashboard_Page = () => {
           </div>
 
           {/* Active Teachers Card */}
-          <div className="bg-gradient-to-br from-white to-green-50 rounded-xl p-5 border border-green-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-linear-to-br from-white to-green-50 rounded-xl p-5 border border-green-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-green-700 mb-1">Active Teachers</p>
@@ -333,24 +333,11 @@ const AdminDashboard_Page = () => {
           </div>
 
           {/* All Subjects Card */}
-          <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl p-5 border border-purple-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-linear-to-br from-white to-purple-50 rounded-xl p-5 border border-purple-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-700 mb-1">All Subjects</p>
+                <p className="text-sm font-medium text-orange-700 mb-1">All Subjects</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allSubjects}</div>
-              </div>
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <FiBookOpen className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
-
-          {/* Active Subjects Card */}
-          <div className="bg-gradient-to-br from-white to-orange-50 rounded-xl p-5 border border-orange-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-700 mb-1">Active Subjects</p>
-                <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.activeSubjects}</div>
               </div>
               <div className="p-3 bg-orange-100 rounded-lg">
                 <FiBookOpen className="h-6 w-6 text-orange-600" />
@@ -477,12 +464,12 @@ const AdminDashboard_Page = () => {
                         <FiUsers className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                         <p className="text-lg font-medium">No teachers found</p>
                         <p className="text-sm mt-1">
-                          {isLoading 
-                            ? "Loading teachers..." 
-                            : teachers.length === 0 
-                              ? "No teachers available in the system" 
+                          {isLoading
+                            ? "Loading teachers..."
+                            : teachers.length === 0
+                              ? "No teachers available in the system"
                               : "No teachers match the criteria. Try refreshing or check if teachers have the 'Teacher' role."
-                            }
+                          }
                         </p>
                         {!isLoading && (
                           <button
