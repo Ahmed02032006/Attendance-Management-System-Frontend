@@ -278,7 +278,7 @@ const AdminDashboard_Page = () => {
     <div className="min-h-screen bg-gray-50">
       <HeaderComponent
         heading={"Admin Dashboard"}
-        subHeading={"Overview of your institution's performance"}
+        subHeading={"Attendance Performance Overview"}
         role='admin'
       />
 
