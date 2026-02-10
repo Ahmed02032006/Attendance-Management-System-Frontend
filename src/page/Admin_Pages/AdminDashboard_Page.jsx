@@ -261,7 +261,7 @@ const AdminDashboard_Page = () => {
       <div className="min-h-screen bg-gray-50">
         <HeaderComponent
           heading={"Admin Dashboard"}
-          subHeading={"Overview of your institution's performance"}
+          subHeading={"Attendance Performance Overview"}
           role='admin'
         />
         <div className="flex items-center justify-center min-h-screen">
@@ -336,7 +336,7 @@ const AdminDashboard_Page = () => {
           <div className="bg-linear-to-br from-white to-orange-50 rounded-xl p-5 border border-orange-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-700 mb-1">All Subjects</p>
+                <p className="text-sm font-medium text-orange-700 mb-1">Total Subjects</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allSubjects}</div>
               </div>
               <div className="p-3 border border-orange-200 bg-orange-100 rounded-lg">
