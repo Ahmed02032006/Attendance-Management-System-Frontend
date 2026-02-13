@@ -35,7 +35,7 @@ const AdminComplaints_Page = () => {
         { value: 'All', label: 'All Complaints', color: 'bg-gray-100 text-gray-800' },
         { value: 'Pending', label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
         { value: 'Resolved', label: 'Resolved', color: 'bg-green-100 text-green-800' },
-        { value: 'In Progress', label: 'In Progress', color: 'bg-sky-100 text-sky-800' },
+        { value: 'In Progress', label: 'In Progress', color: 'bg-blue-100 text-blue-800' },
         { value: 'Urgent', label: 'Urgent', color: 'bg-red-100 text-red-800' }
     ];
 
@@ -98,22 +98,22 @@ const AdminComplaints_Page = () => {
                     {/* Loading State */}
                     {loading ? (
                         <div className="p-8 lg:p-12 flex flex-col items-center justify-center">
-                            <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
                             <p className="text-lg font-medium text-gray-700">Refreshing complaints data...</p>
                             <p className="text-sm text-gray-500 mt-2">Loading latest updates from Google Sheets</p>
                         </div>
                     ) : (
                         <div className="p-0">
                             {/* Info Banner */}
-                            <div className="bg-sky-50 border-b border-sky-200 px-4 lg:px-6 py-3">
+                            <div className="bg-blue-50 border-b border-blue-200 px-4 lg:px-6 py-3">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
-                                        <FiAlertCircle className="h-4 w-4 text-sky-600" />
-                                        <p className="text-sm text-sky-700">
+                                        <FiAlertCircle className="h-4 w-4 text-blue-600" />
+                                        <p className="text-sm text-blue-700">
                                             This is a live view of your Google Sheet. Scroll to see all complaints.
                                         </p>
                                     </div>
-                                    <span className="text-xs text-sky-600 bg-sky-100 px-2 py-1 rounded">
+                                    <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
                                         Last updated: {formatLastRefresh()}
                                     </span>
                                 </div>
@@ -121,7 +121,7 @@ const AdminComplaints_Page = () => {
 
                             {/* Google Sheet Iframe */}
                             <div className="relative w-full overflow-hidden bg-gray-100">
-                                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-sky-500 to-purple-500"></div>
+                                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-blue-500 to-purple-500"></div>
 
                                 <div key={iframeKey} className="iframe-container">
                                     <iframe
@@ -141,8 +141,8 @@ const AdminComplaints_Page = () => {
                             <div className="px-4 lg:px-6 py-4 border-t border-gray-200 bg-gray-50">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="flex items-start space-x-3">
-                                        <div className="shrink-0 w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
-                                            <span className="text-sky-600 font-bold">1</span>
+                                        <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span className="text-blue-600 font-bold">1</span>
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-gray-800">View Complaints</p>
@@ -151,8 +151,8 @@ const AdminComplaints_Page = () => {
                                     </div>
 
                                     <div className="flex items-start space-x-3">
-                                        <div className="shrink-0 w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
-                                            <span className="text-sky-600 font-bold">2</span>
+                                        <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span className="text-blue-600 font-bold">2</span>
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-gray-800">Update Status</p>
@@ -161,8 +161,8 @@ const AdminComplaints_Page = () => {
                                     </div>
 
                                     <div className="flex items-start space-x-3">
-                                        <div className="shrink-0 w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
-                                            <span className="text-sky-600 font-bold">3</span>
+                                        <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span className="text-blue-600 font-bold">3</span>
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-gray-800">Refresh Data</p>

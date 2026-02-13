@@ -147,7 +147,7 @@ const TeacherDashboard_Page = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="mt-4 text-lg font-medium text-gray-700">Loading Stats...</p>
         </div>
       </div>
@@ -166,7 +166,7 @@ const TeacherDashboard_Page = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">My Subjects</h3>
-                {/* <button className="text-sky-600 hover:text-sky-700 text-sm font-medium flex items-center">
+                {/* <button className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
                   View All
                 </button> */}
               </div>
@@ -185,7 +185,7 @@ const TeacherDashboard_Page = () => {
                     <div
                       key={subject.id}
                       className={`flex items-center justify-between p-3 rounded-lg transition-all cursor-pointer ${selectedSubject === subject.id
-                        ? 'bg-sky-50 border border-sky-200'
+                        ? 'bg-blue-50 border border-blue-200'
                         : 'hover:bg-gray-50 border border-transparent'
                         }`}
                       onClick={() => handleSubjectSelect(subject.id)}
@@ -198,7 +198,7 @@ const TeacherDashboard_Page = () => {
                         </div>
                         <div>
                           <p
-                            className={`text-xs font-medium truncate w-[145px] whitespace-nowrap overflow-hidden text-ellipsis ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                            className={`text-xs font-medium truncate w-[145px] whitespace-nowrap overflow-hidden text-ellipsis ${selectedSubject === subject.id ? 'text-blue-700' : 'text-gray-900'
                               }`}
                             title={subject.name}
                           >
@@ -209,7 +209,7 @@ const TeacherDashboard_Page = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={`text-sm font-medium ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                        <p className={`text-sm font-medium ${selectedSubject === subject.id ? 'text-blue-700' : 'text-gray-900'
                           }`}>
                           {subject.students || 0}
                         </p>
@@ -351,7 +351,7 @@ const TeacherDashboard_Page = () => {
                           key={number}
                           onClick={() => paginate(number)}
                           className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
-                            ? 'border-sky-600 bg-sky-600 text-white'
+                            ? 'border-blue-600 bg-blue-600 text-white'
                             : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                             } rounded-md transition-colors`}
                         >
@@ -382,7 +382,7 @@ const TeacherDashboard_Page = () => {
                               key={number}
                               onClick={() => paginate(number)}
                               className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
-                                ? 'border-sky-600 bg-sky-600 text-white'
+                                ? 'border-blue-600 bg-blue-600 text-white'
                                 : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                                 } rounded-md transition-colors`}
                             >

@@ -195,7 +195,7 @@ const TeacherDashboardLayout = () => {
           </button>
 
           {/* ======================================================== */}
-          <div className='bg-gradient-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
+          <div className='bg-gradient-to-b to-blue-300 from-blue-600 h-4 rounded-bl-full'></div>
           {/* ======================================================== */}
 
           {/* School Header */}
@@ -313,7 +313,7 @@ const TeacherDashboardLayout = () => {
                       </>
                     ) : (
                       // Show fallback avatar with background color and initial
-                      <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
+                      <div className="h-9 w-9 rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
                         <span className="text-white font-semibold text-sm">
                           {getInitial()}
                         </span>
@@ -350,7 +350,7 @@ const TeacherDashboardLayout = () => {
                   </div>
                 ) : (
                   // Show fallback avatar in collapsed sidebar
-                  <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
+                  <div className="h-9 w-9 rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
                     <span className="text-white font-semibold text-sm">
                       {getInitial()}
                     </span>

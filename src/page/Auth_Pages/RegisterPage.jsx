@@ -58,7 +58,7 @@ const RegisterPage = () => {
 
   return (
     <div className="py-8 px-6 sm:px-10 bg-white rounded-lg shadow-sm border border-gray-100">
-      <h2 className="text-3xl font-bold text-center text-sky-700 mb-2">Create Your Account</h2>
+      <h2 className="text-3xl font-bold text-center text-blue-700 mb-2">Create Your Account</h2>
       <p className="text-center text-gray-500 mb-8 text-sm">Join us and start managing your dashboard</p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -76,7 +76,7 @@ const RegisterPage = () => {
               value={formData.userName}
               onChange={handleInputChange}
               placeholder="John Doe"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 "
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
             />
           </div>
         </div>
@@ -95,7 +95,7 @@ const RegisterPage = () => {
               value={formData.userEmail}
               onChange={handleInputChange}
               placeholder="you@example.com"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 "
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
             />
           </div>
         </div>
@@ -114,7 +114,7 @@ const RegisterPage = () => {
               value={formData.userPassword}
               onChange={handleInputChange}
               placeholder="••••••••"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 "
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
             />
           </div>
         </div>
@@ -136,7 +136,7 @@ const RegisterPage = () => {
               className={`w-full pl-10 pr-4 py-2.5 border ${formData.confirmPassword && formData.userPassword !== formData.confirmPassword
                   ? 'border-red-500'
                   : 'border-gray-300'
-                } rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500`}
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
             />
           </div>
           {formData.confirmPassword && formData.userPassword !== formData.confirmPassword && (
@@ -150,11 +150,11 @@ const RegisterPage = () => {
             id="terms"
             name="terms"
             type="checkbox"
-            className="mt-0.5 h-4 w-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500"
+            className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
           <label htmlFor="terms" className="ml-3 text-gray-700">
             I agree to the{' '}
-            <Link to={"/auth/termsAndConditions"} className="text-sky-600 hover:underline">
+            <Link to={"/auth/termsAndConditions"} className="text-blue-600 hover:underline">
               terms and conditions
             </Link>
           </label>
@@ -163,7 +163,7 @@ const RegisterPage = () => {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+          className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
           Register
         </button>
@@ -172,7 +172,7 @@ const RegisterPage = () => {
       <div className="mt-6 text-center text-sm">
         <p className="text-gray-600">
           Already have an account?{' '}
-          <Link to="/auth/login" className="font-medium text-sky-600 hover:text-sky-500 hover:underline">
+          <Link to="/auth/login" className="font-medium text-blue-600 hover:text-blue-500 hover:underline">
             Sign in
           </Link>
         </p>

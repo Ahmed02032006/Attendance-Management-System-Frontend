@@ -231,7 +231,7 @@ const AdminDashboard_Page = () => {
               key={number}
               onClick={() => paginateFunction(number)}
               className={`px-3 py-1.5 text-sm font-medium ${currentPage === number
-                ? 'border-sky-600 bg-sky-600 text-white'
+                ? 'border-blue-600 bg-blue-600 text-white'
                 : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                 } rounded-md transition-colors border`}
             >
@@ -266,7 +266,7 @@ const AdminDashboard_Page = () => {
         />
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-4 text-lg font-medium text-gray-700">Loading Dashboard...</p>
           </div>
         </div>
@@ -307,14 +307,14 @@ const AdminDashboard_Page = () => {
         {/* Stats Cards - Modern Design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
           {/* All Teachers Card */}
-          <div className="bg-linear-to-br from-white to-sky-50 rounded-xl p-5 border border-sky-300">
+          <div className="bg-linear-to-br from-white to-blue-50 rounded-xl p-5 border border-blue-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-sky-700 mb-1">Total Teachers</p>
+                <p className="text-sm font-medium text-blue-700 mb-1">Total Teachers</p>
                 <div className="text-2xl lg:text-3xl font-bold text-gray-800">{stats.allTeachers}</div>
               </div>
-              <div className="p-3 border border-sky-200 bg-sky-100 rounded-lg">
-                <FiUsers className="h-6 w-6 text-sky-600" />
+              <div className="p-3 border border-blue-200 bg-blue-100 rounded-lg">
+                <FiUsers className="h-6 w-6 text-blue-600" />
               </div>
             </div>
           </div>
@@ -392,7 +392,7 @@ const AdminDashboard_Page = () => {
                       <tr key={teacher._id || teacher.id || `teacher-${index}`} className="hover:bg-gray-50 transition-colors duration-150">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
+                            <div className="shrink-0 h-10 w-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-blue-500">
                               <span className="text-white font-bold text-lg">
                                 {getAvatarLetter(displayName)}
                               </span>
@@ -409,7 +409,7 @@ const AdminDashboard_Page = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900 hidden md:table-cell">
-                          <span className="px-2 py-1 bg-sky-100 text-sky-800 rounded-full text-xs font-medium inline-block">
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium inline-block">
                             {subjectCount} subjects
                           </span>
                         </td>
@@ -457,7 +457,7 @@ const AdminDashboard_Page = () => {
                         {!isLoading && (
                           <button
                             onClick={handleRetry}
-                            className="mt-4 px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors text-sm font-medium"
+                            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                           >
                             Refresh Data
                           </button>

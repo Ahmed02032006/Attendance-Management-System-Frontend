@@ -176,7 +176,7 @@ const TeacherSubjects_Page = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="mt-4 text-lg font-medium text-gray-700">Loading Subjects...</p>
         </div>
       </div>
@@ -197,7 +197,7 @@ const TeacherSubjects_Page = () => {
             <input
               type="text"
               placeholder="Search subjects by title, name or code..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -263,7 +263,7 @@ const TeacherSubjects_Page = () => {
                           <div className="flex justify-center space-x-3">
                             <button
                               onClick={() => openEditModal(subject)}
-                              className="text-sky-600 hover:text-sky-900 transition-colors"
+                              className="text-blue-600 hover:text-blue-900 transition-colors"
                               title="Edit Subject"
                             >
                               <FiEdit className="h-5 w-5" />
@@ -323,7 +323,7 @@ const TeacherSubjects_Page = () => {
                         key={number}
                         onClick={() => paginate(number)}
                         className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
-                          ? 'border-sky-600 bg-sky-600 text-white'
+                          ? 'border-blue-600 bg-blue-600 text-white'
                           : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                           } rounded-md transition-colors`}
                       >
@@ -354,7 +354,7 @@ const TeacherSubjects_Page = () => {
                             key={number}
                             onClick={() => paginate(number)}
                             className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
-                              ? 'border-sky-600 bg-sky-600 text-white'
+                              ? 'border-blue-600 bg-blue-600 text-white'
                               : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                               } rounded-md transition-colors`}
                           >
@@ -392,7 +392,7 @@ const TeacherSubjects_Page = () => {
         <button
           onClick={openCreateModal}
           disabled={isLoading}
-          className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-3 sm:py-3 sm:px-4 rounded-full sm:rounded-lg transition-all duration-200 flex items-center space-x-2 hover:shadow-xl transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-3 sm:py-3 sm:px-4 rounded-full sm:rounded-lg transition-all duration-200 flex items-center space-x-2 hover:shadow-xl transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FiPlus className="h-5 w-5 sm:h-5 sm:w-5" />
           <span className="hidden sm:inline">Create Subject</span>
@@ -426,7 +426,7 @@ const TeacherSubjects_Page = () => {
                     value={subjectForm.subjectTitle}
                     onChange={handleInputChange}
                     placeholder="e.g., Mathematics"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     disabled={isLoading}
                   />
@@ -442,7 +442,7 @@ const TeacherSubjects_Page = () => {
                     value={subjectForm.subjectName}
                     onChange={handleInputChange}
                     placeholder="e.g., Advanced Mathematics"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     disabled={isLoading}
                   />
@@ -458,7 +458,7 @@ const TeacherSubjects_Page = () => {
                     value={subjectForm.subjectCode}
                     onChange={handleInputChange}
                     placeholder="e.g., MATH101"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     disabled={isLoading}
                   />
@@ -474,7 +474,7 @@ const TeacherSubjects_Page = () => {
                     value={subjectForm.semester}
                     onChange={handleInputChange}
                     placeholder="e.g., 2nd"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     disabled={isLoading}
                   />
@@ -491,7 +491,7 @@ const TeacherSubjects_Page = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Creating...' : 'Create Subject'}
@@ -527,7 +527,7 @@ const TeacherSubjects_Page = () => {
                     name="subjectTitle"
                     value={subjectForm.subjectTitle}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     disabled={isLoading}
                   />
@@ -542,7 +542,7 @@ const TeacherSubjects_Page = () => {
                     name="subjectName"
                     value={subjectForm.subjectName}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     disabled={isLoading}
                   />
@@ -557,7 +557,7 @@ const TeacherSubjects_Page = () => {
                     name="subjectCode"
                     value={subjectForm.subjectCode}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     disabled={isLoading}
                   />
@@ -573,7 +573,7 @@ const TeacherSubjects_Page = () => {
                     value={subjectForm.semester}
                     onChange={handleInputChange}
                     placeholder="e.g., 2nd"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     disabled={isLoading}
                   />
@@ -587,7 +587,7 @@ const TeacherSubjects_Page = () => {
                     name="status"
                     value={subjectForm.status}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     disabled={isLoading}
                   >
                     <option value="Active">Active</option>
@@ -606,7 +606,7 @@ const TeacherSubjects_Page = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Updating...' : 'Update Subject'}

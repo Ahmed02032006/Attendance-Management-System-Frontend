@@ -402,7 +402,7 @@ const StudentAttendance_Page = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container max-w-2xl mx-auto p-2">
         <div className="bg-white rounded-lg border border-gray-300 shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200 bg-sky-50 rounded-t-lg">
+          <div className="px-6 py-4 border-b border-gray-200 bg-blue-50 rounded-t-lg">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-gray-800">Mark Your Attendance</h2>
@@ -433,7 +433,7 @@ const StudentAttendance_Page = () => {
                   <div className="flex items-center">
                     {isGettingLocation ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-sky-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
                         <span className="text-sm text-gray-700">Getting your location...</span>
                       </>
                     ) : studentLocation ? (
@@ -452,7 +452,7 @@ const StudentAttendance_Page = () => {
                           <span className="text-sm text-red-700 block">{locationError}</span>
                           <button
                             onClick={handleRetryLocation}
-                            className="text-xs text-sky-600 hover:text-sky-800 mt-1 font-medium"
+                            className="text-xs text-blue-600 hover:text-blue-800 mt-1 font-medium"
                           >
                             Retry Location Access
                           </button>
@@ -471,7 +471,7 @@ const StudentAttendance_Page = () => {
                   {locationError && (
                     <button
                       onClick={handleRetryLocation}
-                      className="text-xs bg-sky-600 text-white px-3 py-1 rounded hover:bg-sky-700 transition-colors"
+                      className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
                     >
                       Retry
                     </button>
@@ -500,7 +500,7 @@ const StudentAttendance_Page = () => {
                 value={formData.studentName}
                 onChange={handleInputChange}
                 placeholder="Enter your full name"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors uppercase"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
                 required
                 style={{ textTransform: 'uppercase' }}
               />
@@ -517,7 +517,7 @@ const StudentAttendance_Page = () => {
                 value={formData.rollNo}
                 onChange={handleInputChange}
                 placeholder="Enter your roll number"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors uppercase"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
                 required
                 style={{ textTransform: 'uppercase' }}
               />
@@ -542,7 +542,7 @@ const StudentAttendance_Page = () => {
               <button
                 type="submit"
                 disabled={!isSubmitEnabled() || isSubmitting}
-                className="flex-1 bg-sky-600 text-white py-3 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

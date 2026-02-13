@@ -213,7 +213,7 @@ const TeacherDashboard_Page = () => {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline transition-colors"
+            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline transition-colors"
           >
             {pageName}
           </a>
@@ -411,7 +411,7 @@ const TeacherDashboard_Page = () => {
   // Color mapping for subjects
   const getSubjectColor = (index) => {
     const colors = [
-      'bg-sky-500', 'bg-green-500', 'bg-purple-500',
+      'bg-blue-500', 'bg-green-500', 'bg-purple-500',
       'bg-orange-500', 'bg-red-500', 'bg-indigo-500',
       'bg-pink-500', 'bg-teal-500', 'bg-cyan-500', 'bg-amber-500'
     ]
@@ -558,7 +558,7 @@ const TeacherDashboard_Page = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="mt-4 text-lg font-medium text-gray-700">Loading Dashboard...</p>
         </div>
       </div>
@@ -595,7 +595,7 @@ const TeacherDashboard_Page = () => {
                       <div
                         key={subject.id}
                         className={`flex items-center justify-between p-3 rounded-lg transition-all cursor-pointer ${selectedSubject === subject.id
-                          ? 'bg-sky-50 border border-sky-200'
+                          ? 'bg-blue-50 border border-blue-200'
                           : 'hover:bg-gray-50 border border-transparent'
                           }`}
                         onClick={() => handleSubjectSelect(subject.id)}
@@ -608,7 +608,7 @@ const TeacherDashboard_Page = () => {
                           </div>
                           <div className="min-w-0 flex-1">
                             <p
-                              className={`text-xs font-medium truncate ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                              className={`text-xs font-medium truncate ${selectedSubject === subject.id ? 'text-blue-700' : 'text-gray-900'
                                 }`}
                               title={subject.name}
                             >
@@ -618,7 +618,7 @@ const TeacherDashboard_Page = () => {
                           </div>
                         </div>
                         <div className="text-right shrink-0 ml-2">
-                          <p className={`text-sm font-medium ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                          <p className={`text-sm font-medium ${selectedSubject === subject.id ? 'text-blue-700' : 'text-gray-900'
                             }`}>
                             {subject.students || 0}
                           </p>
@@ -763,7 +763,7 @@ const TeacherDashboard_Page = () => {
                           key={number}
                           onClick={() => paginate(number)}
                           className={`px-2.5 sm:px-3.5 py-1.5 border text-xs sm:text-sm font-medium ${currentPage === number
-                            ? 'border-sky-600 bg-sky-600 text-white'
+                            ? 'border-blue-600 bg-blue-600 text-white'
                             : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                             } rounded-md transition-colors`}
                         >
@@ -792,7 +792,7 @@ const TeacherDashboard_Page = () => {
                               key={number}
                               onClick={() => paginate(number)}
                               className={`px-2.5 sm:px-3.5 py-1.5 border text-xs sm:text-sm font-medium ${currentPage === number
-                                ? 'border-sky-600 bg-sky-600 text-white'
+                                ? 'border-blue-600 bg-blue-600 text-white'
                                 : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                                 } rounded-md transition-colors`}
                             >
@@ -829,7 +829,7 @@ const TeacherDashboard_Page = () => {
       {/* Floating Chat Button */}
       <button
         onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-sky-600 hover:bg-sky-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-105"
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-105"
         aria-label="Open customer support chat"
       >
         {isChatOpen ? (
@@ -843,19 +843,19 @@ const TeacherDashboard_Page = () => {
       {isChatOpen && (
         <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
           {/* Chat Header */}
-          <div className="bg-sky-600 px-4 py-3 flex items-center justify-between">
+          <div className="bg-blue-600 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                <FiHelpCircle className="h-5 w-5 text-sky-600" />
+                <FiHelpCircle className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <h3 className="text-white font-semibold">Attendance Support</h3>
-                <p className="text-sky-100 text-xs">AI Assistant</p>
+                <p className="text-blue-100 text-xs">AI Assistant</p>
               </div>
             </div>
             <button
               onClick={clearChat}
-              className="text-sky-100 hover:text-white p-2 rounded-full hover:bg-sky-700 transition-colors"
+              className="text-blue-100 hover:text-white p-2 rounded-full hover:bg-blue-700 transition-colors"
               aria-label="Clear chat history"
               title="Clear Chat"
             >
@@ -873,7 +873,7 @@ const TeacherDashboard_Page = () => {
                 >
                   <div
                     className={`max-w-[80%] rounded-lg px-3 py-2 ${msg.sender === 'user'
-                      ? 'bg-sky-600 text-white rounded-br-none'
+                      ? 'bg-blue-600 text-white rounded-br-none'
                       : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
                       }`}
                   >
@@ -916,13 +916,13 @@ const TeacherDashboard_Page = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask about attendance, subjects, or dashboard..."
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={isSending}
               />
               <button
                 onClick={handleSendMessage}
                 disabled={!message.trim() || isSending}
-                className="bg-sky-600 hover:bg-sky-700 text-white rounded-lg p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Send message"
               >
                 <FiSend className="h-5 w-5" />

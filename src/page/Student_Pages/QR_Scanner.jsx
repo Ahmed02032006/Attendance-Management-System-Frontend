@@ -38,7 +38,7 @@ const QRScanner_Page = () => {
       }
 
       // Test 4: Check for other browser patterns (single comprehensive regex)
-      const otherBrowsers = /Edg|Edge|OPR|Opera|Samsung|UCBrowser|Vivaldi|Yandex|YaBrowser|DuckDuckGo|Phoenix|Miui|XiaoMi|Vivo|Huawei|QQ|Baidu|360|Sogou|Maxthon|Sleipnir|Puffin|Dolphin|Coast|Skyfire|Bolt|Iron|Epic|Pale Moon|Basilisk|Waterfox/i;
+      const otherBrowsers = /Edg|Edge|OPR|Opera|Samsung|UCBrowser|Vivaldi|Yandex|YaBrowser|DuckDuckGo|Phoenix|Miui|XiaoMi|Vivo|Huawei|QQ|Baidu|360|Sogou|Maxthon|Sleipnir|Puffin|Dolphin|Coast|bluefire|Bolt|Iron|Epic|Pale Moon|Basilisk|Waterfox/i;
       if (otherBrowsers.test(userAgent)) return false;
 
       // Test 5: Mobile check
@@ -507,8 +507,8 @@ const QRScanner_Page = () => {
 
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 mt-1">
-                <div className="w-6 h-6 bg-sky-100 rounded-full flex items-center justify-center">
-                  <svg className="h-4 w-4 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 14a2 2 0 100-4 2 2 0 000 4z" />
                     <path fillRule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" clipRule="evenodd" />
                   </svg>
@@ -546,7 +546,7 @@ const QRScanner_Page = () => {
           {/* <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => window.open('https://www.google.com/chrome/', '_blank')}
-              className="inline-flex items-center px-6 py-3 bg-sky-600 text-white font-medium rounded-lg hover:bg-sky-700 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-1.76v.5a3.5 3.5 0 01-3.5 3.5h-.5V8h1.76V6.69h5.31a3 3 0 013 3v5.31H8V15h10.5a1.5 1.5 0 001.5-1.5v-6a4.81 4.81 0 01-4.41 4.81z" />
@@ -662,7 +662,7 @@ const QRScanner_Page = () => {
               <button
                 onClick={toggleCameraScan}
                 disabled={!hasCameraPermission && !isScanning}
-                className={`mt-4 inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 ${isScanning
+                className={`mt-4 inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isScanning
                   ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
                   : !hasCameraPermission
                     ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
@@ -691,9 +691,9 @@ const QRScanner_Page = () => {
         </div>
 
         {/* Instructions */}
-        <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
-          <ul className="text-sm text-sky-700 space-y-1">
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-blue-800 mb-2">How to use:</h3>
+          <ul className="text-sm text-blue-700 space-y-1">
             <li>• <strong>Browser:</strong> Google Chrome browser required</li>
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>

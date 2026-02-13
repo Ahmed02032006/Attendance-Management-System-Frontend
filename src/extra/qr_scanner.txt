@@ -208,7 +208,7 @@ const QRScanner_Page = () => {
               {/* Camera Toggle Button */}
               <button
                 onClick={toggleCameraScan}
-                className={`mt-4 inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 ${
+                className={`mt-4 inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                   isScanning
                     ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
                     : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
@@ -242,7 +242,7 @@ const QRScanner_Page = () => {
               </svg>
               <p className="mt-2 text-sm text-gray-600">Upload QR Code Image</p>
               
-              <label className="mt-2 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 cursor-pointer">
+              <label className="mt-2 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer">
                 <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
@@ -272,12 +272,12 @@ const QRScanner_Page = () => {
                   value={manualCode}
                   onChange={(e) => setManualCode(e.target.value)}
                   placeholder="Enter code from QR code"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-colors font-medium"
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
               >
                 Submit Code
               </button>
@@ -286,9 +286,9 @@ const QRScanner_Page = () => {
         </div>
 
         {/* Instructions */}
-        <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
-          <ul className="text-sm text-sky-700 space-y-1">
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-blue-800 mb-2">How to use:</h3>
+          <ul className="text-sm text-blue-700 space-y-1">
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
             <li>• <strong>Upload Image:</strong> Select a saved QR code image</li>
             <li>• <strong>Manual Entry:</strong> Type the code if you have it</li>

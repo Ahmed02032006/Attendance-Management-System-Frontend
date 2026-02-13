@@ -104,7 +104,7 @@ const TeacherDashboard_Page = () => {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sky-600 hover:text-sky-700 hover:underline font-medium"
+            className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
           >
             {PAGE_NAME_MAPPING[url]}
           </a>
@@ -349,9 +349,9 @@ const TeacherDashboard_Page = () => {
       <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
         <div className="text-center">
           <div className="relative">
-            <div className="w-20 h-20 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin mx-auto"></div>
+            <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <FiBook className="h-8 w-8 text-sky-600 animate-pulse" />
+              <FiBook className="h-8 w-8 text-blue-600 animate-pulse" />
             </div>
           </div>
           <p className="mt-6 text-lg font-medium text-gray-700">Loading your dashboard...</p>

@@ -494,7 +494,7 @@ const TeacherAttendance_Page = () => {
                 <input
                   type="text"
                   placeholder="Search students..."
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -507,7 +507,7 @@ const TeacherAttendance_Page = () => {
                   value={formatDate(currentDate)}
                   onChange={handleDateChange}
                   max={formatDate(getTodayDate())}
-                  className="px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+                  className="px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
 
                 {/* Export to Excel Button */}
@@ -526,7 +526,7 @@ const TeacherAttendance_Page = () => {
                 <button
                   onClick={() => handleRefresh()}
                   disabled={isLoading}
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   title="Refresh attendance data"
                 >
                   <svg
@@ -543,7 +543,7 @@ const TeacherAttendance_Page = () => {
                 {/* Create New Attendance Button */}
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="bg-sky-800 hover:bg-sky-900 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2"
+                  className="bg-blue-800 hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -606,7 +606,7 @@ const TeacherAttendance_Page = () => {
                           <td className="px-4 py-3 whitespace-nowrap">
                             <button
                               onClick={() => handleStudentClick(student)}
-                              className="text-sm font-medium text-gray-900 hover:text-sky-600 transition-colors"
+                              className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
                             >
                               {student.studentName}
                             </button>
@@ -690,7 +690,7 @@ const TeacherAttendance_Page = () => {
             <p className="text-gray-600 mb-4">Please select a subject to view attendance records</p>
             <button
               onClick={() => setShowSubjectModal(true)}
-              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center mx-auto space-x-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center mx-auto space-x-2"
             >
               <FiGrid className="w-4 h-4" />
               <span>Select Subject</span>
@@ -710,7 +710,7 @@ const TeacherAttendance_Page = () => {
             <p className="text-gray-600 mb-4">You don't have any subjects with attendance data yet</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
             >
               Refresh Data
             </button>
@@ -732,7 +732,7 @@ const TeacherAttendance_Page = () => {
                 {subjectsWithAttendance.map((subject) => (
                   <div
                     key={subject.id}
-                    className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-sky-500 hover:bg-sky-50 cursor-pointer transition-all duration-200 text-center min-h-[80px] flex items-center justify-center"
+                    className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all duration-200 text-center min-h-[80px] flex items-center justify-center"
                     onClick={() => handleSubjectSelect(subject.id)}
                   >
                     <h4 className="font-medium text-sm text-gray-700 line-clamp-2">
@@ -776,7 +776,7 @@ const TeacherAttendance_Page = () => {
                   name="subject"
                   value={attendanceForm.subject}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">Select Subject</option>
                   {subjectsWithAttendance.map((subject) => (
@@ -798,7 +798,7 @@ const TeacherAttendance_Page = () => {
                     value={attendanceForm.uniqueCode}
                     onChange={handleInputChange}
                     placeholder="Enter unique code"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                   <button
                     type="button"
@@ -823,7 +823,7 @@ const TeacherAttendance_Page = () => {
               <button
                 onClick={handleGenerateQR}
                 disabled={isLoading}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Creating...' : 'Generate QR'}
               </button>
@@ -892,7 +892,7 @@ const TeacherAttendance_Page = () => {
                     setQrRefreshInterval(null);
                   }
                 }}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
               >
                 Close
               </button>
@@ -1034,7 +1034,7 @@ const TeacherAttendance_Page = () => {
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
               <button
                 onClick={() => setShowStudentModal(false)}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
               >
                 Close
               </button>

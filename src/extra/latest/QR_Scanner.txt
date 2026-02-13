@@ -745,7 +745,7 @@ const QRScanner_Page = () => {
               <button
                 onClick={toggleCameraScan}
                 disabled={!hasCameraPermission && !isScanning}
-                className={`mt-4 inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 ${isScanning
+                className={`mt-4 inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isScanning
                   ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
                   : !hasCameraPermission
                     ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
@@ -774,9 +774,9 @@ const QRScanner_Page = () => {
         </div>
 
         {/* Instructions */}
-        <div className="mt-6 bg-sky-50 border border-sky-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-sky-800 mb-2">How to use:</h3>
-          <ul className="text-sm text-sky-700 space-y-1">
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-blue-800 mb-2">How to use:</h3>
+          <ul className="text-sm text-blue-700 space-y-1">
             <li>• <strong>Browser:</strong> Google Chrome browser required</li>
             <li>• <strong>Camera Scan:</strong> Allow camera access and point at QR code</li>
             <li>• <strong>Tips:</strong> Ensure good lighting and clear focus</li>

@@ -133,7 +133,7 @@ const AdminDashboardLayout = () => {
           </button>
 
           {/* ======================================================== */}
-          <div className='bg-linear-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
+          <div className='bg-linear-to-b to-blue-300 from-blue-600 h-4 rounded-bl-full'></div>
           {/* ======================================================== */}
 
           {/* School Header */}

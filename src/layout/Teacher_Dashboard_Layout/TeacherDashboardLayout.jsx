@@ -187,7 +187,7 @@ const TeacherDashboardLayout = () => {
                           <p className="text-xs font-medium text-slate-500 mb-1">CONTACT EMAIL</p>
                           <a
                             href="mailto:m.ahmedofficial555@gmail.com"
-                            className="text-sky-600 hover:text-sky-700 text-sm font-medium hover:underline transition-colors"
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline transition-colors"
                           >
                             m.ahmedofficial555@gmail.com
                           </a>
@@ -254,7 +254,7 @@ const TeacherDashboardLayout = () => {
           </button>
 
           {/* ======================================================== */}
-          <div className='bg-linear-to-b to-sky-300 from-sky-600 h-4 rounded-bl-full'></div>
+          <div className='bg-linear-to-b to-blue-300 from-blue-600 h-4 rounded-bl-full'></div>
           {/* ======================================================== */}
 
           {/* School Header */}
@@ -371,7 +371,7 @@ const TeacherDashboardLayout = () => {
                       </>
                     ) : (
                       // Show fallback avatar with background color and initial
-                      <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
+                      <div className="h-9 w-9 rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
                         <span className="text-white font-semibold text-sm">
                           {getInitial()}
                         </span>
@@ -409,7 +409,7 @@ const TeacherDashboardLayout = () => {
                   </div>
                 ) : (
                   // Show fallback avatar in collapsed sidebar
-                  <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
+                  <div className="h-9 w-9 rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
                     <span className="text-white font-semibold text-sm">
                       {getInitial()}
                     </span>

@@ -276,7 +276,7 @@ const AdminTeachers_Page = () => {
       case 'Admin':
         return 'bg-purple-100 text-purple-800 border-purple-200'
       case 'Teacher':
-        return 'bg-sky-100 text-sky-800 border-sky-200'
+        return 'bg-blue-100 text-blue-800 border-blue-200'
       case 'Student':
         return 'bg-green-100 text-green-800 border-green-200'
       default:
@@ -296,7 +296,7 @@ const AdminTeachers_Page = () => {
 
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-4 text-lg font-medium text-gray-700">Loading Teachers...</p>
           </div>
         </div>
@@ -322,7 +322,7 @@ const AdminTeachers_Page = () => {
             <input
               type="text"
               placeholder="Search teachers by name or email..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -332,7 +332,7 @@ const AdminTeachers_Page = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
             >
               <option value="All">All Status</option>
               <option value="Active">Active</option>
@@ -342,7 +342,7 @@ const AdminTeachers_Page = () => {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
             >
               <option value="Teacher">Teachers Only</option>
               <option value="All">All Roles</option>
@@ -353,7 +353,7 @@ const AdminTeachers_Page = () => {
             <button
               onClick={openCreateModal}
               disabled={isLoading}
-              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FiPlus className="h-4 w-4" />
               <span>Add Teacher</span>
@@ -409,13 +409,13 @@ const AdminTeachers_Page = () => {
                                     e.target.style.display = 'none';
                                     const parent = e.target.parentNode;
                                     const fallback = document.createElement('div');
-                                    fallback.className = 'h-full w-full flex items-center justify-center bg-sky-500';
+                                    fallback.className = 'h-full w-full flex items-center justify-center bg-blue-500';
                                     fallback.innerHTML = `<span class="text-white font-bold text-lg">${getAvatarLetter(teacher.userName)}</span>`;
                                     parent.appendChild(fallback);
                                   }}
                                 />
                               ) : (
-                                <div className="h-full w-full flex items-center justify-center bg-sky-500">
+                                <div className="h-full w-full flex items-center justify-center bg-blue-500">
                                   <span className="text-white font-bold text-lg">
                                     {getAvatarLetter(teacher.userName)}
                                   </span>
@@ -481,7 +481,7 @@ const AdminTeachers_Page = () => {
                           <div className="flex justify-center space-x-2 lg:space-x-3">
                             <button
                               onClick={() => openEditModal(teacher)}
-                              className="text-sky-600 hover:text-sky-900 transition-colors p-1"
+                              className="text-blue-600 hover:text-blue-900 transition-colors p-1"
                               title="Edit User"
                               disabled={isLoading}
                             >
@@ -548,7 +548,7 @@ const AdminTeachers_Page = () => {
                       key={number}
                       onClick={() => paginate(number)}
                       className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
-                        ? 'border-sky-600 bg-sky-600 text-white'
+                        ? 'border-blue-600 bg-blue-600 text-white'
                         : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                         } rounded-md transition-colors`}
                     >
@@ -579,7 +579,7 @@ const AdminTeachers_Page = () => {
                           key={number}
                           onClick={() => paginate(number)}
                           className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
-                            ? 'border-sky-600 bg-sky-600 text-white'
+                            ? 'border-blue-600 bg-blue-600 text-white'
                             : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                             } rounded-md transition-colors`}
                         >
@@ -617,8 +617,8 @@ const AdminTeachers_Page = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
-                  <FiPlus className="h-4 w-4 text-sky-600" />
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <FiPlus className="h-4 w-4 text-blue-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800">Add New Teacher</h3>
               </div>
@@ -642,7 +642,7 @@ const AdminTeachers_Page = () => {
                     value={teacherForm.userName}
                     onChange={handleInputChange}
                     placeholder="Enter full name"
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     required
                     disabled={isLoading}
                   />
@@ -658,7 +658,7 @@ const AdminTeachers_Page = () => {
                     value={teacherForm.userEmail}
                     onChange={handleInputChange}
                     placeholder="teacher@example.com"
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     required
                     disabled={isLoading}
                   />
@@ -675,7 +675,7 @@ const AdminTeachers_Page = () => {
                       value={teacherForm.userPassword}
                       onChange={handleInputChange}
                       placeholder="••••••••"
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       required
                       disabled={isLoading}
                     />
@@ -691,7 +691,7 @@ const AdminTeachers_Page = () => {
                       value={teacherForm.confirmPassword}
                       onChange={handleInputChange}
                       placeholder="••••••••"
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       required
                       disabled={isLoading}
                     />
@@ -709,7 +709,7 @@ const AdminTeachers_Page = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                  className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Creating...' : 'Add Teacher'}
@@ -726,8 +726,8 @@ const AdminTeachers_Page = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
-                  <FiEdit className="h-4 w-4 text-sky-600" />
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <FiEdit className="h-4 w-4 text-blue-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800">
                   Edit {selectedTeacher?.userRole === 'Admin' ? 'Admin' : 'Teacher'}
@@ -752,7 +752,7 @@ const AdminTeachers_Page = () => {
                     name="userName"
                     value={teacherForm.userName}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     required
                     disabled={isLoading}
                   />
@@ -767,7 +767,7 @@ const AdminTeachers_Page = () => {
                     name="userEmail"
                     value={teacherForm.userEmail}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     required
                     disabled={isLoading}
                   />
@@ -816,7 +816,7 @@ const AdminTeachers_Page = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                  className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Updating...' : 'Update'}
@@ -848,7 +848,7 @@ const AdminTeachers_Page = () => {
             </div>
             <div className="p-6">
               <div className="flex items-center space-x-4 mb-4">
-                <div className="shrink-0 h-16 w-16 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-sky-500">
+                <div className="shrink-0 h-16 w-16 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-blue-500">
                   {selectedTeacher?.profilePicture ? (
                     <img
                       src={selectedTeacher.profilePicture}
