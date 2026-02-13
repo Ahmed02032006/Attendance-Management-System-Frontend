@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { 
-  FiPlus, 
-  FiEdit2, 
-  FiTrash2, 
-  FiSearch, 
-  FiX, 
-  FiChevronLeft, 
-  FiChevronRight, 
-  FiEdit, 
+import {
+  FiPlus,
+  FiEdit2,
+  FiTrash2,
+  FiSearch,
+  FiX,
+  FiChevronLeft,
+  FiChevronRight,
+  FiEdit,
   FiRefreshCcw,
   FiBook,
   FiCalendar,
-  FiClock
+  FiClock,
+  FiBook
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
@@ -198,7 +199,7 @@ const TeacherSubjects_Page = () => {
     const now = new Date()
     const diffTime = Math.abs(now - date)
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
+
     if (diffDays === 1) return 'Yesterday'
     if (diffDays < 7) return `${diffDays} days ago`
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
@@ -206,17 +207,23 @@ const TeacherSubjects_Page = () => {
 
   // Get status color
   const getStatusColor = (status) => {
-    return status === 'Active' 
-      ? 'bg-green-100 text-green-700' 
+    return status === 'Active'
+      ? 'bg-green-100 text-green-700'
       : 'bg-gray-100 text-gray-700'
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
         <div className="text-center">
-          <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading subjects...</p>
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <FiBook className="h-8 w-8 text-blue-600 animate-pulse" />
+            </div>
+          </div>
+          <p className="mt-6 text-lg font-medium text-gray-700">Loading Subjects...</p>
+          <p className="mt-2 text-sm text-gray-500">Preparing subjects assigned to you</p>
         </div>
       </div>
     );
@@ -224,10 +231,10 @@ const TeacherSubjects_Page = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderComponent 
-        heading="Subjects Management" 
-        subHeading="Create and manage your teaching subjects" 
-        role='admin' 
+      <HeaderComponent
+        heading="Subjects Management"
+        subHeading="Create and manage your teaching subjects"
+        role='admin'
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -244,7 +251,7 @@ const TeacherSubjects_Page = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -258,7 +265,7 @@ const TeacherSubjects_Page = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>

@@ -37,7 +37,6 @@
   background-color: transparent;
 }
 
-
 /* Hide Scrollbar */
 
 .hide-scrollbar {
@@ -67,5 +66,34 @@
   animation: wave 1.5s infinite;
 }
 
-/* ====================================================== */
+/* Loader UI */
 
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}

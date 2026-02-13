@@ -15,6 +15,7 @@ import {
   FiGrid,
   FiClock,
   FiUser,
+  FiBook,
   FiRefreshCw
 } from 'react-icons/fi'
 import {
@@ -430,10 +431,16 @@ const TeacherAttendance_Page = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
         <div className="text-center">
-          <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading Attendance Data...</p>
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <FiBook className="h-8 w-8 text-blue-600 animate-pulse" />
+            </div>
+          </div>
+          <p className="mt-6 text-lg font-medium text-gray-700">Loading Attendance Data...</p>
+          <p className="mt-2 text-sm text-gray-500">Compiling student attendance details</p>
         </div>
       </div>
     );
@@ -742,7 +749,7 @@ const TeacherAttendance_Page = () => {
                         {subject.name?.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    <h4 className="font-medium text-gray-900 text-xs mb-1 line-clamp-2 min-h-[32px]">
+                    <h4 className="font-medium text-gray-900 text-xs mb-1 line-clamp-2 min-h-8">
                       {subject.name}
                     </h4>
                     <p className="text-[10px] text-gray-500">
