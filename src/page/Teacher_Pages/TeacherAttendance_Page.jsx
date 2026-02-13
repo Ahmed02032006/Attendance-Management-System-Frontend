@@ -3,15 +3,15 @@ import { useSelector, useDispatch } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'react-toastify'
-import {
-  FiSearch,
-  FiChevronLeft,
-  FiChevronRight,
-  FiArrowUp,
-  FiArrowDown,
-  FiTrash2,
-  FiMaximize2,
-  FiMinimize2,
+import { 
+  FiSearch, 
+  FiChevronLeft, 
+  FiChevronRight, 
+  FiArrowUp, 
+  FiArrowDown, 
+  FiTrash2, 
+  FiMaximize2, 
+  FiMinimize2, 
   FiGrid,
   FiClock,
   FiUser,
@@ -718,33 +718,43 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal - Minimal Design */}
+      {/* Subject Selection Modal */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-md">
-            <div className="px-4 py-3 border-b border-gray-200">
-              <h3 className="text-base font-medium text-gray-900">Select Subject</h3>
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-auto my-8">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">Select Subject</h3>
+              <p className="text-sm text-gray-600 mt-1">Choose a subject to view attendance records</p>
             </div>
-
-            <div className="p-2 max-h-80 overflow-y-auto">
-              {subjectsWithAttendance.map((subject) => (
-                <button
-                  key={subject.id}
-                  onClick={() => handleSubjectSelect(subject.id)}
-                  className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
-                >
-                  {subject.name}
-                </button>
-              ))}
+            
+            <div className="p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {subjectsWithAttendance.map((subject) => (
+                  <div
+                    key={subject.id}
+                    className="p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all duration-200 text-center min-h-[80px] flex items-center justify-center"
+                    onClick={() => handleSubjectSelect(subject.id)}
+                  >
+                    <h4 className="font-medium text-sm text-gray-700 line-clamp-2">
+                      {subject.name}
+                    </h4>
+                  </div>
+                ))}
+              </div>
+              
+              {subjectsWithAttendance.length > 12 && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 text-center">
+                    Showing {subjectsWithAttendance.length} subjects. Select one to continue.
+                  </p>
+                </div>
+              )}
             </div>
-
-            <div className="px-4 py-3 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => setShowSubjectModal(false)}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Cancel
-              </button>
+            
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <p className="text-sm text-gray-600 text-center">
+                Select a subject to continue to the attendance dashboard
+              </p>
             </div>
           </div>
         </div>
