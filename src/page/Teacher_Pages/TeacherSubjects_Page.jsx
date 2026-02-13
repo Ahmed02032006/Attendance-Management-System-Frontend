@@ -222,8 +222,8 @@ const TeacherSubjects_Page = () => {
               <FiBook className="h-8 w-8 text-blue-600 animate-pulse" />
             </div>
           </div>
-          <p className="mt-6 text-lg font-medium text-gray-700">Loading Subjects...</p>
-          <p className="mt-2 text-sm text-gray-500">Preparing subjects assigned to you</p>
+          <p className="mt-6 text-lg font-medium text-gray-700">Loading your dashboard...</p>
+          <p className="mt-2 text-sm text-gray-500">Preparing your teaching overview</p>
         </div>
       </div>
     );
