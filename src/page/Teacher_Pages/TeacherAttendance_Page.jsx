@@ -718,115 +718,39 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal - Enhanced Design */}
+      {/* Subject Selection Modal - Simple Design */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-4xl mx-auto shadow-2xl">
+          <div className="bg-white rounded-lg w-full max-w-2xl">
             {/* Header */}
-            <div className="px-6 py-5 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Select Subject</h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Choose a subject to view its attendance records
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowSubjectModal(false)}
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h3 className="text-base font-medium text-gray-900">Select Subject</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Choose a subject to view attendance records</p>
+            </div>
+
+            {/* Subject List */}
+            <div className="p-4 max-h-96 overflow-y-auto">
+              <div className="space-y-1">
+                {subjectsWithAttendance.map((subject) => (
+                  <button
+                    key={subject.id}
+                    onClick={() => handleSubjectSelect(subject.id)}
+                    className="w-full text-left px-3 py-2.5 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"
+                  >
+                    <span className="text-sm text-gray-900">{subject.name}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Subject Grid */}
-            <div className="p-6 max-h-[500px] overflow-y-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {subjectsWithAttendance.map((subject) => {
-                  // Calculate attendance stats for this subject
-                  const totalDays = Object.keys(subject.attendance || {}).length;
-                  const totalRecords = Object.values(subject.attendance || {}).reduce(
-                    (sum, day) => sum + day.length, 0
-                  );
-
-                  return (
-                    <button
-                      key={subject.id}
-                      onClick={() => handleSubjectSelect(subject.id)}
-                      className="group relative p-5 rounded-xl border border-gray-200 bg-white hover:border-blue-500 hover:shadow-md transition-all duration-200 text-left"
-                    >
-                      {/* Subject Icon/Initial */}
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-3 shadow-sm">
-                        <span className="text-white font-semibold text-lg">
-                          {subject.name?.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-
-                      {/* Subject Name */}
-                      <h4 className="font-medium text-gray-900 mb-2 line-clamp-2 min-h-[40px]">
-                        {subject.name}
-                      </h4>
-
-                      {/* Stats */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center text-xs text-gray-500">
-                          <svg className="w-3.5 h-3.5 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          <span>{totalDays} attendance days</span>
-                        </div>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <svg className="w-3.5 h-3.5 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                          </svg>
-                          <span>{totalRecords} total records</span>
-                        </div>
-                      </div>
-
-                      {/* Hover indicator */}
-                      <div className="absolute inset-x-0 bottom-0 h-1 bg-blue-500 rounded-b-xl scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Load More Indicator (if needed) */}
-              {subjectsWithAttendance.length > 12 && (
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-500 bg-gray-50 py-3 px-4 rounded-lg inline-block">
-                    Showing all {subjectsWithAttendance.length} subjects
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer with Quick Stats */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center">
-                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                    <span className="text-gray-600">
-                      <span className="font-semibold text-gray-900">{subjectsWithAttendance.length}</span> total subjects
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                    <span className="text-gray-600">
-                      Click any subject to continue
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowSubjectModal(false)}
-                  className="text-sm text-gray-500 hover:text-gray-700 font-medium"
-                >
-                  Cancel
-                </button>
-              </div>
+            {/* Footer */}
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-lg flex justify-end">
+              <button
+                onClick={() => setShowSubjectModal(false)}
+                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
