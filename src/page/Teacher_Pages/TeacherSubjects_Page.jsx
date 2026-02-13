@@ -11,6 +11,7 @@ import {
   FiChevronRight,
   FiEdit,
   FiRefreshCcw,
+  FiBook,
   FiBookOpen,
   FiCalendar,
   FiClock
