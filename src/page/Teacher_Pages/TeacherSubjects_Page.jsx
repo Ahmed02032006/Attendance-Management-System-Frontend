@@ -14,7 +14,6 @@ import {
   FiBook,
   FiCalendar,
   FiClock,
-  FiBook
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
