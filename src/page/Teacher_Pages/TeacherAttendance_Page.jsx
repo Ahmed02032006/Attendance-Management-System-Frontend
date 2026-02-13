@@ -718,36 +718,30 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal - Simple Design */}
+      {/* Subject Selection Modal - Minimal Design */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-2xl">
-            {/* Header */}
+          <div className="bg-white rounded-lg w-full max-w-md">
             <div className="px-4 py-3 border-b border-gray-200">
               <h3 className="text-base font-medium text-gray-900">Select Subject</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Choose a subject to view attendance records</p>
             </div>
 
-            {/* Subject List */}
-            <div className="p-4 max-h-96 overflow-y-auto">
-              <div className="space-y-1">
-                {subjectsWithAttendance.map((subject) => (
-                  <button
-                    key={subject.id}
-                    onClick={() => handleSubjectSelect(subject.id)}
-                    className="w-full text-left px-3 py-2.5 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"
-                  >
-                    <span className="text-sm text-gray-900">{subject.name}</span>
-                  </button>
-                ))}
-              </div>
+            <div className="p-2 max-h-80 overflow-y-auto">
+              {subjectsWithAttendance.map((subject) => (
+                <button
+                  key={subject.id}
+                  onClick={() => handleSubjectSelect(subject.id)}
+                  className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                >
+                  {subject.name}
+                </button>
+              ))}
             </div>
 
-            {/* Footer */}
-            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-lg flex justify-end">
+            <div className="px-4 py-3 border-t border-gray-200 flex justify-end">
               <button
                 onClick={() => setShowSubjectModal(false)}
-                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
+                className="text-sm text-gray-500 hover:text-gray-700"
               >
                 Cancel
               </button>
