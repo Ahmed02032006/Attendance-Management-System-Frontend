@@ -376,7 +376,7 @@ const TeacherSubjects_Page = () => {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center text-sm text-gray-600">
-                          <FiClock className="h-3.5 w-3.5 mr-1 text-gray-400" />
+                          {/* <FiClock className="h-3.5 w-3.5 mr-1 text-gray-400" /> */}
                           {formatDate(subject.createdAt)}
                         </div>
                       </td>
