@@ -419,7 +419,7 @@ const TeacherDashboard_Page = () => {
                   <p className="text-gray-500 text-sm">No subjects found</p>
                 </div>
               ) : (
-                <div className="p-3 max-h-[500px] overflow-y-auto hide-scrollbar">
+                <div className="p-3 max-h-[400px] overflow-y-auto hide-scrollbar">
                   {dashboardSubjects.map((subject, index) => {
                     const isSelected = selectedSubject === subject.id;
                     return (
