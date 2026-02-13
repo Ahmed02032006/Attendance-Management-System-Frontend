@@ -19,8 +19,7 @@ import {
   FiRefreshCw,
   FiPlus,
   FiX,
-  FiUser,
-  FiBook
+  FiUser
 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
@@ -388,120 +387,85 @@ const TeacherAttendance_Page = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Total Subjects</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">{subjectsWithAttendance.length}</p>
-              </div>
-              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                <FiBook className="h-5 w-5 text-blue-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Today's Students</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">{currentAttendanceRecords.length}</p>
-              </div>
-              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                <FiUser className="h-5 w-5 text-green-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Attendance Rate</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">
-                  {currentAttendanceRecords.length > 0 ? '100%' : '0%'}
-                </p>
-              </div>
-              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                <FiClock className="h-5 w-5 text-purple-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Total Records</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">
-                  {subjectsWithAttendance.reduce((acc, s) => 
-                    acc + Object.values(s.attendance || {}).reduce((sum, d) => sum + d.length, 0), 0
-                  )}
-                </p>
-              </div>
-              <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
-                <FiCalendar className="h-5 w-5 text-amber-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Date Navigation - Centered */}
+        {/* Simple Subject Header - Only shown when subject selected */}
         {selectedSubject && (
-          <div className="flex justify-center items-center mb-6">
-            <div className="flex items-center space-x-4 bg-white rounded-lg border border-gray-200 px-4 py-2">
-              <button
-                onClick={() => navigateDate('prev')}
-                className="p-2 rounded-md hover:bg-gray-100 text-gray-600 transition-colors"
-              >
-                <FiChevronLeft className="h-5 w-5" />
-              </button>
-
-              <div className="text-center min-w-[200px]">
-                <div className="flex items-center justify-center space-x-2">
-                  <FiCalendar className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-900">
-                    {formatDisplayDate(currentDate)}
-                  </span>
+          <div className="mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
+                  <FiGrid className="h-4 w-4 text-blue-600" />
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {subjectsWithAttendance.find(s => s.id === selectedSubject)?.name}
-                </p>
+                <div>
+                  <h2 className="text-lg font-medium text-gray-900">
+                    {subjectsWithAttendance.find(s => s.id === selectedSubject)?.name}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {currentAttendanceRecords.length} students present
+                  </p>
+                </div>
               </div>
-
+              
               <button
-                onClick={() => navigateDate('next')}
-                disabled={isFutureDate(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000))}
-                className={`p-2 rounded-md transition-colors ${
-                  isFutureDate(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000))
-                    ? 'text-gray-300 cursor-not-allowed'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                onClick={() => setShowSubjectModal(true)}
+                className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
               >
-                <FiChevronRight className="h-5 w-5" />
+                Change Subject
+                <FiChevronRight className="h-4 w-4 ml-1" />
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Date Navigation - Clean */}
+        {selectedSubject && (
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => navigateDate('prev')}
+              className="p-2 rounded-md hover:bg-gray-100 text-gray-600 transition-colors"
+            >
+              <FiChevronLeft className="h-5 w-5" />
+            </button>
+
+            <div className="flex items-center space-x-3">
+              <FiCalendar className="h-4 w-4 text-gray-400" />
+              <span className="text-sm font-medium text-gray-900">
+                {formatDisplayDate(currentDate)}
+              </span>
+            </div>
+
+            <button
+              onClick={() => navigateDate('next')}
+              disabled={isFutureDate(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000))}
+              className={`p-2 rounded-md transition-colors ${
+                isFutureDate(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000))
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <FiChevronRight className="h-5 w-5" />
+            </button>
           </div>
         )}
 
         {/* Main Content */}
         {selectedSubject ? (
           <div className="space-y-4">
-            {/* Search and Actions Bar */}
+            {/* Search and Actions Bar - Clean */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="relative w-full sm:w-64">
+              <div className="relative w-full sm:w-72">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FiSearch className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   type="text"
                   placeholder="Search students..."
-                  className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-2">
                 <input
                   type="date"
                   value={formatDate(currentDate)}
@@ -521,7 +485,7 @@ const TeacherAttendance_Page = () => {
                 <button
                   onClick={exportToCSV}
                   disabled={filteredStudents.length === 0}
-                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-40"
                   title="Export to CSV"
                 >
                   <FiDownload className="h-5 w-5" />
@@ -530,8 +494,8 @@ const TeacherAttendance_Page = () => {
                 <button
                   onClick={handleRefresh}
                   disabled={isLoading}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-                  title="Refresh data"
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                  title="Refresh"
                 >
                   <FiRefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
                 </button>
@@ -541,23 +505,23 @@ const TeacherAttendance_Page = () => {
                   className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors flex items-center"
                 >
                   <FiPlus className="h-4 w-4 mr-1.5" />
-                  New Attendance
+                  New
                 </button>
               </div>
             </div>
 
-            {/* Attendance Table */}
+            {/* Attendance Table - Clean */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50">
                       <th 
                         className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                         onClick={() => handleSort('studentName')}
                       >
                         <div className="flex items-center space-x-1">
-                          <span>Student Name</span>
+                          <span>Student</span>
                           {getSortIcon('studentName')}
                         </div>
                       </th>
@@ -566,7 +530,7 @@ const TeacherAttendance_Page = () => {
                         onClick={() => handleSort('rollNo')}
                       >
                         <div className="flex items-center justify-center space-x-1">
-                          <span>Roll No.</span>
+                          <span>Roll No</span>
                           {getSortIcon('rollNo')}
                         </div>
                       </th>
@@ -587,32 +551,32 @@ const TeacherAttendance_Page = () => {
                   <tbody className="divide-y divide-gray-200">
                     {currentStudents.length > 0 ? (
                       currentStudents.map((student) => (
-                        <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3 whitespace-nowrap">
+                        <tr key={student.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
                             <button
                               onClick={() => {
                                 setSelectedStudent(student);
                                 setShowStudentModal(true);
                               }}
-                              className="text-sm text-gray-900 hover:text-blue-600 transition-colors"
+                              className="text-sm text-gray-900 hover:text-blue-600"
                             >
                               {student.studentName}
                             </button>
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">
+                          <td className="px-4 py-3 text-center text-sm text-gray-600">
                             {student.rollNo}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-center">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                              <FiClock className="h-3 w-3 mr-1" />
+                          <td className="px-4 py-3 text-center">
+                            <span className="text-sm text-gray-600 flex items-center justify-center">
+                              <FiClock className="h-3.5 w-3.5 mr-1 text-gray-400" />
                               {student.time}
                             </span>
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-center">
+                          <td className="px-4 py-3 text-center">
                             <button
                               onClick={() => handleDeleteClick(student.id)}
-                              className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                              title="Delete record"
+                              className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                              title="Delete"
                             >
                               <FiTrash2 className="h-4 w-4" />
                             </button>
@@ -622,7 +586,7 @@ const TeacherAttendance_Page = () => {
                     ) : (
                       <tr>
                         <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
-                          {searchTerm ? 'No matching students found' : 'No attendance records for this date'}
+                          {searchTerm ? 'No matching students' : 'No attendance records'}
                         </td>
                       </tr>
                     )}
@@ -630,27 +594,27 @@ const TeacherAttendance_Page = () => {
                 </table>
               </div>
 
-              {/* Pagination */}
+              {/* Simple Pagination */}
               {filteredStudents.length > 0 && (
                 <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
                   <span className="text-xs text-gray-500">
-                    Showing {indexOfFirstStudent + 1}-{Math.min(indexOfLastStudent, filteredStudents.length)} of {filteredStudents.length}
+                    {indexOfFirstStudent + 1}-{Math.min(indexOfLastStudent, filteredStudents.length)} of {filteredStudents.length}
                   </span>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={prevPage}
                       disabled={currentPage === 1}
-                      className="p-1.5 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="p-1 border border-gray-300 rounded text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40"
                     >
                       <FiChevronLeft className="h-4 w-4" />
                     </button>
                     <span className="text-xs text-gray-600">
-                      Page {currentPage} of {totalPages}
+                      {currentPage} / {totalPages}
                     </span>
                     <button
                       onClick={nextPage}
                       disabled={currentPage === totalPages}
-                      className="p-1.5 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="p-1 border border-gray-300 rounded text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40"
                     >
                       <FiChevronRight className="h-4 w-4" />
                     </button>
@@ -660,38 +624,43 @@ const TeacherAttendance_Page = () => {
             </div>
           </div>
         ) : (
-          /* No Subject Selected */
+          /* No Subject Selected - Clean */
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FiGrid className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Subject Selected</h3>
+            <h3 className="text-base font-medium text-gray-900 mb-2">No Subject Selected</h3>
             <p className="text-sm text-gray-500 mb-4">Choose a subject to view attendance records</p>
             <button
               onClick={() => setShowSubjectModal(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
             >
-              <FiGrid className="h-4 w-4 mr-2" />
               Select Subject
             </button>
           </div>
         )}
       </div>
 
-      {/* Subject Selection Modal */}
+      {/* Subject Selection Modal - Simple Grid */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-2xl">
-            <div className="px-4 py-3 border-b border-gray-200">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
               <h3 className="text-base font-medium text-gray-900">Select Subject</h3>
+              <button
+                onClick={() => setShowSubjectModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX className="h-5 w-5" />
+              </button>
             </div>
             <div className="p-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {subjectsWithAttendance.map((subject) => (
                   <button
                     key={subject.id}
                     onClick={() => handleSubjectSelect(subject.id)}
-                    className="p-3 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-left"
+                    className="p-3 border border-gray-200 rounded-md hover:border-blue-500 hover:bg-blue-50 text-left"
                   >
                     <p className="text-sm font-medium text-gray-900">{subject.name}</p>
                     <p className="text-xs text-gray-500 mt-1">
@@ -705,7 +674,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Create Attendance Modal */}
+      {/* Create Attendance Modal - Simple Form */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-md">
@@ -713,16 +682,14 @@ const TeacherAttendance_Page = () => {
               <h3 className="text-base font-medium text-gray-900">Create Attendance</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded"
+                className="text-gray-400 hover:text-gray-600"
               >
-                <FiX className="h-4 w-4" />
+                <FiX className="h-5 w-5" />
               </button>
             </div>
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Subject
-                </label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Subject</label>
                 <select
                   name="subject"
                   value={attendanceForm.subject}
@@ -731,16 +698,12 @@ const TeacherAttendance_Page = () => {
                 >
                   <option value="">Select subject</option>
                   {subjectsWithAttendance.map((subject) => (
-                    <option key={subject.id} value={subject.id}>
-                      {subject.name}
-                    </option>
+                    <option key={subject.id} value={subject.id}>{subject.name}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Unique Code
-                </label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Code</label>
                 <input
                   type="text"
                   name="uniqueCode"
@@ -754,31 +717,31 @@ const TeacherAttendance_Page = () => {
             <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
+                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
               >
                 Cancel
               </button>
               <button
                 onClick={handleGenerateQR}
-                className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium"
+                className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
               >
-                Generate QR
+                Generate
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* QR Code Modal */}
+      {/* QR Code Modal - Simple */}
       {showQRModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className={`bg-white rounded-lg ${isQrZoomed ? 'w-full max-w-2xl' : 'w-full max-w-sm'}`}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <h3 className="text-base font-medium text-gray-900">Attendance QR Code</h3>
+              <h3 className="text-base font-medium text-gray-900">QR Code</h3>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setIsQrZoomed(!isQrZoomed)}
-                  className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                  className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
                 >
                   {isQrZoomed ? <FiMinimize2 className="h-4 w-4" /> : <FiMaximize2 className="h-4 w-4" />}
                 </button>
@@ -788,14 +751,14 @@ const TeacherAttendance_Page = () => {
                     setIsQrZoomed(false);
                     if (qrRefreshInterval) clearInterval(qrRefreshInterval);
                   }}
-                  className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                  className="text-gray-400 hover:text-gray-600"
                 >
-                  <FiX className="h-4 w-4" />
+                  <FiX className="h-5 w-5" />
                 </button>
               </div>
             </div>
             <div className="p-6 flex flex-col items-center">
-              <div className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white border-2 border-gray-200 rounded-lg p-2 mb-4`}>
+              <div className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white border border-gray-200 rounded p-2 mb-4`}>
                 {currentQrCode && (
                   <QRCodeSVG
                     value={currentQrCode}
@@ -806,14 +769,14 @@ const TeacherAttendance_Page = () => {
                 )}
               </div>
               <p className="text-sm text-gray-600 text-center">
-                Students can scan this QR code to mark attendance
+                Scan to mark attendance
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Simple */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-sm">
@@ -821,20 +784,18 @@ const TeacherAttendance_Page = () => {
               <h3 className="text-base font-medium text-gray-900">Delete Record</h3>
             </div>
             <div className="p-4">
-              <p className="text-sm text-gray-600">
-                This attendance record will be permanently removed.
-              </p>
+              <p className="text-sm text-gray-600">This record will be permanently removed.</p>
             </div>
             <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
               <button
                 onClick={handleCancelDelete}
-                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
+                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium"
+                className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
               >
                 Delete
               </button>
@@ -843,55 +804,44 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Student Details Modal */}
+      {/* Student Details Modal - Simple List */}
       {showStudentModal && selectedStudent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[80vh] overflow-hidden">
+          <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
               <div>
                 <h3 className="text-base font-medium text-gray-900">{selectedStudent.studentName}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Roll No: {selectedStudent.rollNo}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Roll: {selectedStudent.rollNo}</p>
               </div>
               <button
                 onClick={() => setShowStudentModal(false)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded"
+                className="text-gray-400 hover:text-gray-600"
               >
-                <FiX className="h-4 w-4" />
+                <FiX className="h-5 w-5" />
               </button>
             </div>
             <div className="p-4 overflow-y-auto max-h-[60vh]">
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Attendance History</h4>
+              <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Attendance History</h4>
               {getStudentPreviousAttendance(selectedStudent).length > 0 ? (
                 <div className="space-y-2">
                   {getStudentPreviousAttendance(selectedStudent).map((record, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <FiCalendar className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                          {new Date(record.date).toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric' 
-                          })}
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">
+                        {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                      {record.time ? (
+                        <span className="text-sm text-green-600 flex items-center">
+                          <FiClock className="h-3 w-3 mr-1" />
+                          {record.time}
                         </span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        {record.time ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                            <FiClock className="h-3 w-3 mr-1" />
-                            {record.time}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                            Absent
-                          </span>
-                        )}
-                      </div>
+                      ) : (
+                        <span className="text-sm text-red-600">Absent</span>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 text-center py-4">No attendance history found</p>
+                <p className="text-sm text-gray-500 text-center py-4">No history found</p>
               )}
             </div>
           </div>
