@@ -589,7 +589,7 @@ const TeacherDashboard_Page = () => {
                 </div>
               ) : (
                 // Updated container with scrollbar
-                <div className="max-h-[calc(100vh-190px)] hide-scrollbar overflow-y-auto pr-2">
+                <div className="max-h-[calc(100vh-210px)] hide-scrollbar overflow-y-auto pr-2">
                   <div className="space-y-2 sm:space-y-3">
                     {dashboardSubjects.map((subject, index) => (
                       <div
