@@ -15,9 +15,7 @@ import {
   FiGrid,
   FiClock,
   FiUser,
-  FiBook,
   FiFileText,
-  FiRefreshCw
 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
@@ -624,7 +622,6 @@ const TeacherAttendance_Page = () => {
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
-                              <FiClock className="w-3 h-3 mr-1" />
                               {student.time}
                             </span>
                           </td>

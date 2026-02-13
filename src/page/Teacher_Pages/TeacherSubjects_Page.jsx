@@ -12,7 +12,7 @@ import {
   FiEdit,
   FiRefreshCcw,
   FiBook,
-  FiBookOpen,
+  FiLayers,
   FiCalendar,
   FiClock
 } from 'react-icons/fi'
@@ -219,7 +219,7 @@ const TeacherSubjects_Page = () => {
           <div className="relative">
             <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <FiBookOpen className="h-8 w-8 text-blue-600 animate-pulse" />
+              <FiLayers className="h-8 w-8 text-blue-600 animate-pulse" />
             </div>
           </div>
           <p className="mt-6 text-lg font-medium text-gray-700">Loading Subjects...</p>
@@ -370,7 +370,7 @@ const TeacherSubjects_Page = () => {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center text-sm text-gray-600">
-                          <FiCalendar className="h-3.5 w-3.5 mr-1 text-gray-400" />
+                          {/* <FiCalendar className="h-3.5 w-3.5 mr-1 text-gray-400" /> */}
                           {subject.semester}
                         </div>
                       </td>
@@ -665,7 +665,7 @@ const TeacherSubjects_Page = () => {
             <div className="p-4">
               <p className="text-sm text-gray-600">
                 Are you sure you want to delete{' '}
-                <span className="font-medium text-gray-900">"{selectedSubject?.subjectTitle}"</span>?
+                <span className="font-bold text-gray-900">"{selectedSubject?.subjectTitle}"</span>?
               </p>
               <p className="text-xs text-red-600 mt-2">
                 This action cannot be undone.
