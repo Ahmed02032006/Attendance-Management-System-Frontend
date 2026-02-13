@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiEdit, FiRefreshCcw } from 'react-icons/fi'
+import { 
+  FiPlus, 
+  FiEdit2, 
+  FiTrash2, 
+  FiSearch, 
+  FiX, 
+  FiChevronLeft, 
+  FiChevronRight, 
+  FiEdit, 
+  FiRefreshCcw,
+  FiBook,
+  FiCalendar,
+  FiClock
+} from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
   getSubjectsByUser,
@@ -35,7 +48,6 @@ const TeacherSubjects_Page = () => {
   })
 
   const { user } = useSelector((state) => state.auth)
-
   const currentUserId = user?.id
 
   useEffect(() => {
@@ -44,7 +56,7 @@ const TeacherSubjects_Page = () => {
     }
   }, [dispatch, currentUserId])
 
-  // Filter subjects based on search and filter
+  // Filter subjects
   const filteredSubjects = subjects.filter(subject => {
     const matchesSearch =
       subject.subjectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -180,21 +192,31 @@ const TeacherSubjects_Page = () => {
   const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages))
   const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1))
 
-  // Format date for display
+  // Format date
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now - date)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays < 7) return `${diffDays} days ago`
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  }
+
+  // Get status color
+  const getStatusColor = (status) => {
+    return status === 'Active' 
+      ? 'bg-green-100 text-green-700' 
+      : 'bg-gray-100 text-gray-700'
   }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-lg font-medium text-gray-700">Loading Subjects...</p>
+          <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading subjects...</p>
         </div>
       </div>
     );
@@ -202,252 +224,253 @@ const TeacherSubjects_Page = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderComponent heading={"Subjects Management"} subHeading={"Create and manage your teaching subjects"} role='admin' />
+      <HeaderComponent 
+        heading="Subjects Management" 
+        subHeading="Create and manage your teaching subjects" 
+        role='admin' 
+      />
 
-      <div className="container max-w-full mx-auto p-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {/* Quick Stats - Light and Clean */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Total Subjects</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">{subjects.length}</p>
+              </div>
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                <FiBook className="h-5 w-5 text-blue-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Active Subjects</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">
+                  {subjects.filter(s => s.status === 'Active').length}
+                </p>
+              </div>
+              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                <FiEdit2 className="h-5 w-5 text-green-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Total Semesters</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">
+                  {new Set(subjects.map(s => s.semester)).size}
+                </p>
+              </div>
+              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                <FiCalendar className="h-5 w-5 text-purple-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Search and Filter Section */}
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="relative w-full sm:w-auto sm:flex-1 max-w-xl">
+          <div className="relative w-full sm:w-auto sm:flex-1 max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FiSearch className="h-5 w-5 text-gray-400" />
+              <FiSearch className="h-4 w-4 text-gray-400" />
             </div>
             <input
               type="text"
-              placeholder="Search subjects by title, name or code..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+              placeholder="Search subjects..."
+              className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {/* Create Subject Button */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="All">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+
             <button
               onClick={openCreateModal}
               disabled={isLoading}
-              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors flex items-center whitespace-nowrap disabled:opacity-50"
             >
-              <FiPlus className="h-4 w-4" />
-              <span>Create Subject</span>
+              <FiPlus className="h-4 w-4 mr-1.5" />
+              New Subject
             </button>
           </div>
         </div>
 
-        {/* Subjects Table */}
-        {!isLoading && (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto hide-scrollbar">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Subject Info
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Created Date
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Subject Semester
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {currentSubjects.length > 0 ? (
-                    currentSubjects.map((subject) => (
-                      <tr key={subject._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-3.5 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="shrink-0 h-10 w-10 rounded-full bg-sky-100 overflow-hidden border border-gray-300 flex items-center justify-center">
-                              <span className="text-sky-600 font-bold text-sm">
-                                {subject.subjectTitle?.charAt(0)}
-                              </span>
+        {/* Subjects Table - Clean */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Subject
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Code
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Semester
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {currentSubjects.length > 0 ? (
+                  currentSubjects.map((subject) => (
+                    <tr key={subject._id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center text-blue-600 font-medium text-sm shrink-0">
+                            {subject.subjectTitle?.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="ml-3">
+                            <div className="text-sm font-medium text-gray-900">
+                              {subject.subjectTitle}
                             </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{subject.subjectName}</div>
-                              <div className="text-xs text-gray-500">Course Code : <span className='border-b border-gray-400'>{subject.subjectCode}</span></div>
+                            <div className="text-xs text-gray-500">
+                              {subject.subjectName}
                             </div>
                           </div>
-                        </td>
-                        <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
-                          {formatDate(subject.createdAt)}
-                        </td>
-                        <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm text-gray-500">
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-600 font-mono">
+                          {subject.subjectCode}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center text-sm text-gray-600">
+                          <FiCalendar className="h-3.5 w-3.5 mr-1 text-gray-400" />
                           {subject.semester}
-                        </td>
-                        <td className="px-6 py-3.5 whitespace-nowrap text-center">
-                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${subject.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                            }`}>
-                            {subject.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-3.5 whitespace-nowrap text-center text-sm font-medium">
-                          <div className="flex justify-center space-x-3">
-                            <button
-                              onClick={() => openEditModal(subject)}
-                              className="text-sky-600 hover:text-sky-900 transition-colors"
-                              title="Edit Subject"
-                            >
-                              <FiEdit className="h-5 w-5" />
-                            </button>
-
-                            <button
-                              onClick={() => openDeleteModal(subject)}
-                              className="text-red-600 hover:text-red-900 transition-colors"
-                              title="Delete Subject"
-                            >
-                              <FiTrash2 className="h-5 w-5" />
-                            </button>
-
-                            <button
-                              onClick={() => openResetModal(subject)}
-                              className="text-yellow-600 hover:text-yellow-900 transition-colors"
-                              title="Reset Subject Attendance"
-                            >
-                              <FiRefreshCcw className="h-5 w-5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center">
-                        <div className="text-gray-500">
-                          <FiSearch className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                          <p className="text-lg font-medium">No subjects found</p>
-                          <p className="mt-1">
-                            {searchTerm || statusFilter !== 'All'
-                              ? 'Try adjusting your search or filter'
-                              : 'Get started by creating your first subject'
-                            }
-                          </p>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center text-sm text-gray-600">
+                          <FiClock className="h-3.5 w-3.5 mr-1 text-gray-400" />
+                          {formatDate(subject.createdAt)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(subject.status)}`}>
+                          {subject.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center justify-center space-x-2">
+                          <button
+                            onClick={() => openEditModal(subject)}
+                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                            title="Edit Subject"
+                          >
+                            <FiEdit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => openResetModal(subject)}
+                            className="p-1.5 text-gray-500 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors"
+                            title="Reset Attendance"
+                          >
+                            <FiRefreshCcw className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(subject)}
+                            className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            title="Delete Subject"
+                          >
+                            <FiTrash2 className="h-4 w-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {filteredSubjects.length > 0 && (
-              <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                <div className="mb-3 sm:mb-0">
-                  <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{indexOfFirstSubject + 1}</span> to{' '}
-                    <span className="font-medium">{Math.min(indexOfLastSubject, filteredSubjects.length)}</span> of{' '}
-                    <span className="font-medium">{filteredSubjects.length}</span> subjects
-                  </p>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <button
-                    onClick={prevPage}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
-                  >
-                    <FiChevronLeft className="h-4 w-4 mr-1" />
-                  </button>
-
-                  {totalPages <= 6 ? (
-                    Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
-                      <button
-                        key={number}
-                        onClick={() => paginate(number)}
-                        className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
-                          ? 'border-sky-600 bg-sky-600 text-white'
-                          : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                          } rounded-md transition-colors`}
-                      >
-                        {number}
-                      </button>
-                    ))
-                  ) : (
-                    <>
-                      {currentPage > 3 && (
-                        <button
-                          onClick={() => paginate(1)}
-                          className="px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-md transition-colors"
-                        >
-                          1
-                        </button>
-                      )}
-                      {currentPage > 4 && <span className="px-2 text-gray-500">...</span>}
-                      {[
-                        currentPage - 2,
-                        currentPage - 1,
-                        currentPage,
-                        currentPage + 1,
-                        currentPage + 2
-                      ]
-                        .filter(num => num > 0 && num <= totalPages)
-                        .map(number => (
-                          <button
-                            key={number}
-                            onClick={() => paginate(number)}
-                            className={`px-3.5 py-1.5 border text-sm font-medium ${currentPage === number
-                              ? 'border-sky-600 bg-sky-600 text-white'
-                              : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                              } rounded-md transition-colors`}
-                          >
-                            {number}
-                          </button>
-                        ))}
-                      {currentPage < totalPages - 3 && <span className="px-2 text-gray-500">...</span>}
-                      {currentPage < totalPages - 2 && (
-                        <button
-                          onClick={() => paginate(totalPages)}
-                          className="px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-md transition-colors"
-                        >
-                          {totalPages}
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  <button
-                    onClick={nextPage}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
-                  >
-                    <FiChevronRight className="h-4 w-4 ml-1" />
-                  </button>
-                </div>
-              </div>
-            )}
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-4 py-8 text-center">
+                      <div className="text-gray-500">
+                        <FiBook className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-sm">No subjects found</p>
+                        {searchTerm && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            Try adjusting your search
+                          </p>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {/* Simple Pagination */}
+          {filteredSubjects.length > 0 && (
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+              <span className="text-xs text-gray-500">
+                Showing {indexOfFirstSubject + 1}-{Math.min(indexOfLastSubject, filteredSubjects.length)} of {filteredSubjects.length}
+              </span>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className="p-1.5 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <FiChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="text-xs text-gray-600">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className="p-1.5 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <FiChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Create Subject Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
-                  <FiPlus className="h-4 w-4 text-sky-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800">Create New Subject</h3>
-              </div>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full max-w-md">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <h3 className="text-base font-medium text-gray-900">Create New Subject</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                disabled={isLoading}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded"
               >
-                <FiX className="h-5 w-5" />
+                <FiX className="h-4 w-4" />
               </button>
             </div>
             <form onSubmit={handleCreateSubject}>
-              <div className="p-6 space-y-4">
+              <div className="p-4 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Subject Title *
                   </label>
                   <input
@@ -456,14 +479,12 @@ const TeacherSubjects_Page = () => {
                     value={subjectForm.subjectTitle}
                     onChange={handleInputChange}
                     placeholder="e.g., Mathematics"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
-                    disabled={isLoading}
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Subject Name *
                   </label>
                   <input
@@ -472,14 +493,12 @@ const TeacherSubjects_Page = () => {
                     value={subjectForm.subjectName}
                     onChange={handleInputChange}
                     placeholder="e.g., Advanced Mathematics"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
-                    disabled={isLoading}
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Subject Code *
                   </label>
                   <input
@@ -488,14 +507,12 @@ const TeacherSubjects_Page = () => {
                     value={subjectForm.subjectCode}
                     onChange={handleInputChange}
                     placeholder="e.g., MATH101"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
-                    disabled={isLoading}
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Semester *
                   </label>
                   <input
@@ -504,27 +521,24 @@ const TeacherSubjects_Page = () => {
                     value={subjectForm.semester}
                     onChange={handleInputChange}
                     placeholder="e.g., 2nd"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
-                    disabled={isLoading}
                   />
                 </div>
               </div>
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-                  disabled={isLoading}
+                  className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading}
+                  className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium"
                 >
-                  {isLoading ? 'Creating...' : 'Create Subject'}
+                  Create Subject
                 </button>
               </div>
             </form>
@@ -534,27 +548,21 @@ const TeacherSubjects_Page = () => {
 
       {/* Edit Subject Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
-                  <FiEdit className="h-4 w-4 text-sky-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800">Edit Subject</h3>
-              </div>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full max-w-md">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <h3 className="text-base font-medium text-gray-900">Edit Subject</h3>
               <button
                 onClick={() => setShowEditModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                disabled={isLoading}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded"
               >
-                <FiX className="h-5 w-5" />
+                <FiX className="h-4 w-4" />
               </button>
             </div>
             <form onSubmit={handleEditSubject}>
-              <div className="p-6 space-y-4">
+              <div className="p-4 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Subject Title *
                   </label>
                   <input
@@ -562,14 +570,12 @@ const TeacherSubjects_Page = () => {
                     name="subjectTitle"
                     value={subjectForm.subjectTitle}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
-                    disabled={isLoading}
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Subject Name *
                   </label>
                   <input
@@ -577,14 +583,12 @@ const TeacherSubjects_Page = () => {
                     name="subjectName"
                     value={subjectForm.subjectName}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
-                    disabled={isLoading}
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Subject Code *
                   </label>
                   <input
@@ -592,14 +596,12 @@ const TeacherSubjects_Page = () => {
                     name="subjectCode"
                     value={subjectForm.subjectCode}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
-                    disabled={isLoading}
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Semester *
                   </label>
                   <input
@@ -607,44 +609,38 @@ const TeacherSubjects_Page = () => {
                     name="semester"
                     value={subjectForm.semester}
                     onChange={handleInputChange}
-                    placeholder="e.g., 2nd"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
-                    disabled={isLoading}
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Status
                   </label>
                   <select
                     name="status"
                     value={subjectForm.status}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    disabled={isLoading}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
                   </select>
                 </div>
               </div>
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-                  disabled={isLoading}
+                  className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading}
+                  className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium"
                 >
-                  {isLoading ? 'Updating...' : 'Update Subject'}
+                  Update Subject
                 </button>
               </div>
             </form>
@@ -654,100 +650,71 @@ const TeacherSubjects_Page = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <FiTrash2 className="h-4 w-4 text-red-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800">Delete Subject</h3>
-              </div>
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                disabled={isLoading}
-              >
-                <FiX className="h-5 w-5" />
-              </button>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full max-w-sm">
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h3 className="text-base font-medium text-gray-900">Delete Subject</h3>
             </div>
-            <div className="p-6">
-              <p className="text-gray-600 text-center mb-2">
-                Are you sure you want to delete the subject{' '}
-                <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong>?
+            <div className="p-4">
+              <p className="text-sm text-gray-600">
+                Are you sure you want to delete{' '}
+                <span className="font-medium text-gray-900">"{selectedSubject?.subjectTitle}"</span>?
               </p>
-              <p className="text-red-600 text-sm text-center mb-6">
-                This action cannot be undone and all subject data will be permanently removed.
+              <p className="text-xs text-red-600 mt-2">
+                This action cannot be undone.
               </p>
             </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-                disabled={isLoading}
+                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteSubject}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading}
+                className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium"
               >
-                {isLoading ? 'Deleting...' : 'Delete Subject'}
+                Delete
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Reset Subject Confirmation Modal */}
+      {/* Reset Subject Modal */}
       {showResetModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <FiRefreshCcw className="h-4 w-4 text-yellow-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800">Reset Subject Attendance</h3>
-              </div>
-              <button
-                onClick={() => setShowResetModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                disabled={isLoading}
-              >
-                <FiX className="h-5 w-5" />
-              </button>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full max-w-sm">
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h3 className="text-base font-medium text-gray-900">Reset Attendance</h3>
             </div>
-            <div className="p-6">
-              <p className="text-gray-600 text-center mb-2">
-                Are you sure you want to reset attendance records for{' '}
-                <strong className="text-gray-900 font-semibold">"{selectedSubject?.subjectTitle}"</strong>?
+            <div className="p-4">
+              <p className="text-sm text-gray-600">
+                Clear all attendance records for{' '}
+                <span className="font-medium text-gray-900">"{selectedSubject?.subjectTitle}"</span>?
               </p>
-              <p className="text-yellow-600 text-sm text-center mb-6">
-                This will clear all student attendance data for this subject. This action cannot be undone.
+              <p className="text-xs text-yellow-600 mt-2">
+                This will permanently delete all attendance data.
               </p>
             </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
               <button
                 onClick={() => setShowResetModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-                disabled={isLoading}
+                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleResetSubject}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading}
+                className="px-3 py-1.5 bg-yellow-600 text-white text-xs rounded-md hover:bg-yellow-700 font-medium"
               >
-                {isLoading ? 'Resetting...' : 'Reset Attendance'}
+                Reset
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   )
 }
