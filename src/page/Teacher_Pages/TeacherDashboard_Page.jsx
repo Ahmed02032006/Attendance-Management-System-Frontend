@@ -80,7 +80,7 @@ const TeacherDashboard_Page = () => {
   // Format AI response
   const formatAIResponse = (text) => {
     if (!text) return text;
-    
+
     // Simple formatting - just replace URLs with links
     const urlPattern = new RegExp(
       Object.keys(PAGE_NAME_MAPPING)
@@ -204,7 +204,7 @@ const TeacherDashboard_Page = () => {
 
   // Quick stats
   const totalStudents = dashboardSubjects.reduce((acc, subject) => acc + (subject.students || 0), 0);
-  const attendanceRate = selectedSubjectData ? 
+  const attendanceRate = selectedSubjectData ?
     Math.round((currentAttendanceRecords.length / (selectedSubjectData.students || 1)) * 100) : 0;
 
   // Pagination
@@ -226,7 +226,7 @@ const TeacherDashboard_Page = () => {
 
     if (date.toDateString() === today.toDateString()) return 'Today';
     if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
-    
+
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -346,10 +346,16 @@ const TeacherDashboard_Page = () => {
   // Loading state
   if (isLoading || !dataLoaded) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
         <div className="text-center">
-          <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <FiBook className="h-8 w-8 text-sky-600 animate-pulse" />
+            </div>
+          </div>
+          <p className="mt-6 text-lg font-medium text-gray-700">Loading your dashboard...</p>
+          <p className="mt-2 text-sm text-gray-500">Preparing your teaching overview</p>
         </div>
       </div>
     );
@@ -357,10 +363,10 @@ const TeacherDashboard_Page = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderComponent 
-        heading="Teacher Dashboard" 
-        subHeading="Overview of your teaching activities" 
-        role='admin' 
+      <HeaderComponent
+        heading="Teacher Dashboard"
+        subHeading="Overview of your teaching activities"
+        role='admin'
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -377,7 +383,7 @@ const TeacherDashboard_Page = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -389,7 +395,7 @@ const TeacherDashboard_Page = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -412,7 +418,7 @@ const TeacherDashboard_Page = () => {
                 <h3 className="font-medium text-gray-900">My Subjects</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{dashboardSubjects.length} subjects assigned</p>
               </div>
-              
+
               {dashboardSubjects.length === 0 ? (
                 <div className="p-8 text-center">
                   <FiBook className="h-8 w-8 text-gray-300 mx-auto mb-2" />
@@ -428,8 +434,8 @@ const TeacherDashboard_Page = () => {
                         onClick={() => handleSubjectSelect(subject.id)}
                         className={`
                           flex items-center p-3 rounded-lg mb-1 cursor-pointer transition-all
-                          ${isSelected 
-                            ? 'bg-blue-50 border border-blue-100' 
+                          ${isSelected
+                            ? 'bg-blue-50 border border-blue-100'
                             : 'hover:bg-gray-50 border border-transparent'
                           }
                         `}
@@ -472,7 +478,7 @@ const TeacherDashboard_Page = () => {
                       >
                         <FiChevronLeft className="h-4 w-4" />
                       </button>
-                      
+
                       <div className="flex items-center space-x-2">
                         <FiCalendar className="h-4 w-4 text-gray-400" />
                         <span className="text-sm font-medium text-gray-900">
@@ -482,7 +488,7 @@ const TeacherDashboard_Page = () => {
                           {currentAttendanceRecords.length} present
                         </span>
                       </div>
-                      
+
                       <button
                         onClick={() => navigateDate('next')}
                         disabled={currentDateIndex <= 0}
@@ -626,11 +632,10 @@ const TeacherDashboard_Page = () => {
                   className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
-                      msg.sender === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white border border-gray-200 text-gray-800'
-                    }`}
+                    className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${msg.sender === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white border border-gray-200 text-gray-800'
+                      }`}
                   >
                     <div className="whitespace-pre-line">
                       {msg.sender === 'assistant' ? formatAIResponse(msg.text) : msg.text}
@@ -685,6 +690,44 @@ const TeacherDashboard_Page = () => {
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
         }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+          @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-slideUp {
+          animation: slideUp 0.3s ease-out;
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        
         .hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
