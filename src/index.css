@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 *{
-  font-family: "Poppins";
+  /* font-family: "Poppins"; */
+  font-family: "Lexend";
   font-style: normal;
   font-weight: 500;
 }
