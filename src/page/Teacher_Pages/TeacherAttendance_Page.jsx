@@ -718,72 +718,46 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal - Decent Design */}
+      {/* Subject Selection Modal - Compact Card Grid Design */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-2xl shadow-xl">
+          <div className="bg-white rounded-xl w-full max-w-3xl shadow-xl">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Select Subject</h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Choose a subject to view its attendance records
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowSubjectModal(false)}
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+            <div className="px-5 py-3 border-b border-gray-200">
+              <h3 className="text-base font-semibold text-gray-900">Select Subject</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Choose a subject to continue</p>
             </div>
 
             {/* Subject Grid */}
-            <div className="p-6 max-h-[400px] overflow-y-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {subjectsWithAttendance.map((subject) => {
-                  const totalDays = Object.keys(subject.attendance || {}).length;
-
-                  return (
-                    <button
-                      key={subject.id}
-                      onClick={() => handleSubjectSelect(subject.id)}
-                      className="flex items-center p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all text-left group"
-                    >
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
-                        <span className="text-blue-600 font-semibold text-sm">
-                          {subject.name?.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 text-sm mb-1">
-                          {subject.name}
-                        </h4>
-                        <p className="text-xs text-gray-500">
-                          {totalDays} {totalDays === 1 ? 'day' : 'days'} of attendance
-                        </p>
-                      </div>
-                      <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  );
-                })}
+            <div className="p-5 max-h-[380px] overflow-y-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {subjectsWithAttendance.map((subject) => (
+                  <button
+                    key={subject.id}
+                    onClick={() => handleSubjectSelect(subject.id)}
+                    className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all text-center group"
+                  >
+                    <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-200 transition-colors">
+                      <span className="text-blue-600 font-semibold text-sm">
+                        {subject.name?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <h4 className="font-medium text-gray-900 text-xs mb-1 line-clamp-2 min-h-[32px]">
+                      {subject.name}
+                    </h4>
+                    <p className="text-[10px] text-gray-500">
+                      {Object.keys(subject.attendance || {}).length} days
+                    </p>
+                  </button>
+                ))}
               </div>
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl flex items-center justify-between">
-              <p className="text-xs text-gray-500">
-                {subjectsWithAttendance.length} subjects available
-              </p>
+            <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end">
               <button
                 onClick={() => setShowSubjectModal(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-lg transition-colors"
+                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
               >
                 Cancel
               </button>
