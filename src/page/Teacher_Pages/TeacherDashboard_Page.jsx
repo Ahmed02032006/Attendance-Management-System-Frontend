@@ -9,21 +9,9 @@ import {
   FiSend,
   FiX,
   FiHelpCircle,
-  FiTrash2,
-  FiCalendar,
-  FiClock,
-  FiUsers,
-  FiBookOpen,
-  FiAward,
-  FiTrendingUp,
-  FiCheckCircle,
-  FiMoreVertical,
-  FiMessageCircle
+  FiTrash2
 } from 'react-icons/fi'
-import { BiSupport, BiTimeFive } from "react-icons/bi";
-import { HiOutlineAcademicCap, HiOutlineUserGroup } from "react-icons/hi";
-import { BsGraphUp, BsThreeDotsVertical } from "react-icons/bs";
-
+import { BiSupport } from "react-icons/bi";
 import {
   getDashboardSubjects,
   getDashboardAttendance,
@@ -35,15 +23,15 @@ const CHAT_STORAGE_KEY = 'teacher_dashboard_chat_history';
 
 // URL to page name mapping
 const PAGE_NAME_MAPPING = {
-  'https://attendance-management-system-fronte-two.vercel.app/teacher/dashboard': 'Dashboard',
-  'https://attendance-management-system-fronte-two.vercel.app/teacher/subject': 'Subjects',
-  'https://attendance-management-system-fronte-two.vercel.app/teacher/attendance': 'Attendance',
-  'http://localhost:5000/teacher/dashboard': 'Dashboard',
-  'http://localhost:5000/teacher/subject': 'Subjects',
-  'http://localhost:5000/teacher/attendance': 'Attendance',
-  'http://localhost:3000/teacher/dashboard': 'Dashboard',
-  'http://localhost:3000/teacher/subject': 'Subjects',
-  'http://localhost:3000/teacher/attendance': 'Attendance',
+  'https://attendance-management-system-fronte-two.vercel.app/teacher/dashboard': 'Dashboard Page',
+  'https://attendance-management-system-fronte-two.vercel.app/teacher/subject': 'Subject Page',
+  'https://attendance-management-system-fronte-two.vercel.app/teacher/attendance': 'Attendance Page',
+  'http://localhost:5000/teacher/dashboard': 'Dashboard Page',
+  'http://localhost:5000/teacher/subject': 'Subject Page',
+  'http://localhost:5000/teacher/attendance': 'Attendance Page',
+  'http://localhost:3000/teacher/dashboard': 'Dashboard Page',
+  'http://localhost:3000/teacher/subject': 'Subject Page',
+  'http://localhost:3000/teacher/attendance': 'Attendance Page',
 };
 
 const TeacherDashboard_Page = () => {
@@ -72,7 +60,6 @@ const TeacherDashboard_Page = () => {
     }
   ])
   const [isSending, setIsSending] = useState(false)
-  const [unreadMessages, setUnreadMessages] = useState(0)
 
   // Refs for auto-focus and auto-scroll
   const inputRef = useRef(null)
@@ -88,21 +75,25 @@ const TeacherDashboard_Page = () => {
 
   // Function to split text into numbered list items
   const splitNumberedList = (text) => {
+    // Regex to match numbered list items like "1. ", "2. ", etc.
     const numberedListRegex = /(\d+\.\s+)/g;
     const parts = text.split(numberedListRegex);
 
     if (parts.length <= 1) {
+      // No numbered list found
       return [text];
     }
 
     const result = [];
     for (let i = 0; i < parts.length; i++) {
       if (numberedListRegex.test(parts[i])) {
+        // This is a number prefix (e.g., "1. ")
         const numberPart = parts[i];
         const contentPart = parts[i + 1] || '';
         result.push(numberPart + contentPart);
-        i++;
+        i++; // Skip the next part since we've combined it
       } else if (parts[i].trim()) {
+        // Non-numbered content
         result.push(parts[i]);
       }
     }
@@ -114,38 +105,43 @@ const TeacherDashboard_Page = () => {
   const formatAIResponse = (text) => {
     if (!text) return text;
 
+    // First, handle numbered lists that might be concatenated
     const lines = text.split('\n');
     const formattedLines = [];
 
     for (let line of lines) {
+      // Check if line starts with # (heading)
       if (line.trim().startsWith('#')) {
+        // Remove the # and trim, then wrap in heading element
         const headingText = line.replace(/^#+\s*/, '').trim();
         if (headingText) {
           formattedLines.push(
-            <div key={`heading-${formattedLines.length}`} className="font-semibold text-base text-gray-900 mt-3 mb-2 border-b border-gray-100 pb-1">
+            <div key={`heading-${formattedLines.length}`} className="font-semibold text-base text-gray-900 mt-3 mb-2">
               {headingText}
             </div>
           );
         }
       } else {
+        // Check if this line contains numbered list items without proper line breaks
         if (line.match(/\d+\.\s+/)) {
+          // Split the line into individual numbered items
           const listItems = splitNumberedList(line);
 
           listItems.forEach((item, index) => {
             if (item.trim()) {
+              // Check if it's a numbered item
               if (item.match(/^\d+\.\s+/)) {
                 formattedLines.push(
-                  <div key={`list-${formattedLines.length}-${index}`} className="flex items-start ml-2 my-1.5">
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-100 text-sky-700 text-xs font-medium mr-2 shrink-0">
-                      {item.match(/^\d+/)[0]}
-                    </span>
-                    <span className="flex-1 text-gray-700">{processLineForURLs(item.replace(/^\d+\.\s+/, ''))}</span>
+                  <div key={`list-${formattedLines.length}-${index}`} className="flex items-start ml-2 my-1">
+                    <span className="font-medium text-gray-700 mr-2 min-w-5">{item.match(/^\d+/)[0]}.</span>
+                    <span className="flex-1">{processLineForURLs(item.replace(/^\d+\.\s+/, ''))}</span>
                   </div>
                 );
               } else {
+                // Regular text (not a numbered item)
                 const processedLine = processLineForURLs(item);
                 formattedLines.push(
-                  <div key={`line-${formattedLines.length}-${index}`} className="my-1 text-gray-700">
+                  <div key={`line-${formattedLines.length}-${index}`} className="my-1">
                     {processedLine}
                   </div>
                 );
@@ -153,18 +149,20 @@ const TeacherDashboard_Page = () => {
             }
           });
         } else {
+          // Regular line - check for bullet points
           const trimmedLine = line.trim();
           if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
             formattedLines.push(
-              <div key={`bullet-${formattedLines.length}`} className="flex items-start ml-2 my-1.5">
-                <span className="mr-2 text-sky-600">•</span>
-                <span className="flex-1 text-gray-700">{processLineForURLs(trimmedLine.substring(1).trim())}</span>
+              <div key={`bullet-${formattedLines.length}`} className="flex items-start ml-2 my-1">
+                <span className="mr-2">•</span>
+                <span className="flex-1">{processLineForURLs(trimmedLine.substring(1).trim())}</span>
               </div>
             );
           } else {
+            // Regular text line
             const processedLine = processLineForURLs(line);
             formattedLines.push(
-              <div key={`line-${formattedLines.length}`} className="my-1 text-gray-700">
+              <div key={`line-${formattedLines.length}`} className="my-1">
                 {processedLine}
               </div>
             );
@@ -178,11 +176,13 @@ const TeacherDashboard_Page = () => {
 
   // Helper function to process a single line for URLs
   const processLineForURLs = (line) => {
+    // Clean up markdown formatting
     let cleanedLine = line
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/`/g, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+      .replace(/`/g, '') // Remove backticks
       .trim();
 
+    // Create a regex pattern to match all known URLs
     const urlPattern = new RegExp(
       Object.keys(PAGE_NAME_MAPPING)
         .map(url => url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
@@ -190,13 +190,16 @@ const TeacherDashboard_Page = () => {
       'g'
     );
 
+    // Split the line by URLs
     const parts = cleanedLine.split(urlPattern);
     const matches = cleanedLine.match(urlPattern) || [];
 
+    // If no URLs found, return the line as is
     if (matches.length === 0) {
       return cleanedLine;
     }
 
+    // Reconstruct with clickable links
     const elements = parts.reduce((acc, part, index) => {
       if (part) {
         acc.push(part);
@@ -210,12 +213,9 @@ const TeacherDashboard_Page = () => {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 font-medium hover:underline transition-colors bg-sky-50 px-2 py-0.5 rounded-md"
+            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 hover:underline transition-colors"
           >
             {pageName}
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
           </a>
         );
       }
@@ -228,14 +228,16 @@ const TeacherDashboard_Page = () => {
   // Function to render message content with formatting
   const renderMessageContent = (text, sender) => {
     if (sender === 'user') {
-      return <span className="break-words">{text}</span>;
+      return text;
     }
 
+    // For assistant messages, apply URL formatting
     const formattedContent = formatAIResponse(text);
 
+    // Check if we have React elements (from formatting)
     if (Array.isArray(formattedContent)) {
       return (
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           {formattedContent.map((item, index) => (
             <React.Fragment key={index}>
               {item}
@@ -245,7 +247,8 @@ const TeacherDashboard_Page = () => {
       );
     }
 
-    return <span className="break-words">{formattedContent}</span>;
+    // If it's just a string, return it
+    return formattedContent;
   };
 
   // Load chat history from localStorage on component mount
@@ -257,6 +260,7 @@ const TeacherDashboard_Page = () => {
         setChatMessages(parsedChat);
       } catch (error) {
         console.error('Error loading chat history:', error);
+        // If there's an error parsing, use default chat
         localStorage.removeItem(CHAT_STORAGE_KEY);
       }
     }
@@ -272,10 +276,10 @@ const TeacherDashboard_Page = () => {
   // Auto-scroll to bottom when chat opens or new messages are added
   useEffect(() => {
     if (isChatOpen) {
+      // Small delay to ensure chat container is fully rendered
       setTimeout(() => {
         scrollToBottom();
       }, 100);
-      setUnreadMessages(0);
     }
   }, [isChatOpen, chatMessages]);
 
@@ -283,59 +287,46 @@ const TeacherDashboard_Page = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setDataLoaded(false);
+        setDataLoaded(false)
         await Promise.all([
           dispatch(getDashboardSubjects(userId)).unwrap(),
           dispatch(getDashboardAttendance(userId)).unwrap()
-        ]);
-        setDataLoaded(true);
+        ])
+        setDataLoaded(true)
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setDataLoaded(true);
+        console.error('Error fetching dashboard data:', error)
+        setDataLoaded(true)
       }
-    };
+    }
 
-    fetchData();
+    fetchData()
 
     return () => {
-      dispatch(clearDashboard());
-    };
-  }, [dispatch, userId]);
+      dispatch(clearDashboard())
+    }
+  }, [dispatch, userId])
 
   // Set initial selected subject when subjects are loaded
   useEffect(() => {
     if (dashboardSubjects.length > 0 && !selectedSubject && dataLoaded) {
-      setSelectedSubject(dashboardSubjects[0].id);
+      setSelectedSubject(dashboardSubjects[0].id)
 
-      const subjectAttendance = dashboardAttendance[dashboardSubjects[0].id];
+      const subjectAttendance = dashboardAttendance[dashboardSubjects[0].id]
       if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
-        const latestDate = Object.keys(subjectAttendance).sort().reverse()[0];
-        setCurrentDate(latestDate);
+        const latestDate = Object.keys(subjectAttendance).sort().reverse()[0]
+        setCurrentDate(latestDate)
       }
     }
-  }, [dashboardSubjects, selectedSubject, dashboardAttendance, dataLoaded]);
+  }, [dashboardSubjects, selectedSubject, dashboardAttendance, dataLoaded])
 
   // Auto-focus input when chat opens
   useEffect(() => {
     if (isChatOpen && inputRef.current) {
       setTimeout(() => {
-        inputRef.current.focus();
-      }, 150);
+        inputRef.current.focus()
+      }, 150)
     }
-  }, [isChatOpen]);
-
-  // Update unread messages when not focused
-  useEffect(() => {
-    if (!isChatOpen && chatMessages.length > 0) {
-      const lastAssistantMessage = [...chatMessages]
-        .reverse()
-        .find(msg => msg.sender === 'assistant');
-      
-      if (lastAssistantMessage && lastAssistantMessage.id > 1) {
-        setUnreadMessages(prev => prev + 1);
-      }
-    }
-  }, [chatMessages, isChatOpen]);
+  }, [isChatOpen])
 
   // Scroll to bottom function
   const scrollToBottom = () => {
@@ -343,114 +334,89 @@ const TeacherDashboard_Page = () => {
       behavior: 'smooth',
       block: 'end'
     });
-  };
+  }
 
   // Get available dates for selected subject
   const getAvailableDates = () => {
-    if (!selectedSubject) return [];
-    const subjectData = dashboardAttendance[selectedSubject];
-    return subjectData ? Object.keys(subjectData).sort().reverse() : [];
-  };
+    if (!selectedSubject) return []
+    const subjectData = dashboardAttendance[selectedSubject]
+    return subjectData ? Object.keys(subjectData).sort().reverse() : []
+  }
 
-  const availableDates = getAvailableDates();
-  const currentDateIndex = availableDates.indexOf(currentDate);
+  const availableDates = getAvailableDates()
+  const currentDateIndex = availableDates.indexOf(currentDate)
 
   // Get current attendance records
   const getCurrentAttendanceRecords = () => {
-    if (!selectedSubject) return [];
-    const subjectData = dashboardAttendance[selectedSubject];
-    return subjectData && subjectData[currentDate] ? subjectData[currentDate] : [];
-  };
+    if (!selectedSubject) return []
+    const subjectData = dashboardAttendance[selectedSubject]
+    return subjectData && subjectData[currentDate] ? subjectData[currentDate] : []
+  }
 
-  const currentAttendanceRecords = getCurrentAttendanceRecords();
-  const selectedSubjectData = dashboardSubjects.find(subject => subject.id === selectedSubject);
-
-  // Calculate statistics
-  const totalStudents = dashboardSubjects.reduce((acc, subject) => acc + (subject.students || 0), 0);
-  const totalAttendanceRecords = Object.values(dashboardAttendance).reduce((acc, subject) => {
-    return acc + Object.values(subject || {}).reduce((subAcc, date) => subAcc + date.length, 0);
-  }, 0);
-  const averageAttendance = selectedSubjectData ? 
-    Math.round((currentAttendanceRecords.length / (selectedSubjectData.students || 1)) * 100) : 0;
+  const currentAttendanceRecords = getCurrentAttendanceRecords()
+  const selectedSubjectData = dashboardSubjects.find(subject => subject.id === selectedSubject)
 
   // Pagination logic
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = currentAttendanceRecords.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(currentAttendanceRecords.length / recordsPerPage);
+  const indexOfLastRecord = currentPage * recordsPerPage
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage
+  const currentRecords = currentAttendanceRecords.slice(indexOfFirstRecord, indexOfLastRecord)
+  const totalPages = Math.ceil(currentAttendanceRecords.length / recordsPerPage)
 
   // Pagination functions
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+  const paginate = (pageNumber) => setCurrentPage(pageNumber)
+  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages))
+  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1))
 
   // Format date for display
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    }
-    return date.toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
-    });
-  };
+    })
+  }
 
   // Navigation functions
   const navigateDate = (direction) => {
-    const currentIndex = availableDates.indexOf(currentDate);
+    const currentIndex = availableDates.indexOf(currentDate)
     if (direction === 'prev' && currentIndex < availableDates.length - 1) {
-      setCurrentDate(availableDates[currentIndex + 1]);
-      setCurrentPage(1);
+      setCurrentDate(availableDates[currentIndex + 1])
+      setCurrentPage(1)
     } else if (direction === 'next' && currentIndex > 0) {
-      setCurrentDate(availableDates[currentIndex - 1]);
-      setCurrentPage(1);
+      setCurrentDate(availableDates[currentIndex - 1])
+      setCurrentPage(1)
     }
-  };
+  }
 
   // Handle subject selection
   const handleSubjectSelect = (subjectId) => {
-    setSelectedSubject(subjectId);
-    setCurrentPage(1);
+    setSelectedSubject(subjectId)
+    setCurrentPage(1)
 
-    const subjectAttendance = dashboardAttendance[subjectId];
+    const subjectAttendance = dashboardAttendance[subjectId]
     if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
-      const latestDate = Object.keys(subjectAttendance).sort().reverse()[0];
-      setCurrentDate(latestDate);
+      const latestDate = Object.keys(subjectAttendance).sort().reverse()[0]
+      setCurrentDate(latestDate)
     } else {
-      setCurrentDate('');
+      setCurrentDate('')
     }
-  };
+  }
 
   // Reset pagination when subject or date changes
   useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedSubject, currentDate]);
+    setCurrentPage(1)
+  }, [selectedSubject, currentDate])
 
   // Color mapping for subjects
   const getSubjectColor = (index) => {
     const colors = [
-      'from-sky-500 to-sky-600', 
-      'from-emerald-500 to-emerald-600', 
-      'from-violet-500 to-violet-600',
-      'from-amber-500 to-amber-600', 
-      'from-rose-500 to-rose-600', 
-      'from-indigo-500 to-indigo-600',
-      'from-pink-500 to-pink-600', 
-      'from-cyan-500 to-cyan-600', 
-      'from-orange-500 to-orange-600', 
-      'from-teal-500 to-teal-600'
-    ];
-    return colors[index % colors.length];
-  };
+      'bg-sky-500', 'bg-green-500', 'bg-purple-500',
+      'bg-orange-500', 'bg-red-500', 'bg-indigo-500',
+      'bg-pink-500', 'bg-teal-500', 'bg-cyan-500', 'bg-amber-500'
+    ]
+    return colors[index % colors.length]
+  }
 
   // Function to call the AI API via your backend proxy
   const callAIApi = async (userQuery) => {
@@ -461,11 +427,13 @@ const TeacherDashboard_Page = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          // Add auth token if needed
           ...(user?.token && { Authorization: `Bearer ${user.token}` })
         },
         body: JSON.stringify({
           query: userQuery,
           userId: userId,
+          // Add context about the current dashboard state
           context: {
             currentSubject: selectedSubjectData?.name,
             currentDate: currentDate,
@@ -482,89 +450,95 @@ const TeacherDashboard_Page = () => {
         return data.response || "I couldn't process your request at the moment.";
       }
 
+      // Return the raw response - we'll format it in the render function
       return data.response;
 
     } catch (error) {
       console.error('Error calling AI proxy:', error);
 
+      // Smart fallback responses based on query
       const lowerQuery = userQuery.toLowerCase();
 
       if (lowerQuery.includes('attendance') && lowerQuery.includes('add')) {
-        return `To add attendance:\n\n1. Navigate to the **Attendance Page**\n2. Select a subject from the dropdown\n3. Choose the date for attendance\n4. Mark students as present/absent\n5. Click "Save Attendance"\n\nYou currently have ${dashboardSubjects.length} subjects assigned.`;
+        return `To add attendance:\n\n1. Navigate to the Attendance Page\n2. Select a subject\n3. Choose the date for attendance\n4. Mark students as present/absent\n5. Click "Save Attendance"\n\nYou currently have ${dashboardSubjects.length} subjects assigned.`;
 
       } else if (lowerQuery.includes('view') && lowerQuery.includes('record')) {
-        return `To view attendance records:\n\n1. Select a subject from the left panel\n2. Use the date navigation arrows\n3. View student records in the table\n4. Use pagination for more records\n\nCurrently showing ${currentAttendanceRecords.length} records for ${selectedSubjectData?.name || 'selected subject'}.`;
+        return `To view attendance records:\n\n1. Select a subject from the left panel\n2. Use date navigation to select a specific date\n3. View student records in the table\n4. Use pagination if there are many students\n\nCurrently showing ${currentAttendanceRecords.length} records for ${selectedSubjectData?.name || 'selected subject'}.`;
 
       } else if (lowerQuery.includes('dashboard') || lowerQuery.includes('overview')) {
-        return `Your dashboard overview:\n\n• **${dashboardSubjects.length}** assigned subjects\n• **${totalStudents}** total students\n• **${totalAttendanceRecords}** attendance records\n• **${averageAttendance}%** average attendance for selected subject\n\nSelect a subject to see detailed attendance.`;
+        return `Your dashboard shows:\n\n• ${dashboardSubjects.length} assigned subjects on the left\n• Attendance records for selected subject on the right\n• Date navigation for historical records\n• Student details with roll numbers and timestamps\n\nSelect a subject to see detailed attendance.`;
 
       } else if (lowerQuery.includes('subject') || lowerQuery.includes('course')) {
-        return `## Your Assigned Subjects\n\n${dashboardSubjects.map((sub, i) => `${i + 1}. **${sub.name}** (${sub.code})\n   • Students: ${sub.students || 0}\n   • Attendance records: ${Object.values(dashboardAttendance[sub.id] || {}).reduce((acc, date) => acc + date.length, 0)}\n`).join('\n')}\n\nClick on any subject to view its detailed attendance records.`;
+        return `You have ${dashboardSubjects.length} subjects:\n${dashboardSubjects.map((sub, i) => `${i + 1}. ${sub.name} (${sub.code}) - ${sub.students || 0} students`).join('\n')}\n\nClick on any subject to view its attendance records.`;
 
       } else {
-        return `I'm having trouble connecting to the AI service. Here are some things you can try:\n\n1. Check your internet connection\n2. Refresh the page\n3. Clear your browser cache\n4. Try asking about:\n   • How to add attendance\n   • Viewing attendance records\n   • Understanding the dashboard\n   • Your assigned subjects\n\nError: ${error.message}`;
+        return `I'm having trouble connecting to the AI service. Here's what you can do:\n\n1. Check your internet connection\n2. Try asking about:\n   • How to add attendance\n   • Viewing attendance records\n   • Understanding the dashboard\n   • Your assigned subjects\n3. Contact support if the issue persists\n\nError: ${error.message}`;
       }
     }
   };
 
   // Main chat function
   const handleSendMessage = async () => {
-    if (!message.trim()) return;
+    if (!message.trim()) return
 
     const userMessage = {
-      id: Date.now(),
+      id: Date.now(), // Use timestamp for unique ID
       text: message,
       sender: 'user',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
+    }
 
-    setChatMessages(prev => [...prev, userMessage]);
-    setMessage('');
-    setIsSending(true);
+    setChatMessages(prev => [...prev, userMessage])
+    setMessage('')
+    setIsSending(true)
 
     try {
-      const aiResponseText = await callAIApi(message);
+      // Call the AI API with user's message
+      const aiResponseText = await callAIApi(message)
 
       const aiResponse = {
-        id: Date.now() + 1,
+        id: Date.now() + 1, // Use timestamp for unique ID
         text: aiResponseText,
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
+      }
 
-      setChatMessages(prev => [...prev, aiResponse]);
+      setChatMessages(prev => [...prev, aiResponse])
 
     } catch (error) {
-      console.error('Error in chat:', error);
+      console.error('Error in chat:', error)
 
+      // Fallback response if API fails
       const fallbackResponse = {
         id: Date.now() + 1,
-        text: "I'm having trouble connecting right now. Here are common actions you can take:\n\n1. **Add attendance**: Go to Attendance Page\n2. **View records**: Select a subject above\n3. **See student details**: Check the table below\n\nPlease try your query again or contact support if the issue persists.",
+        text: "I'm having trouble connecting right now. Here are some common actions:\n\n1. To add attendance: Go to Attendance Page\n2. To view records: Select a subject above\n3. To see student details: Check the table below\n\nPlease try your query again or contact support if the issue persists.",
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
+      }
 
-      setChatMessages(prev => [...prev, fallbackResponse]);
+      setChatMessages(prev => [...prev, fallbackResponse])
 
     } finally {
-      setIsSending(false);
+      setIsSending(false)
 
+      // Focus input after response
       setTimeout(() => {
         if (inputRef.current) {
-          inputRef.current.focus();
+          inputRef.current.focus()
         }
-      }, 100);
+      }, 100)
     }
-  };
+  }
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+      e.preventDefault()
+      handleSendMessage()
     }
-  };
+  }
 
   const clearChat = () => {
+    // Reset to initial message only
     const initialChat = [
       {
         id: 1,
@@ -575,175 +549,83 @@ const TeacherDashboard_Page = () => {
     ];
 
     setChatMessages(initialChat);
+    // Also clear from localStorage
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(initialChat));
-  };
+  }
 
   // Show loader when data is still loading
   if (isLoading || !dataLoaded) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin mx-auto"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <FiBook className="h-8 w-8 text-sky-600 animate-pulse" />
-            </div>
-          </div>
-          <p className="mt-6 text-lg font-medium text-gray-700">Loading your dashboard...</p>
-          <p className="mt-2 text-sm text-gray-500">Preparing your teaching overview</p>
+          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-lg font-medium text-gray-700">Loading Dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <HeaderComponent heading="Teacher Dashboard" subHeading="Overview of your teaching activities" role="admin" />
+    <div className="min-h-screen bg-gray-50">
+      <HeaderComponent heading={"Teacher Dashboard"} subHeading={"Overview of your teaching activities"} role='admin' />
 
-      {/* Stats Cards */}
-      <div className="container mx-auto px-4 sm:px-6 -mt-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Subjects</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{dashboardSubjects.length}</p>
-                <p className="text-xs text-gray-500 mt-1">Active courses</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
-                <HiOutlineAcademicCap className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Students</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{totalStudents}</p>
-                <p className="text-xs text-gray-500 mt-1">Across all subjects</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                <HiOutlineUserGroup className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Attendance Records</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{totalAttendanceRecords}</p>
-                <p className="text-xs text-gray-500 mt-1">Total entries</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl flex items-center justify-center">
-                <FiCheckCircle className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Avg. Attendance</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{averageAttendance}%</p>
-                <p className="text-xs text-gray-500 mt-1">Current subject</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
-                <BsGraphUp className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 sm:px-6 pb-8">
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <div className="container max-w-full mx-auto p-4 sm:p-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
           {/* Left Column - Subjects */}
-          <div className="xl:col-span-4">
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-lg flex items-center justify-center">
-                      <FiBook className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">My Subjects</h3>
-                      <p className="text-sm text-gray-500">{dashboardSubjects.length} subjects assigned</p>
-                    </div>
-                  </div>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <BsThreeDotsVertical className="h-5 w-5 text-gray-500" />
-                  </button>
-                </div>
+          <div className="xl:col-span-1">
+            {/* My Subjects */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">My Subjects</h3>
               </div>
 
               {dashboardSubjects.length === 0 ? (
-                <div className="p-8 text-center">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FiBook className="h-10 w-10 text-gray-400" />
-                  </div>
-                  <p className="text-gray-900 font-medium text-lg">No subjects found</p>
-                  <p className="text-gray-500 text-sm mt-1">
+                <div className="text-center py-6 sm:py-8">
+                  <FiBook className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
+                  <p className="text-gray-500 text-base sm:text-lg font-medium">No subjects found</p>
+                  <p className="text-gray-400 text-xs sm:text-sm mt-1">
                     You are not assigned to any subjects yet
                   </p>
                 </div>
               ) : (
-                <div className="p-4">
-                  <div className="max-h-[480px] hide-scrollbar overflow-y-auto pr-2">
-                    <div className="space-y-2">
-                      {dashboardSubjects.map((subject, index) => {
-                        const attendanceCount = Object.values(dashboardAttendance[subject.id] || {}).reduce((acc, date) => acc + date.length, 0);
-                        const isSelected = selectedSubject === subject.id;
-                        return (
-                          <div
-                            key={subject.id}
-                            onClick={() => handleSubjectSelect(subject.id)}
-                            className={`
-                              relative group p-4 rounded-xl border-2 transition-all cursor-pointer
-                              ${isSelected 
-                                ? 'border-sky-500 bg-gradient-to-r from-sky-50 to-white shadow-sm' 
-                                : 'border-transparent hover:border-gray-200 hover:bg-gray-50'
-                              }
-                            `}
-                          >
-                            <div className="flex items-start space-x-4">
-                              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getSubjectColor(index)} flex items-center justify-center shrink-0 shadow-sm`}>
-                                <span className="text-white font-bold text-lg">
-                                  {subject.name?.charAt(0).toUpperCase() || 'S'}
-                                </span>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between">
-                                  <div>
-                                    <p className={`font-semibold text-base truncate ${isSelected ? 'text-sky-700' : 'text-gray-900'}`}>
-                                      {subject.name}
-                                    </p>
-                                    <p className="text-sm text-gray-500 mt-0.5">{subject.code}</p>
-                                  </div>
-                                  {isSelected && (
-                                    <span className="inline-flex items-center px-2 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-medium">
-                                      Active
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center space-x-4 mt-2">
-                                  <div className="flex items-center text-xs text-gray-500">
-                                    <FiUsers className="h-3.5 w-3.5 mr-1" />
-                                    <span>{subject.students || 0} students</span>
-                                  </div>
-                                  <div className="flex items-center text-xs text-gray-500">
-                                    <FiCalendar className="h-3.5 w-3.5 mr-1" />
-                                    <span>{attendanceCount} records</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                // Updated container with scrollbar
+                <div className="max-h-[calc(100vh-210px)] hide-scrollbar overflow-y-auto pr-2">
+                  <div className="space-y-2 sm:space-y-3">
+                    {dashboardSubjects.map((subject, index) => (
+                      <div
+                        key={subject.id}
+                        className={`flex items-center justify-between p-3 rounded-lg transition-all cursor-pointer ${selectedSubject === subject.id
+                          ? 'bg-sky-50 border border-sky-200'
+                          : 'hover:bg-gray-50 border border-transparent'
+                          }`}
+                        onClick={() => handleSubjectSelect(subject.id)}
+                      >
+                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${getSubjectColor(index)} flex items-center justify-center shrink-0`}>
+                            <span className="text-white font-semibold text-xs sm:text-sm">
+                              {subject.name?.charAt(0) || 'S'}
+                            </span>
                           </div>
-                        );
-                      })}
-                    </div>
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className={`text-xs font-medium truncate ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                                }`}
+                              title={subject.name}
+                            >
+                              {subject.name}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">{subject.code}</p>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0 ml-2">
+                          <p className={`text-sm font-medium ${selectedSubject === subject.id ? 'text-sky-700' : 'text-gray-900'
+                            }`}>
+                            {subject.students || 0}
+                          </p>
+                          <p className="text-xs text-gray-500">students</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -751,242 +633,192 @@ const TeacherDashboard_Page = () => {
           </div>
 
           {/* Right Column - Attendance Records */}
-          <div className="xl:col-span-8 space-y-6">
-            {/* Date Navigation Card */}
+          <div className="xl:col-span-2 space-y-4 sm:space-y-6">
+            {/* Date Navigation */}
             {availableDates.length > 0 && selectedSubject && (
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                <div className="p-6">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center space-x-4">
-                      <button
-                        onClick={() => navigateDate('prev')}
-                        disabled={currentDateIndex >= availableDates.length - 1}
-                        className={`
-                          p-2.5 rounded-lg transition-all
-                          ${currentDateIndex >= availableDates.length - 1
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                          }
-                        `}
-                      >
-                        <FiChevronLeft className="h-5 w-5" />
-                      </button>
+              <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+                <div className="flex items-center justify-between space-x-4">
+                  <button
+                    onClick={() => navigateDate('prev')}
+                    disabled={currentDateIndex >= availableDates.length - 1}
+                    className={`p-2 rounded-lg transition-colors shrink-0 ${currentDateIndex >= availableDates.length - 1
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                  >
+                    <FiChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
 
-                      <div className="text-center">
-                        <div className="flex items-center space-x-2">
-                          <FiCalendar className="h-5 w-5 text-sky-600" />
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {formatDate(currentDate)}
-                          </h3>
-                        </div>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
-                            {selectedSubjectData?.name}
-                          </span>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                            {currentAttendanceRecords.length} Present
-                          </span>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            {Math.round((currentAttendanceRecords.length / (selectedSubjectData?.students || 1)) * 100)}% Attendance
-                          </span>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => navigateDate('next')}
-                        disabled={currentDateIndex <= 0}
-                        className={`
-                          p-2.5 rounded-lg transition-all
-                          ${currentDateIndex <= 0
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                          }
-                        `}
-                      >
-                        <FiChevronRight className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-500">
-                        {availableDates.length} {availableDates.length === 1 ? 'date' : 'dates'} available
-                      </span>
-                    </div>
+                  <div className="text-center flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+                      {formatDate(currentDate)}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">
+                      {selectedSubjectData?.name} • {currentAttendanceRecords.length} students present
+                    </p>
                   </div>
+
+                  <button
+                    onClick={() => navigateDate('next')}
+                    disabled={currentDateIndex <= 0}
+                    className={`p-2 rounded-lg transition-colors shrink-0 ${currentDateIndex <= 0
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                  >
+                    <FiChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* Attendance Records Table Card */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-violet-600 rounded-lg flex items-center justify-center">
-                      <FiEye className="h-5 w-5 text-white" />
+            {/* Attendance Records Table */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Attendance Records</h3>
+                  {selectedSubject && (
+                    <div className="text-sm text-gray-500">
+                      {currentAttendanceRecords.length} students
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Attendance Records</h3>
-                      {selectedSubject && (
-                        <p className="text-sm text-gray-500">
-                          {currentAttendanceRecords.length} students present • Page {currentPage} of {totalPages}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
-              </div>
 
-              {!selectedSubject ? (
-                <div className="p-12 text-center">
-                  <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FiEye className="h-12 w-12 text-gray-400" />
+                {!selectedSubject ? (
+                  <div className="text-center py-6 sm:py-8">
+                    <FiEye className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
+                    <p className="text-gray-500 text-base sm:text-lg font-medium">Select a subject to view attendance</p>
                   </div>
-                  <p className="text-gray-900 font-medium text-lg">No subject selected</p>
-                  <p className="text-gray-500 text-sm mt-1">
-                    Select a subject from the left panel to view attendance records
-                  </p>
-                </div>
-              ) : currentRecords.length > 0 ? (
-                <div>
-                  <div className="overflow-x-auto">
+                ) : currentRecords.length > 0 ? (
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                      <thead>
                         <tr>
-                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Student Name
                           </th>
-                          <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Roll Number
+                          <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Roll No.
                           </th>
-                          <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 sm:px-4 py-2 sm:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Time
-                          </th>
-                          <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {currentRecords.map((record, index) => (
-                          <tr key={record.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="flex-shrink-0 h-10 w-10">
-                                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                                    <span className="text-sm font-medium text-gray-600">
-                                      {record.studentName?.charAt(0).toUpperCase() || 'S'}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {record.studentName}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {record.email || 'No email'}
-                                  </div>
-                                </div>
+                      <tbody className="divide-y divide-gray-200">
+                        {currentRecords.map((record) => (
+                          <tr key={record.id} className="hover:bg-gray-50">
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
+                                {record.studentName}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="text-sm font-medium text-gray-900">
-                                {record.rollNo}
-                              </span>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-center text-sm text-gray-500">
+                              {record.rollNo}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <div className="flex items-center justify-center space-x-1">
-                                <FiClock className="h-4 w-4 text-gray-400" />
-                                <span className="text-sm text-gray-600">
-                                  {record.time}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                                <FiCheckCircle className="h-3 w-3 mr-1" />
-                                Present
-                              </span>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-center text-sm text-gray-500">
+                              {record.time}
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-
-                  {/* Enhanced Pagination */}
-                  {currentAttendanceRecords.length > recordsPerPage && (
-                    <div className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 bg-gray-50">
-                      <div className="text-sm text-gray-700 mb-2 sm:mb-0">
-                        Showing <span className="font-medium">{indexOfFirstRecord + 1}</span> to{' '}
-                        <span className="font-medium">{Math.min(indexOfLastRecord, currentAttendanceRecords.length)}</span> of{' '}
-                        <span className="font-medium">{currentAttendanceRecords.length}</span> students
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={prevPage}
-                          disabled={currentPage === 1}
-                          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <FiChevronLeft className="h-4 w-4 mr-1" />
-                          Previous
-                        </button>
-                        
-                        <div className="flex items-center space-x-1">
-                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                            let pageNum;
-                            if (totalPages <= 5) {
-                              pageNum = i + 1;
-                            } else if (currentPage <= 3) {
-                              pageNum = i + 1;
-                            } else if (currentPage >= totalPages - 2) {
-                              pageNum = totalPages - 4 + i;
-                            } else {
-                              pageNum = currentPage - 2 + i;
-                            }
-                            
-                            return (
-                              <button
-                                key={pageNum}
-                                onClick={() => paginate(pageNum)}
-                                className={`
-                                  relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-lg transition-colors
-                                  ${currentPage === pageNum
-                                    ? 'border-sky-600 bg-gradient-to-r from-sky-600 to-sky-700 text-white shadow-sm'
-                                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                                  }
-                                `}
-                              >
-                                {pageNum}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        <button
-                          onClick={nextPage}
-                          disabled={currentPage === totalPages}
-                          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          Next
-                          <FiChevronRight className="h-4 w-4 ml-1" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="p-12 text-center">
-                  <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FiEye className="h-12 w-12 text-gray-400" />
+                ) : (
+                  <div className="text-center py-6 sm:py-8">
+                    <FiEye className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
+                    <p className="text-gray-500 text-base sm:text-lg font-medium">No attendance records found</p>
+                    <p className="text-gray-400 text-xs sm:text-sm mt-1">
+                      {availableDates.length === 0
+                        ? `No attendance data available for ${selectedSubjectData?.name}`
+                        : `No records for ${formatDate(currentDate)}`
+                      }
+                    </p>
                   </div>
-                  <p className="text-gray-900 font-medium text-lg">No attendance records found</p>
-                  <p className="text-gray-500 text-sm mt-1">
-                    {availableDates.length === 0
-                      ? `No attendance data available for ${selectedSubjectData?.name}`
-                      : `No records for ${formatDate(currentDate)}`
-                    }
-                  </p>
+                )}
+              </div>
+
+              {/* Pagination */}
+              {currentAttendanceRecords.length > recordsPerPage && (
+                <div className="px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 bg-gray-50">
+                  <div className="mb-2 sm:mb-0">
+                    <p className="text-xs sm:text-sm text-gray-700">
+                      Showing <span className="font-medium">{indexOfFirstRecord + 1}</span> to{' '}
+                      <span className="font-medium">{Math.min(indexOfLastRecord, currentAttendanceRecords.length)}</span> of{' '}
+                      <span className="font-medium">{currentAttendanceRecords.length}</span> students
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={prevPage}
+                      disabled={currentPage === 1}
+                      className="px-2 sm:px-3 py-1.5 border border-gray-300 rounded-md text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                    >
+                      <FiChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                    </button>
+
+                    {totalPages <= 4 ? (
+                      Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                        <button
+                          key={number}
+                          onClick={() => paginate(number)}
+                          className={`px-2.5 sm:px-3.5 py-1.5 border text-xs sm:text-sm font-medium ${currentPage === number
+                            ? 'border-sky-600 bg-sky-600 text-white'
+                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                            } rounded-md transition-colors`}
+                        >
+                          {number}
+                        </button>
+                      ))
+                    ) : (
+                      <>
+                        {currentPage > 2 && (
+                          <button
+                            onClick={() => paginate(1)}
+                            className="px-2.5 sm:px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-medium rounded-md transition-colors"
+                          >
+                            1
+                          </button>
+                        )}
+                        {currentPage > 3 && <span className="px-1 sm:px-2 text-gray-500">...</span>}
+                        {[
+                          currentPage - 1,
+                          currentPage,
+                          currentPage + 1
+                        ]
+                          .filter(num => num > 0 && num <= totalPages)
+                          .map(number => (
+                            <button
+                              key={number}
+                              onClick={() => paginate(number)}
+                              className={`px-2.5 sm:px-3.5 py-1.5 border text-xs sm:text-sm font-medium ${currentPage === number
+                                ? 'border-sky-600 bg-sky-600 text-white'
+                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                } rounded-md transition-colors`}
+                            >
+                              {number}
+                            </button>
+                          ))}
+                        {currentPage < totalPages - 2 && <span className="px-1 sm:px-2 text-gray-500">...</span>}
+                        {currentPage < totalPages - 1 && (
+                          <button
+                            onClick={() => paginate(totalPages)}
+                            className="px-2.5 sm:px-3.5 py-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-medium rounded-md transition-colors"
+                          >
+                            {totalPages}
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                    <button
+                      onClick={nextPage}
+                      disabled={currentPage === totalPages}
+                      className="px-2 sm:px-3 py-1.5 border border-gray-300 rounded-md text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                    >
+                      <FiChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -994,188 +826,116 @@ const TeacherDashboard_Page = () => {
         </div>
       </div>
 
-      {/* Enhanced Floating Chat Button */}
+      {/* Floating Chat Button */}
       <button
         onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed bottom-6 right-6 z-40 group"
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-sky-600 hover:bg-sky-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-105"
         aria-label="Open customer support chat"
       >
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-sky-400 to-sky-600 rounded-full blur-lg opacity-70 group-hover:opacity-100 transition-opacity"></div>
-          <div className="relative w-14 h-14 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
-            {isChatOpen ? (
-              <FiX className="h-6 w-6" />
-            ) : (
-              <BiSupport className="h-6 w-6" />
-            )}
-          </div>
-          {unreadMessages > 0 && !isChatOpen && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-xs font-bold text-white animate-pulse">
-              {unreadMessages}
-            </span>
-          )}
-        </div>
+        {isChatOpen ? (
+          <FiX className="h-6 w-6" />
+        ) : (
+          <BiSupport className="h-6 w-6" />
+        )}
       </button>
 
-      {/* Enhanced Chat Assistant Box */}
+      {/* Chat Assistant Box */}
       {isChatOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden animate-slideUp">
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
           {/* Chat Header */}
-          <div className="bg-gradient-to-r from-sky-600 to-sky-700 px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/50">
-                  <FiHelpCircle className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-white font-semibold">Attendance Support</h3>
-                  <div className="flex items-center space-x-1 mt-0.5">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <p className="text-sky-100 text-xs">Online</p>
-                  </div>
-                </div>
+          <div className="bg-sky-600 px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <FiHelpCircle className="h-5 w-5 text-sky-600" />
               </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={clearChat}
-                  className="text-sky-100 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-all"
-                  aria-label="Clear chat history"
-                  title="Clear Chat"
-                >
-                  <FiTrash2 className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => setIsChatOpen(false)}
-                  className="text-sky-100 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-all"
-                >
-                  <FiX className="h-5 w-5" />
-                </button>
+              <div>
+                <h3 className="text-white font-semibold">Attendance Support</h3>
+                <p className="text-sky-100 text-xs">AI Assistant</p>
               </div>
             </div>
+            <button
+              onClick={clearChat}
+              className="text-sky-100 hover:text-white p-2 rounded-full hover:bg-sky-700 transition-colors"
+              aria-label="Clear chat history"
+              title="Clear Chat"
+            >
+              <FiTrash2 className="h-5 w-5" />
+            </button>
           </div>
 
           {/* Chat Messages */}
-          <div className="h-96 overflow-y-auto p-4 bg-gray-50" ref={messagesEndRef}>
+          <div className="h-80 overflow-y-auto p-4 bg-gray-50">
             <div className="space-y-4">
               {chatMessages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`
-                      max-w-[85%] rounded-2xl px-4 py-3 
-                      ${msg.sender === 'user'
-                        ? 'bg-gradient-to-r from-sky-600 to-sky-700 text-white rounded-br-none shadow-md'
-                        : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm'
-                      }
-                    `}
+                    className={`max-w-[80%] rounded-lg px-3 py-2 ${msg.sender === 'user'
+                      ? 'bg-sky-600 text-white rounded-br-none'
+                      : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                      }`}
                   >
-                    <div className="text-sm leading-relaxed whitespace-pre-line">
+                    <div className="text-sm whitespace-pre-line">
                       {renderMessageContent(msg.text, msg.sender)}
                     </div>
-                    <div className={`flex items-center justify-end space-x-1 mt-2 ${msg.sender === 'user' ? 'text-sky-100' : 'text-gray-400'}`}>
-                      <span className="text-xs">
-                        {msg.timestamp}
-                      </span>
-                      {msg.sender === 'user' && (
-                        <FiCheckCircle className="h-3 w-3" />
-                      )}
-                    </div>
+                    <p className="text-xs mt-1 opacity-70">
+                      {msg.sender === 'user' ? 'You' : 'Assistant'} • {msg.timestamp}
+                    </p>
                   </div>
                 </div>
               ))}
               {isSending && (
-                <div className="flex justify-start animate-fadeIn">
-                  <div className="bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm">
+                <div className="flex justify-start">
+                  <div className="bg-white border border-gray-200 text-gray-800 rounded-lg rounded-bl-none px-3 py-2">
                     <div className="flex items-center space-x-2">
-                      <div className="text-sm text-gray-600">Assistant is typing</div>
+                      <div className="text-sm text-gray-600">Thinking...</div>
                       <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
+
+              {/* Invisible element for auto-scroll */}
+              <div ref={messagesEndRef} />
             </div>
           </div>
 
           {/* Chat Input */}
-          <div className="border-t border-gray-200 p-4 bg-white">
+          <div className="border-t border-gray-200 p-3">
             <div className="flex items-center space-x-2">
-              <div className="flex-1 relative">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Type your message..."
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent pr-10"
-                  disabled={isSending}
-                />
-                <FiMessageCircle className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
-              </div>
+              <input
+                ref={inputRef}
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about attendance, subjects, or dashboard..."
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                disabled={isSending}
+              />
               <button
                 onClick={handleSendMessage}
                 disabled={!message.trim() || isSending}
-                className="bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 text-white rounded-lg p-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-sky-600 shadow-sm"
+                className="bg-sky-600 hover:bg-sky-700 text-white rounded-lg p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Send message"
               >
                 <FiSend className="h-5 w-5" />
               </button>
             </div>
-            <p className="text-xs text-gray-400 mt-2 text-center">
-              Ask me about attendance, subjects, or dashboard features
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Ask about attendance management, subjects, or dashboard features
             </p>
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-        
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </div>
-  );
-};
+  )
+}
 
-export default TeacherDashboard_Page;
+export default TeacherDashboard_Page
