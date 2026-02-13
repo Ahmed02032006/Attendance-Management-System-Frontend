@@ -396,7 +396,7 @@ const TeacherDashboardLayout = () => {
               </div>
             ) : (
               <div className="flex justify-center">
-                {hasValidProfilePicture() ? (
+                {/* {hasValidProfilePicture() ? (
                   // Show profile picture thumbnail in collapsed sidebar
                   <div className="relative">
                     <img
@@ -415,7 +415,7 @@ const TeacherDashboardLayout = () => {
                     </span>
                     <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
                   </div>
-                )}
+                )} */}
                 <button
                   className="p-2 rounded-full hover:bg-slate-200 text-slate-500 hover:text-red-500 transition-colors duration-200"
                   title="Logout"
