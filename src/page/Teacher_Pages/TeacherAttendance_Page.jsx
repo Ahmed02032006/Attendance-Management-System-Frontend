@@ -16,6 +16,7 @@ import {
   FiClock,
   FiUser,
   FiBook,
+  FiClipboard,
   FiRefreshCw
 } from 'react-icons/fi'
 import {
@@ -436,7 +437,7 @@ const TeacherAttendance_Page = () => {
           <div className="relative">
             <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <FiBook className="h-8 w-8 text-blue-600 animate-pulse" />
+              <FiClipboard className="h-8 w-8 text-blue-600 animate-pulse" />
             </div>
           </div>
           <p className="mt-6 text-lg font-medium text-gray-700">Loading Attendance Data...</p>
