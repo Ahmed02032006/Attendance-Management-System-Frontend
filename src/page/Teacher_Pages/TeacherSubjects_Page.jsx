@@ -389,7 +389,7 @@ const TeacherSubjects_Page = () => {
                         <div className="flex items-center justify-center space-x-2">
                           <button
                             onClick={() => openEditModal(subject)}
-                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                            className="p-1.5 text-blue-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                             title="Edit Subject"
                           >
                             <FiEdit className="h-4 w-4" />
