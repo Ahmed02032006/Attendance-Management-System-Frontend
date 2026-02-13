@@ -396,14 +396,14 @@ const TeacherSubjects_Page = () => {
                           </button>
                           <button
                             onClick={() => openResetModal(subject)}
-                            className="p-1.5 text-gray-500 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors"
+                            className="p-1.5 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors"
                             title="Reset Attendance"
                           >
                             <FiRefreshCcw className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => openDeleteModal(subject)}
-                            className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                             title="Delete Subject"
                           >
                             <FiTrash2 className="h-4 w-4" />
