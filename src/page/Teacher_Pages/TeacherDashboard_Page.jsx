@@ -343,6 +343,45 @@ const TeacherDashboard_Page = () => {
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(initialChat));
   };
 
+  // Calculate how many different students you've taught
+  const calculateDiversity = () => {
+    const uniqueStudents = new Set();
+    const studentAttendance = {};
+
+    dashboardSubjects.forEach(subject => {
+      const subjectAttendance = dashboardAttendance[subject.id];
+      if (subjectAttendance) {
+        Object.values(subjectAttendance).forEach(records => {
+          records.forEach(record => {
+            const studentId = record.studentId || record.id;
+            uniqueStudents.add(studentId);
+
+            if (!studentAttendance[studentId]) {
+              studentAttendance[studentId] = new Set();
+            }
+            studentAttendance[studentId].add(subject.id);
+          });
+        });
+      }
+    });
+
+    const studentsInMultipleSubjects = Object.values(studentAttendance).filter(
+      subjects => subjects.size > 1
+    ).length;
+
+    const diversityRate = uniqueStudents.size > 0
+      ? Math.round((studentsInMultipleSubjects / uniqueStudents.size) * 100)
+      : 0;
+
+    return {
+      total: uniqueStudents.size,
+      multiSubject: studentsInMultipleSubjects,
+      rate: diversityRate
+    };
+  };
+
+  const diversity = calculateDiversity();
+
   // Loading state
   if (isLoading || !dataLoaded) {
     return (
@@ -396,17 +435,21 @@ const TeacherDashboard_Page = () => {
             </div>
           </div>
 
-          {/* <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Attendance Rate</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">{attendanceRate}%</p>
+                <p className="text-sm text-gray-500">Student Diversity</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">{diversity.total}</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {diversity.multiSubject} in multiple subjects ({diversity.rate}%)
+                </p>
               </div>
-              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                <FiEye className="h-5 w-5 text-purple-600" />
+              <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center">
+                <FiUsers className="h-5 w-5 text-pink-600" />
               </div>
             </div>
-          </div> */}
+          </div>
+
         </div>
 
         {/* Main Grid */}
