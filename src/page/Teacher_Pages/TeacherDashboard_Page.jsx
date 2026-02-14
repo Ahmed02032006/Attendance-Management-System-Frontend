@@ -396,23 +396,26 @@ const TeacherDashboard_Page = () => {
             </div>
           </div>
 
-          {/* NEW BOX: Today's Classes */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Today's Classes</p>
+                <p className="text-sm text-gray-500">Total Classes</p>
                 <p className="text-2xl font-semibold text-gray-900 mt-1">
-                  {dashboardSubjects.length > 0 ?
-                    Math.min(dashboardSubjects.length, 3) : 0}
+                  {Object.values(subjectClassCounts).reduce((a, b) => a + b, 0)}
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {dashboardSubjects.length > 0 ?
-                    `${Math.min(dashboardSubjects.length, 3)} scheduled today` :
-                    'No classes today'}
-                </p>
+                <div className="flex items-center mt-1 space-x-2">
+                  <span className="text-xs text-gray-500">
+                    Avg: {averageClassesPerSubject}/subject
+                  </span>
+                  {subjectWithMostClasses && (
+                    <span className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
+                      Most: {subjectWithMostClasses.name?.substring(0, 10)}...
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                <FiClock className="h-5 w-5 text-orange-600" />
+              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                <FiCalendar className="h-5 w-5 text-purple-600" />
               </div>
             </div>
           </div>
