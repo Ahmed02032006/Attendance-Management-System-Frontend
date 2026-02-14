@@ -12,6 +12,7 @@ import {
   FiTrash2,
   FiCalendar,
   FiClock,
+  FiHeart,
   FiUsers
 } from 'react-icons/fi'
 import { BiSupport } from "react-icons/bi";
