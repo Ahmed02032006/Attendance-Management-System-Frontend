@@ -424,27 +424,34 @@ const TeacherDashboard_Page = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Total Classes</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">
-                  {Object.values(subjectClassCounts).reduce((a, b) => a + b, 0)}
-                </p>
-                <div className="flex items-center mt-1 space-x-2">
-                  <span className="text-xs text-gray-500">
-                    Avg: {averageClassesPerSubject}/subject
-                  </span>
-                  {subjectWithMostClasses && (
-                    <span className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
-                      Most: {subjectWithMostClasses.name?.substring(0, 10)}...
-                    </span>
-                  )}
+          {/* Subject-wise Class Breakdown - Optional */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-700">Classes per Subject</h3>
+              <span className="text-xs text-gray-500">Total lectures conducted</span>
+            </div>
+
+            <div className="space-y-2">
+              {dashboardSubjects.map((subject, index) => (
+                <div key={subject.id} className="flex items-center">
+                  <div className="w-24 sm:w-32 truncate text-xs text-gray-600">
+                    {subject.name}
+                  </div>
+                  <div className="flex-1 mx-2">
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${getSubjectColor(index)}`}
+                        style={{
+                          width: `${maxClasses > 0 ? (subjectClassCounts[subject.id] / maxClasses) * 100 : 0}%`
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="text-xs font-medium text-gray-700">
+                    {subjectClassCounts[subject.id]} classes
+                  </div>
                 </div>
-              </div>
-              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                <FiCalendar className="h-5 w-5 text-purple-600" />
-              </div>
+              ))}
             </div>
           </div>
         </div>
