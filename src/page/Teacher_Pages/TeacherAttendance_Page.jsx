@@ -633,7 +633,7 @@ const TeacherAttendance_Page = () => {
                           <td className="px-4 py-3 whitespace-nowrap text-right">
                             <button
                               onClick={() => handleDeleteClick(student.id)}
-                              className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                              className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                               title="Delete record"
                             >
                               <FiTrash2 className="w-4 h-4" />
