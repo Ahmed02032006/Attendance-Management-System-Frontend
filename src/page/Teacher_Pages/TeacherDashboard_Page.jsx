@@ -343,34 +343,6 @@ const TeacherDashboard_Page = () => {
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(initialChat));
   };
 
-  // Calculate total classes (attendance records) for each subject
-  const getSubjectClassCounts = () => {
-    const classCounts = {};
-
-    dashboardSubjects.forEach(subject => {
-      const subjectAttendance = dashboardAttendance[subject.id];
-      if (subjectAttendance) {
-        // Count the number of unique dates for this subject
-        classCounts[subject.id] = Object.keys(subjectAttendance).length;
-      } else {
-        classCounts[subject.id] = 0;
-      }
-    });
-
-    return classCounts;
-  };
-
-  const subjectClassCounts = getSubjectClassCounts();
-
-  // Calculate average classes per subject
-  const averageClassesPerSubject = dashboardSubjects.length > 0
-    ? Math.round(Object.values(subjectClassCounts).reduce((a, b) => a + b, 0) / dashboardSubjects.length)
-    : 0;
-
-  // Find subject with most classes
-  const maxClasses = Math.max(...Object.values(subjectClassCounts), 0);
-  const subjectWithMostClasses = dashboardSubjects.find(s => subjectClassCounts[s.id] === maxClasses);
-
   // Loading state
   if (isLoading || !dataLoaded) {
     return (
@@ -424,36 +396,17 @@ const TeacherDashboard_Page = () => {
             </div>
           </div>
 
-          {/* Subject-wise Class Breakdown - Optional */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-gray-700">Classes per Subject</h3>
-              <span className="text-xs text-gray-500">Total lectures conducted</span>
+          {/* <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Attendance Rate</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">{attendanceRate}%</p>
+              </div>
+              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                <FiEye className="h-5 w-5 text-purple-600" />
+              </div>
             </div>
-
-            <div className="space-y-2">
-              {dashboardSubjects.map((subject, index) => (
-                <div key={subject.id} className="flex items-center">
-                  <div className="w-24 sm:w-32 truncate text-xs text-gray-600">
-                    {subject.name}
-                  </div>
-                  <div className="flex-1 mx-2">
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${getSubjectColor(index)}`}
-                        style={{
-                          width: `${maxClasses > 0 ? (subjectClassCounts[subject.id] / maxClasses) * 100 : 0}%`
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="text-xs font-medium text-gray-700">
-                    {subjectClassCounts[subject.id]} classes
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Main Grid */}
