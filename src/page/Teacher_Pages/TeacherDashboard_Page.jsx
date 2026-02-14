@@ -343,6 +343,34 @@ const TeacherDashboard_Page = () => {
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(initialChat));
   };
 
+  // Calculate total classes (attendance records) for each subject
+  const getSubjectClassCounts = () => {
+    const classCounts = {};
+
+    dashboardSubjects.forEach(subject => {
+      const subjectAttendance = dashboardAttendance[subject.id];
+      if (subjectAttendance) {
+        // Count the number of unique dates for this subject
+        classCounts[subject.id] = Object.keys(subjectAttendance).length;
+      } else {
+        classCounts[subject.id] = 0;
+      }
+    });
+
+    return classCounts;
+  };
+
+  const subjectClassCounts = getSubjectClassCounts();
+
+  // Calculate average classes per subject
+  const averageClassesPerSubject = dashboardSubjects.length > 0
+    ? Math.round(Object.values(subjectClassCounts).reduce((a, b) => a + b, 0) / dashboardSubjects.length)
+    : 0;
+
+  // Find subject with most classes
+  const maxClasses = Math.max(...Object.values(subjectClassCounts), 0);
+  const subjectWithMostClasses = dashboardSubjects.find(s => subjectClassCounts[s.id] === maxClasses);
+
   // Loading state
   if (isLoading || !dataLoaded) {
     return (
