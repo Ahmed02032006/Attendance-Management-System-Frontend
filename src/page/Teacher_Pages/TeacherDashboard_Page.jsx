@@ -396,14 +396,23 @@ const TeacherDashboard_Page = () => {
             </div>
           </div>
 
+          {/* NEW BOX: Today's Classes */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Attendance Rate</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">{attendanceRate}%</p>
+                <p className="text-sm text-gray-500">Today's Classes</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">
+                  {dashboardSubjects.length > 0 ?
+                    Math.min(dashboardSubjects.length, 3) : 0}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {dashboardSubjects.length > 0 ?
+                    `${Math.min(dashboardSubjects.length, 3)} scheduled today` :
+                    'No classes today'}
+                </p>
               </div>
-              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                <FiEye className="h-5 w-5 text-purple-600" />
+              <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                <FiClock className="h-5 w-5 text-orange-600" />
               </div>
             </div>
           </div>
