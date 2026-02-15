@@ -264,20 +264,8 @@ const TeacherDashboardLayout = () => {
                 sidebarOpen ? (
                   <>
                     <div className='flex flex-col'>
-                      <p className='text-2xl'>ATTENDLY</p>
-                      <p className='text-2xl montserrat'>ATTENDLY</p>
-                      <p className='text-2xl playwrite'>ATTENDLY</p>
-                      <p className='text-2xl bitcount'>ATTENDLY</p>
-                      <p className='text-2xl bungee'>ATTENDLY</p>
-                      <p className='text-2xl pacifico'>ATTENDLY</p>
-                      <p className='text-2xl space-grotesk'>ATTENDLY</p>
-                      <p className='text-2xl alfa'>ATTENDLY</p>
-                      <p className='text-2xl lobster'>ATTENDLY</p>
-                      <p className='text-2xl orbitron'>ATTENDLY</p>
+                      <img src="https://www.shutterstock.com/image-vector/effective-teamwork-icon-black-thin-600nw-2227180861.jpg" alt="" />
                       <p className='text-2xl cinzel'>ATTENDLY</p>
-                      <p className='text-2xl rowdies'>ATTENDLY</p>
-                      <p className='text-2xl permanent-marker'>ATTENDLY</p>
-                      <p className='text-2xl montserrat-alternates'>ATTENDLY</p>
                     </div>
                   </>
                 ) :
