@@ -264,7 +264,7 @@ const TeacherDashboardLayout = () => {
                 sidebarOpen ? (
                   <>
                     <div className='flex items-center gap-4'>
-                      <img src="https://www.shutterstock.com/image-vector/effective-teamwork-icon-black-thin-600nw-2227180861.jpg" width={"40px"} height={"25px"} />
+                      <img src="https://www.shutterstock.com/image-vector/effective-teamwork-icon-black-thin-600nw-2265229773.jpg" width={"40px"} height={"25px"} />
                       <p className='text-2xl orbitron'>ATTENDLY</p>
                     </div>
                   </>
