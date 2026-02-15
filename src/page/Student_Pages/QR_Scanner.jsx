@@ -17,15 +17,21 @@ const QRScanner_Page = () => {
   const scanInterval = useRef(null);
 
   // Add this function before the useEffect
+  // Add this function before the useEffect
   const isGenuineChromeStrict = async () => {
     try {
       // Test 1: User Agent
       const userAgent = navigator.userAgent;
       const hasChrome = /Chrome/i.test(userAgent) || /CriOS/i.test(userAgent);
+
       if (!hasChrome) return false;
 
-      // Test 2: Vendor
-      if (!navigator.vendor || !navigator.vendor.includes('Google')) return false;
+      // Test 2: Vendor (relaxed for iOS)
+      // iOS Chrome uses different vendor, so we check for CriOS in user agent
+      const isIOSChrome = /CriOS/i.test(userAgent);
+      if (!isIOSChrome && (!navigator.vendor || !navigator.vendor.includes('Google'))) {
+        return false;
+      }
 
       // Test 3: Brave check
       if (navigator.brave) {
@@ -45,14 +51,13 @@ const QRScanner_Page = () => {
       const isMobile = /Android|iPhone|iPad|iPod/.test(userAgent);
       if (!isMobile) return false;
 
-      // Test 6: For Android, verify Chrome object
+      // Test 6: For Android, verify Chrome object (skip for iOS)
       if (/Android/.test(userAgent)) {
         if (!window.chrome) return false;
       }
 
       // All tests passed
       return true;
-
     } catch (error) {
       console.error('Chrome validation error:', error);
       return false;
