@@ -64,7 +64,7 @@ const TeacherDashboardLayout = () => {
     if (user?.status === 'Inactive') {
       setShowInactiveModal(true);
     } else {
-      dispatch(updateTeacherLastLogin({userId:user.id}));
+      dispatch(updateTeacherLastLogin({ userId: user.id }));
     }
   }, [user]);
 
@@ -262,7 +262,24 @@ const TeacherDashboardLayout = () => {
             <div className="flex items-center justify-center">
               {
                 sidebarOpen ? (
-                  <p className='text-2xl'>ATTENDLY</p>
+                  <>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                    <p className='text-2xl'>ATTENDLY</p>
+                  </>
                 ) :
                   <img
                     src="https://repository-images.githubusercontent.com/266040586/ea7a9500-cd19-11ea-9ec9-c7a5474b81af"
