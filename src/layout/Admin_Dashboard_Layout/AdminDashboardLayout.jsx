@@ -141,7 +141,12 @@ const AdminDashboardLayout = () => {
             <div className="flex items-center justify-center">
               {
                 sidebarOpen ? (
-                  <p className='text-2xl'>ATTENDLY</p>
+                  <>
+                    <div className='flex items-center gap-4'>
+                      <img src="/Side-Logo/1.png" width={"40px"} height={"25px"} />
+                      <p className='text-2xl orbitron'>ATTENDLY</p>
+                    </div>
+                  </>
                 ) :
                   <img
                     src="https://repository-images.githubusercontent.com/266040586/ea7a9500-cd19-11ea-9ec9-c7a5474b81af"
