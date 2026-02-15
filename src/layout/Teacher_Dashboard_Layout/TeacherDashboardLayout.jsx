@@ -263,22 +263,24 @@ const TeacherDashboardLayout = () => {
               {
                 sidebarOpen ? (
                   <>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
-                    <p className='text-2xl'>ATTENDLY</p>
+                    <div className='flex flex-col'>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                      <p className='text-2xl'>ATTENDLY</p>
+                    </div>
                   </>
                 ) :
                   <img
