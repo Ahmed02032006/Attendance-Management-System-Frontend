@@ -263,8 +263,8 @@ const TeacherDashboardLayout = () => {
               {
                 sidebarOpen ? (
                   <>
-                    <div className='flex gap-2'>
-                      <img src="https://www.shutterstock.com/image-vector/effective-teamwork-icon-black-thin-600nw-2227180861.jpg" width={"25px"} height={"25px"} />
+                    <div className='flex gap-4'>
+                      <img src="https://www.shutterstock.com/image-vector/effective-teamwork-icon-black-thin-600nw-2227180861.jpg" width={"40px"} height={"25px"} />
                       <p className='text-2xl cinzel'>ATTENDLY</p>
                     </div>
                   </>
