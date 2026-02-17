@@ -302,6 +302,7 @@ const TeacherAttendance_Page = () => {
           [
             `"${student.studentName}"`,
             `"${student.rollNo}"`,
+            `"Dummy"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
             `"${student.subject}"`
