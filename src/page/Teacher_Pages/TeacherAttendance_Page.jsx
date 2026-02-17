@@ -226,7 +226,7 @@ const TeacherAttendance_Page = () => {
       <FiArrowDown className="w-3 h-3" />;
   };
 
-  // Sorting function for modal table
+  // Sorting function for modal table (status sorting removed)
   const sortModalRecords = (records) => {
     if (!modalSortConfig.key) return records;
     
@@ -250,10 +250,7 @@ const TeacherAttendance_Page = () => {
           aValue = a.subject?.toLowerCase() || '';
           bValue = b.subject?.toLowerCase() || '';
           break;
-        case 'status':
-          aValue = a.time ? 1 : 0; // Present (1) vs Absent (0)
-          bValue = b.time ? 1 : 0;
-          break;
+        // Status sorting case removed
         default:
           return 0;
       }
@@ -710,7 +707,7 @@ const TeacherAttendance_Page = () => {
                             <span className="text-sm text-gray-600">{student.rollNo}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="text-sm text-gray-600">{"Dummy"}</span>
+                            <span className="text-sm text-gray-600">Dummy</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
@@ -1035,7 +1032,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Student Details Modal - UPDATED with sorting and date field */}
+      {/* Student Details Modal - UPDATED with sorting (status sorting removed) */}
       {showStudentModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
@@ -1044,7 +1041,7 @@ const TeacherAttendance_Page = () => {
                 {selectedStudent?.studentName} - Attendance Details
               </h3>
               <p className="text-sm text-gray-600 mt-1">
-                Roll No: {selectedStudent?.rollNo} | Discipline: {"Dummy"}
+                Roll No: {selectedStudent?.rollNo} | Discipline: Dummy
               </p>
             </div>
 
@@ -1063,7 +1060,7 @@ const TeacherAttendance_Page = () => {
                       </div>
                       <div>
                         <p className="font-medium text-gray-700">Discipline</p>
-                        <p className="text-gray-900">{"Dummy"}</p>
+                        <p className="text-gray-900">Dummy</p>
                       </div>
                       <div>
                         <p className="font-medium text-gray-700">Current Subject</p>
@@ -1120,14 +1117,8 @@ const TeacherAttendance_Page = () => {
                                     {getModalSortIcon('subject')}
                                   </div>
                                 </th>
-                                <th 
-                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                  onClick={() => handleModalSort('status')}
-                                >
-                                  <div className="flex items-center space-x-1 justify-center">
-                                    <span>Status</span>
-                                    {getModalSortIcon('status')}
-                                  </div>
+                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Status
                                 </th>
                               </tr>
                             </thead>
