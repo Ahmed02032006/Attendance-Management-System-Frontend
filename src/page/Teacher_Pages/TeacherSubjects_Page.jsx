@@ -232,8 +232,8 @@ const TeacherSubjects_Page = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderComponent
-        heading="Subjects Management"
-        subHeading="Create and manage your teaching subjects"
+        heading="Courses Management"
+        subHeading="Create and manage your registered courses"
         role='admin'
       />
 
