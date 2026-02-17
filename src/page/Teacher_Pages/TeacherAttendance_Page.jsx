@@ -654,19 +654,19 @@ const TeacherAttendance_Page = () => {
                       </th>
                       <th
                         scope="col"
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                         onClick={() => handleSort('rollNo')}
                       >
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-1 justify-center">
                           <span>Roll No.</span>
                           {getSortIcon('rollNo')}
                         </div>
                       </th>
                       <th
                         scope="col"
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-1 justify-center">
                           <FiBookOpen className="w-3 h-3" />
                           <span>Discipline</span>
                         </div>
@@ -682,7 +682,7 @@ const TeacherAttendance_Page = () => {
                           {getSortIcon('time')}
                         </div>
                       </th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
                       <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -697,15 +697,15 @@ const TeacherAttendance_Page = () => {
                           <td className="px-4 py-3 whitespace-nowrap">
                             <button
                               onClick={() => handleStudentClick(student)}
-                              className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                              className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors text-left"
                             >
                               {student.studentName}
                             </button>
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
+                          <td className="px-4 py-3 whitespace-nowrap text-center">
                             <span className="text-sm text-gray-600">{student.rollNo}</span>
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
+                          <td className="px-4 py-3 whitespace-nowrap text-center">
                             <span className="text-sm text-gray-600">{"Dummy"}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
@@ -713,7 +713,7 @@ const TeacherAttendance_Page = () => {
                               {student.time}
                             </span>
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
+                          <td className="px-4 py-3 whitespace-nowrap text-center">
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
                               Present
                             </span>
@@ -1031,7 +1031,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Student Details Modal - UPDATED with sorting and date field */}
+      {/* Student Details Modal - UPDATED with centered alignment for Roll No and Discipline */}
       {showStudentModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
@@ -1039,9 +1039,14 @@ const TeacherAttendance_Page = () => {
               <h3 className="text-lg font-semibold text-gray-800">
                 {selectedStudent?.studentName} - Attendance Details
               </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Roll No: {selectedStudent?.rollNo} | Discipline: {"Dummy"}
-              </p>
+              <div className="flex items-center gap-4 mt-1">
+                <p className="text-sm text-gray-600">
+                  Roll No: {selectedStudent?.rollNo}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Discipline: {"Dummy"}
+                </p>
+              </div>
             </div>
 
             <div className="p-6 max-h-[60vh] overflow-y-auto">
@@ -1053,11 +1058,11 @@ const TeacherAttendance_Page = () => {
                         <p className="font-medium text-gray-700">Student Name</p>
                         <p className="text-gray-900">{selectedStudent.studentName}</p>
                       </div>
-                      <div>
+                      <div className="text-center">
                         <p className="font-medium text-gray-700">Roll Number</p>
                         <p className="text-gray-900">{selectedStudent.rollNo}</p>
                       </div>
-                      <div>
+                      <div className="text-center">
                         <p className="font-medium text-gray-700">Discipline</p>
                         <p className="text-gray-900">{"Dummy"}</p>
                       </div>
@@ -1117,7 +1122,7 @@ const TeacherAttendance_Page = () => {
                                   </div>
                                 </th>
                                 <th 
-                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                   <div className="flex items-center space-x-1 justify-center">
                                     <span>Status</span>
