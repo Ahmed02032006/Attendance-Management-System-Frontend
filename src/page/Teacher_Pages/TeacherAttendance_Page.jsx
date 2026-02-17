@@ -703,10 +703,10 @@ const TeacherAttendance_Page = () => {
                             </button>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="text-sm text-gray-600">{student.rollNo}</span>
+                            <span className="text-sm text-center text-gray-600">{student.rollNo}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="text-sm text-gray-600">{"Dummy"}</span>
+                            <span className="text-sm text-center text-gray-600">{"Dummy"}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
@@ -1055,15 +1055,15 @@ const TeacherAttendance_Page = () => {
                       </div>
                       <div>
                         <p className="font-medium text-gray-700">Roll Number</p>
-                        <p className="text-gray-900">{selectedStudent.rollNo}</p>
+                        <p className="text-gray-900 text-center">{selectedStudent.rollNo}</p>
                       </div>
                       <div>
                         <p className="font-medium text-gray-700">Discipline</p>
-                        <p className="text-gray-900">{"Dummy"}</p>
+                        <p className="text-gray-900 text-center">{"Dummy"}</p>
                       </div>
                       <div>
                         <p className="font-medium text-gray-700">Current Subject</p>
-                        <p className="text-gray-900">{selectedStudent.subject}</p>
+                        <p className="text-gray-900 text-center">{selectedStudent.subject}</p>
                       </div>
                     </div>
                   </div>
