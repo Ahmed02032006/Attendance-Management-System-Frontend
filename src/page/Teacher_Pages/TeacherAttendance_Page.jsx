@@ -72,9 +72,6 @@ const TeacherAttendance_Page = () => {
   const { user } = useSelector((state) => state.auth)
   const userId = user?.id
 
-  // Static discipline value
-  const STATIC_DISCIPLINE = "Computer Science";
-
   // Fetch subjects with attendance on component mount
   useEffect(() => {
     dispatch(getSubjectsWithAttendance(userId)).unwrap();
@@ -309,7 +306,6 @@ const TeacherAttendance_Page = () => {
           [
             `"${student.studentName}"`,
             `"${student.rollNo}"`,
-            `"${STATIC_DISCIPLINE}"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
             `"${student.subject}"`
@@ -714,7 +710,7 @@ const TeacherAttendance_Page = () => {
                             <span className="text-sm text-gray-600">{student.rollNo}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="text-sm text-gray-600">{STATIC_DISCIPLINE}</span>
+                            <span className="text-sm text-gray-600">{"Dummy"}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
@@ -1048,7 +1044,7 @@ const TeacherAttendance_Page = () => {
                 {selectedStudent?.studentName} - Attendance Details
               </h3>
               <p className="text-sm text-gray-600 mt-1">
-                Roll No: {selectedStudent?.rollNo} | Discipline: {STATIC_DISCIPLINE}
+                Roll No: {selectedStudent?.rollNo} | Discipline: {"Dummy"}
               </p>
             </div>
 
@@ -1067,7 +1063,7 @@ const TeacherAttendance_Page = () => {
                       </div>
                       <div>
                         <p className="font-medium text-gray-700">Discipline</p>
-                        <p className="text-gray-900">{STATIC_DISCIPLINE}</p>
+                        <p className="text-gray-900">{"Dummy"}</p>
                       </div>
                       <div>
                         <p className="font-medium text-gray-700">Current Subject</p>
