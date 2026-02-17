@@ -16,6 +16,9 @@ import {
   FiClock,
   FiUser,
   FiFileText,
+  FiCalendar,
+  FiFilter,
+  FiBookOpen,
 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
@@ -47,6 +50,13 @@ const TeacherAttendance_Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
 
+  // New state for student modal filtering
+  const [studentModalSearchTerm, setStudentModalSearchTerm] = useState('');
+  const [studentModalDateFilter, setStudentModalDateFilter] = useState('');
+  const [studentModalSubjectFilter, setStudentModalSubjectFilter] = useState('');
+  const [studentModalCurrentPage, setStudentModalCurrentPage] = useState(1);
+  const [studentModalRecordsPerPage] = useState(5);
+
   // QR Auto-refresh states
   const [qrExpiryTime, setQrExpiryTime] = useState(null);
   const [qrRefreshInterval, setQrRefreshInterval] = useState(null);
@@ -61,8 +71,17 @@ const TeacherAttendance_Page = () => {
     direction: 'asc'
   });
 
+  // Student modal sorting state
+  const [studentModalSortConfig, setStudentModalSortConfig] = useState({
+    key: 'date',
+    direction: 'desc'
+  });
+
   const { user } = useSelector((state) => state.auth)
   const userId = user?.id
+
+  // Static discipline value
+  const STATIC_DISCIPLINE = "hello";
 
   // Fetch subjects with attendance on component mount
   useEffect(() => {
@@ -93,6 +112,11 @@ const TeacherAttendance_Page = () => {
       }
     }
   }, [showQRModal]);
+
+  // Reset student modal pagination when filters change
+  useEffect(() => {
+    setStudentModalCurrentPage(1);
+  }, [studentModalSearchTerm, studentModalDateFilter, studentModalSubjectFilter]);
 
   // Format date to YYYY-MM-DD
   const formatDate = (date) => {
@@ -153,7 +177,7 @@ const TeacherAttendance_Page = () => {
     }
   };
 
-  // Sorting function
+  // Sorting function for main table
   const sortStudents = (students) => {
     if (!sortConfig.key) return students;
     return [...students].sort((a, b) => {
@@ -180,7 +204,38 @@ const TeacherAttendance_Page = () => {
     });
   };
 
-  // Handle sort request
+  // Sorting function for student modal
+  const sortStudentModalRecords = (records) => {
+    if (!studentModalSortConfig.key) return records;
+    return [...records].sort((a, b) => {
+      let aValue, bValue;
+      switch (studentModalSortConfig.key) {
+        case 'date':
+          aValue = new Date(a.date).getTime();
+          bValue = new Date(b.date).getTime();
+          break;
+        case 'time':
+          aValue = timeToSortableValue(a.time);
+          bValue = timeToSortableValue(b.time);
+          break;
+        case 'subject':
+          aValue = a.subject?.toLowerCase() || '';
+          bValue = b.subject?.toLowerCase() || '';
+          break;
+        case 'status':
+          aValue = a.time ? 1 : 0;
+          bValue = b.time ? 1 : 0;
+          break;
+        default:
+          return 0;
+      }
+      if (aValue < bValue) return studentModalSortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return studentModalSortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  // Handle sort request for main table
   const handleSort = (key) => {
     setSortConfig(prevConfig => ({
       key,
@@ -189,7 +244,16 @@ const TeacherAttendance_Page = () => {
     setCurrentPage(1);
   };
 
-  // Get sort icon
+  // Handle sort request for student modal
+  const handleStudentModalSort = (key) => {
+    setStudentModalSortConfig(prevConfig => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+    }));
+    setStudentModalCurrentPage(1);
+  };
+
+  // Get sort icon for main table
   const getSortIcon = (key) => {
     if (sortConfig.key !== key) {
       return <FiArrowUp className="w-3 h-3 opacity-30" />;
@@ -199,7 +263,17 @@ const TeacherAttendance_Page = () => {
       <FiArrowDown className="w-3 h-3" />;
   };
 
-  // Filter students based on search term
+  // Get sort icon for student modal
+  const getStudentModalSortIcon = (key) => {
+    if (studentModalSortConfig.key !== key) {
+      return <FiArrowUp className="w-3 h-3 opacity-30" />;
+    }
+    return studentModalSortConfig.direction === 'asc' ?
+      <FiArrowUp className="w-3 h-3" /> :
+      <FiArrowDown className="w-3 h-3" />;
+  };
+
+  // Filter students based on search term for main table
   const filteredStudents = sortStudents(
     currentAttendanceRecords.filter(student =>
       student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -208,7 +282,58 @@ const TeacherAttendance_Page = () => {
     )
   );
 
-  // Export to Excel function
+  // Filter and sort records for student modal
+  const getFilteredStudentRecords = (student) => {
+    if (!student || !selectedSubject) return [];
+
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+    if (!subject || !subject.attendance) return [];
+
+    const allAttendance = [];
+
+    Object.entries(subject.attendance).forEach(([date, records]) => {
+      const studentRecord = records.find(record =>
+        record.rollNo === student.rollNo && record.studentName === student.studentName
+      );
+
+      if (studentRecord) {
+        allAttendance.push({
+          ...studentRecord,
+          date: date,
+          formattedDate: formatDisplayDate(new Date(date)),
+          dayOfWeek: new Date(date).toLocaleDateString('en-US', { weekday: 'short' })
+        });
+      }
+    });
+
+    // Apply filters
+    let filtered = allAttendance;
+
+    if (studentModalSearchTerm) {
+      const searchLower = studentModalSearchTerm.toLowerCase();
+      filtered = filtered.filter(record =>
+        record.subject?.toLowerCase().includes(searchLower) ||
+        record.formattedDate?.toLowerCase().includes(searchLower) ||
+        record.dayOfWeek?.toLowerCase().includes(searchLower) ||
+        (record.time || '').toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (studentModalDateFilter) {
+      filtered = filtered.filter(record => record.date === studentModalDateFilter);
+    }
+
+    if (studentModalSubjectFilter) {
+      filtered = filtered.filter(record =>
+        record.subject?.toLowerCase().includes(studentModalSubjectFilter.toLowerCase())
+      );
+    }
+
+    // Apply sorting
+    return sortStudentModalRecords(filtered);
+  };
+
+  // Export to Excel function with date field
   const exportToExcel = () => {
     if (filteredStudents.length === 0) {
       toast.error('No data to export');
@@ -216,15 +341,19 @@ const TeacherAttendance_Page = () => {
     }
 
     try {
-      const headers = ['Student Name', 'Roll No', 'Time', 'Subject'];
+      // Add Date column to headers
+      const headers = ['Student Name', 'Roll No', 'Discipline', 'Date', 'Time', 'Subject', 'Status'];
       const csvContent = [
         headers.join(','),
         ...filteredStudents.map(student =>
           [
             `"${student.studentName}"`,
             `"${student.rollNo}"`,
+            `"${STATIC_DISCIPLINE}"`,
+            `"${currentDateString}"`,
             `"${student.time}"`,
-            `"${student.subject}"`
+            `"${student.subject}"`,
+            '"Present"'
           ].join(',')
         )
       ].join('\n');
@@ -249,11 +378,28 @@ const TeacherAttendance_Page = () => {
     }
   };
 
-  // Pagination logic
+  // Pagination logic for main table
   const indexOfLastStudent = currentPage * studentsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
   const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+
+  // Pagination logic for student modal
+  const getPaginatedStudentRecords = (student) => {
+    const filteredRecords = getFilteredStudentRecords(student);
+    const indexOfLastRecord = studentModalCurrentPage * studentModalRecordsPerPage;
+    const indexOfFirstRecord = indexOfLastRecord - studentModalRecordsPerPage;
+    const currentRecords = filteredRecords.slice(indexOfFirstRecord, indexOfLastRecord);
+    const totalPages = Math.ceil(filteredRecords.length / studentModalRecordsPerPage);
+    
+    return {
+      records: currentRecords,
+      totalPages,
+      totalRecords: filteredRecords.length,
+      indexOfFirstRecord,
+      indexOfLastRecord
+    };
+  };
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
@@ -387,6 +533,11 @@ const TeacherAttendance_Page = () => {
   const handleStudentClick = (student) => {
     setSelectedStudent(student);
     setShowStudentModal(true);
+    // Reset filters when opening modal
+    setStudentModalSearchTerm('');
+    setStudentModalDateFilter('');
+    setStudentModalSubjectFilter('');
+    setStudentModalCurrentPage(1);
   };
 
   // Reset search and pagination when search term changes
@@ -425,6 +576,13 @@ const TeacherAttendance_Page = () => {
     } catch (error) {
       toast.error('Failed to refresh data');
     }
+  };
+
+  // Get unique subjects for filter dropdown
+  const getUniqueSubjects = (student) => {
+    if (!student || !selectedSubject) return [];
+    const records = getStudentPreviousAttendance(student);
+    return [...new Set(records.map(r => r.subject))];
   };
 
   // Loading state
@@ -586,6 +744,12 @@ const TeacherAttendance_Page = () => {
                           {getSortIcon('rollNo')}
                         </div>
                       </th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <div className="flex items-center space-x-1">
+                          <FiBookOpen className="w-3 h-3" />
+                          <span>Discipline</span>
+                        </div>
+                      </th>
                       <th
                         scope="col"
                         className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
@@ -621,6 +785,9 @@ const TeacherAttendance_Page = () => {
                             <span className="text-sm text-gray-600">{student.rollNo}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
+                            <span className="text-sm text-gray-600">{STATIC_DISCIPLINE}</span>
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap">
                             <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
                               {student.time}
                             </span>
@@ -643,7 +810,7 @@ const TeacherAttendance_Page = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" className="px-4 py-8 text-center text-sm text-gray-500">
+                        <td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500">
                           {searchTerm ? "No matching students found" : "No attendance records for this date"}
                         </td>
                       </tr>
@@ -943,83 +1110,166 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Student Details Modal */}
+      {/* Student Details Modal with Filtering */}
       {showStudentModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">
                 {selectedStudent?.studentName} - Attendance Details
               </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Roll No: {selectedStudent?.rollNo}
-              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 text-sm">
+                <div>
+                  <p className="font-medium text-gray-700">Roll No</p>
+                  <p className="text-gray-900">{selectedStudent?.rollNo}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-700">Current Subject</p>
+                  <p className="text-gray-900">{selectedStudent?.subject}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-700">Discipline</p>
+                  <p className="text-gray-900">{STATIC_DISCIPLINE}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-700">Current Date</p>
+                  <p className="text-gray-900">{currentDateString}</p>
+                </div>
+              </div>
             </div>
 
-            <div className="p-6 max-h-[60vh] overflow-y-auto">
+            {/* Filter Section */}
+            <div className="px-6 py-3 border-b border-gray-200 bg-gray-50">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center text-gray-700">
+                  <FiFilter className="w-4 h-4 mr-1" />
+                  <span className="text-sm font-medium">Filters:</span>
+                </div>
+                
+                <div className="relative flex-1 max-w-xs">
+                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search by subject, date, day..."
+                    value={studentModalSearchTerm}
+                    onChange={(e) => setStudentModalSearchTerm(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <input
+                  type="date"
+                  value={studentModalDateFilter}
+                  onChange={(e) => setStudentModalDateFilter(e.target.value)}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Filter by date"
+                />
+
+                <select
+                  value={studentModalSubjectFilter}
+                  onChange={(e) => setStudentModalSubjectFilter(e.target.value)}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">All Subjects</option>
+                  {getUniqueSubjects(selectedStudent).map((subject, index) => (
+                    <option key={index} value={subject}>{subject}</option>
+                  ))}
+                </select>
+
+                {(studentModalSearchTerm || studentModalDateFilter || studentModalSubjectFilter) && (
+                  <button
+                    onClick={() => {
+                      setStudentModalSearchTerm('');
+                      setStudentModalDateFilter('');
+                      setStudentModalSubjectFilter('');
+                    }}
+                    className="px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="p-6 max-h-[50vh] overflow-y-auto">
               {selectedStudent && (
                 <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="font-medium text-gray-700">Student Name</p>
-                        <p className="text-gray-900">{selectedStudent.studentName}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">Roll Number</p>
-                        <p className="text-gray-900">{selectedStudent.rollNo}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">Current Subject</p>
-                        <p className="text-gray-900">{selectedStudent.subject}</p>
-                      </div>
-                    </div>
-                  </div>
-
                   <div>
-                    <h4 className="text-md font-semibold text-gray-800 mb-4">Previous Attendance Records</h4>
+                    <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center justify-between">
+                      <span>Previous Attendance Records</span>
+                      <span className="text-sm font-normal text-gray-600">
+                        Total: {getFilteredStudentRecords(selectedStudent).length} records
+                      </span>
+                    </h4>
 
-                    {getStudentPreviousAttendance(selectedStudent).length > 0 ? (
+                    {getFilteredStudentRecords(selectedStudent).length > 0 ? (
                       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div className="overflow-x-auto">
                           <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                               <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Date
+                                <th 
+                                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  onClick={() => handleStudentModalSort('date')}
+                                >
+                                  <div className="flex items-center space-x-1">
+                                    <FiCalendar className="w-3 h-3" />
+                                    <span>Date</span>
+                                    {getStudentModalSortIcon('date')}
+                                  </div>
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   Day
                                 </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Time
+                                <th 
+                                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  onClick={() => handleStudentModalSort('time')}
+                                >
+                                  <div className="flex items-center space-x-1">
+                                    <FiClock className="w-3 h-3" />
+                                    <span>Time</span>
+                                    {getStudentModalSortIcon('time')}
+                                  </div>
                                 </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Subject
+                                <th 
+                                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  onClick={() => handleStudentModalSort('subject')}
+                                >
+                                  <div className="flex items-center space-x-1">
+                                    <span>Subject</span>
+                                    {getStudentModalSortIcon('subject')}
+                                  </div>
                                 </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Status
+                                <th 
+                                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  onClick={() => handleStudentModalSort('status')}
+                                >
+                                  <div className="flex items-center space-x-1">
+                                    <span>Status</span>
+                                    {getStudentModalSortIcon('status')}
+                                  </div>
                                 </th>
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                              {getStudentPreviousAttendance(selectedStudent).map((record, index) => (
+                              {getPaginatedStudentRecords(selectedStudent).records.map((record, index) => (
                                 <tr key={index} className="hover:bg-gray-50">
                                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                    {formatDisplayDate(new Date(record.date))}
+                                    {record.formattedDate}
                                   </td>
                                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                                    {new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                                    {record.dayOfWeek}
                                   </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
+                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                                     {record.time || 'N/A'}
                                   </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
+                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                                     {record.subject}
                                   </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-center">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                      }`}>
+                                  <td className="px-4 py-3 whitespace-nowrap">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                      record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    }`}>
                                       {record.time ? 'Present' : 'Absent'}
                                     </span>
                                   </td>
@@ -1028,13 +1278,46 @@ const TeacherAttendance_Page = () => {
                             </tbody>
                           </table>
                         </div>
+
+                        {/* Pagination for Student Modal */}
+                        {getFilteredStudentRecords(selectedStudent).length > studentModalRecordsPerPage && (
+                          <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+                            <span className="text-xs text-gray-500">
+                              Showing {getPaginatedStudentRecords(selectedStudent).indexOfFirstRecord + 1}-
+                              {Math.min(getPaginatedStudentRecords(selectedStudent).indexOfLastRecord, getFilteredStudentRecords(selectedStudent).length)} of {getFilteredStudentRecords(selectedStudent).length}
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => setStudentModalCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={studentModalCurrentPage === 1}
+                                className="p-1.5 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40"
+                              >
+                                <FiChevronLeft className="h-4 w-4" />
+                              </button>
+                              <span className="text-xs text-gray-600">
+                                Page {studentModalCurrentPage} of {getPaginatedStudentRecords(selectedStudent).totalPages}
+                              </span>
+                              <button
+                                onClick={() => setStudentModalCurrentPage(prev => Math.min(prev + 1, getPaginatedStudentRecords(selectedStudent).totalPages))}
+                                disabled={studentModalCurrentPage === getPaginatedStudentRecords(selectedStudent).totalPages}
+                                className="p-1.5 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40"
+                              >
+                                <FiChevronRight className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
                         <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <p className="mt-2 text-sm text-gray-600">No previous attendance records found</p>
+                        <p className="mt-2 text-sm text-gray-600">
+                          {studentModalSearchTerm || studentModalDateFilter || studentModalSubjectFilter 
+                            ? 'No records match your filters' 
+                            : 'No previous attendance records found'}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -1058,5 +1341,3 @@ const TeacherAttendance_Page = () => {
 }
 
 export default TeacherAttendance_Page
-
-// Every Thing Perfect
