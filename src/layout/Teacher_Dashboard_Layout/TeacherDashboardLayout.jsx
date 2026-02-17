@@ -78,7 +78,7 @@ const TeacherDashboardLayout = () => {
     {
       name: "MySubjects",
       icon: BookOpen,
-      label: "My Subjects",
+      label: "Registered Courses",
       path: "/teacher/subject"
     },
     {
