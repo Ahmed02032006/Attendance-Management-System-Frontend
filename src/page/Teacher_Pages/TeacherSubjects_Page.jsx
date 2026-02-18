@@ -65,7 +65,7 @@ const TeacherSubjects_Page = () => {
       subject.subjectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.departmentOffering?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.session?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      subject.creditHours?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.creditHours?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.subjectCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.semester?.toLowerCase().includes(searchTerm.toLowerCase())
 
@@ -91,15 +91,23 @@ const TeacherSubjects_Page = () => {
   const handleCreateSubject = async (e) => {
     e.preventDefault()
 
+    // Validate required fields
     if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session || !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
+      return
+    }
+
+    // Validate credit hours is a number
+    if (isNaN(subjectForm.creditHours) || subjectForm.creditHours < 1 || subjectForm.creditHours > 6) {
+      toast.error('Credit hours must be a number between 1 and 6')
       return
     }
 
     try {
       const formData = {
         ...subjectForm,
-        userId: currentUserId
+        userId: currentUserId,
+        creditHours: Number(subjectForm.creditHours) // Ensure it's a number
       }
 
       await dispatch(createSubject(formData)).unwrap()
@@ -119,10 +127,19 @@ const TeacherSubjects_Page = () => {
       return
     }
 
+    // Validate credit hours is a number
+    if (isNaN(subjectForm.creditHours) || subjectForm.creditHours < 1 || subjectForm.creditHours > 6) {
+      toast.error('Credit hours must be a number between 1 and 6')
+      return
+    }
+
     try {
       await dispatch(updateSubject({
         id: selectedSubject._id,
-        formData: subjectForm
+        formData: {
+          ...subjectForm,
+          creditHours: Number(subjectForm.creditHours) // Ensure it's a number
+        }
       })).unwrap()
 
       setShowEditModal(false)
@@ -135,20 +152,34 @@ const TeacherSubjects_Page = () => {
 
   const handleDeleteSubject = async () => {
     try {
+      if (!selectedSubject || !selectedSubject._id) {
+        toast.error('Invalid subject selected')
+        return
+      }
+      
       await dispatch(deleteSubject(selectedSubject._id)).unwrap()
       setShowDeleteModal(false)
+      setSelectedSubject(null)
       toast.success('Subject deleted successfully!')
     } catch (error) {
+      console.error('Delete error:', error)
       toast.error(error?.message || 'Failed to delete subject')
     }
   }
 
   const handleResetSubject = async () => {
     try {
+      if (!selectedSubject || !selectedSubject._id) {
+        toast.error('Invalid subject selected')
+        return
+      }
+      
       await dispatch(resetSubjectAttendance(selectedSubject._id)).unwrap()
       setShowResetModal(false)
+      setSelectedSubject(null)
       toast.success('Subject attendance records cleared successfully!')
     } catch (error) {
+      console.error('Reset error:', error)
       toast.error(error?.message || 'Failed to reset subject attendance')
     }
   }
@@ -161,14 +192,14 @@ const TeacherSubjects_Page = () => {
   const openEditModal = (subject) => {
     setSelectedSubject(subject)
     setSubjectForm({
-      subjectTitle: subject.subjectTitle,
-      departmentOffering: subject.departmentOffering,
-      subjectCode: subject.subjectCode,
-      semester: subject.semester,
-      creditHours: subject.creditHours,
-      session: subject.session,
-      status: subject.status,
-      userId: subject.userId
+      subjectTitle: subject.subjectTitle || '',
+      departmentOffering: subject.departmentOffering || '',
+      subjectCode: subject.subjectCode || '',
+      semester: subject.semester || '',
+      creditHours: subject.creditHours || '',
+      session: subject.session || '',
+      status: subject.status || 'Active',
+      userId: subject.userId || ''
     })
     setShowEditModal(true)
   }
@@ -203,6 +234,7 @@ const TeacherSubjects_Page = () => {
 
   // Format date
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A'
     const date = new Date(dateString)
     const now = new Date()
     const diffTime = Math.abs(now - date)
@@ -342,6 +374,9 @@ const TeacherSubjects_Page = () => {
                     Semester
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Credit Hours
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -359,34 +394,37 @@ const TeacherSubjects_Page = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center text-blue-600 font-medium text-sm shrink-0">
-                            {subject.title?.charAt(0).toUpperCase()}
+                            {subject.subjectTitle?.charAt(0).toUpperCase()}
                           </div>
                           <div className="ml-3">
                             <div className="text-sm font-medium text-gray-900">
-                              {subject.title}
+                              {subject.subjectTitle}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {subject.session}
+                              {subject.departmentOffering} • {subject.session}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="text-sm text-gray-600 font-mono">
-                          {subject.code}
+                          {subject.subjectCode}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center text-sm text-gray-600">
-                          {/* <FiCalendar className="h-3.5 w-3.5 mr-1 text-gray-400" /> */}
+                        <span className="text-sm text-gray-600">
                           {subject.semester}
-                        </div>
+                        </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center text-sm text-gray-600">
-                          {/* <FiClock className="h-3.5 w-3.5 mr-1 text-gray-400" /> */}
+                        <span className="text-sm text-gray-600">
+                          {subject.creditHours}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <span className="text-sm text-gray-600">
                           {formatDate(subject.createdAt)}
-                        </div>
+                        </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(subject.status)}`}>
@@ -422,7 +460,7 @@ const TeacherSubjects_Page = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-4 py-8 text-center">
+                    <td colSpan="7" className="px-4 py-8 text-center">
                       <div className="text-gray-500">
                         <FiBook className="h-8 w-8 text-gray-300 mx-auto mb-2" />
                         <p className="text-sm">No subjects found</p>
@@ -542,14 +580,16 @@ const TeacherSubjects_Page = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Credit Hours *
+                    Credit Hours * (1-6)
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     name="creditHours"
                     value={subjectForm.creditHours}
                     onChange={handleInputChange}
-                    placeholder="e.g., 2nd"
+                    placeholder="e.g., 3"
+                    min="1"
+                    max="6"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -563,7 +603,7 @@ const TeacherSubjects_Page = () => {
                     name="session"
                     value={subjectForm.session}
                     onChange={handleInputChange}
-                    placeholder="e.g., 2nd"
+                    placeholder="e.g., 2024-2025"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -611,7 +651,7 @@ const TeacherSubjects_Page = () => {
                   <input
                     type="text"
                     name="subjectTitle"
-                    value={subjectForm.title}
+                    value={subjectForm.subjectTitle}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
@@ -637,7 +677,7 @@ const TeacherSubjects_Page = () => {
                   <input
                     type="text"
                     name="subjectCode"
-                    value={subjectForm.code}
+                    value={subjectForm.subjectCode}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
@@ -658,14 +698,15 @@ const TeacherSubjects_Page = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Credit Hours *
+                    Credit Hours * (1-6)
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     name="creditHours"
                     value={subjectForm.creditHours}
                     onChange={handleInputChange}
-                    placeholder="e.g., 2nd"
+                    min="1"
+                    max="6"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -679,7 +720,7 @@ const TeacherSubjects_Page = () => {
                     name="session"
                     value={subjectForm.session}
                     onChange={handleInputChange}
-                    placeholder="e.g., 2nd"
+                    placeholder="e.g., 2024-2025"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -720,7 +761,7 @@ const TeacherSubjects_Page = () => {
       )}
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+      {showDeleteModal && selectedSubject && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-sm">
             <div className="px-4 py-3 border-b border-gray-200">
@@ -732,7 +773,7 @@ const TeacherSubjects_Page = () => {
                 <span className="font-bold text-gray-900">"{selectedSubject?.subjectTitle}"</span>?
               </p>
               <p className="text-xs text-red-600 mt-2">
-                This action cannot be undone.
+                This action cannot be undone. All associated attendance records will also be deleted.
               </p>
             </div>
             <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
@@ -754,7 +795,7 @@ const TeacherSubjects_Page = () => {
       )}
 
       {/* Reset Subject Modal */}
-      {showResetModal && (
+      {showResetModal && selectedSubject && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-sm">
             <div className="px-4 py-3 border-b border-gray-200">
@@ -766,7 +807,7 @@ const TeacherSubjects_Page = () => {
                 <span className="font-medium text-gray-900">"{selectedSubject?.subjectTitle}"</span>?
               </p>
               <p className="text-xs text-yellow-600 mt-2">
-                This will permanently delete all attendance data.
+                This will permanently delete all attendance data for this subject.
               </p>
             </div>
             <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
