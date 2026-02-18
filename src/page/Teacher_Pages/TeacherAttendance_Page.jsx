@@ -833,11 +833,11 @@ const TeacherAttendance_Page = () => {
                   >
                     <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-200 transition-colors">
                       <span className="text-blue-600 font-semibold text-sm">
-                        {subject.name?.charAt(0).toUpperCase()}
+                        {subject.title?.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <h4 className="font-medium text-gray-900 text-xs mb-1 line-clamp-2 min-h-8">
-                      {subject.name}
+                      {subject.title}
                     </h4>
                     <p className="text-[10px] text-gray-500">
                       {Object.keys(subject.attendance || {}).length} days
