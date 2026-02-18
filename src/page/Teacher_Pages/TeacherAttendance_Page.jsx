@@ -314,8 +314,8 @@ const TeacherAttendance_Page = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
 
-      const departmentOffering = subjectsWithAttendance.find(s => s.id === selectedSubject)?.name || 'attendance';
-      const fileName = `attendance_${departmentOffering}_${currentDateString}.csv`;
+      const subjectName = subjectsWithAttendance.find(s => s.id === selectedSubject)?.name || 'attendance';
+      const fileName = `attendance_${subjectName}_${currentDateString}.csv`;
 
       link.setAttribute('href', url);
       link.setAttribute('download', fileName);
@@ -371,7 +371,7 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
-    const departmentOffering = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
+    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
 
@@ -380,7 +380,7 @@ const TeacherAttendance_Page = () => {
     const url = new URL(baseUrl);
     url.searchParams.append('code', originalCode);
     url.searchParams.append('subject', attendanceForm.subject);
-    url.searchParams.append('departmentOffering', departmentOffering || 'Unknown Subject');
+    url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
     url.searchParams.append('timestamp', currentTime.getTime());
     url.searchParams.append('expiry', expiryTime.getTime());
 

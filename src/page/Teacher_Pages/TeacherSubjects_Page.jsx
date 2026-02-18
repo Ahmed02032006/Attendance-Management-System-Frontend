@@ -41,7 +41,7 @@ const TeacherSubjects_Page = () => {
 
   const [subjectForm, setSubjectForm] = useState({
     subjectTitle: '',
-    departmentOffering: '',
+    subjectName: '',
     subjectCode: '',
     status: 'Active',
     semester: '',
@@ -61,7 +61,7 @@ const TeacherSubjects_Page = () => {
   const filteredSubjects = subjects.filter(subject => {
     const matchesSearch =
       subject.subjectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      subject.departmentOffering?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.subjectName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.subjectCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.semester?.toLowerCase().includes(searchTerm.toLowerCase())
 
@@ -87,7 +87,7 @@ const TeacherSubjects_Page = () => {
   const handleCreateSubject = async (e) => {
     e.preventDefault()
 
-    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.subjectCode || !subjectForm.semester) {
+    if (!subjectForm.subjectTitle || !subjectForm.subjectName || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
     }
@@ -110,7 +110,7 @@ const TeacherSubjects_Page = () => {
   const handleEditSubject = async (e) => {
     e.preventDefault()
 
-    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.subjectCode || !subjectForm.semester) {
+    if (!subjectForm.subjectTitle || !subjectForm.subjectName || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
     }
@@ -158,7 +158,7 @@ const TeacherSubjects_Page = () => {
     setSelectedSubject(subject)
     setSubjectForm({
       subjectTitle: subject.subjectTitle,
-      departmentOffering: subject.departmentOffering,
+      subjectName: subject.subjectName,
       subjectCode: subject.subjectCode,
       semester: subject.semester,
       status: subject.status,
@@ -180,7 +180,7 @@ const TeacherSubjects_Page = () => {
   const resetForm = () => {
     setSubjectForm({
       subjectTitle: '',
-      departmentOffering: '',
+      subjectName: '',
       subjectCode: '',
       semester: '',
       status: 'Active',
@@ -358,7 +358,7 @@ const TeacherSubjects_Page = () => {
                               {subject.subjectTitle}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {subject.departmentOffering}
+                              {subject.subjectName}
                             </div>
                           </div>
                         </div>
@@ -492,14 +492,14 @@ const TeacherSubjects_Page = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Department Offering the Course *
+                    Subject Name *
                   </label>
                   <input
                     type="text"
-                    name="departmentOffering"
-                    value={subjectForm.departmentOffering}
+                    name="subjectName"
+                    value={subjectForm.subjectName}
                     onChange={handleInputChange}
-                    placeholder="e.g., CET , SET"
+                    placeholder="e.g., Advanced Mathematics"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -583,12 +583,12 @@ const TeacherSubjects_Page = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Department Offering the Course *
+                    Subject Name *
                   </label>
                   <input
                     type="text"
-                    name="departmentOffering"
-                    value={subjectForm.departmentOffering}
+                    name="subjectName"
+                    value={subjectForm.subjectName}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
