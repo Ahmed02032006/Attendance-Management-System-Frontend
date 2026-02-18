@@ -464,7 +464,8 @@ const StudentAttendance_Page = () => {
                 <h2 className="text-xl font-semibold text-gray-800">Mark Your Attendance</h2>
                 {qrData && (
                   <div className="mt-0.5 text-xs text-gray-600 space-y-1">
-                    <p><span className="font-medium">Subject Name:</span> <span className='border-b border-gray-400'>{qrData.subjectName}</span></p>
+                    <p><span className="font-medium">Course Name:</span> <span className='border-b border-gray-400'>{qrData.subjectName}</span></p>
+                    <p><span className="font-medium">Course Code:</span> <span className='border-b border-gray-400'>{qrData.code}</span></p>
                     {/* <div className="flex items-center mt-1">
                       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-800 flex items-center">
                         <svg className="w-2 h-2 mr-1" fill="currentColor" viewBox="0 0 20 20">
