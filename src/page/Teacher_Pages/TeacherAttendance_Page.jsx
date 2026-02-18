@@ -246,7 +246,7 @@ const TeacherAttendance_Page = () => {
           aValue = timeToSortableValue(a.time);
           bValue = timeToSortableValue(b.time);
           break;
-        case 'subject':
+        case 'title':
           aValue = a.subject?.toLowerCase() || '';
           bValue = b.subject?.toLowerCase() || '';
           break;
