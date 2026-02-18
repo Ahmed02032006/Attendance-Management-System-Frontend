@@ -377,12 +377,12 @@ const TeacherSubjects_Page = () => {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="text-sm text-gray-600 font-mono">
-                          {subject.code}
+                          {subject.departmentOffering}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="text-sm text-gray-600 font-mono">
-                          {subject.departmentOffering}
+                          {subject.code}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
