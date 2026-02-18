@@ -1063,7 +1063,7 @@ const TeacherAttendance_Page = () => {
                       </div>
                       <div>
                         <p className="font-medium text-gray-700">Current Subject</p>
-                        <p className="text-gray-900">{selectedStudent.subject}</p>
+                        <p className="text-gray-900">{selectedStudent.title}</p>
                       </div>
                     </div>
                   </div>
