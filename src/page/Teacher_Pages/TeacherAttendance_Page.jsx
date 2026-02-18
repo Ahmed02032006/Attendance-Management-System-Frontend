@@ -372,12 +372,6 @@ const TeacherAttendance_Page = () => {
     }
 
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.title;
-    console.log("============================================================================");
-    console.log(subjectsWithAttendance.find(s => s.id === attendanceForm.subject));
-    console.log("subjectName");
-    console.log(subjectName);
-    console.log("============================================================================");
-
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
 
