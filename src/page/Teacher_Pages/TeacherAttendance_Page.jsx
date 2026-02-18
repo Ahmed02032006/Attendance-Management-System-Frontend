@@ -229,10 +229,10 @@ const TeacherAttendance_Page = () => {
   // Sorting function for modal table
   const sortModalRecords = (records) => {
     if (!modalSortConfig.key) return records;
-    
+
     return [...records].sort((a, b) => {
       let aValue, bValue;
-      
+
       switch (modalSortConfig.key) {
         case 'date':
           aValue = new Date(a.date).getTime();
@@ -253,7 +253,7 @@ const TeacherAttendance_Page = () => {
         default:
           return 0;
       }
-      
+
       if (aValue < bValue) return modalSortConfig.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return modalSortConfig.direction === 'asc' ? 1 : -1;
       return 0;
@@ -372,6 +372,12 @@ const TeacherAttendance_Page = () => {
     }
 
     const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.title;
+    console.log("============================================================================");
+    console.log(subjectsWithAttendance.find(s => s.id === attendanceForm.subject));
+    console.log("subjectName");
+    console.log(subjectName);
+    console.log("============================================================================");
+
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
 
@@ -1077,7 +1083,7 @@ const TeacherAttendance_Page = () => {
                           <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                               <tr>
-                                <th 
+                                <th
                                   className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleModalSort('date')}
                                 >
@@ -1087,7 +1093,7 @@ const TeacherAttendance_Page = () => {
                                     {getModalSortIcon('date')}
                                   </div>
                                 </th>
-                                <th 
+                                <th
                                   className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleModalSort('day')}
                                 >
@@ -1096,7 +1102,7 @@ const TeacherAttendance_Page = () => {
                                     {getModalSortIcon('day')}
                                   </div>
                                 </th>
-                                <th 
+                                <th
                                   className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleModalSort('time')}
                                 >
@@ -1106,7 +1112,7 @@ const TeacherAttendance_Page = () => {
                                     {getModalSortIcon('time')}
                                   </div>
                                 </th>
-                                <th 
+                                <th
                                   className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleModalSort('subject')}
                                 >
@@ -1116,7 +1122,7 @@ const TeacherAttendance_Page = () => {
                                     {getModalSortIcon('subject')}
                                   </div>
                                 </th>
-                                <th 
+                                <th
                                   className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                 >
                                   <div className="flex items-center space-x-1 justify-center">
