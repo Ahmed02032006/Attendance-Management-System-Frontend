@@ -314,7 +314,7 @@ const TeacherAttendance_Page = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
 
-      const subjectName = subjectsWithAttendance.find(s => s.id === selectedSubject)?.name || 'attendance';
+      const subjectName = subjectsWithAttendance.find(s => s.id === selectedSubject)?.title || 'attendance';
       const fileName = `attendance_${subjectName}_${currentDateString}.csv`;
 
       link.setAttribute('href', url);
@@ -371,7 +371,7 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
-    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.name;
+    const subjectName = subjectsWithAttendance.find(s => s.id === attendanceForm.subject)?.title;
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
 
@@ -498,7 +498,6 @@ const TeacherAttendance_Page = () => {
   const handleRefresh = async () => {
     try {
       await dispatch(getSubjectsWithAttendance(userId)).unwrap();
-      toast.success('Data refreshed successfully!');
     } catch (error) {
       toast.error('Failed to refresh data');
     }
@@ -545,7 +544,7 @@ const TeacherAttendance_Page = () => {
                   {formatDisplayDate(currentDate)}
                 </h2>
                 <p className="text-xs text-gray-600">
-                  {subjectsWithAttendance.find(s => s.id === selectedSubject)?.name}
+                  {subjectsWithAttendance.find(s => s.id === selectedSubject)?.title}
                 </p>
               </div>
 
