@@ -1113,7 +1113,7 @@ const TeacherAttendance_Page = () => {
                                   <div className="flex items-center space-x-1 justify-center">
                                     <FiBookOpen className="w-3 h-3" />
                                     <span>Subject</span>
-                                    {getModalSortIcon('subject')}
+                                    {getModalSortIcon('title')}
                                   </div>
                                 </th>
                                 <th
