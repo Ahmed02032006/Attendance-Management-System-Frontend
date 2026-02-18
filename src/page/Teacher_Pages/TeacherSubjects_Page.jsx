@@ -45,6 +45,8 @@ const TeacherSubjects_Page = () => {
     subjectCode: '',
     status: 'Active',
     semester: '',
+    creditHours: '',
+    session: '',
     userId: ''
   })
 
@@ -62,6 +64,8 @@ const TeacherSubjects_Page = () => {
     const matchesSearch =
       subject.subjectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.departmentOffering?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.session?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.creditHours?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.subjectCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.semester?.toLowerCase().includes(searchTerm.toLowerCase())
 
@@ -87,7 +91,7 @@ const TeacherSubjects_Page = () => {
   const handleCreateSubject = async (e) => {
     e.preventDefault()
 
-    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.subjectCode || !subjectForm.semester) {
+    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session || !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
     }
@@ -110,7 +114,7 @@ const TeacherSubjects_Page = () => {
   const handleEditSubject = async (e) => {
     e.preventDefault()
 
-    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.subjectCode || !subjectForm.semester) {
+    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session || !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
     }
@@ -161,6 +165,8 @@ const TeacherSubjects_Page = () => {
       departmentOffering: subject.departmentOffering,
       subjectCode: subject.subjectCode,
       semester: subject.semester,
+      creditHours: subject.creditHours,
+      session: subject.session,
       status: subject.status,
       userId: subject.userId
     })
@@ -183,6 +189,8 @@ const TeacherSubjects_Page = () => {
       departmentOffering: '',
       subjectCode: '',
       semester: '',
+      session: '',
+      creditHours: '',
       status: 'Active',
       userId: ''
     })
@@ -358,7 +366,7 @@ const TeacherSubjects_Page = () => {
                               {subject.title}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {subject.departmentOffering}
+                              {subject.session}
                             </div>
                           </div>
                         </div>
@@ -499,7 +507,7 @@ const TeacherSubjects_Page = () => {
                     name="departmentOffering"
                     value={subjectForm.departmentOffering}
                     onChange={handleInputChange}
-                    placeholder="e.g., Advanced Mathematics"
+                    placeholder="e.g., CET, SET"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -526,6 +534,34 @@ const TeacherSubjects_Page = () => {
                     type="text"
                     name="semester"
                     value={subjectForm.semester}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 2nd"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Credit Hours *
+                  </label>
+                  <input
+                    type="text"
+                    name="creditHours"
+                    value={subjectForm.creditHours}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 2nd"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Session *
+                  </label>
+                  <input
+                    type="text"
+                    name="session"
+                    value={subjectForm.session}
                     onChange={handleInputChange}
                     placeholder="e.g., 2nd"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
@@ -616,6 +652,34 @@ const TeacherSubjects_Page = () => {
                     name="semester"
                     value={subjectForm.semester}
                     onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Credit Hours *
+                  </label>
+                  <input
+                    type="text"
+                    name="creditHours"
+                    value={subjectForm.creditHours}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 2nd"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Session *
+                  </label>
+                  <input
+                    type="text"
+                    name="session"
+                    value={subjectForm.session}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 2nd"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
