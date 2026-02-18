@@ -123,7 +123,8 @@ const TeacherSubjects_Page = () => {
       await dispatch(updateSubject({
         id: selectedSubject.id,
         formData: subjectForm
-      })).unwrap()
+      })).unwrap();
+      dispatch(getSubjectsByUser(currentUserId)).unwrap();
 
       setShowEditModal(false)
       resetForm()

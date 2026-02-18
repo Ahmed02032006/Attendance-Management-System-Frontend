@@ -132,7 +132,6 @@ const subjectSlicer = createSlice({
         state.isLoading = false;
         state.subjects = [];
       })
-
       // Create Subject
       .addCase(createSubject.pending, (state) => {
         state.isLoading = true;
