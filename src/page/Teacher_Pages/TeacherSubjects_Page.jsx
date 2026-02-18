@@ -337,6 +337,9 @@ const TeacherSubjects_Page = () => {
                     Subject
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Discipline
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Code
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -375,6 +378,11 @@ const TeacherSubjects_Page = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="text-sm text-gray-600 font-mono">
                           {subject.code}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-600 font-mono">
+                          {subject.departmentOffering}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
