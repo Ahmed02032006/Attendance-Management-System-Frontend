@@ -156,7 +156,7 @@ const TeacherSubjects_Page = () => {
         toast.error('Invalid subject selected')
         return
       }
-      
+
       await dispatch(deleteSubject(selectedSubject._id)).unwrap()
       setShowDeleteModal(false)
       setSelectedSubject(null)
@@ -173,7 +173,7 @@ const TeacherSubjects_Page = () => {
         toast.error('Invalid subject selected')
         return
       }
-      
+
       await dispatch(resetSubjectAttendance(selectedSubject._id)).unwrap()
       setShowResetModal(false)
       setSelectedSubject(null)
@@ -580,16 +580,14 @@ const TeacherSubjects_Page = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Credit Hours * (1-6)
+                    Credit Hours *
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     name="creditHours"
                     value={subjectForm.creditHours}
                     onChange={handleInputChange}
                     placeholder="e.g., 3"
-                    min="1"
-                    max="6"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -698,15 +696,13 @@ const TeacherSubjects_Page = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Credit Hours * (1-6)
+                    Credit Hours *
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     name="creditHours"
                     value={subjectForm.creditHours}
                     onChange={handleInputChange}
-                    min="1"
-                    max="6"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
