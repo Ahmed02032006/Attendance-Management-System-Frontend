@@ -38,7 +38,7 @@ const App = () => {
         autoClose={1000} 
         // hideProgressBar={true} 
         pauseOnHover={false}
-        toastStyle={{ fontFamily: "Poppins" }}
+        toastStyle={{ fontFamily: "Lexend" }}
         draggable={false}
       />
       <Routes>
