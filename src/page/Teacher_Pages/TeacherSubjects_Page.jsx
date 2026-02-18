@@ -121,7 +121,7 @@ const TeacherSubjects_Page = () => {
 
     try {
       await dispatch(updateSubject({
-        id: selectedSubject._id,
+        id: selectedSubject.id,
         formData: subjectForm
       })).unwrap()
 
@@ -135,7 +135,7 @@ const TeacherSubjects_Page = () => {
 
   const handleDeleteSubject = async () => {
     try {
-      await dispatch(deleteSubject(selectedSubject._id)).unwrap()
+      await dispatch(deleteSubject(selectedSubject.id)).unwrap()
       setShowDeleteModal(false)
       toast.success('Subject deleted successfully!')
     } catch (error) {
@@ -145,7 +145,7 @@ const TeacherSubjects_Page = () => {
 
   const handleResetSubject = async () => {
     try {
-      await dispatch(resetSubjectAttendance(selectedSubject._id)).unwrap()
+      await dispatch(resetSubjectAttendance(selectedSubject.id)).unwrap()
       setShowResetModal(false)
       toast.success('Subject attendance records cleared successfully!')
     } catch (error) {
@@ -729,7 +729,7 @@ const TeacherSubjects_Page = () => {
             <div className="p-4">
               <p className="text-sm text-gray-600">
                 Are you sure you want to delete{' '}
-                <span className="font-bold text-gray-900">"{selectedSubject?.subjectTitle}"</span>?
+                <span className="font-bold text-gray-900">"{selectedSubject?.title}"</span>?
               </p>
               <p className="text-xs text-red-600 mt-2">
                 This action cannot be undone.
@@ -763,7 +763,7 @@ const TeacherSubjects_Page = () => {
             <div className="p-4">
               <p className="text-sm text-gray-600">
                 Clear all attendance records for{' '}
-                <span className="font-medium text-gray-900">"{selectedSubject?.subjectTitle}"</span>?
+                <span className="font-medium text-gray-900">"{selectedSubject?.title}"</span>?
               </p>
               <p className="text-xs text-yellow-600 mt-2">
                 This will permanently delete all attendance data.
