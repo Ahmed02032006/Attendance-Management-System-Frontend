@@ -351,11 +351,11 @@ const TeacherSubjects_Page = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center text-blue-600 font-medium text-sm shrink-0">
-                            {subject.subjectTitle?.charAt(0).toUpperCase()}
+                            {subject.title?.charAt(0).toUpperCase()}
                           </div>
                           <div className="ml-3">
                             <div className="text-sm font-medium text-gray-900">
-                              {subject.subjectTitle}
+                              {subject.title}
                             </div>
                             <div className="text-xs text-gray-500">
                               {subject.departmentOffering}
@@ -365,7 +365,7 @@ const TeacherSubjects_Page = () => {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="text-sm text-gray-600 font-mono">
-                          {subject.subjectCode}
+                          {subject.code}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
