@@ -635,11 +635,11 @@ const TeacherDashboard_Page = () => {
                         `}
                       >
                         <div className={`w-8 h-8 rounded-md ${getSubjectColor(index)} flex items-center justify-center text-white text-xs font-medium shrink-0`}>
-                          {subject.name?.charAt(0).toUpperCase()}
+                          {subject.title?.charAt(0).toUpperCase()}
                         </div>
                         <div className="ml-3 flex-1 min-w-0">
                           <p className={`text-sm font-medium truncate ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
-                            {subject.name}
+                            {subject.title}
                           </p>
                           <p className="text-xs text-gray-500 truncate">{subject.code}</p>
                         </div>
