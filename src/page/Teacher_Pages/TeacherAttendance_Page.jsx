@@ -881,7 +881,7 @@ const TeacherAttendance_Page = () => {
                   <option value="">Select Subject</option>
                   {subjectsWithAttendance.map((subject) => (
                     <option key={subject.id} value={subject.id}>
-                      {subject.name}
+                      {subject.title}
                     </option>
                   ))}
                 </select>
