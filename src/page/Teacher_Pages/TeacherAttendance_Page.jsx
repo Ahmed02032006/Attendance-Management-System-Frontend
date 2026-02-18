@@ -1108,12 +1108,12 @@ const TeacherAttendance_Page = () => {
                                 </th>
                                 <th
                                   className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                  onClick={() => handleModalSort('subject')}
+                                  onClick={() => handleModalSort('title')}
                                 >
                                   <div className="flex items-center space-x-1 justify-center">
                                     <FiBookOpen className="w-3 h-3" />
                                     <span>Subject</span>
-                                    {getModalSortIcon('subject')}
+                                    {getModalSortIcon('title')}
                                   </div>
                                 </th>
                                 <th
