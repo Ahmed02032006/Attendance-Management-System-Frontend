@@ -133,7 +133,7 @@ const StudentAttendance_Page = () => {
       const urlParams = new URLSearchParams(locationHook.search);
       const code = urlParams.get('code');
       const subject = urlParams.get('subject');
-      const subjectName = urlParams.get('subjectTitle');
+      const subjectName = urlParams.get('subjectName');
       const expiry = urlParams.get('expiry');
 
       if (code) {
