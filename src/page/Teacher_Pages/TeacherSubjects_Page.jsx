@@ -161,9 +161,9 @@ const TeacherSubjects_Page = () => {
   const openEditModal = (subject) => {
     setSelectedSubject(subject)
     setSubjectForm({
-      subjectTitle: subject.subjectTitle,
+      subjectTitle: subject.title,
       departmentOffering: subject.departmentOffering,
-      subjectCode: subject.subjectCode,
+      subjectCode: subject.code,
       semester: subject.semester,
       creditHours: subject.creditHours,
       session: subject.session,
