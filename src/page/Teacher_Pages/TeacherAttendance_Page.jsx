@@ -250,6 +250,10 @@ const TeacherAttendance_Page = () => {
           aValue = a.subject?.toLowerCase() || '';
           bValue = b.subject?.toLowerCase() || '';
           break;
+        case 'discipline':
+          aValue = a.subject?.toLowerCase() || '';
+          bValue = b.subject?.toLowerCase() || '';
+          break;
         default:
           return 0;
       }
@@ -1051,7 +1055,7 @@ const TeacherAttendance_Page = () => {
               {selectedStudent && (
                 <div className="space-y-6">
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
                         <p className="font-medium text-gray-700">Student Name</p>
                         <p className="text-gray-900">{selectedStudent.studentName}</p>
@@ -1113,6 +1117,16 @@ const TeacherAttendance_Page = () => {
                                     <FiBookOpen className="w-3 h-3" />
                                     <span>Subject</span>
                                     {getModalSortIcon('title')}
+                                  </div>
+                                </th>
+                                <th
+                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  onClick={() => handleModalSort('discipline')}
+                                >
+                                  <div className="flex items-center space-x-1 justify-center">
+                                    <FiBookOpen className="w-3 h-3" />
+                                    <span>Discipline</span>
+                                    {getModalSortIcon('discipline')}
                                   </div>
                                 </th>
                                 <th
