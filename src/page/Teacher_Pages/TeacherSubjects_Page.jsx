@@ -558,7 +558,7 @@ const TeacherSubjects_Page = () => {
                     name="creditHours"
                     value={subjectForm.creditHours}
                     onChange={handleInputChange}
-                    placeholder="e.g., 2nd"
+                    placeholder="e.g., 2 + 0"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -572,7 +572,7 @@ const TeacherSubjects_Page = () => {
                     name="session"
                     value={subjectForm.session}
                     onChange={handleInputChange}
-                    placeholder="e.g., 2nd"
+                    placeholder="e.g., Fall 2026"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />

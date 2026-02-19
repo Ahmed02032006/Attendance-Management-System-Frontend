@@ -379,9 +379,6 @@ const TeacherAttendance_Page = () => {
     const subjectName = selectedSubject?.title;
     const subjectCode = selectedSubject?.code; // Get the subject code
 
-    console.log(subjectName);
-    console.log(subjectCode);
-
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
 
@@ -618,7 +615,7 @@ const TeacherAttendance_Page = () => {
                 {/* Refresh Button */}
                 <button
                   onClick={() => handleRefresh()}
-                  disabled={isLoading}
+                  disabled={isLoading || showStudentModal}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   title="Refresh attendance data"
                 >
@@ -635,6 +632,7 @@ const TeacherAttendance_Page = () => {
 
                 {/* Create New Attendance Button */}
                 <button
+                  disabled={showStudentModal}
                   onClick={() => setShowCreateModal(true)}
                   className="bg-blue-800 hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2"
                 >

@@ -548,7 +548,7 @@ const StudentAttendance_Page = () => {
                 name="discipline"
                 value={formData.discipline}
                 onChange={handleInputChange}
-                placeholder="Enter your discipline (e.g., BSCS, BBA, BS English)"
+                placeholder="Enter your discipline"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
                 required
                 style={{ textTransform: 'uppercase' }}
