@@ -109,6 +109,7 @@ const StudentAttendance_Page = () => {
   }, []);
 
   useEffect(() => {
+    // Check if we have data from navigation state (scanned via QRScanner_Page)
     if (locationHook.state?.qrData) {
       try {
         const parsedData = JSON.parse(locationHook.state.qrData);
@@ -138,8 +139,8 @@ const StudentAttendance_Page = () => {
 
         setQrData({
           ...parsedData,
-          subjectName: subjectName, // Store the actual subject name
-          subjectCode: parsedData.subjectCode || parsedData.code || 'N/A', // Make sure subjectCode is set
+          subjectName: subjectName,
+          subjectCode: parsedData.subjectCode || parsedData.code || 'N/A',
         });
 
         setFormData(prev => ({
@@ -150,12 +151,14 @@ const StudentAttendance_Page = () => {
         toast.error('Invalid QR code data');
         navigate('/');
       }
-    } else {
+    }
+    // Check URL parameters (when opened directly in browser)
+    else {
       const urlParams = new URLSearchParams(locationHook.search);
       const code = urlParams.get('code');
       const subject = urlParams.get('subject');
       const subjectName = urlParams.get('subjectName');
-      const subjectCode = urlParams.get('subjectCode'); // Get subjectCode from URL
+      const subjectCode = urlParams.get('subjectCode');
       const expiry = urlParams.get('expiry');
 
       if (code) {
@@ -171,13 +174,18 @@ const StudentAttendance_Page = () => {
           }
         }
 
-        setQrData({
-          code,
+        // Create QR data object from URL parameters
+        const qrDataFromUrl = {
+          code: code,
+          subject: subject,
           subjectName: subjectName || subject || 'Unknown Subject',
-          subjectCode: subjectCode || code || 'N/A', // Use subjectCode from URL
+          subjectCode: subjectCode || code || 'N/A',
           type: 'attendance',
-          expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null
-        });
+          expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null,
+          timestamp: urlParams.get('timestamp') || new Date().toISOString()
+        };
+
+        setQrData(qrDataFromUrl);
         setFormData(prev => ({
           ...prev,
           uniqueCode: code,
