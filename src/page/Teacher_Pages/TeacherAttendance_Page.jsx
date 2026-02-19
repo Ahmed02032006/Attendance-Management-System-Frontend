@@ -379,6 +379,9 @@ const TeacherAttendance_Page = () => {
     const subjectName = selectedSubject?.title;
     const subjectCode = selectedSubject?.code; // Get the subject code
 
+    console.log(subjectName);
+    console.log(subjectCode);
+
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
 

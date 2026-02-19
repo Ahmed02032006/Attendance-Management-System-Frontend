@@ -86,7 +86,6 @@ const QRScanner_Page = () => {
   }, []);
 
   // Enhanced QR data parsing with expiry check
-  // Enhanced QR data parsing with expiry check
   const parseQRData = (qrDataString) => {
     if (!qrDataString) {
       throw new Error('Empty QR code data');
