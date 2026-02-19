@@ -699,19 +699,25 @@ const TeacherAttendance_Page = () => {
                       currentStudents.map((student) => (
                         <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="text-sm text-gray-600">{student.studentName}</span>
+                            <button
+                              onClick={() => handleStudentClick(student)}
+                              className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                            >
+                              {student.studentName}
+                            </button>
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
+
+                          {/* <td className="px-4 py-3 whitespace-nowrap">
                             <button
                               onClick={() => handleStudentClick(student)}
                               className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
                             >
                               {student.rollNo}
                             </button>
-                          </td>
-                          {/* <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="text-sm text-gray-600">{student.rollNo}</span>
                           </td> */}
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <span className="text-sm text-gray-600">{student.rollNo}</span>
+                          </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="text-sm text-gray-600">{student.discipline}</span>
                           </td>
