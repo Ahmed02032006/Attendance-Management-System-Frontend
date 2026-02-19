@@ -86,6 +86,7 @@ const QRScanner_Page = () => {
   }, []);
 
   // Enhanced QR data parsing with expiry check
+  // Enhanced QR data parsing with expiry check
   const parseQRData = (qrDataString) => {
     if (!qrDataString) {
       throw new Error('Empty QR code data');
@@ -119,7 +120,8 @@ const QRScanner_Page = () => {
         code: code,
         originalCode: code,
         subject: urlParams.get('subject') || 'Unknown Subject', // This is the subject ID
-        subjectName: urlParams.get('subjectName') || urlParams.get('subject') || 'Unknown Subject', // Try to get subjectName
+        subjectName: urlParams.get('subjectName') || 'Unknown Subject',
+        subjectCode: urlParams.get('subjectCode') || 'N/A', // Add this line to get subject code
         departmentOffering: urlParams.get('departmentOffering') || 'Unknown Subject',
         attendanceTime: new Date().toLocaleTimeString('en-US', {
           hour: 'numeric',
@@ -157,6 +159,8 @@ const QRScanner_Page = () => {
           code: parsedData.code || parsedData.id || qrDataString,
           originalCode: parsedData.originalCode || parsedData.code,
           subject: parsedData.subject || 'Unknown Subject',
+          subjectName: parsedData.subjectName || parsedData.subject || 'Unknown Subject',
+          subjectCode: parsedData.subjectCode || 'N/A', // Add this line
           departmentOffering: parsedData.departmentOffering || parsedData.subject || 'Unknown Subject',
           attendanceTime: parsedData.attendanceTime || parsedData.time || new Date().toLocaleTimeString(),
           attendanceDate: parsedData.attendanceDate || parsedData.date || new Date().toISOString().split('T')[0],
@@ -207,6 +211,8 @@ const QRScanner_Page = () => {
           type: 'attendance',
           code: urlParams.get('code') || urlParams.get('id') || qrDataString,
           subject: urlParams.get('subject') || 'Unknown Subject',
+          subjectName: urlParams.get('subjectName') || urlParams.get('subject') || 'Unknown Subject',
+          subjectCode: urlParams.get('subjectCode') || 'N/A', // Add this line
           departmentOffering: urlParams.get('departmentOffering') || urlParams.get('subject') || 'Unknown Subject',
           attendanceTime: urlParams.get('attendanceTime') || urlParams.get('time') || new Date().toLocaleTimeString(),
           attendanceDate: urlParams.get('attendanceDate') || urlParams.get('date') || new Date().toISOString().split('T')[0],
@@ -222,6 +228,8 @@ const QRScanner_Page = () => {
       type: 'attendance',
       code: qrDataString,
       subject: 'Scanned Subject',
+      subjectName: 'Scanned Subject',
+      subjectCode: 'N/A', // Add this line
       departmentOffering: 'Scanned Subject',
       attendanceTime: new Date().toLocaleTimeString(),
       attendanceDate: new Date().toISOString().split('T')[0],

@@ -125,24 +125,17 @@ const StudentAttendance_Page = () => {
           }
         }
 
-        // Fix: Get the subject name correctly
-        // The subject field in parsedData might contain the subject ID
-        // We need to get the actual subject name from the correct field
-
-        // Check the structure of your parsedData
+        // Fix: Get the subject name and code correctly
         console.log('Parsed QR Data:', parsedData);
 
         // Determine the correct subject name based on available fields
         let subjectName = 'Unknown Subject';
 
         if (parsedData.subjectName) {
-          // If subjectName exists directly
           subjectName = parsedData.subjectName;
         } else if (parsedData.subject && typeof parsedData.subject === 'string' && !parsedData.subject.match(/^[0-9a-fA-F]{24}$/)) {
-          // If subject is a string and not a MongoDB ObjectId (24 hex chars)
           subjectName = parsedData.subject;
         } else if (parsedData.departmentOffering) {
-          // Fallback to departmentOffering
           subjectName = parsedData.departmentOffering;
         }
 
@@ -151,7 +144,7 @@ const StudentAttendance_Page = () => {
         setQrData({
           ...parsedData,
           subjectName: subjectName, // Store the actual subject name
-          subjectCode: parsedData.code || parsedData.originalCode || 'N/A',
+          subjectCode: parsedData.subjectCode || parsedData.code || 'N/A', // Make sure subjectCode is set
         });
 
         setFormData(prev => ({
@@ -167,6 +160,7 @@ const StudentAttendance_Page = () => {
       const code = urlParams.get('code');
       const subject = urlParams.get('subject');
       const subjectName = urlParams.get('subjectName');
+      const subjectCode = urlParams.get('subjectCode'); // Get subjectCode from URL
       const expiry = urlParams.get('expiry');
 
       if (code) {
@@ -184,8 +178,8 @@ const StudentAttendance_Page = () => {
 
         setQrData({
           code,
-          subjectName: subjectName || subject || 'Unknown Subject', // Use subjectName or subject
-          subjectCode: code,
+          subjectName: subjectName || subject || 'Unknown Subject',
+          subjectCode: subjectCode || code || 'N/A', // Use subjectCode from URL
           type: 'attendance',
           expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null
         });
@@ -328,11 +322,14 @@ const StudentAttendance_Page = () => {
         ...formData,
         uniqueCode: originalCode, // Send original code to backend
         subjectName: qrData.subjectName || qrData.subject || 'Unknown Subject',
-        subjectId: qrData.subjectId || qrData.subject,
+        subjectCode: qrData.subjectCode || 'N/A', // Include subject code if needed
+        subjectId: qrData.subject, // This is the subject ID
         time: currentTime,
         date: qrData.attendanceDate || new Date().toISOString().split('T')[0],
         ipAddress: deviceFingerprint,
       };
+
+      console.log('Attendance Data being submitted:', AttendanceData); // For debugging
 
       dispatch(createAttendance(AttendanceData))
         .then((res) => {
@@ -341,6 +338,7 @@ const StudentAttendance_Page = () => {
             setFormData({
               studentName: '',
               rollNo: '',
+              discipline: '',
               uniqueCode: ''
             });
             navigate("/scan-attendance");
