@@ -9,6 +9,7 @@ const StudentAttendance_Page = () => {
   const [formData, setFormData] = useState({
     studentName: '',
     rollNo: '',
+    discipline: '',
     uniqueCode: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -124,7 +125,13 @@ const StudentAttendance_Page = () => {
           }
         }
 
-        setQrData(parsedData);
+        // Map the data correctly
+        setQrData({
+          ...parsedData,
+          subject: parsedData.subject || parsedData.subjectName || 'Unknown Subject',
+          subjectCode: parsedData.code || parsedData.subjectCode || 'N/A',
+        });
+
         setFormData(prev => ({
           ...prev,
           uniqueCode: parsedData.code,
@@ -155,14 +162,14 @@ const StudentAttendance_Page = () => {
 
         setQrData({
           code,
-          subject: subject || 'Unknown Subject',
-          subjectName: subjectName || 'Unknown Subject Name',
+          subject: subject || subjectName || 'Unknown Subject',
+          subjectCode: code,
           type: 'attendance',
           expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null
         });
         setFormData(prev => ({
           ...prev,
-          uniqueCode: code, // Use the original code
+          uniqueCode: code,
         }));
       } else {
         toast.error('No attendance code found');
@@ -179,7 +186,7 @@ const StudentAttendance_Page = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    const processedValue = (name === 'studentName' || name === 'rollNo')
+    const processedValue = (name === 'studentName' || name === 'rollNo' || name === 'discipline')
       ? capitalizeText(value)
       : value;
 
@@ -259,7 +266,7 @@ const StudentAttendance_Page = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.studentName.trim() || !formData.rollNo.trim() || !formData.uniqueCode.trim()) {
+    if (!formData.studentName.trim() || !formData.rollNo.trim() || !formData.uniqueCode.trim() || !formData.discipline.trim()) {
       toast.error('Please fill all fields');
       return;
     }
@@ -464,16 +471,8 @@ const StudentAttendance_Page = () => {
                 <h2 className="text-xl font-semibold text-gray-800">Mark Your Attendance</h2>
                 {qrData && (
                   <div className="mt-0.5 text-xs text-gray-600 space-y-1">
-                    <p><span className="font-medium">Course Name:</span> <span className='border-b border-gray-400'>{qrData.subjectTitle}</span></p>
-                    <p><span className="font-medium">Course Code:</span> <span className='border-b border-gray-400'>{qrData.subjectCode}</span></p>
-                    {/* <div className="flex items-center mt-1">
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-800 flex items-center">
-                        <svg className="w-2 h-2 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        Chrome Browser
-                      </span>
-                    </div> */}
+                    <p><span className="font-medium">Course Name:</span> <span className='border-b border-gray-400'>{qrData.subject || qrData.subjectName || 'N/A'}</span></p>
+                    <p><span className="font-medium">Course Code:</span> <span className='border-b border-gray-400'>{qrData.subjectCode || qrData.code || 'N/A'}</span></p>
                   </div>
                 )}
               </div>
@@ -512,6 +511,24 @@ const StudentAttendance_Page = () => {
                 value={formData.rollNo}
                 onChange={handleInputChange}
                 placeholder="Enter your roll number"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
+                required
+                style={{ textTransform: 'uppercase' }}
+              />
+            </div>
+
+            {/* Discipline */}
+            <div>
+              <label htmlFor="discipline" className="block text-sm font-medium text-gray-700 mb-2">
+                Discipline *
+              </label>
+              <input
+                type="text"
+                id="discipline"
+                name="discipline"
+                value={formData.discipline}
+                onChange={handleInputChange}
+                placeholder="Enter your discipline (e.g., BSCS, BBA, BS English)"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
                 required
                 style={{ textTransform: 'uppercase' }}
