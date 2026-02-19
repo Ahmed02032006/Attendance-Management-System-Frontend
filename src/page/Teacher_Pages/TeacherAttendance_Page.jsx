@@ -1153,6 +1153,9 @@ const TeacherAttendance_Page = () => {
                                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
                                     {record.title}
                                   </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
+                                    {record.discipline}
+                                  </td>
                                   <td className="px-4 py-3 whitespace-nowrap text-center">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                       }`}>
