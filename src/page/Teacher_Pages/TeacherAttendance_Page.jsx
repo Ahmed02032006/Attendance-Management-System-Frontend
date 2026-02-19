@@ -302,7 +302,7 @@ const TeacherAttendance_Page = () => {
           [
             `"${student.studentName}"`,
             `"${student.rollNo}"`,
-            `"Dummy"`,
+            `"${student.discipline}"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
             `"${student.subject}"`
@@ -695,18 +695,21 @@ const TeacherAttendance_Page = () => {
                       currentStudents.map((student) => (
                         <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-3 whitespace-nowrap">
+                            <span className="text-sm text-gray-600">{student.studentName}</span>
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap">
                             <button
                               onClick={() => handleStudentClick(student)}
                               className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
                             >
-                              {student.studentName}
+                              {student.rollNo}
                             </button>
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
+                          {/* <td className="px-4 py-3 whitespace-nowrap">
                             <span className="text-sm text-gray-600">{student.rollNo}</span>
-                          </td>
+                          </td> */}
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="text-sm text-gray-600">{"Dummy"}</span>
+                            <span className="text-sm text-gray-600">{student.discipline}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
@@ -1040,7 +1043,7 @@ const TeacherAttendance_Page = () => {
                 {selectedStudent?.studentName} - Attendance Details
               </h3>
               <p className="text-sm text-gray-600 mt-1">
-                Roll No: {selectedStudent?.rollNo} | Discipline: {"Dummy"}
+                Roll No: {selectedStudent?.rollNo}
               </p>
             </div>
 
@@ -1056,10 +1059,6 @@ const TeacherAttendance_Page = () => {
                       <div>
                         <p className="font-medium text-gray-700">Roll Number</p>
                         <p className="text-gray-900">{selectedStudent.rollNo}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">Discipline</p>
-                        <p className="text-gray-900">{"Dummy"}</p>
                       </div>
                       <div>
                         <p className="font-medium text-gray-700">Current Subject</p>
