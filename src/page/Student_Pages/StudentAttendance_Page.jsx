@@ -125,9 +125,6 @@ const StudentAttendance_Page = () => {
           }
         }
 
-        // Fix: Get the subject name and code correctly
-        console.log('Parsed QR Data:', parsedData);
-
         // Determine the correct subject name based on available fields
         let subjectName = 'Unknown Subject';
 
@@ -138,8 +135,6 @@ const StudentAttendance_Page = () => {
         } else if (parsedData.departmentOffering) {
           subjectName = parsedData.departmentOffering;
         }
-
-        console.log('Subject Name:', subjectName);
 
         setQrData({
           ...parsedData,

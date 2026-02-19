@@ -287,7 +287,8 @@ const TeacherAttendance_Page = () => {
     currentAttendanceRecords.filter(student =>
       student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.rollNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.subject.toLowerCase().includes(searchTerm.toLowerCase())
+      student.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.discipline.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
@@ -309,7 +310,7 @@ const TeacherAttendance_Page = () => {
             `"${student.discipline}"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
-            `"${student.subject}"`
+            `"${student.title || student.subject || 'N/A'}"` // Fix: Use title instead of subject
           ].join(',')
         )
       ].join('\n');
