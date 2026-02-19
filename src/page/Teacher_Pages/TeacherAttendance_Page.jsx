@@ -400,6 +400,16 @@ const TeacherAttendance_Page = () => {
     }
   };
 
+  // Check if viewing today's date
+  const isToday = (date) => {
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+  };
+
+  const isViewingToday = isToday(currentDate);
+
   const handleGenerateQR = async () => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
@@ -615,7 +625,7 @@ const TeacherAttendance_Page = () => {
                 {/* Refresh Button */}
                 <button
                   onClick={() => handleRefresh()}
-                  disabled={isLoading || showStudentModal}
+                  disabled={isLoading || !isViewingToday}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   title="Refresh attendance data"
                 >
@@ -632,7 +642,7 @@ const TeacherAttendance_Page = () => {
 
                 {/* Create New Attendance Button */}
                 <button
-                  disabled={showStudentModal}
+                  disabled={!isViewingToday}
                   onClick={() => setShowCreateModal(true)}
                   className="bg-blue-800 hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2"
                 >
