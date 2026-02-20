@@ -345,7 +345,7 @@ const TeacherAttendance_Page = () => {
             `"${student.discipline}"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
-            `"${student.title || student.subject || 'N/A'}"`
+            `"${student.title || student.subject || 'N/A'}"` // Fix: Use title instead of subject
           ].join(',')
         )
       ].join('\n');
@@ -421,7 +421,7 @@ const TeacherAttendance_Page = () => {
 
     const selectedSubject = subjectsWithAttendance.find(s => s.id === attendanceForm.subject);
     const subjectName = selectedSubject?.title;
-    const subjectCode = selectedSubject?.code;
+    const subjectCode = selectedSubject?.code; // Get the subject code
 
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
@@ -430,9 +430,9 @@ const TeacherAttendance_Page = () => {
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
     url.searchParams.append('code', originalCode);
-    url.searchParams.append('subject', attendanceForm.subject);
+    url.searchParams.append('subject', attendanceForm.subject); // subject ID
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('subjectCode', subjectCode || 'N/A');
+    url.searchParams.append('subjectCode', subjectCode || 'N/A'); // Add subject code
     url.searchParams.append('timestamp', currentTime.getTime());
     url.searchParams.append('expiry', expiryTime.getTime());
 
@@ -488,7 +488,6 @@ const TeacherAttendance_Page = () => {
     setShowAttendanceDropdown(false);
   };
 
-  // FIXED: Handle Submit Manual Attendance
   const handleSubmitManualAttendance = () => {
     // Validate required fields
     if (!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline) {
@@ -496,46 +495,53 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
-    // Create attendance record with EXACT field names expected by the slice
+    // Get subject details
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+
+    // Create attendance record
     const attendanceRecord = {
       studentName: manualAttendanceForm.studentName,
       rollNo: manualAttendanceForm.rollNo,
       discipline: manualAttendanceForm.discipline,
       time: manualAttendanceForm.time,
-      subjectId: selectedSubject, // Make sure this is the selected subject ID
+      subjectId: selectedSubject,
+      subjectName: subject?.title || 'Unknown Subject',
       date: manualAttendanceForm.date,
-      ipAddress: manualAttendanceForm.ipAddress
-      // Removed subjectName and title as they're not in the required fields list
+      ipAddress: manualAttendanceForm.ipAddress,
+      title: subject?.title || 'Unknown Subject'
     };
 
     console.log('Manual Attendance Record:', attendanceRecord);
 
-    dispatch(createAttendance({ AttendanceData: attendanceRecord }))
+    dispatch(createAttendance(attendanceRecord))
       .then((res) => {
-        if (res.payload && res.payload.success) {
+        if (res.payload.success) {
           toast.success('Manual attendance marked successfully!');
-          // Reset form
-          setManualAttendanceForm({
+          setFormData({
             studentName: '',
             rollNo: '',
-            discipline: '',
-            subjectId: '',
-            date: '',
-            time: '',
-            ipAddress: ''
+            discipline: ''
           });
-          setShowManualModal(false);
-          
-          // Refresh the attendance data
-          dispatch(getSubjectsWithAttendance(userId)).unwrap();
         } else {
-          toast.error(res.payload?.message || 'Failed to mark attendance');
+          toast.error(res.payload.message)
         }
       })
       .catch((error) => {
         console.error('Attendance submission error:', error);
-        toast.error('Failed to mark attendance');
       });
+
+    setShowManualModal(false);
+
+    // Reset form
+    setManualAttendanceForm({
+      studentName: '',
+      rollNo: '',
+      discipline: '',
+      subjectId: '',
+      date: '',
+      time: '',
+      ipAddress: ''
+    });
   };
 
   // Toggle QR zoom
