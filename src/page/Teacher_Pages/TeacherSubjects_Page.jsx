@@ -252,7 +252,7 @@ const TeacherSubjects_Page = () => {
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Total Subjects</p>
+                <p className="text-sm text-gray-500">Total Courses</p>
                 <p className="text-2xl font-semibold text-gray-900 mt-1">{subjects.length}</p>
               </div>
               <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -264,7 +264,7 @@ const TeacherSubjects_Page = () => {
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Active Subjects</p>
+                <p className="text-sm text-gray-500">Active Courses</p>
                 <p className="text-2xl font-semibold text-gray-900 mt-1">
                   {subjects.filter(s => s.status === 'Active').length}
                 </p>
@@ -334,7 +334,7 @@ const TeacherSubjects_Page = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Subject
+                    Courses
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Discipline
