@@ -23,7 +23,8 @@ import {
 import {
   getSubjectsWithAttendance,
   deleteAttendance,
-  clearAttendance
+  clearAttendance,
+  createAttendance
 } from '../../store/Teacher-Slicer/Attendance-Slicer.js'
 
 const TeacherAttendance_Page = () => {
@@ -473,7 +474,7 @@ const TeacherAttendance_Page = () => {
     const ampm = hours >= 12 ? 'PM' : 'AM';
     const formattedHours = hours % 12 || 12;
     const formattedTime = `${formattedHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-    
+
     setManualAttendanceForm({
       studentName: '',
       rollNo: '',
@@ -496,7 +497,7 @@ const TeacherAttendance_Page = () => {
 
     // Get subject details
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
-    
+
     // Create attendance record
     const attendanceRecord = {
       studentName: manualAttendanceForm.studentName,
@@ -510,15 +511,27 @@ const TeacherAttendance_Page = () => {
       title: subject?.title || 'Unknown Subject'
     };
 
-    // Log to console
-    console.log('Manual Attendance Record:', attendanceRecord);
-    
-    // Here you would typically dispatch an action to save this to your state/backend
-    // dispatch(addManualAttendance(attendanceRecord));
-    
-    toast.success('Manual attendance marked successfully!');
+    // console.log('Manual Attendance Record:', attendanceRecord);
+
+    dispatch(createAttendance({ AttendanceData: attendanceRecord }))
+      .then((res) => {
+        if (res.payload.success) {
+          toast.success('Manual attendance marked successfully!');
+          setFormData({
+            studentName: '',
+            rollNo: '',
+            discipline: ''
+          });
+        } else {
+          toast.error(res.payload.message)
+        }
+      })
+      .catch((error) => {
+        console.error('Attendance submission error:', error);
+      });
+
     setShowManualModal(false);
-    
+
     // Reset form
     setManualAttendanceForm({
       studentName: '',
@@ -1150,11 +1163,6 @@ const TeacherAttendance_Page = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
-              {/* Hidden fields note - not displayed to user */}
-              <p className="text-xs text-gray-400 italic">
-                * Date, time, and IP address will be auto-generated
-              </p>
             </div>
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button

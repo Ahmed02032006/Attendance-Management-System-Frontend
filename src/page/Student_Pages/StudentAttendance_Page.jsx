@@ -332,8 +332,6 @@ const StudentAttendance_Page = () => {
         ipAddress: deviceFingerprint,
       };
 
-      console.log('Attendance Data being submitted:', AttendanceData); // For debugging
-
       dispatch(createAttendance(AttendanceData))
         .then((res) => {
           if (res.payload.success) {
