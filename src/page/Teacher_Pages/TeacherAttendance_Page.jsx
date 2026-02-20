@@ -51,9 +51,10 @@ const TeacherAttendance_Page = () => {
   const [manualAttendanceForm, setManualAttendanceForm] = useState({
     studentName: '',
     rollNo: '',
-    time: '',
+    discipline: '',
     subjectId: '',
     date: '',
+    time: '',
     ipAddress: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
@@ -476,9 +477,10 @@ const TeacherAttendance_Page = () => {
     setManualAttendanceForm({
       studentName: '',
       rollNo: '',
-      time: formattedTime,
+      discipline: '',
       subjectId: selectedSubject || '',
       date: formatDate(currentDate),
+      time: formattedTime,
       ipAddress: generateRandomIP()
     });
     setShowManualModal(true);
@@ -487,7 +489,7 @@ const TeacherAttendance_Page = () => {
 
   const handleSubmitManualAttendance = () => {
     // Validate required fields
-    if (!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo) {
+    if (!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -499,12 +501,12 @@ const TeacherAttendance_Page = () => {
     const attendanceRecord = {
       studentName: manualAttendanceForm.studentName,
       rollNo: manualAttendanceForm.rollNo,
+      discipline: manualAttendanceForm.discipline,
       time: manualAttendanceForm.time,
       subjectId: selectedSubject,
       subjectName: subject?.title || 'Unknown Subject',
       date: manualAttendanceForm.date,
       ipAddress: manualAttendanceForm.ipAddress,
-      discipline: subject?.discipline || 'N/A',
       title: subject?.title || 'Unknown Subject'
     };
 
@@ -521,9 +523,10 @@ const TeacherAttendance_Page = () => {
     setManualAttendanceForm({
       studentName: '',
       rollNo: '',
-      time: '',
+      discipline: '',
       subjectId: '',
       date: '',
+      time: '',
       ipAddress: ''
     });
   };
@@ -1098,7 +1101,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Manual Attendance Modal */}
+      {/* Manual Attendance Modal - Updated without time/date fields and with discipline */}
       {showManualModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -1136,46 +1139,22 @@ const TeacherAttendance_Page = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Time
+                  Discipline *
                 </label>
                 <input
                   type="text"
-                  name="time"
-                  value={manualAttendanceForm.time}
+                  name="discipline"
+                  value={manualAttendanceForm.discipline}
                   onChange={handleManualInputChange}
-                  placeholder="Enter time"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Format: HH:MM AM/PM
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  value={manualAttendanceForm.date}
-                  onChange={handleManualInputChange}
-                  max={formatDate(getTodayDate())}
+                  placeholder="Enter discipline"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
-              <div className="bg-gray-50 p-3 rounded-md">
-                <p className="text-xs text-gray-600">
-                  <span className="font-medium">Subject ID:</span> {selectedSubject || 'Not selected'}
-                </p>
-                <p className="text-xs text-gray-600 mt-1">
-                  <span className="font-medium">IP Address:</span> {manualAttendanceForm.ipAddress}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  * IP Address is auto-generated
-                </p>
-              </div>
+              {/* Hidden fields note - not displayed to user */}
+              <p className="text-xs text-gray-400 italic">
+                * Date, time, and IP address will be auto-generated
+              </p>
             </div>
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button
@@ -1184,9 +1163,10 @@ const TeacherAttendance_Page = () => {
                   setManualAttendanceForm({
                     studentName: '',
                     rollNo: '',
-                    time: '',
+                    discipline: '',
                     subjectId: '',
                     date: '',
+                    time: '',
                     ipAddress: ''
                   });
                 }}
