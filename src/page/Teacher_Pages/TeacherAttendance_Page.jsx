@@ -511,12 +511,11 @@ const TeacherAttendance_Page = () => {
       title: subject?.title || 'Unknown Subject'
     };
 
-    console.log('Manual Attendance Record:', attendanceRecord);
-
     dispatch(createAttendance(attendanceRecord))
       .then((res) => {
         if (res.payload.success) {
           toast.success('Manual attendance marked successfully!');
+          dispatch(getSubjectsWithAttendance(userId)).unwrap();
           setFormData({
             studentName: '',
             rollNo: '',
