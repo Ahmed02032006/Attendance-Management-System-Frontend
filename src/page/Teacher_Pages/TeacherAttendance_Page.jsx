@@ -345,7 +345,7 @@ const TeacherAttendance_Page = () => {
             `"${student.discipline}"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
-            `"${student.title || student.subject || 'N/A'}"` // Fix: Use title instead of subject
+            `"${student.title || student.subject || 'N/A'}"`
           ].join(',')
         )
       ].join('\n');
@@ -421,7 +421,7 @@ const TeacherAttendance_Page = () => {
 
     const selectedSubject = subjectsWithAttendance.find(s => s.id === attendanceForm.subject);
     const subjectName = selectedSubject?.title;
-    const subjectCode = selectedSubject?.code; // Get the subject code
+    const subjectCode = selectedSubject?.code;
 
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
@@ -430,9 +430,9 @@ const TeacherAttendance_Page = () => {
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
     url.searchParams.append('code', originalCode);
-    url.searchParams.append('subject', attendanceForm.subject); // subject ID
+    url.searchParams.append('subject', attendanceForm.subject);
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('subjectCode', subjectCode || 'N/A'); // Add subject code
+    url.searchParams.append('subjectCode', subjectCode || 'N/A');
     url.searchParams.append('timestamp', currentTime.getTime());
     url.searchParams.append('expiry', expiryTime.getTime());
 
@@ -488,6 +488,7 @@ const TeacherAttendance_Page = () => {
     setShowAttendanceDropdown(false);
   };
 
+  // FIXED: Handle Submit Manual Attendance
   const handleSubmitManualAttendance = () => {
     // Validate required fields
     if (!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline) {
@@ -495,53 +496,46 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
-    // Get subject details
-    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
-
-    // Create attendance record
+    // Create attendance record with EXACT field names expected by the slice
     const attendanceRecord = {
       studentName: manualAttendanceForm.studentName,
       rollNo: manualAttendanceForm.rollNo,
       discipline: manualAttendanceForm.discipline,
       time: manualAttendanceForm.time,
-      subjectId: selectedSubject,
-      subjectName: subject?.title || 'Unknown Subject',
+      subjectId: selectedSubject, // Make sure this is the selected subject ID
       date: manualAttendanceForm.date,
-      ipAddress: manualAttendanceForm.ipAddress,
-      title: subject?.title || 'Unknown Subject'
+      ipAddress: manualAttendanceForm.ipAddress
+      // Removed subjectName and title as they're not in the required fields list
     };
 
     console.log('Manual Attendance Record:', attendanceRecord);
 
     dispatch(createAttendance({ AttendanceData: attendanceRecord }))
       .then((res) => {
-        if (res.payload.success) {
+        if (res.payload && res.payload.success) {
           toast.success('Manual attendance marked successfully!');
-          setFormData({
+          // Reset form
+          setManualAttendanceForm({
             studentName: '',
             rollNo: '',
-            discipline: ''
+            discipline: '',
+            subjectId: '',
+            date: '',
+            time: '',
+            ipAddress: ''
           });
+          setShowManualModal(false);
+          
+          // Refresh the attendance data
+          dispatch(getSubjectsWithAttendance(userId)).unwrap();
         } else {
-          toast.error(res.payload.message)
+          toast.error(res.payload?.message || 'Failed to mark attendance');
         }
       })
       .catch((error) => {
         console.error('Attendance submission error:', error);
+        toast.error('Failed to mark attendance');
       });
-
-    setShowManualModal(false);
-
-    // Reset form
-    setManualAttendanceForm({
-      studentName: '',
-      rollNo: '',
-      discipline: '',
-      subjectId: '',
-      date: '',
-      time: '',
-      ipAddress: ''
-    });
   };
 
   // Toggle QR zoom
