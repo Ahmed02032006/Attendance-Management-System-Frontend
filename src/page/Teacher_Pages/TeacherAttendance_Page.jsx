@@ -511,7 +511,7 @@ const TeacherAttendance_Page = () => {
       title: subject?.title || 'Unknown Subject'
     };
 
-    // console.log('Manual Attendance Record:', attendanceRecord);
+    console.log('Manual Attendance Record:', attendanceRecord);
 
     dispatch(createAttendance({ AttendanceData: attendanceRecord }))
       .then((res) => {
