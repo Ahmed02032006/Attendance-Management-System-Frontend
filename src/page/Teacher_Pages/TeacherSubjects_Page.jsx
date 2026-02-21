@@ -483,7 +483,7 @@ const TeacherSubjects_Page = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-md">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <h3 className="text-base font-medium text-gray-900">Create New Subject</h3>
+              <h3 className="text-base font-medium text-gray-900">Create New Course</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded"
@@ -495,7 +495,7 @@ const TeacherSubjects_Page = () => {
               <div className="p-4 space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Subject Title *
+                    Course Title *
                   </label>
                   <input
                     type="text"
@@ -523,7 +523,7 @@ const TeacherSubjects_Page = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Subject Code *
+                    Course Code *
                   </label>
                   <input
                     type="text"
@@ -590,7 +590,7 @@ const TeacherSubjects_Page = () => {
                   type="submit"
                   className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium"
                 >
-                  Create Subject
+                  Create Course
                 </button>
               </div>
             </form>
@@ -603,7 +603,7 @@ const TeacherSubjects_Page = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-md">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <h3 className="text-base font-medium text-gray-900">Edit Subject</h3>
+              <h3 className="text-base font-medium text-gray-900">Edit Course</h3>
               <button
                 onClick={() => setShowEditModal(false)}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded"
@@ -615,7 +615,7 @@ const TeacherSubjects_Page = () => {
               <div className="p-4 space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Subject Title *
+                    Course Title *
                   </label>
                   <input
                     type="text"
@@ -641,7 +641,7 @@ const TeacherSubjects_Page = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Subject Code *
+                    Course Code *
                   </label>
                   <input
                     type="text"
@@ -720,7 +720,7 @@ const TeacherSubjects_Page = () => {
                   type="submit"
                   className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium"
                 >
-                  Update Subject
+                  Update Course
                 </button>
               </div>
             </form>
@@ -733,7 +733,7 @@ const TeacherSubjects_Page = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-sm">
             <div className="px-4 py-3 border-b border-gray-200">
-              <h3 className="text-base font-medium text-gray-900">Delete Subject</h3>
+              <h3 className="text-base font-medium text-gray-900">Delete Course</h3>
             </div>
             <div className="p-4">
               <p className="text-sm text-gray-600">
