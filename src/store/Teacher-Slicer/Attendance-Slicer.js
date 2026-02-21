@@ -139,6 +139,7 @@ const attendanceSlicer = createSlice({
                         id: newAttendance._id,
                         studentName: newAttendance.studentName,
                         rollNo: newAttendance.rollNo,
+                        discipline: newAttendance.discipline,
                         time: newAttendance.time,
                         subject: subject.name
                     });
