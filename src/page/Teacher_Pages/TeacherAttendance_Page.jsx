@@ -967,14 +967,14 @@ const TeacherAttendance_Page = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Subject Selected</h3>
-            <p className="text-gray-600 mb-4">Please select a subject to view attendance records</p>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Course Selected</h3>
+            <p className="text-gray-600 mb-4">Please select a course to view attendance records</p>
             <button
               onClick={() => setShowSubjectModal(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center mx-auto space-x-2"
             >
               <FiGrid className="w-4 h-4" />
-              <span>Select Subject</span>
+              <span>Select Course</span>
             </button>
           </div>
         )}
@@ -1005,8 +1005,8 @@ const TeacherAttendance_Page = () => {
           <div className="bg-white rounded-xl w-full max-w-3xl shadow-xl">
             {/* Header */}
             <div className="px-5 py-3 border-b border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900">Select Subject</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Choose a subject to continue</p>
+              <h3 className="text-base font-semibold text-gray-900">Select Course</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Choose a course to continue</p>
             </div>
 
             {/* Subject Grid */}
@@ -1326,7 +1326,7 @@ const TeacherAttendance_Page = () => {
                       </div>
                       <div>
                         <p className="font-medium text-gray-700">Current Subject</p>
-                        <p className="text-gray-900">{selectedStudent.title}</p>
+                        <p className="text-gray-900">{selectedStudent.subjectTitle}</p>
                       </div>
                     </div>
                   </div>

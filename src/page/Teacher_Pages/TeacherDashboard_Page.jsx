@@ -565,7 +565,7 @@ const TeacherDashboard_Page = () => {
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Total Subjects</p>
+                <p className="text-sm text-gray-500">Total Courses</p>
                 <p className="text-2xl font-semibold text-gray-900 mt-1">{dashboardSubjects.length}</p>
               </div>
               <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -609,14 +609,14 @@ const TeacherDashboard_Page = () => {
           <div className="lg:col-span-4">
             <div className="bg-white rounded-lg border border-gray-200">
               <div className="p-4 border-b border-gray-200">
-                <h3 className="font-medium text-gray-900">My Subjects</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{dashboardSubjects.length} subjects assigned</p>
+                <h3 className="font-medium text-gray-900">My Courses</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{dashboardSubjects.length} courses assigned</p>
               </div>
 
               {dashboardSubjects.length === 0 ? (
                 <div className="p-8 text-center">
                   <FiBook className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500 text-sm">No subjects found</p>
+                  <p className="text-gray-500 text-sm">No courses found</p>
                 </div>
               ) : (
                 <div className="p-3 max-h-[415px] overflow-y-auto hide-scrollbar">
