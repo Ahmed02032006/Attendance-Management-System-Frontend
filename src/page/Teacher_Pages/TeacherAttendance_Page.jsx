@@ -779,7 +779,7 @@ const TeacherAttendance_Page = () => {
 
                   {/* Dropdown Menu */}
                   {showAttendanceDropdown && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                    <div className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg border border-gray-200 z-50">
                       <button
                         onClick={() => {
                           setShowCreateModal(true);
