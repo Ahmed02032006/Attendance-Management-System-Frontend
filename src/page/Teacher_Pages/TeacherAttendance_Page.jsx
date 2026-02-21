@@ -369,7 +369,7 @@ const TeacherAttendance_Page = () => {
       link.click();
       document.body.removeChild(link);
 
-      toast.success('Data exported successfully!');
+      // toast.success('Data exported successfully!');
     } catch (error) {
       toast.error('Failed to export data');
     }
@@ -779,7 +779,7 @@ const TeacherAttendance_Page = () => {
 
                   {/* Dropdown Menu */}
                   {showAttendanceDropdown && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-gray-200 z-50">
                       <button
                         onClick={() => {
                           setShowCreateModal(true);
