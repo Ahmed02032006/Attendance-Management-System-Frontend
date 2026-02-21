@@ -72,7 +72,7 @@ const TeacherDashboardLayout = () => {
     {
       name: "Dashboard",
       icon: LayoutDashboard,
-      label: "Dashboard",
+      label: "Attendance Overview",
       path: "/teacher/dashboard"
     },
     {
@@ -84,7 +84,7 @@ const TeacherDashboardLayout = () => {
     {
       name: "Attendance",
       icon: UserCheck,
-      label: "Attendance",
+      label: "Manage Attendance",
       path: "/teacher/attendance"
     },
   ];
