@@ -233,6 +233,10 @@ const TeacherAttendance_Page = () => {
           aValue = a.studentName?.toLowerCase() || '';
           bValue = b.studentName?.toLowerCase() || '';
           break;
+        case 'discipline':
+          aValue = a.discipline?.toLowerCase() || '';
+          bValue = b.discipline?.toLowerCase() || '';
+          break;
         default:
           return 0;
       }
@@ -846,11 +850,13 @@ const TeacherAttendance_Page = () => {
                       </th>
                       <th
                         scope="col"
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('discipline')}
                       >
                         <div className="flex items-center space-x-1">
                           <FiBookOpen className="w-3 h-3" />
                           <span>Discipline</span>
+                          {getSortIcon('discipline')}
                         </div>
                       </th>
                       <th
