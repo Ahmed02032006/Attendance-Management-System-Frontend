@@ -322,7 +322,7 @@ const TeacherSubjects_Page = () => {
               className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors flex items-center whitespace-nowrap disabled:opacity-50"
             >
               <FiPlus className="h-4 w-4 mr-1.5" />
-              New Subject
+              New Courses
             </button>
           </div>
         </div>
