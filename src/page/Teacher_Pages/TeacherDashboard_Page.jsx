@@ -559,63 +559,67 @@ const TeacherDashboard_Page = () => {
         role='admin'
       />
 
-      <div className="max-w-7xl xl:max-w-[1600px] 2xl:max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6 lg:py-8 xl:py-10">
-        {/* Quick Stats - Responsive grid for all screen sizes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-8 mb-6 lg:mb-8 xl:mb-10">
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 lg:p-6 xl:p-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {/* Quick Stats - Light and Clean */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm lg:text-base xl:text-lg text-gray-500">Total Subjects</p>
-                <p className="text-2xl lg:text-3xl xl:text-4xl font-semibold text-gray-900 mt-1 lg:mt-2 xl:mt-3">{dashboardSubjects.length}</p>
+                <p className="text-sm text-gray-500">Total Subjects</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">{dashboardSubjects.length}</p>
               </div>
-              <div className="w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-blue-50 rounded-lg flex items-center justify-center">
-                <FiBook className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-blue-600" />
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                <FiBook className="h-5 w-5 text-blue-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 lg:p-6 xl:p-8">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm lg:text-base xl:text-lg text-gray-500">Total Students</p>
-                <p className="text-2xl lg:text-3xl xl:text-4xl font-semibold text-gray-900 mt-1 lg:mt-2 xl:mt-3">{totalStudents}</p>
+                <p className="text-sm text-gray-500">Total Students</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">{totalStudents}</p>
               </div>
-              <div className="w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-green-50 rounded-lg flex items-center justify-center">
-                <FiUsers className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-green-600" />
+              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                <FiUsers className="h-5 w-5 text-green-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 lg:p-6 xl:p-8 sm:col-span-2 lg:col-span-1">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm lg:text-base xl:text-lg text-gray-500">Student Retention</p>
-                <p className="text-2xl lg:text-3xl xl:text-4xl font-semibold text-gray-900 mt-1 lg:mt-2 xl:mt-3">{retention.rate}%</p>
+                <p className="text-sm text-gray-500">Student Retention</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">{retention.rate}%</p>
+                {/* <p className="text-xs text-gray-500 mt-0.5">
+                  {retention.consistent}/{retention.total} regular attendees
+                </p> */}
               </div>
-              <div className="w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-emerald-50 rounded-lg flex items-center justify-center">
-                <FiHeart className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-emerald-600" />
+              <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+                <FiHeart className="h-5 w-5 text-emerald-600" />
               </div>
             </div>
           </div>
+
         </div>
 
-        {/* Main Grid - Optimized for 2000px screens */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-10">
-          {/* Subjects Panel - Adjusted proportions for 2000px */}
-          <div className="lg:col-span-4 xl:col-span-3 2xl:col-span-3">
-            <div className="bg-white rounded-lg border border-gray-200 h-full">
-              <div className="p-4 lg:p-5 xl:p-6 border-b border-gray-200">
-                <h3 className="font-medium lg:font-semibold text-gray-900 text-base lg:text-lg xl:text-xl">My Subjects</h3>
-                <p className="text-xs lg:text-sm xl:text-base text-gray-500 mt-1">{dashboardSubjects.length} subjects assigned</p>
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Subjects Panel - Clean Card */}
+          <div className="lg:col-span-4">
+            <div className="bg-white rounded-lg border border-gray-200">
+              <div className="p-4 border-b border-gray-200">
+                <h3 className="font-medium text-gray-900">My Subjects</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{dashboardSubjects.length} subjects assigned</p>
               </div>
 
               {dashboardSubjects.length === 0 ? (
-                <div className="p-8 lg:p-10 xl:p-12 text-center">
-                  <FiBook className="h-8 w-8 lg:h-10 lg:w-10 xl:h-12 xl:w-12 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500 text-sm lg:text-base xl:text-lg">No subjects found</p>
+                <div className="p-8 text-center">
+                  <FiBook className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-gray-500 text-sm">No subjects found</p>
                 </div>
               ) : (
-                <div className="p-3 lg:p-4 xl:p-5 max-h-[415px] lg:max-h-[500px] xl:max-h-[600px] 2xl:max-h-[700px] overflow-y-auto hide-scrollbar">
+                <div className="p-3 max-h-[415px] overflow-y-auto hide-scrollbar">
                   {dashboardSubjects.map((subject, index) => {
                     const isSelected = selectedSubject === subject.id;
                     return (
@@ -623,27 +627,27 @@ const TeacherDashboard_Page = () => {
                         key={subject.id}
                         onClick={() => handleSubjectSelect(subject.id)}
                         className={`
-                          flex items-center p-3 lg:p-4 xl:p-5 rounded-lg mb-1 cursor-pointer transition-all
+                          flex items-center p-3 rounded-lg mb-1 cursor-pointer transition-all
                           ${isSelected
                             ? 'bg-blue-50 border border-blue-100'
                             : 'hover:bg-gray-50 border border-transparent'
                           }
                         `}
                       >
-                        <div className={`w-8 h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 rounded-md ${getSubjectColor(index)} flex items-center justify-center text-white text-xs lg:text-sm xl:text-base font-medium shrink-0`}>
+                        <div className={`w-8 h-8 rounded-md ${getSubjectColor(index)} flex items-center justify-center text-white text-xs font-medium shrink-0`}>
                           {subject.title?.charAt(0).toUpperCase()}
                         </div>
-                        <div className="ml-3 lg:ml-4 xl:ml-5 flex-1 min-w-0">
-                          <p className={`text-sm lg:text-base xl:text-lg font-medium truncate ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
+                        <div className="ml-3 flex-1 min-w-0">
+                          <p className={`text-sm font-medium truncate ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
                             {subject.title}
                           </p>
-                          <p className="text-xs lg:text-sm xl:text-base text-gray-500 truncate">{subject.code}</p>
+                          <p className="text-xs text-gray-500 truncate">{subject.code}</p>
                         </div>
                         <div className="text-right ml-2">
-                          <p className={`text-sm lg:text-base xl:text-lg font-medium ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
+                          <p className={`text-sm font-medium ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
                             {subject.students || 0}
                           </p>
-                          <p className="text-xs lg:text-sm xl:text-base text-gray-400">students</p>
+                          <p className="text-xs text-gray-400">students</p>
                         </div>
                       </div>
                     );
@@ -653,28 +657,28 @@ const TeacherDashboard_Page = () => {
             </div>
           </div>
 
-          {/* Attendance Panel - Expanded for 2000px */}
-          <div className="lg:col-span-8 xl:col-span-9 2xl:col-span-9">
+          {/* Attendance Panel - Clean Card */}
+          <div className="lg:col-span-8">
             {selectedSubject ? (
               <>
-                {/* Date Navigation - Enhanced for large screens */}
+                {/* Date Navigation - Simple */}
                 {availableDates.length > 0 && (
-                  <div className="bg-white rounded-lg border border-gray-200 p-4 lg:p-5 xl:p-6 mb-4 lg:mb-6 xl:mb-8">
+                  <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
                     <div className="flex items-center justify-between">
                       <button
                         onClick={() => navigateDate('prev')}
                         disabled={currentDateIndex >= availableDates.length - 1}
-                        className="p-1.5 lg:p-2 xl:p-3 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
                       >
-                        <FiChevronLeft className="h-4 w-4 lg:h-5 lg:w-5 xl:h-6 xl:w-6" />
+                        <FiChevronLeft className="h-4 w-4" />
                       </button>
 
-                      <div className="flex items-center space-x-2 lg:space-x-3 xl:space-x-4">
-                        <FiCalendar className="h-4 w-4 lg:h-5 lg:w-5 xl:h-6 xl:w-6 text-gray-400" />
-                        <span className="text-sm lg:text-base xl:text-lg font-medium text-gray-900">
+                      <div className="flex items-center space-x-2">
+                        <FiCalendar className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-900">
                           {formatDate(currentDate)}
                         </span>
-                        <span className="text-xs lg:text-sm xl:text-base bg-gray-100 text-gray-600 px-2 py-1 lg:px-3 lg:py-1.5 xl:px-4 xl:py-2 rounded-full">
+                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
                           {currentAttendanceRecords.length} present
                         </span>
                       </div>
@@ -682,23 +686,23 @@ const TeacherDashboard_Page = () => {
                       <button
                         onClick={() => navigateDate('next')}
                         disabled={currentDateIndex <= 0}
-                        className="p-1.5 lg:p-2 xl:p-3 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
                       >
-                        <FiChevronRight className="h-4 w-4 lg:h-5 lg:w-5 xl:h-6 xl:w-6" />
+                        <FiChevronRight className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
                 )}
 
-                {/* Attendance Table - Optimized for 2000px */}
+                {/* Attendance Table - Clean */}
                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  <div className="p-4 lg:p-5 xl:p-6 border-b border-gray-200">
+                  <div className="p-4 border-b border-gray-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <FiEye className="h-4 w-4 lg:h-5 lg:w-5 xl:h-6 xl:w-6 text-gray-400" />
-                        <h3 className="font-medium lg:font-semibold text-gray-900 text-base lg:text-lg xl:text-xl">Attendance Records</h3>
+                        <FiEye className="h-4 w-4 text-gray-400" />
+                        <h3 className="font-medium text-gray-900">Attendance Records</h3>
                       </div>
-                      <span className="text-xs lg:text-sm xl:text-base text-gray-500">
+                      <span className="text-xs text-gray-500">
                         {currentAttendanceRecords.length} students
                       </span>
                     </div>
@@ -710,29 +714,29 @@ const TeacherDashboard_Page = () => {
                         <table className="w-full">
                           <thead className="bg-gray-50">
                             <tr>
-                              <th className="px-4 lg:px-6 xl:px-8 py-3 lg:py-4 xl:py-5 text-left text-xs lg:text-sm xl:text-base font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                              <th className="px-4 lg:px-6 xl:px-8 py-3 lg:py-4 xl:py-5 text-center text-xs lg:text-sm xl:text-base font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
-                              <th className="px-4 lg:px-6 xl:px-8 py-3 lg:py-4 xl:py-5 text-center text-xs lg:text-sm xl:text-base font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                              <th className="px-4 lg:px-6 xl:px-8 py-3 lg:py-4 xl:py-5 text-center text-xs lg:text-sm xl:text-base font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
+                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200">
                             {currentRecords.map((record) => (
                               <tr key={record.id} className="hover:bg-gray-50">
-                                <td className="px-4 lg:px-6 xl:px-8 py-3 lg:py-4 xl:py-5 whitespace-nowrap">
-                                  <span className="text-sm lg:text-base xl:text-lg text-gray-900">{record.studentName}</span>
+                                <td className="px-4 py-3 whitespace-nowrap">
+                                  <span className="text-sm text-gray-900">{record.studentName}</span>
                                 </td>
-                                <td className="px-4 lg:px-6 xl:px-8 py-3 lg:py-4 xl:py-5 whitespace-nowrap text-center text-sm lg:text-base xl:text-lg text-gray-600">
+                                <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">
                                   {record.rollNo}
                                 </td>
-                                <td className="px-4 lg:px-6 xl:px-8 py-3 lg:py-4 xl:py-5 whitespace-nowrap text-center text-sm lg:text-base xl:text-lg text-gray-600">
+                                <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">
                                   <div className="flex items-center justify-center">
-                                    <FiClock className="h-3 w-3 lg:h-4 lg:w-4 xl:h-5 xl:w-5 mr-1 text-gray-400" />
+                                    <FiClock className="h-3 w-3 mr-1 text-gray-400" />
                                     {record.time}
                                   </div>
                                 </td>
-                                <td className="px-4 lg:px-6 xl:px-8 py-3 lg:py-4 xl:py-5 whitespace-nowrap text-center">
-                                  <span className="inline-flex items-center px-2 py-0.5 lg:px-3 lg:py-1 xl:px-4 xl:py-1.5 rounded-full text-xs lg:text-sm xl:text-base font-medium bg-green-100 text-green-800">
+                                <td className="px-4 py-3 whitespace-nowrap text-center">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     Present
                                   </span>
                                 </td>
@@ -742,27 +746,27 @@ const TeacherDashboard_Page = () => {
                         </table>
                       </div>
 
-                      {/* Pagination - Enhanced for large screens */}
+                      {/* Simple Pagination */}
                       {totalPages > 1 && (
-                        <div className="px-4 lg:px-6 xl:px-8 py-3 lg:py-4 xl:py-5 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
-                          <span className="text-xs lg:text-sm xl:text-base text-gray-500">
+                        <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+                          <span className="text-xs text-gray-500">
                             Showing {indexOfFirstRecord + 1}-{Math.min(indexOfLastRecord, currentAttendanceRecords.length)} of {currentAttendanceRecords.length}
                           </span>
-                          <div className="flex items-center space-x-2 lg:space-x-3 xl:space-x-4">
+                          <div className="flex items-center space-x-2">
                             <button
                               onClick={prevPage}
                               disabled={currentPage === 1}
-                              className="px-3 py-1 lg:px-4 lg:py-2 xl:px-5 xl:py-2.5 text-xs lg:text-sm xl:text-base border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40"
+                              className="px-3 py-1 text-xs border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40"
                             >
                               Previous
                             </button>
-                            <span className="text-xs lg:text-sm xl:text-base text-gray-600">
+                            <span className="text-xs text-gray-600">
                               Page {currentPage} of {totalPages}
                             </span>
                             <button
                               onClick={nextPage}
                               disabled={currentPage === totalPages}
-                              className="px-3 py-1 lg:px-4 lg:py-2 xl:px-5 xl:py-2.5 text-xs lg:text-sm xl:text-base border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40"
+                              className="px-3 py-1 text-xs border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40"
                             >
                               Next
                             </button>
@@ -771,58 +775,58 @@ const TeacherDashboard_Page = () => {
                       )}
                     </>
                   ) : (
-                    <div className="p-8 lg:p-12 xl:p-16 text-center">
-                      <FiEye className="h-8 w-8 lg:h-12 lg:w-12 xl:h-16 xl:w-16 text-gray-300 mx-auto mb-2" />
-                      <p className="text-sm lg:text-base xl:text-lg text-gray-500">No attendance records found</p>
+                    <div className="p-8 text-center">
+                      <FiEye className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500">No attendance records found</p>
                     </div>
                   )}
                 </div>
               </>
             ) : (
-              <div className="bg-white rounded-lg border border-gray-200 p-8 lg:p-12 xl:p-16 text-center">
-                <FiEye className="h-8 w-8 lg:h-12 lg:w-12 xl:h-16 xl:w-16 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm lg:text-base xl:text-lg text-gray-500">Select a subject to view attendance</p>
+              <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+                <FiEye className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">Select a subject to view attendance</p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Floating Chat Button - Optimized for large screens */}
+      {/* Simple Floating Chat Button */}
       <button
         onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed bottom-6 right-6 lg:bottom-8 lg:right-8 xl:bottom-10 xl:right-10 2xl:bottom-12 2xl:right-12 z-40 w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105"
+        className="fixed bottom-6 right-6 z-40 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md flex items-center justify-center transition-all"
       >
-        {isChatOpen ? <FiX className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 2xl:h-8 2xl:w-8" /> : <BiSupport className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 2xl:h-8 2xl:w-8" />}
+        {isChatOpen ? <FiX className="h-5 w-5" /> : <BiSupport className="h-5 w-5" />}
       </button>
 
-      {/* Chat Box - Scaled for 2000px screens */}
+      {/* Clean Chat Box */}
       {isChatOpen && (
-        <div className="fixed bottom-20 right-6 lg:bottom-24 lg:right-8 xl:bottom-28 xl:right-10 2xl:bottom-32 2xl:right-12 z-50 w-80 lg:w-96 xl:w-[400px] 2xl:w-[450px] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+        <div className="fixed bottom-20 right-6 z-50 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
           {/* Chat Header */}
-          <div className="bg-blue-600 px-4 lg:px-5 xl:px-6 2xl:px-8 py-3 lg:py-4 xl:py-5 2xl:py-6 flex items-center justify-between">
+          <div className="bg-blue-600 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <FiHelpCircle className="h-4 w-4 lg:h-5 lg:w-5 xl:h-6 xl:w-6 text-white" />
-              <span className="text-sm lg:text-base xl:text-lg 2xl:text-xl font-medium text-white">Attendance Support</span>
+              <FiHelpCircle className="h-4 w-4 text-white" />
+              <span className="text-sm font-medium text-white">Attendance Support</span>
             </div>
             <button
               onClick={clearChat}
               className="text-white/80 hover:text-white p-1 rounded"
             >
-              <FiTrash2 className="h-4 w-4 lg:h-5 lg:w-5 xl:h-6 xl:w-6" />
+              <FiTrash2 className="h-4 w-4" />
             </button>
           </div>
 
-          {/* Chat Messages */}
-          <div className="h-72 lg:h-96 xl:h-[400px] 2xl:h-[500px] overflow-y-auto p-3 lg:p-4 xl:p-5 2xl:p-6 bg-gray-50">
-            <div className="space-y-3 lg:space-y-4 xl:space-y-5">
+          {/* Chat Messages - Updated to use renderMessageContent */}
+          <div className="h-72 overflow-y-auto p-3 bg-gray-50">
+            <div className="space-y-3">
               {chatMessages.map((msg) => (
                 <div
                   key={msg.id}
                   className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-lg px-3 py-2 lg:px-4 lg:py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 text-sm lg:text-base xl:text-lg ${msg.sender === 'user'
+                    className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${msg.sender === 'user'
                       ? 'bg-blue-600 text-white'
                       : 'bg-white border border-gray-200 text-gray-800'
                       }`}
@@ -830,7 +834,7 @@ const TeacherDashboard_Page = () => {
                     <div className="whitespace-pre-line">
                       {renderMessageContent(msg.text, msg.sender)}
                     </div>
-                    <p className={`text-[10px] lg:text-xs xl:text-sm mt-1 ${msg.sender === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
+                    <p className={`text-[10px] mt-1 ${msg.sender === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
                       {msg.timestamp}
                     </p>
                   </div>
@@ -838,11 +842,11 @@ const TeacherDashboard_Page = () => {
               ))}
               {isSending && (
                 <div className="flex justify-start">
-                  <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 lg:px-4 lg:py-3 xl:px-5 xl:py-4">
+                  <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
                     <div className="flex items-center space-x-1">
-                      <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 xl:w-2.5 xl:h-2.5 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 xl:w-2.5 xl:h-2.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 xl:w-2.5 xl:h-2.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                     </div>
                   </div>
                 </div>
@@ -852,7 +856,7 @@ const TeacherDashboard_Page = () => {
           </div>
 
           {/* Chat Input */}
-          <div className="border-t border-gray-200 p-3 lg:p-4 xl:p-5 2xl:p-6">
+          <div className="border-t border-gray-200 p-3">
             <div className="flex items-center space-x-2">
               <input
                 ref={inputRef}
@@ -861,15 +865,15 @@ const TeacherDashboard_Page = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask something..."
-                className="flex-1 border border-gray-300 rounded-md px-3 py-2 lg:px-4 lg:py-3 xl:px-5 xl:py-4 text-sm lg:text-base xl:text-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 disabled={isSending}
               />
               <button
                 onClick={handleSendMessage}
                 disabled={!message.trim() || isSending}
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-md p-2 lg:p-3 xl:p-4 transition-colors disabled:opacity-50"
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-md p-2 transition-colors disabled:opacity-50"
               >
-                <FiSend className="h-4 w-4 lg:h-5 lg:w-5 xl:h-6 xl:w-6" />
+                <FiSend className="h-4 w-4" />
               </button>
             </div>
           </div>
