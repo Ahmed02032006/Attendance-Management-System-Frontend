@@ -7,10 +7,16 @@ const CheckAuth = ({ isAuthenticated, user, isInitialAuthCheckComplete, children
   // Show loading state while auth check is in progress
   if (!isInitialAuthCheckComplete) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          {/* <p className="mt-4 text-lg font-medium text-gray-700">Loading...</p> */}
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              {/* <FiBook className="h-8 w-8 text-blue-600 animate-pulse" /> */}
+            </div>
+          </div>
+          {/* <p className="mt-6 text-lg font-medium text-gray-700">Loading your dashboard...</p> */}
+          {/* <p className="mt-2 text-sm text-gray-500">Preparing your teaching overview</p> */}
         </div>
       </div>
     );

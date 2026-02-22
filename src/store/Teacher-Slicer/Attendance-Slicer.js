@@ -22,7 +22,7 @@ export const getSubjectsWithAttendance = createAsyncThunk(
 
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
@@ -43,7 +43,7 @@ export const createAttendance = createAsyncThunk(
 
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
@@ -64,7 +64,7 @@ export const updateAttendance = createAsyncThunk(
 
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
@@ -84,7 +84,7 @@ export const deleteAttendance = createAsyncThunk(
 
             return { ...response.data, deletedId: id };
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
@@ -121,7 +121,9 @@ const attendanceSlicer = createSlice({
                 state.isLoading = false;
 
                 const newAttendance = action.payload.data;
-                const subjectId = newAttendance.subjectId._id || newAttendance.subjectId;
+                
+                // Handle both cases: when subjectId is populated or just an ID
+                const subjectId = newAttendance.subjectId?._id || newAttendance.subjectId;
                 const dateKey = new Date(newAttendance.date).toISOString().split('T')[0];
 
                 const subjectIndex = state.subjectsWithAttendance.findIndex(
@@ -135,20 +137,34 @@ const attendanceSlicer = createSlice({
                         subject.attendance[dateKey] = [];
                     }
 
-                    subject.attendance[dateKey].push({
+                    // Get the subject title from either the populated subjectId or from the subject object
+                    const subjectTitle = newAttendance.subjectId?.subjectTitle || subject.title;
+
+                    // Create the attendance record with proper structure
+                    const attendanceRecord = {
                         id: newAttendance._id,
                         studentName: newAttendance.studentName,
                         rollNo: newAttendance.rollNo,
                         discipline: newAttendance.discipline,
-                        title: newAttendance.title,
-                        subjectTitle: newAttendance.subjectTitle,
                         time: newAttendance.time,
-                        subject: subject.name
+                        title: subjectTitle, // Use the title from the response
+                        subjectId: subjectId,
+                        subject: subjectTitle // Also set the subject field for display
+                    };
+
+                    subject.attendance[dateKey].push(attendanceRecord);
+                    
+                    // Optional: Sort the attendance records by time
+                    subject.attendance[dateKey].sort((a, b) => {
+                        if (a.time < b.time) return -1;
+                        if (a.time > b.time) return 1;
+                        return 0;
                     });
                 }
             })
             .addCase(createAttendance.rejected, (state, action) => {
                 state.isLoading = false;
+                console.error('Create attendance failed:', action.payload);
             })
 
             // Update Attendance
@@ -170,11 +186,11 @@ const attendanceSlicer = createSlice({
 
                         if (attendanceIndex !== -1) {
                             subject.attendance[dateKey][attendanceIndex] = {
-                                id: updatedAttendance._id,
+                                ...subject.attendance[dateKey][attendanceIndex],
                                 studentName: updatedAttendance.studentName,
                                 rollNo: updatedAttendance.rollNo,
+                                discipline: updatedAttendance.discipline,
                                 time: updatedAttendance.time,
-                                subject: subject.name
                             };
                             break;
                         }
@@ -183,6 +199,7 @@ const attendanceSlicer = createSlice({
             })
             .addCase(updateAttendance.rejected, (state, action) => {
                 state.isLoading = false;
+                console.error('Update attendance failed:', action.payload);
             })
 
             // Delete Attendance
@@ -208,6 +225,7 @@ const attendanceSlicer = createSlice({
             })
             .addCase(deleteAttendance.rejected, (state, action) => {
                 state.isLoading = false;
+                console.error('Delete attendance failed:', action.payload);
             });
     },
 });
