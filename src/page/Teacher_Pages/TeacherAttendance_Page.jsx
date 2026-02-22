@@ -1325,7 +1325,7 @@ const TeacherAttendance_Page = () => {
                         <p className="text-gray-900">{selectedStudent.rollNo}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-700">Current Subject</p>
+                        <p className="font-medium text-gray-700">Current Course</p>
                         <p className="text-gray-900">{selectedStudent.title}</p>
                       </div>
                     </div>
@@ -1375,7 +1375,7 @@ const TeacherAttendance_Page = () => {
                                 >
                                   <div className="flex items-center space-x-1 justify-center">
                                     <FiBookOpen className="w-3 h-3" />
-                                    <span>Subject</span>
+                                    <span>Course</span>
                                     {getModalSortIcon('title')}
                                   </div>
                                 </th>
