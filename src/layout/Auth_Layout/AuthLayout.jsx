@@ -3,13 +3,16 @@ import { Outlet } from 'react-router-dom';
 
 const AuthLayout = () => {
   return (
-    <div
-      className="min-h-screen w-full bg-cover bg-center flex items-center justify-center px-4"
-      style={{
-        backgroundImage: `url('https://cdn.pixabay.com/photo/2022/05/24/04/38/study-7217599_1280.jpg')`,
-      }}
-    >
-      <div className="w-full max-w-md bg-white bg-opacity-90 backdrop-blur-sm border-gray-400 border-[0.5px] p-1 rounded-xl shadow-lg">
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+      
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-4xl">
         <Outlet />
       </div>
     </div>

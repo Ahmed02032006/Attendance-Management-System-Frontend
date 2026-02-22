@@ -1,25 +1,26 @@
 @import "tailwindcss";
 
-*{
+* {
   /* font-family: "Poppins"; */
   font-family: "Lexend";
   font-style: normal;
   font-weight: 500;
 }
 
-.orbitron{
+.orbitron {
   font-family: "Orbitron";
 }
-
-
-/* #e0e7ff */
-/* #8b94f6 */
 
 /* Loader */
 
 @keyframes loading {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(200%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(200%);
+  }
 }
 
 .animate-loading {
@@ -45,13 +46,13 @@
 /* Hide Scrollbar */
 
 .hide-scrollbar {
-  overflow: auto;          
-  scrollbar-width: none;    
-  -ms-overflow-style: none; 
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none;            
+  display: none;
 }
 
 .scroll-smooth {
@@ -61,9 +62,19 @@
 /* Wave Animation */
 
 @keyframes wave {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(10deg); }
-  75% { transform: rotate(-10deg); }
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(10deg);
+  }
+
+  75% {
+    transform: rotate(-10deg);
+  }
 }
 
 .animate-wave {
@@ -78,6 +89,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -89,6 +101,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -101,4 +114,36 @@
 
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
+}
+
+/* =================================================== */
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
 }
