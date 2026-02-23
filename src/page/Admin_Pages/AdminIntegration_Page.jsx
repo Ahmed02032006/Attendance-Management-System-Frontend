@@ -108,7 +108,7 @@ const AdminIntegration_Page = () => {
   ];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <HeaderComponent
         heading={"Website Integration"}
