@@ -18,7 +18,7 @@ import AdminTeachers_Page from './page/Admin_Pages/AdminTeachers_Page';
 import AdminDashboardLayout from './layout/Admin_Dashboard_Layout/AdminDashboardLayout';
 import AdminDashboard_Page from './page/Admin_Pages/AdminDashboard_Page';
 import AdminComplaints_Page from './page/Admin_Pages/AdminComplaints_Page';
-import Integration from './hooks/integration';
+import Integration from './page/Admin_Pages/Integration';
 
 const App = () => {
 
