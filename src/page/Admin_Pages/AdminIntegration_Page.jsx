@@ -61,7 +61,6 @@ const AdminIntegration_Page = () => {
   const handleCopyHtml = () => {
     navigator.clipboard.writeText(htmlCode);
     setCopiedScript(true);
-    toast.success('Complete HTML example copied!');
     setTimeout(() => setCopiedScript(false), 3000);
   };
 
