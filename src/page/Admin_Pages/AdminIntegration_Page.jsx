@@ -117,7 +117,7 @@ const AdminIntegration_Page = () => {
       />
 
       {/* Features Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 container max-w-full mx-auto p-4 lg:p-6">
         {features.map((feature, index) => (
           <div key={index} className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mb-4">
