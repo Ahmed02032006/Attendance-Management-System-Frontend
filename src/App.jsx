@@ -18,7 +18,7 @@ import AdminTeachers_Page from './page/Admin_Pages/AdminTeachers_Page';
 import AdminDashboardLayout from './layout/Admin_Dashboard_Layout/AdminDashboardLayout';
 import AdminDashboard_Page from './page/Admin_Pages/AdminDashboard_Page';
 import AdminComplaints_Page from './page/Admin_Pages/AdminComplaints_Page';
-import Integration from './page/Admin_Pages/Integration';
+import AdminIntegration_Page from './page/Admin_Pages/AdminIntegration_Page';
 
 const App = () => {
 
@@ -36,7 +36,7 @@ const App = () => {
     <>
       <ToastContainer
         position="bottom-right"
-        autoClose={1000} 
+        autoClose={1000}
         // hideProgressBar={true} 
         pauseOnHover={false}
         toastStyle={{ fontFamily: "Lexend" }}
@@ -74,7 +74,7 @@ const App = () => {
           <Route path="dashboard" element={<AdminDashboard_Page />} />
           <Route path="teachers" element={<AdminTeachers_Page />} />
           <Route path="complaints" element={<AdminComplaints_Page />} />
-          <Route path="integration" element={<Integration />} />
+          <Route path="integration" element={<AdminIntegration_Page />} />
         </Route>
 
         {/* =====>] Students Routes [<===== */}

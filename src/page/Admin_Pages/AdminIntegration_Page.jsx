@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Code, Copy, Check, Globe, Shield, Zap, Smartphone, ExternalLink, CheckCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 
-const Integration = () => {
+const AdminIntegration_Page = () => {
   const [copiedIframe, setCopiedIframe] = useState(false);
   const [copiedScript, setCopiedScript] = useState(false);
 
   const baseUrl = "https://attendance-management-system-fronte-two.vercel.app";
-  
+
   const iframeCode = `<!-- Attendly Integration -->
 <iframe 
   src="${baseUrl}/auth/login?embed=true" 
@@ -112,7 +112,7 @@ const Integration = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">Embed Attendly on Your Website</h1>
         <p className="text-slate-600">
-          Add our attendance management system to any website using simple iframe integration. 
+          Add our attendance management system to any website using simple iframe integration.
           Works with HTML, WordPress, Wix, Shopify, and any platform that supports iframes.
         </p>
       </div>
@@ -148,7 +148,7 @@ const Integration = () => {
 
       {/* Iframe Integration Code */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden mb-8">
-        <div className="border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4">
+        <div className="border-b border-slate-200 bg-linear-to-r from-blue-50 to-indigo-50 px-6 py-4">
           <h2 className="text-lg font-semibold text-slate-800 flex items-center">
             <Code className="w-5 h-5 mr-2 text-blue-600" />
             Simple Iframe Integration
@@ -212,7 +212,7 @@ const Integration = () => {
 
       {/* Complete HTML Example */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden mb-8">
-        <div className="border-b border-slate-200 bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
+        <div className="border-b border-slate-200 bg-linear-to-r from-purple-50 to-pink-50 px-6 py-4">
           <h2 className="text-lg font-semibold text-slate-800 flex items-center">
             <Globe className="w-5 h-5 mr-2 text-purple-600" />
             Complete HTML Example
@@ -250,7 +250,7 @@ const Integration = () => {
       {/* Platform-Specific Guides */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 mb-8">
         <h2 className="text-lg font-semibold text-slate-800 mb-4">Platform-Specific Integration</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 border border-slate-200 rounded-lg hover:border-blue-300 transition-colors">
             <h3 className="font-medium text-slate-800 mb-2">WordPress</h3>
@@ -282,10 +282,10 @@ const Integration = () => {
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
         <h2 className="text-lg font-semibold text-slate-800 mb-4">Preview Your Integration</h2>
         <p className="text-slate-600 mb-4">
-          After adding the iframe code to your website, your users will see the login page. 
+          After adding the iframe code to your website, your users will see the login page.
           Once logged in, they'll have full access to the attendance management system.
         </p>
-        
+
         <div className="border border-slate-200 rounded-lg overflow-hidden">
           <div className="bg-slate-50 px-4 py-2 border-b border-slate-200 flex items-center">
             <div className="flex space-x-2">
@@ -301,7 +301,7 @@ const Integration = () => {
                 <Globe className="w-8 h-8 mx-auto mb-2" />
                 <p className="font-medium">Your Website Content</p>
               </div>
-              
+
               {/* Iframe Preview */}
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
@@ -311,7 +311,7 @@ const Integration = () => {
                   </div>
                   <span className="text-xs text-slate-400">iframe</span>
                 </div>
-                <div className="h-32 bg-gradient-to-r from-blue-50 to-indigo-50 rounded flex items-center justify-center">
+                <div className="h-32 bg-linear-to-r from-blue-50 to-indigo-50 rounded flex items-center justify-center">
                   <div className="text-center">
                     <p className="text-sm text-slate-600">Login page will appear here</p>
                     <p className="text-xs text-slate-400 mt-1">After login, full dashboard loads</p>
@@ -328,7 +328,7 @@ const Integration = () => {
 
         <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
           <p className="text-sm text-yellow-700">
-            <strong className="font-medium">Note:</strong> Make sure your website uses HTTPS for secure iframe embedding. 
+            <strong className="font-medium">Note:</strong> Make sure your website uses HTTPS for secure iframe embedding.
             Test on a staging site first before adding to production.
           </p>
         </div>
@@ -337,4 +337,4 @@ const Integration = () => {
   );
 };
 
-export default Integration;
+export default AdminIntegration_Page;
