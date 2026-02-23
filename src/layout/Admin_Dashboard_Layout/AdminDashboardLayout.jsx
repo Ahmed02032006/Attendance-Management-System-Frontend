@@ -4,7 +4,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuthUser, logOutUser } from '../../store/Auth-Slicer/Auth-Slicer';
 import { toast } from 'react-toastify';
-import { Users } from 'lucide-react'; // Changed from LayoutDashboard to Users
+import { Users, Code } from 'lucide-react'; // Changed from LayoutDashboard to Users
 
 const AdminDashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -58,7 +58,13 @@ const AdminDashboardLayout = () => {
       icon: MessageSquareWarning,
       label: "Complaints",
       path: "/admin/complaints",
+    }, {
+      name: "Integration",
+      icon: Code,
+      label: "Integration",
+      path: "/admin/integration",
     },
+
   ];
 
   useEffect(() => {
