@@ -1,60 +1,108 @@
 import React, { useState } from 'react';
-import { Code, Copy, Check, Globe, Shield, Zap, Smartphone, ExternalLink } from 'lucide-react';
+import { Code, Copy, Check, Globe, Shield, Zap, Smartphone, ExternalLink, CheckCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const Integration = () => {
-  const [copied, setCopied] = useState(false);
-  const [selectedTab, setSelectedTab] = useState('iframe');
+  const [copiedIframe, setCopiedIframe] = useState(false);
+  const [copiedScript, setCopiedScript] = useState(false);
 
-  const baseUrl = window.location.origin;
+  const baseUrl = "https://attendance-management-system-fronte-two.vercel.app";
   
-  const iframeCode = `<iframe 
-  src="${baseUrl}/embed/dashboard" 
+  const iframeCode = `<!-- Attendly Integration -->
+<iframe 
+  src="${baseUrl}/auth/login?embed=true" 
   width="100%" 
   height="600px" 
   frameborder="0" 
-  allow="camera; microphone"
   style="border: none; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"
+  allow="camera; microphone"
 ></iframe>`;
 
-  const scriptCode = `<script src="${baseUrl}/embed-sdk.js" async></script>
-<div id="attendly-widget"></div>
-<script>
-  AttendlyWidget.init({
-    container: '#attendly-widget',
-    theme: 'light', // or 'dark'
-    width: '100%',
-    height: '600px'
-  });
-</script>`;
+  const htmlCode = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website with Attendly</title>
+    <style>
+        .attendly-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="attendly-container">
+        <h1>Welcome to My Website</h1>
+        <p>Here's our attendance management system:</p>
+        
+        <!-- Attendly Integration -->
+        <iframe 
+            src="${baseUrl}/auth/login?embed=true" 
+            width="100%" 
+            height="600px" 
+            frameborder="0" 
+            style="border: none; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"
+            allow="camera; microphone"
+        ></iframe>
+    </div>
+</body>
+</html>`;
 
-  const handleCopyCode = (code) => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    toast.success('Code copied to clipboard!');
-    setTimeout(() => setCopied(false), 3000);
+  const handleCopyIframe = () => {
+    navigator.clipboard.writeText(iframeCode);
+    setCopiedIframe(true);
+    toast.success('Iframe code copied to clipboard!');
+    setTimeout(() => setCopiedIframe(false), 3000);
+  };
+
+  const handleCopyHtml = () => {
+    navigator.clipboard.writeText(htmlCode);
+    setCopiedScript(true);
+    toast.success('Complete HTML example copied!');
+    setTimeout(() => setCopiedScript(false), 3000);
   };
 
   const features = [
     {
       icon: Globe,
       title: 'Universal Integration',
-      description: 'Embed on any website using simple iframe or JavaScript SDK'
+      description: 'Embed on any website using simple iframe - works with HTML, CSS, JavaScript, WordPress, Wix, and more'
     },
     {
       icon: Shield,
       title: 'Secure Authentication',
-      description: 'SSO support and secure token-based authentication'
+      description: 'Users can log in securely through the embedded iframe'
     },
     {
       icon: Zap,
       title: 'Real-time Updates',
-      description: 'Live attendance tracking and instant notifications'
+      description: 'Live attendance tracking works seamlessly in iframe'
     },
     {
       icon: Smartphone,
-      title: 'Responsive Design',
-      description: 'Automatically adapts to any screen size'
+      title: 'Fully Responsive',
+      description: 'Automatically adapts to any screen size and device'
+    }
+  ];
+
+  const steps = [
+    {
+      title: 'Copy the iframe code',
+      description: 'Use the simple iframe code below and paste it into your website HTML'
+    },
+    {
+      title: 'Adjust dimensions',
+      description: 'Modify the width and height values to match your website layout'
+    },
+    {
+      title: 'Add to your website',
+      description: 'Paste the code anywhere in your HTML where you want the attendance system to appear'
+    },
+    {
+      title: 'Test the integration',
+      description: 'Visit your website and test the login functionality'
     }
   ];
 
@@ -62,9 +110,10 @@ const Integration = () => {
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">Platform Integration</h1>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">Embed Attendly on Your Website</h1>
         <p className="text-slate-600">
-          Embed Attendly's attendance management system directly into your website or application
+          Add our attendance management system to any website using simple iframe integration. 
+          Works with HTML, WordPress, Wix, Shopify, and any platform that supports iframes.
         </p>
       </div>
 
@@ -81,144 +130,162 @@ const Integration = () => {
         ))}
       </div>
 
-      {/* Integration Tabs */}
+      {/* Quick Integration Steps */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 mb-8">
+        <h2 className="text-xl font-semibold text-slate-800 mb-6">Quick Integration Guide</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {steps.map((step, index) => (
+            <div key={index} className="relative">
+              <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mb-3 font-bold">
+                {index + 1}
+              </div>
+              <h3 className="font-medium text-slate-800 mb-2">{step.title}</h3>
+              <p className="text-sm text-slate-600">{step.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Iframe Integration Code */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden mb-8">
-        <div className="border-b border-slate-200 bg-slate-50 px-6 py-3">
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setSelectedTab('iframe')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                selectedTab === 'iframe'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              Iframe Integration
-            </button>
-            <button
-              onClick={() => setSelectedTab('sdk')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                selectedTab === 'sdk'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              JavaScript SDK
-            </button>
-          </div>
+        <div className="border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4">
+          <h2 className="text-lg font-semibold text-slate-800 flex items-center">
+            <Code className="w-5 h-5 mr-2 text-blue-600" />
+            Simple Iframe Integration
+          </h2>
+          <p className="text-sm text-slate-600 mt-1">
+            Copy this code and paste it anywhere in your HTML where you want the attendance system to appear
+          </p>
         </div>
 
         <div className="p-6">
-          {selectedTab === 'iframe' ? (
-            <div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">Simple Iframe Integration</h3>
-              <p className="text-slate-600 mb-4">
-                Copy and paste this code into your website's HTML where you want the attendance system to appear:
-              </p>
-              <div className="relative">
-                <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm">
-                  <code>{iframeCode}</code>
-                </pre>
-                <button
-                  onClick={() => handleCopyCode(iframeCode)}
-                  className="absolute top-3 right-3 p-2 bg-slate-700 hover:bg-slate-600 rounded-md text-white transition-colors"
-                >
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-medium text-blue-800 mb-2 flex items-center">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Iframe Parameters
-                </h4>
-                <ul className="space-y-2 text-sm text-blue-700">
-                  <li><strong>src:</strong> The embed URL for your dashboard</li>
-                  <li><strong>width:</strong> Set to 100% for responsive design</li>
-                  <li><strong>height:</strong> Adjust based on your layout needs</li>
-                  <li><strong>allow:</strong> Permissions for camera/microphone if needed</li>
-                </ul>
-              </div>
+          <div className="relative">
+            <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm font-mono">
+              <code>{iframeCode}</code>
+            </pre>
+            <button
+              onClick={handleCopyIframe}
+              className="absolute top-3 right-3 p-2 bg-slate-700 hover:bg-slate-600 rounded-md text-white transition-colors flex items-center gap-2"
+            >
+              {copiedIframe ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span className="text-xs">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span className="text-xs">Copy</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <h4 className="font-medium text-blue-800 mb-2 flex items-center">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Iframe Parameters
+              </h4>
+              <ul className="space-y-2 text-sm text-blue-700">
+                <li><strong>src:</strong> {baseUrl}/auth/login?embed=true</li>
+                <li><strong>width:</strong> Set to 100% for responsive design</li>
+                <li><strong>height:</strong> Adjust based on your needs (600px default)</li>
+                <li><strong>allow:</strong> Permissions for camera/microphone if needed</li>
+              </ul>
             </div>
-          ) : (
-            <div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">JavaScript SDK Integration</h3>
-              <p className="text-slate-600 mb-4">
-                For more control and advanced features, use our JavaScript SDK:
-              </p>
-              <div className="relative">
-                <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm">
-                  <code>{scriptCode}</code>
-                </pre>
-                <button
-                  onClick={() => handleCopyCode(scriptCode)}
-                  className="absolute top-3 right-3 p-2 bg-slate-700 hover:bg-slate-600 rounded-md text-white transition-colors"
-                >
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-medium text-blue-800 mb-2">SDK Configuration Options</h4>
-                <pre className="text-sm text-blue-700 bg-white p-3 rounded border border-blue-200">
-                  {`{
-  container: '#element-id',    // CSS selector for container
-  theme: 'light',              // 'light' or 'dark'
-  width: '100%',               // Width of widget
-  height: '600px',             // Height of widget
-  autoResize: true,            // Auto-adjust height
-  onLoad: function() {},       // Callback when loaded
-  onError: function(error) {}  // Error handling
-}`}
-                </pre>
-              </div>
+
+            <div className="p-4 bg-green-50 rounded-lg">
+              <h4 className="font-medium text-green-800 mb-2 flex items-center">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Customization Options
+              </h4>
+              <ul className="space-y-2 text-sm text-green-700">
+                <li>Add ?theme=dark to URL for dark mode</li>
+                <li>Add ?hideHeader=true to hide navigation</li>
+                <li>Style the iframe with CSS border and shadow</li>
+              </ul>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Authentication Guide */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">Authentication Setup</h3>
-        <div className="space-y-4">
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-green-600 text-sm font-bold">1</span>
-            </div>
-            <div>
-              <h4 className="font-medium text-slate-700">Generate API Key</h4>
-              <p className="text-sm text-slate-600">Create an API key from your dashboard settings for secure authentication</p>
-            </div>
-          </div>
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-green-600 text-sm font-bold">2</span>
-            </div>
-            <div>
-              <h4 className="font-medium text-slate-700">Add to iframe URL</h4>
-              <p className="text-sm text-slate-600">Append your API key to the embed URL: <code className="bg-slate-100 px-2 py-1 rounded">?api_key=YOUR_API_KEY</code></p>
-            </div>
-          </div>
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-green-600 text-sm font-bold">3</span>
-            </div>
-            <div>
-              <h4 className="font-medium text-slate-700">Configure SSO (Optional)</h4>
-              <p className="text-sm text-slate-600">Enable single sign-on for seamless user authentication across platforms</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-          <p className="text-sm text-yellow-700">
-            <strong className="font-medium">Note:</strong> For security reasons, always use HTTPS in production environments. 
-            Test your integration in staging first before deploying to live sites.
+      {/* Complete HTML Example */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden mb-8">
+        <div className="border-b border-slate-200 bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
+          <h2 className="text-lg font-semibold text-slate-800 flex items-center">
+            <Globe className="w-5 h-5 mr-2 text-purple-600" />
+            Complete HTML Example
+          </h2>
+          <p className="text-sm text-slate-600 mt-1">
+            A complete HTML template you can use as a starting point
           </p>
         </div>
+
+        <div className="p-6">
+          <div className="relative">
+            <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm font-mono max-h-96">
+              <code>{htmlCode}</code>
+            </pre>
+            <button
+              onClick={handleCopyHtml}
+              className="absolute top-3 right-3 p-2 bg-slate-700 hover:bg-slate-600 rounded-md text-white transition-colors flex items-center gap-2"
+            >
+              {copiedScript ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span className="text-xs">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span className="text-xs">Copy HTML</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Live Preview */}
-      <div className="mt-8 bg-white rounded-lg border border-slate-200 shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">Live Preview</h3>
+      {/* Platform-Specific Guides */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 mb-8">
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Platform-Specific Integration</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 border border-slate-200 rounded-lg hover:border-blue-300 transition-colors">
+            <h3 className="font-medium text-slate-800 mb-2">WordPress</h3>
+            <p className="text-sm text-slate-600 mb-3">Add to any page using HTML block or widget</p>
+            <div className="text-xs bg-slate-100 p-2 rounded">
+              Use the "Custom HTML" block in Gutenberg or add to text widget
+            </div>
+          </div>
+
+          <div className="p-4 border border-slate-200 rounded-lg hover:border-blue-300 transition-colors">
+            <h3 className="font-medium text-slate-800 mb-2">Wix</h3>
+            <p className="text-sm text-slate-600 mb-3">Add using Embed Code element</p>
+            <div className="text-xs bg-slate-100 p-2 rounded">
+              Add → Embed → Embed Code → Paste HTML
+            </div>
+          </div>
+
+          <div className="p-4 border border-slate-200 rounded-lg hover:border-blue-300 transition-colors">
+            <h3 className="font-medium text-slate-800 mb-2">Shopify</h3>
+            <p className="text-sm text-slate-600 mb-3">Add to any page using custom HTML section</p>
+            <div className="text-xs bg-slate-100 p-2 rounded">
+              Customize theme → Add section → Custom HTML
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Live Preview Guide */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Preview Your Integration</h2>
+        <p className="text-slate-600 mb-4">
+          After adding the iframe code to your website, your users will see the login page. 
+          Once logged in, they'll have full access to the attendance management system.
+        </p>
+        
         <div className="border border-slate-200 rounded-lg overflow-hidden">
           <div className="bg-slate-50 px-4 py-2 border-b border-slate-200 flex items-center">
             <div className="flex space-x-2">
@@ -226,17 +293,44 @@ const Integration = () => {
               <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
             </div>
-            <span className="ml-4 text-xs text-slate-500">Preview Mode</span>
+            <span className="ml-4 text-xs text-slate-500">Preview - How it looks embedded</span>
           </div>
           <div className="p-4 bg-white">
-            <div className="bg-slate-100 rounded-lg p-8 flex items-center justify-center text-slate-400">
-              <div className="text-center">
-                <Globe className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                <p>Your embedded attendance system will appear here</p>
-                <p className="text-sm mt-2">Login required for actual content</p>
+            <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 bg-blue-50">
+              <div className="text-center text-blue-600 mb-3">
+                <Globe className="w-8 h-8 mx-auto mb-2" />
+                <p className="font-medium">Your Website Content</p>
+              </div>
+              
+              {/* Iframe Preview */}
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+                <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-slate-600">Attendly Attendance System</span>
+                  </div>
+                  <span className="text-xs text-slate-400">iframe</span>
+                </div>
+                <div className="h-32 bg-gradient-to-r from-blue-50 to-indigo-50 rounded flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-sm text-slate-600">Login page will appear here</p>
+                    <p className="text-xs text-slate-400 mt-1">After login, full dashboard loads</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center text-blue-600 mt-3">
+                <p className="text-sm">↓ More Your Website Content ↓</p>
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+          <p className="text-sm text-yellow-700">
+            <strong className="font-medium">Note:</strong> Make sure your website uses HTTPS for secure iframe embedding. 
+            Test on a staging site first before adding to production.
+          </p>
         </div>
       </div>
     </div>
