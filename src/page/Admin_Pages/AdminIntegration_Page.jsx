@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Code, Copy, Check, Globe, Shield, Zap, Smartphone, ExternalLink, CheckCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
+import HeaderComponent from '../../components/HeaderComponent';
 
 const AdminIntegration_Page = () => {
   const [copiedIframe, setCopiedIframe] = useState(false);
@@ -109,13 +110,11 @@ const AdminIntegration_Page = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">Embed Attendly on Your Website</h1>
-        <p className="text-slate-600">
-          Add our attendance management system to any website using simple iframe integration.
-          Works with HTML, WordPress, Wix, Shopify, and any platform that supports iframes.
-        </p>
-      </div>
+      <HeaderComponent
+        heading={"Website Integration"}
+        subHeading={"Add Attendly to Your Site"}
+        role="admin"
+      />
 
       {/* Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
