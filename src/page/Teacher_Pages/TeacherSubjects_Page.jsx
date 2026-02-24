@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import {
   FiPlus,
-  FiEdit2,
   FiTrash2,
   FiSearch,
   FiX,
@@ -16,7 +15,8 @@ import {
   FiCalendar,
   FiClock,
   FiUsers,
-  FiUpload
+  FiUpload,
+  FiUserMinus
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import * as XLSX from 'xlsx'
@@ -25,12 +25,15 @@ import {
   createSubject,
   updateSubject,
   deleteSubject,
-  resetSubjectAttendance
+  resetSubjectAttendance,
+  getRegisteredStudents,
+  addRegisteredStudents,
+  deleteRegisteredStudent
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
   const dispatch = useDispatch()
-  const { subjects, isLoading, currentSubject } = useSelector((state) => state.teacherSubject)
+  const { subjects, isLoading, registeredStudents, studentsLoading } = useSelector((state) => state.teacherSubject)
 
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -71,11 +74,11 @@ const TeacherSubjects_Page = () => {
   // Filter subjects
   const filteredSubjects = subjects.filter(subject => {
     const matchesSearch =
-      subject.subjectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.departmentOffering?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.session?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.creditHours?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      subject.subjectCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.semester?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesFilter = statusFilter === 'All' || subject.status === statusFilter
@@ -108,7 +111,8 @@ const TeacherSubjects_Page = () => {
     try {
       const formData = {
         ...subjectForm,
-        userId: currentUserId
+        userId: currentUserId,
+        registeredStudents: [] // Initialize with empty students array
       }
 
       await dispatch(createSubject(formData)).unwrap()
@@ -201,31 +205,68 @@ const TeacherSubjects_Page = () => {
   };
 
   // Handle insert students
-  const handleInsertStudents = () => {
+  const handleInsertStudents = async () => {
     if (importedStudents.length === 0) {
       toast.error('No students to insert');
       return;
     }
     
-    console.log('Imported Students Array:', importedStudents);
-    toast.success(`${importedStudents.length} students logged to console!`);
-    
-    // You can add API call here to save students
-    // For now, we'll just close the modal after logging
-    setShowImportStudentsModal(false);
-    setImportedStudents([]);
+    try {
+      await dispatch(addRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId,
+        students: importedStudents
+      })).unwrap();
+      
+      toast.success(`${importedStudents.length} students added successfully!`);
+      setShowImportStudentsModal(false);
+      setImportedStudents([]);
+      
+      // Refresh subjects to update the count
+      dispatch(getSubjectsByUser(currentUserId));
+    } catch (error) {
+      toast.error(error?.message || 'Failed to add students');
+    }
   };
 
-  // Sample registered students data (replace with actual data from API)
-  const getRegisteredStudents = (subjectId) => {
-    // This is sample data - replace with actual API call
-    return [
-      { registrationNo: '2024-CS-001', studentName: 'John Doe' },
-      { registrationNo: '2024-CS-002', studentName: 'Jane Smith' },
-      { registrationNo: '2024-CS-003', studentName: 'Mike Johnson' },
-      { registrationNo: '2024-CS-004', studentName: 'Sarah Williams' },
-      { registrationNo: '2024-CS-005', studentName: 'David Brown' },
-    ];
+  // Handle view registered students
+  const handleViewStudents = async (subject) => {
+    try {
+      const result = await dispatch(getRegisteredStudents({
+        subjectId: subject.id,
+        teacherId: currentUserId
+      })).unwrap();
+      
+      setSelectedSubject(subject);
+      setShowViewStudentsModal(true);
+    } catch (error) {
+      toast.error(error?.message || 'Failed to fetch registered students');
+    }
+  };
+
+  // Handle delete registered student
+  const handleDeleteStudent = async (studentId) => {
+    if (!window.confirm('Are you sure you want to remove this student?')) {
+      return;
+    }
+
+    try {
+      await dispatch(deleteRegisteredStudent({
+        subjectId: selectedSubject.id,
+        studentId: studentId,
+        teacherId: currentUserId
+      })).unwrap();
+      
+      toast.success('Student removed successfully!');
+      
+      // Refresh the students list
+      dispatch(getRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      }));
+    } catch (error) {
+      toast.error(error?.message || 'Failed to delete student');
+    }
   };
 
   const openCreateModal = () => {
@@ -256,11 +297,6 @@ const TeacherSubjects_Page = () => {
   const openResetModal = (subject) => {
     setSelectedSubject(subject)
     setShowResetModal(true)
-  }
-
-  const openViewStudentsModal = (subject) => {
-    setSelectedSubject(subject);
-    setShowViewStudentsModal(true);
   }
 
   const openImportStudentsModal = (subject) => {
@@ -332,8 +368,8 @@ const TeacherSubjects_Page = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {/* Quick Stats - Light and Clean */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -373,6 +409,20 @@ const TeacherSubjects_Page = () => {
               </div>
             </div>
           </div>
+
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Total Students</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">
+                  {subjects.reduce((acc, s) => acc + (s.registeredStudentsCount || 0), 0)}
+                </p>
+              </div>
+              <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                <FiUsers className="h-5 w-5 text-orange-600" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Search and Filter Section */}
@@ -407,19 +457,19 @@ const TeacherSubjects_Page = () => {
               className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors flex items-center whitespace-nowrap disabled:opacity-50"
             >
               <FiPlus className="h-4 w-4 mr-1.5" />
-              New Courses
+              New Course
             </button>
           </div>
         </div>
 
-        {/* Subjects Table - Clean */}
+        {/* Subjects Table */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Courses
+                    Course
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Discipline
@@ -429,6 +479,9 @@ const TeacherSubjects_Page = () => {
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Semester
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Students
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created
@@ -444,10 +497,10 @@ const TeacherSubjects_Page = () => {
               <tbody className="divide-y divide-gray-200">
                 {currentSubjects.length > 0 ? (
                   currentSubjects.map((subject) => (
-                    <tr key={subject._id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={subject.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center text-blue-600 font-medium text-sm shrink-0">
+                          <div className={`w-8 h-8 ${subject.color || 'bg-blue-500'} rounded-md flex items-center justify-center text-white font-medium text-sm shrink-0`}>
                             {subject.title?.charAt(0).toUpperCase()}
                           </div>
                           <div className="ml-3">
@@ -455,13 +508,13 @@ const TeacherSubjects_Page = () => {
                               {subject.title}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {subject.session}
+                              {subject.session} | {subject.creditHours} Cr
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="text-sm text-gray-600 font-mono">
+                        <span className="text-sm text-gray-600">
                           {subject.departmentOffering}
                         </span>
                       </td>
@@ -471,12 +524,17 @@ const TeacherSubjects_Page = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center text-sm text-gray-600">
+                        <div className="text-sm text-gray-600">
                           {subject.semester}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center text-sm text-gray-600">
+                        <div className="text-sm text-gray-600">
+                          {subject.registeredStudentsCount || 0}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <div className="text-sm text-gray-600">
                           {formatDate(subject.createdAt)}
                         </div>
                       </td>
@@ -488,7 +546,7 @@ const TeacherSubjects_Page = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center justify-center space-x-2">
                           <button
-                            onClick={() => openViewStudentsModal(subject)}
+                            onClick={() => handleViewStudents(subject)}
                             className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
                             title="View Registered Students"
                           >
@@ -528,7 +586,7 @@ const TeacherSubjects_Page = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="px-4 py-8 text-center">
+                    <td colSpan="8" className="px-4 py-8 text-center">
                       <div className="text-gray-500">
                         <FiBook className="h-8 w-8 text-gray-300 mx-auto mb-2" />
                         <p className="text-sm">No subjects found</p>
@@ -545,7 +603,7 @@ const TeacherSubjects_Page = () => {
             </table>
           </div>
 
-          {/* Simple Pagination */}
+          {/* Pagination */}
           {filteredSubjects.length > 0 && (
             <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
               <span className="text-xs text-gray-500">
@@ -575,7 +633,7 @@ const TeacherSubjects_Page = () => {
         </div>
       </div>
 
-      {/* Create Subject Modal */}
+      {/* Create Subject Modal (same as before) */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-md">
@@ -606,7 +664,7 @@ const TeacherSubjects_Page = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Department Offering the Course *
+                    Department Offering *
                   </label>
                   <input
                     type="text"
@@ -655,7 +713,7 @@ const TeacherSubjects_Page = () => {
                     name="creditHours"
                     value={subjectForm.creditHours}
                     onChange={handleInputChange}
-                    placeholder="e.g., 2 + 0"
+                    placeholder="e.g., 3"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -695,7 +753,7 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
-      {/* Edit Subject Modal */}
+      {/* Edit Subject Modal (same as before) */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-md">
@@ -771,7 +829,6 @@ const TeacherSubjects_Page = () => {
                     name="creditHours"
                     value={subjectForm.creditHours}
                     onChange={handleInputChange}
-                    placeholder="e.g., 2nd"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -785,7 +842,6 @@ const TeacherSubjects_Page = () => {
                     name="session"
                     value={subjectForm.session}
                     onChange={handleInputChange}
-                    placeholder="e.g., 2nd"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -838,7 +894,7 @@ const TeacherSubjects_Page = () => {
                 <span className="font-bold text-gray-900">"{selectedSubject?.title}"</span>?
               </p>
               <p className="text-xs text-red-600 mt-2">
-                This action cannot be undone.
+                This will delete all associated students and attendance records.
               </p>
             </div>
             <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
@@ -872,7 +928,7 @@ const TeacherSubjects_Page = () => {
                 <span className="font-medium text-gray-900">"{selectedSubject?.title}"</span>?
               </p>
               <p className="text-xs text-yellow-600 mt-2">
-                This will permanently delete all attendance data.
+                This will permanently delete all attendance data but keep registered students.
               </p>
             </div>
             <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
@@ -916,26 +972,51 @@ const TeacherSubjects_Page = () => {
                   Session: <span className="font-medium">{selectedSubject.session}</span>
                 </p>
               </div>
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Registration No</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {getRegisteredStudents(selectedSubject.id).map((student, index) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
-                        <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
-                        <td className="px-4 py-2 text-sm text-gray-900">{student.studentName}</td>
+              {studentsLoading ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <p className="mt-2 text-sm text-gray-500">Loading students...</p>
+                </div>
+              ) : (
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Registration No</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
+                        <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {registeredStudents?.registeredStudents?.length > 0 ? (
+                        registeredStudents.registeredStudents.map((student, index) => (
+                          <tr key={student._id} className="hover:bg-gray-50">
+                            <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
+                            <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
+                            <td className="px-4 py-2 text-sm text-gray-900">{student.studentName}</td>
+                            <td className="px-4 py-2 text-sm text-center">
+                              <button
+                                onClick={() => handleDeleteStudent(student._id)}
+                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                                title="Remove Student"
+                              >
+                                <FiUserMinus className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
+                            No students registered yet
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
             <div className="px-4 py-3 border-t border-gray-200 flex justify-end">
               <button
@@ -968,9 +1049,9 @@ const TeacherSubjects_Page = () => {
               </button>
             </div>
             <div className="p-4">
-              <div className="flex items-center gap-4 mb-4">
+              <div className="mb-4">
                 <p className="text-sm text-gray-600 mb-2">
-                  Upload Excel file with columns:
+                  Upload Excel file with columns: <span className="font-mono bg-gray-100 px-2 py-1 rounded">Registration No</span> and <span className="font-mono bg-gray-100 px-2 py-1 rounded">Student Name</span>
                 </p>
                 <div className="flex items-center space-x-3">
                   <label className="relative">
@@ -1032,14 +1113,14 @@ const TeacherSubjects_Page = () => {
               </button>
               <button
                 onClick={handleInsertStudents}
-                disabled={importedStudents.length === 0}
+                disabled={importedStudents.length === 0 || studentsLoading}
                 className={`px-3 py-1.5 text-xs rounded-md font-medium ${
-                  importedStudents.length > 0
+                  importedStudents.length > 0 && !studentsLoading
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                Insert {importedStudents.length > 0 ? `(${importedStudents.length})` : ''}
+                {studentsLoading ? 'Saving...' : `Insert ${importedStudents.length > 0 ? `(${importedStudents.length})` : ''}`}
               </button>
             </div>
           </div>
