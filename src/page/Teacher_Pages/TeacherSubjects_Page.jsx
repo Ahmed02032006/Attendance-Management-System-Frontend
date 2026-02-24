@@ -970,7 +970,7 @@ const TeacherSubjects_Page = () => {
             <div className="p-4">
               <div className="mb-4">
                 <p className="text-sm text-gray-600 mb-2">
-                  Upload Excel file with columns: <span className="font-mono bg-gray-100 px-2 py-1 rounded">Registration No</span> and <span className="font-mono bg-gray-100 px-2 py-1 rounded">Student Name</span>
+                  Upload Excel file with columns:
                 </p>
                 <div className="flex items-center space-x-3">
                   <label className="relative">
