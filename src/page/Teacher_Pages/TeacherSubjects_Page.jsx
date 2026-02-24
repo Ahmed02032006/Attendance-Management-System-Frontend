@@ -46,7 +46,7 @@ const TeacherSubjects_Page = () => {
   const [statusFilter, setStatusFilter] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
   const [subjectsPerPage] = useState(5)
-  
+
   // For imported students data
   const [importedStudents, setImportedStudents] = useState([])
   const [isUploading, setIsUploading] = useState(false)
@@ -210,18 +210,18 @@ const TeacherSubjects_Page = () => {
       toast.error('No students to insert');
       return;
     }
-    
+
     try {
       await dispatch(addRegisteredStudents({
         subjectId: selectedSubject.id,
         teacherId: currentUserId,
         students: importedStudents
       })).unwrap();
-      
+
       toast.success(`${importedStudents.length} students added successfully!`);
       setShowImportStudentsModal(false);
       setImportedStudents([]);
-      
+
       // Refresh subjects to update the count
       dispatch(getSubjectsByUser(currentUserId));
     } catch (error) {
@@ -236,7 +236,7 @@ const TeacherSubjects_Page = () => {
         subjectId: subject.id,
         teacherId: currentUserId
       })).unwrap();
-      
+
       setSelectedSubject(subject);
       setShowViewStudentsModal(true);
     } catch (error) {
@@ -256,9 +256,9 @@ const TeacherSubjects_Page = () => {
         studentId: studentId,
         teacherId: currentUserId
       })).unwrap();
-      
+
       toast.success('Student removed successfully!');
-      
+
       // Refresh the students list
       dispatch(getRegisteredStudents({
         subjectId: selectedSubject.id,
@@ -952,7 +952,7 @@ const TeacherSubjects_Page = () => {
       {/* View Students Modal */}
       {showViewStudentsModal && selectedSubject && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-2xl">
+          <div className="bg-white rounded-lg w-full max-w-3xl max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
               <h3 className="text-base font-medium text-gray-900">
                 Registered Students - {selectedSubject.title}
@@ -964,60 +964,65 @@ const TeacherSubjects_Page = () => {
                 <FiX className="h-4 w-4" />
               </button>
             </div>
+
             <div className="p-4">
               <div className="mb-4">
                 <p className="text-sm text-gray-600">
-                  Course Code: <span className="font-medium">{selectedSubject.code}</span> | 
-                  Semester: <span className="font-medium">{selectedSubject.semester}</span> | 
+                  Course Code: <span className="font-medium">{selectedSubject.code}</span> |
+                  Semester: <span className="font-medium">{selectedSubject.semester}</span> |
                   Session: <span className="font-medium">{selectedSubject.session}</span>
                 </p>
               </div>
+
               {studentsLoading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <p className="mt-2 text-sm text-gray-500">Loading students...</p>
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
+                  <p className="mt-3 text-sm text-gray-500">Loading students...</p>
                 </div>
               ) : (
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Registration No</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
-                        <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {registeredStudents?.registeredStudents?.length > 0 ? (
-                        registeredStudents.registeredStudents.map((student, index) => (
-                          <tr key={student._id} className="hover:bg-gray-50">
-                            <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
-                            <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
-                            <td className="px-4 py-2 text-sm text-gray-900">{student.studentName}</td>
-                            <td className="px-4 py-2 text-sm text-center">
-                              <button
-                                onClick={() => handleDeleteStudent(student._id)}
-                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                                title="Remove Student"
-                              >
-                                <FiUserMinus className="h-4 w-4" />
-                              </button>
+                  <div className="max-h-[400px] overflow-y-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 sticky top-0 z-10">
+                        <tr>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Registration No</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
+                          <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {registeredStudents?.registeredStudents?.length > 0 ? (
+                          registeredStudents.registeredStudents.map((student, index) => (
+                            <tr key={student._id} className="hover:bg-gray-50">
+                              <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{student.studentName}</td>
+                              <td className="px-4 py-2 text-sm text-center">
+                                <button
+                                  onClick={() => handleDeleteStudent(student._id)}
+                                  className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                                  title="Remove Student"
+                                >
+                                  <FiUserMinus className="h-4 w-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
+                              No students registered yet
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
-                            No students registered yet
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
+
             <div className="px-4 py-3 border-t border-gray-200 flex justify-end">
               <button
                 onClick={() => setShowViewStudentsModal(false)}
@@ -1114,11 +1119,10 @@ const TeacherSubjects_Page = () => {
               <button
                 onClick={handleInsertStudents}
                 disabled={importedStudents.length === 0 || studentsLoading}
-                className={`px-3 py-1.5 text-xs rounded-md font-medium ${
-                  importedStudents.length > 0 && !studentsLoading
+                className={`px-3 py-1.5 text-xs rounded-md font-medium ${importedStudents.length > 0 && !studentsLoading
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                  }`}
               >
                 {studentsLoading ? 'Saving...' : `Insert ${importedStudents.length > 0 ? `(${importedStudents.length})` : ''}`}
               </button>
