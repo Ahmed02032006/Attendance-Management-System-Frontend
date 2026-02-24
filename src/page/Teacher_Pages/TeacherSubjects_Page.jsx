@@ -14,9 +14,12 @@ import {
   FiBook,
   FiLayers,
   FiCalendar,
-  FiClock
+  FiClock,
+  FiUsers,
+  FiUpload
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
+import * as XLSX from 'xlsx'
 import {
   getSubjectsByUser,
   createSubject,
@@ -33,11 +36,17 @@ const TeacherSubjects_Page = () => {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
+  const [showViewStudentsModal, setShowViewStudentsModal] = useState(false)
+  const [showImportStudentsModal, setShowImportStudentsModal] = useState(false)
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
   const [subjectsPerPage] = useState(5)
+  
+  // For imported students data
+  const [importedStudents, setImportedStudents] = useState([])
+  const [isUploading, setIsUploading] = useState(false)
 
   const [subjectForm, setSubjectForm] = useState({
     subjectTitle: '',
@@ -154,6 +163,71 @@ const TeacherSubjects_Page = () => {
     }
   }
 
+  // Handle file upload for Excel
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        // Extract only Registration No and Student Name
+        const students = jsonData.map(row => ({
+          registrationNo: row['Registration No'] || row['registrationNo'] || row['Registration'] || '',
+          studentName: row['Student Name'] || row['studentName'] || row['Name'] || row['name'] || ''
+        })).filter(student => student.registrationNo && student.studentName);
+
+        setImportedStudents(students);
+        toast.success(`${students.length} students imported successfully!`);
+      } catch (error) {
+        toast.error('Error parsing Excel file. Please check the format.');
+        console.error('Error parsing Excel:', error);
+      } finally {
+        setIsUploading(false);
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+    // Clear the input
+    e.target.value = '';
+  };
+
+  // Handle insert students
+  const handleInsertStudents = () => {
+    if (importedStudents.length === 0) {
+      toast.error('No students to insert');
+      return;
+    }
+    
+    console.log('Imported Students Array:', importedStudents);
+    toast.success(`${importedStudents.length} students logged to console!`);
+    
+    // You can add API call here to save students
+    // For now, we'll just close the modal after logging
+    setShowImportStudentsModal(false);
+    setImportedStudents([]);
+  };
+
+  // Sample registered students data (replace with actual data from API)
+  const getRegisteredStudents = (subjectId) => {
+    // This is sample data - replace with actual API call
+    return [
+      { registrationNo: '2024-CS-001', studentName: 'John Doe' },
+      { registrationNo: '2024-CS-002', studentName: 'Jane Smith' },
+      { registrationNo: '2024-CS-003', studentName: 'Mike Johnson' },
+      { registrationNo: '2024-CS-004', studentName: 'Sarah Williams' },
+      { registrationNo: '2024-CS-005', studentName: 'David Brown' },
+    ];
+  };
+
   const openCreateModal = () => {
     resetForm()
     setShowCreateModal(true)
@@ -182,6 +256,17 @@ const TeacherSubjects_Page = () => {
   const openResetModal = (subject) => {
     setSelectedSubject(subject)
     setShowResetModal(true)
+  }
+
+  const openViewStudentsModal = (subject) => {
+    setSelectedSubject(subject);
+    setShowViewStudentsModal(true);
+  }
+
+  const openImportStudentsModal = (subject) => {
+    setSelectedSubject(subject);
+    setImportedStudents([]);
+    setShowImportStudentsModal(true);
   }
 
   const resetForm = () => {
@@ -387,13 +472,11 @@ const TeacherSubjects_Page = () => {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center text-sm text-gray-600">
-                          {/* <FiCalendar className="h-3.5 w-3.5 mr-1 text-gray-400" /> */}
                           {subject.semester}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center text-sm text-gray-600">
-                          {/* <FiClock className="h-3.5 w-3.5 mr-1 text-gray-400" /> */}
                           {formatDate(subject.createdAt)}
                         </div>
                       </td>
@@ -405,8 +488,22 @@ const TeacherSubjects_Page = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center justify-center space-x-2">
                           <button
+                            onClick={() => openViewStudentsModal(subject)}
+                            className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
+                            title="View Registered Students"
+                          >
+                            <FiUsers className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => openImportStudentsModal(subject)}
+                            className="p-1.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
+                            title="Import Students"
+                          >
+                            <FiUpload className="h-4 w-4" />
+                          </button>
+                          <button
                             onClick={() => openEditModal(subject)}
-                            className="p-1.5 text-blue-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                            className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                             title="Edit Subject"
                           >
                             <FiEdit className="h-4 w-4" />
@@ -431,7 +528,7 @@ const TeacherSubjects_Page = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-4 py-8 text-center">
+                    <td colSpan="7" className="px-4 py-8 text-center">
                       <div className="text-gray-500">
                         <FiBook className="h-8 w-8 text-gray-300 mx-auto mb-2" />
                         <p className="text-sm">No subjects found</p>
@@ -790,6 +887,159 @@ const TeacherSubjects_Page = () => {
                 className="px-3 py-1.5 bg-yellow-600 text-white text-xs rounded-md hover:bg-yellow-700 font-medium"
               >
                 Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Students Modal */}
+      {showViewStudentsModal && selectedSubject && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full max-w-2xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <h3 className="text-base font-medium text-gray-900">
+                Registered Students - {selectedSubject.title}
+              </h3>
+              <button
+                onClick={() => setShowViewStudentsModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded"
+              >
+                <FiX className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="mb-4">
+                <p className="text-sm text-gray-600">
+                  Course Code: <span className="font-medium">{selectedSubject.code}</span> | 
+                  Semester: <span className="font-medium">{selectedSubject.semester}</span> | 
+                  Session: <span className="font-medium">{selectedSubject.session}</span>
+                </p>
+              </div>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Registration No</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {getRegisteredStudents(selectedSubject.id).map((student, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900">{student.studentName}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="px-4 py-3 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setShowViewStudentsModal(false)}
+                className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs rounded-md hover:bg-gray-200 font-medium"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Students Modal */}
+      {showImportStudentsModal && selectedSubject && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full max-w-2xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <h3 className="text-base font-medium text-gray-900">
+                Import Students - {selectedSubject.title}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowImportStudentsModal(false);
+                  setImportedStudents([]);
+                }}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded"
+              >
+                <FiX className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  Upload Excel file with columns: <span className="font-mono bg-gray-100 px-2 py-1 rounded">Registration No</span> and <span className="font-mono bg-gray-100 px-2 py-1 rounded">Student Name</span>
+                </p>
+                <div className="flex items-center space-x-3">
+                  <label className="relative">
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      disabled={isUploading}
+                    />
+                    <div className={`px-4 py-2 ${isUploading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'} text-white text-sm rounded-md cursor-pointer transition-colors flex items-center`}>
+                      <FiUpload className="h-4 w-4 mr-2" />
+                      {isUploading ? 'Uploading...' : 'Upload Excel'}
+                    </div>
+                  </label>
+                  {importedStudents.length > 0 && (
+                    <span className="text-sm text-green-600">
+                      {importedStudents.length} students loaded
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {importedStudents.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Imported Students Preview:</h4>
+                  <div className="border border-gray-200 rounded-lg overflow-hidden max-h-60 overflow-y-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Registration No</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {importedStudents.map((student, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
+                            <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
+                            <td className="px-4 py-2 text-sm text-gray-900">{student.studentName}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setShowImportStudentsModal(false);
+                  setImportedStudents([]);
+                }}
+                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleInsertStudents}
+                disabled={importedStudents.length === 0}
+                className={`px-3 py-1.5 text-xs rounded-md font-medium ${
+                  importedStudents.length > 0
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                Insert {importedStudents.length > 0 ? `(${importedStudents.length})` : ''}
               </button>
             </div>
           </div>
