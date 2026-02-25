@@ -1215,11 +1215,11 @@ const TeacherSubjects_Page = () => {
                     </li>
                     <li className="flex items-start text-xs">
                       <span className="text-blue-600 font-bold mr-2">•</span>
-                      <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded text-blue-600 text-[10px]">Registration No</span></span>
+                      <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded border border-blue-400 text-blue-600 text-[10px]">Registration No</span></span>
                     </li>
                     <li className="flex items-start text-xs">
                       <span className="text-blue-600 font-bold mr-2">•</span>
-                      <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded text-blue-600 text-[10px]">Student Name</span></span>
+                      <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded border border-blue-400 text-blue-600 text-[10px]">Student Name</span></span>
                     </li>
                   </ul>
                 </div>
