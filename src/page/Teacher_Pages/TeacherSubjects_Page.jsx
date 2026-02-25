@@ -1110,7 +1110,7 @@ const TeacherSubjects_Page = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-linear-to-r from-blue-50 to-indigo-50">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -1133,12 +1133,12 @@ const TeacherSubjects_Page = () => {
               </div>
             </div>
 
-            {/* Body - Adjusted padding to prevent cutoff */}
+            {/* Body */}
             <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 130px)' }}>
               {/* Info Card */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <div className="flex items-start">
-                  <FiInfo className="h-5 w-5 text-blue-600 mt-0.5 mr-3 shrink-0" />
+                  <FiInfo className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="text-sm font-medium text-blue-800">Instructions</h4>
                     <p className="text-sm text-blue-700 mt-1">
@@ -1148,50 +1148,46 @@ const TeacherSubjects_Page = () => {
                       <li><span className="font-medium">Registration No</span> - Student's registration number (e.g., FA24-BCS-001)</li>
                       <li><span className="font-medium">Student Name</span> - Full name of the student</li>
                     </ul>
-                    <p className="text-xs text-blue-600 mt-2">
-                      Note: Duplicate entries will be automatically handled.
-                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Action Buttons - Flex row layout */}
-              <div className="flex flex-row gap-4 mb-6">
-                {/* Upload Button */}
-                <div className="flex-1">
-                  <label className="block cursor-pointer">
-                    <input
-                      type="file"
-                      accept=".xlsx,.xls,.csv"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      disabled={isUploading}
-                    />
-                    <div className={`w-full border-2 border-dashed rounded-lg p-4 text-center transition-colors ${isUploading
-                      ? 'border-gray-300 bg-gray-50'
-                      : 'border-blue-300 hover:border-blue-400 bg-blue-50 hover:bg-blue-100'
-                      }`}>
-                      <FiUpload className={`h-6 w-6 mx-auto mb-1 ${isUploading ? 'text-gray-400' : 'text-blue-600'}`} />
-                      <p className={`text-xs font-medium ${isUploading ? 'text-gray-500' : 'text-blue-700'}`}>
-                        {isUploading ? 'Uploading...' : 'Click to upload file'}
-                      </p>
-                      <p className="text-[10px] text-gray-500 mt-1">
-                        .xlsx, .xls, .csv
-                      </p>
-                    </div>
-                  </label>
-                </div>
+              {/* Upload Button - Smaller size */}
+              <div className="mb-4">
+                <label className="block cursor-pointer">
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    disabled={isUploading}
+                  />
+                  <div className={`w-48 mx-auto border-2 border-dashed rounded-lg p-3 text-center transition-colors ${isUploading
+                    ? 'border-gray-300 bg-gray-50'
+                    : 'border-blue-300 hover:border-blue-400 bg-blue-50 hover:bg-blue-100'
+                    }`}>
+                    <FiUpload className={`h-5 w-5 mx-auto mb-1 ${isUploading ? 'text-gray-400' : 'text-blue-600'}`} />
+                    <p className={`text-xs font-medium ${isUploading ? 'text-gray-500' : 'text-blue-700'}`}>
+                      {isUploading ? 'Uploading...' : 'Click to upload'}
+                    </p>
+                    <p className="text-[10px] text-gray-500 mt-1">
+                      .xlsx, .xls, .csv
+                    </p>
+                  </div>
+                </label>
+              </div>
 
-                {/* Download Template Button */}
-                <div className="flex items-center">
+              {/* Simple Template Download Line */}
+              <div className="text-center mb-6">
+                <span className="text-xs text-gray-500">
+                  Need a template?{' '}
                   <button
                     onClick={downloadDummyExcel}
-                    className="flex items-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+                    className="text-blue-600 hover:text-blue-800 font-medium underline underline-offset-2"
                   >
-                    <FiFileText className="h-4 w-4 mr-2" />
-                    Download Template
+                    Download sample Excel file
                   </button>
-                </div>
+                </span>
               </div>
 
               {/* Imported Students Preview */}
