@@ -1286,7 +1286,7 @@ const TeacherSubjects_Page = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                          {importedStudents.slice(0, 8).map((student, index) => ( // Show only first 8
+                          {importedStudents.map((student, index) => ( // Show only first 8
                             <tr key={index} className="hover:bg-gray-50">
                               <td className="px-3 py-1.5 text-[11px] text-gray-600">{index + 1}</td>
                               <td className="px-3 py-1.5 text-[11px] text-gray-900 font-mono">{student.registrationNo}</td>
