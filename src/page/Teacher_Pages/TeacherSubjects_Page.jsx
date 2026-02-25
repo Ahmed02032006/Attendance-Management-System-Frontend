@@ -32,7 +32,8 @@ import {
   resetSubjectAttendance,
   getRegisteredStudents,
   addRegisteredStudents,
-  deleteRegisteredStudent
+  deleteRegisteredStudent,
+  deleteAllRegisteredStudents
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
@@ -404,6 +405,43 @@ const TeacherSubjects_Page = () => {
       ? 'bg-green-100 text-green-700'
       : 'bg-gray-100 text-gray-700'
   }
+
+  // Handle delete all registered students
+  const handleDeleteAllStudents = async () => {
+    if (!selectedSubject) return;
+
+    const studentCount = registeredStudents?.registeredStudents?.length || 0;
+
+    if (studentCount === 0) {
+      toast.error('No students to delete');
+      return;
+    }
+
+    // Show confirmation dialog
+    if (!window.confirm(`Are you sure you want to delete ALL ${studentCount} students from "${selectedSubject.title}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await dispatch(deleteAllRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      })).unwrap();
+
+      toast.success(`${studentCount} students deleted successfully!`);
+
+      // Refresh the students list
+      dispatch(getRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      }));
+
+      // Also refresh subjects to update the count
+      dispatch(getSubjectsByUser(currentUserId));
+    } catch (error) {
+      toast.error(error?.message || 'Failed to delete students');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -1019,7 +1057,7 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
-      {/* View Students Modal */}
+      {/* View Students Modal with Delete All Button */}
       {showViewStudentsModal && selectedSubject && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-3xl max-h-[80vh] flex flex-col">
@@ -1036,12 +1074,23 @@ const TeacherSubjects_Page = () => {
             </div>
 
             <div className="p-4">
-              <div className="mb-4">
+              <div className="mb-4 flex justify-between items-center">
                 <p className="text-sm text-gray-600">
                   Course Code: <span className="font-medium">{selectedSubject.code}</span> |
                   Semester: <span className="font-medium">{selectedSubject.semester}</span> |
                   Session: <span className="font-medium">{selectedSubject.session}</span>
                 </p>
+
+                {/* Delete All Button - Only show if there are students */}
+                {registeredStudents?.registeredStudents?.length > 0 && (
+                  <button
+                    onClick={handleDeleteAllStudents}
+                    className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium"
+                  >
+                    <FiTrash2 className="h-3.5 w-3.5 mr-1.5" />
+                    Delete All ({registeredStudents?.registeredStudents?.length || 0})
+                  </button>
+                )}
               </div>
 
               {studentsLoading ? (
@@ -1207,8 +1256,8 @@ const TeacherSubjects_Page = () => {
                       disabled={isUploading}
                     />
                     <div className={`border-2 border-dashed rounded-xl p-5 text-center transition-all ${isUploading
-                        ? 'border-gray-300 bg-gray-100'
-                        : 'border-blue-200 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300'
+                      ? 'border-gray-300 bg-gray-100'
+                      : 'border-blue-200 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300'
                       }`}>
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                         <FiUpload className={`h-4 w-4 ${isUploading ? 'text-gray-500' : 'text-blue-600'}`} />
@@ -1224,7 +1273,7 @@ const TeacherSubjects_Page = () => {
                 </div>
               </div>
 
-              {/* Preview Section */}
+              {/* Preview Section - Updated to show ALL students */}
               {importedStudents.length > 0 && (
                 <div className="mt-6">
                   <div className="flex items-center justify-between mb-3">
@@ -1242,7 +1291,7 @@ const TeacherSubjects_Page = () => {
                   </div>
 
                   <div className="border border-gray-200 rounded-xl overflow-hidden">
-                    <div className="max-h-48 overflow-y-auto">
+                    <div className="max-h-60 overflow-y-auto">
                       <table className="w-full">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
@@ -1252,20 +1301,13 @@ const TeacherSubjects_Page = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                          {importedStudents.slice(0, 5).map((student, index) => (
+                          {importedStudents.map((student, index) => (
                             <tr key={index} className="hover:bg-gray-50">
                               <td className="px-4 py-2 text-xs text-gray-600">{index + 1}</td>
                               <td className="px-4 py-2 text-xs text-gray-900 font-mono">{student.registrationNo}</td>
                               <td className="px-4 py-2 text-xs text-gray-900">{student.studentName}</td>
                             </tr>
                           ))}
-                          {importedStudents.length > 5 && (
-                            <tr>
-                              <td colSpan="3" className="px-4 py-2 text-center text-xs text-gray-400">
-                                +{importedStudents.length - 5} more students
-                              </td>
-                            </tr>
-                          )}
                         </tbody>
                       </table>
                     </div>
@@ -1289,8 +1331,8 @@ const TeacherSubjects_Page = () => {
                 onClick={handleInsertStudents}
                 disabled={importedStudents.length === 0 || studentsLoading}
                 className={`px-6 py-2 text-sm rounded-lg font-medium transition-all flex items-center shadow-sm ${importedStudents.length > 0 && !studentsLoading
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-blue-200'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-blue-200'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 {studentsLoading ? (

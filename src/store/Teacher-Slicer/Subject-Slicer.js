@@ -195,6 +195,19 @@ export const deleteRegisteredStudent = createAsyncThunk(
   }
 );
 
+// Delete all registered students
+export const deleteAllRegisteredStudents = createAsyncThunk(
+  'teacherSubject/deleteAllRegisteredStudents',
+  async ({ subjectId, teacherId }, { rejectWithValue }) => {
+    try {
+      const response = await api.delete(`${BASE_URL}/subject/${subjectId}/registered-students?teacherId=${teacherId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const subjectSlicer = createSlice({
   name: "subjects",
   initialState: initialState,
@@ -300,7 +313,7 @@ const subjectSlicer = createSlice({
           s => s.id === action.payload.data?.subjectId
         );
         if (subjectIndex !== -1) {
-          state.subjects[subjectIndex].registeredStudentsCount = 
+          state.subjects[subjectIndex].registeredStudentsCount =
             action.payload.data?.totalRegisteredStudents || 0;
         }
       })
@@ -316,7 +329,7 @@ const subjectSlicer = createSlice({
         state.studentsLoading = false;
         // Update the registered students list if we're viewing it
         if (state.registeredStudents?.registeredStudents) {
-          state.registeredStudents.registeredStudents = 
+          state.registeredStudents.registeredStudents =
             state.registeredStudents.registeredStudents.filter(
               s => s._id !== action.payload.studentId
             );
@@ -326,7 +339,7 @@ const subjectSlicer = createSlice({
           s => s.id === action.payload.subjectId
         );
         if (subjectIndex !== -1) {
-          state.subjects[subjectIndex].registeredStudentsCount = 
+          state.subjects[subjectIndex].registeredStudentsCount =
             action.payload.data?.remainingStudents || 0;
         }
       })
