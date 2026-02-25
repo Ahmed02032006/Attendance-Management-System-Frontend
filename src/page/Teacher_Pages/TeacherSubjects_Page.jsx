@@ -213,7 +213,7 @@ const TeacherSubjects_Page = () => {
 
     // Create worksheet
     const ws = XLSX.utils.json_to_sheet(dummyData);
-    
+
     // Set column widths
     ws['!cols'] = [
       { wch: 20 }, // Registration No column width
@@ -226,7 +226,7 @@ const TeacherSubjects_Page = () => {
 
     // Download file
     XLSX.writeFile(wb, 'student_import_template.xlsx');
-    
+
     toast.success('Dummy template downloaded successfully!');
   };
 
@@ -1110,11 +1110,11 @@ const TeacherSubjects_Page = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
+            <div className="px-6 py-4 border-b border-gray-200 bg-linear-to-r from-blue-50 to-indigo-50">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <FiUpload className="h-5 w-5 text-purple-600 mr-2" />
+                    <FiUpload className="h-5 w-5 text-blue-600 mr-2" />
                     Import Students
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
@@ -1133,12 +1133,12 @@ const TeacherSubjects_Page = () => {
               </div>
             </div>
 
-            {/* Body */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+            {/* Body - Adjusted padding to prevent cutoff */}
+            <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 130px)' }}>
               {/* Info Card */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <div className="flex items-start">
-                  <FiInfo className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <FiInfo className="h-5 w-5 text-blue-600 mt-0.5 mr-3 shrink-0" />
                   <div>
                     <h4 className="text-sm font-medium text-blue-800">Instructions</h4>
                     <p className="text-sm text-blue-700 mt-1">
@@ -1155,11 +1155,11 @@ const TeacherSubjects_Page = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              {/* Action Buttons - Flex row layout */}
+              <div className="flex flex-row gap-4 mb-6">
                 {/* Upload Button */}
                 <div className="flex-1">
-                  <label className="block">
+                  <label className="block cursor-pointer">
                     <input
                       type="file"
                       accept=".xlsx,.xls,.csv"
@@ -1167,26 +1167,26 @@ const TeacherSubjects_Page = () => {
                       className="hidden"
                       disabled={isUploading}
                     />
-                    <div className={`w-full border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isUploading
+                    <div className={`w-full border-2 border-dashed rounded-lg p-4 text-center transition-colors ${isUploading
                       ? 'border-gray-300 bg-gray-50'
-                      : 'border-purple-300 hover:border-purple-400 bg-purple-50 hover:bg-purple-100'
+                      : 'border-blue-300 hover:border-blue-400 bg-blue-50 hover:bg-blue-100'
                       }`}>
-                      <FiUpload className={`h-8 w-8 mx-auto mb-2 ${isUploading ? 'text-gray-400' : 'text-purple-600'}`} />
-                      <p className={`text-sm font-medium ${isUploading ? 'text-gray-500' : 'text-purple-700'}`}>
-                        {isUploading ? 'Uploading...' : 'Click to upload Excel/CSV file'}
+                      <FiUpload className={`h-6 w-6 mx-auto mb-1 ${isUploading ? 'text-gray-400' : 'text-blue-600'}`} />
+                      <p className={`text-xs font-medium ${isUploading ? 'text-gray-500' : 'text-blue-700'}`}>
+                        {isUploading ? 'Uploading...' : 'Click to upload file'}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Supports .xlsx, .xls, .csv files
+                      <p className="text-[10px] text-gray-500 mt-1">
+                        .xlsx, .xls, .csv
                       </p>
                     </div>
                   </label>
                 </div>
 
                 {/* Download Template Button */}
-                <div className="flex items-center justify-center sm:justify-start">
+                <div className="flex items-center">
                   <button
                     onClick={downloadDummyExcel}
-                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="flex items-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
                   >
                     <FiFileText className="h-4 w-4 mr-2" />
                     Download Template
@@ -1196,19 +1196,19 @@ const TeacherSubjects_Page = () => {
 
               {/* Imported Students Preview */}
               {importedStudents.length > 0 && (
-                <div className="mt-6">
+                <div className="mt-4">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-sm font-semibold text-gray-800 flex items-center">
-                      <FiUsers className="h-4 w-4 mr-2 text-purple-600" />
+                      <FiUsers className="h-4 w-4 mr-2 text-blue-600" />
                       Preview ({importedStudents.length} students)
                     </h4>
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
                       Ready to import
                     </span>
                   </div>
-                  
+
                   <div className="border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="max-h-60 overflow-y-auto">
+                    <div className="max-h-48 overflow-y-auto">
                       <table className="w-full">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
@@ -1231,8 +1231,8 @@ const TeacherSubjects_Page = () => {
                   </div>
 
                   {/* Summary Stats */}
-                  <div className="mt-3 flex gap-2">
-                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                  <div className="mt-2 flex gap-2">
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                       {importedStudents.length} students loaded
                     </span>
                   </div>
@@ -1241,7 +1241,7 @@ const TeacherSubjects_Page = () => {
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
+            <div className="px-6 py-3 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
               <button
                 onClick={() => {
                   setShowImportStudentsModal(false);
@@ -1255,8 +1255,8 @@ const TeacherSubjects_Page = () => {
                 onClick={handleInsertStudents}
                 disabled={importedStudents.length === 0 || studentsLoading}
                 className={`px-6 py-2 text-sm rounded-lg font-medium transition-colors flex items-center ${importedStudents.length > 0 && !studentsLoading
-                  ? 'bg-purple-600 text-white hover:bg-purple-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 {studentsLoading ? (
@@ -1272,6 +1272,7 @@ const TeacherSubjects_Page = () => {
           </div>
         </div>
       )}
+
     </div>
   )
 }
