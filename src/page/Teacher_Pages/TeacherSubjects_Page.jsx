@@ -1120,8 +1120,8 @@ const TeacherSubjects_Page = () => {
                 onClick={handleInsertStudents}
                 disabled={importedStudents.length === 0 || studentsLoading}
                 className={`px-3 py-1.5 text-xs rounded-md font-medium ${importedStudents.length > 0 && !studentsLoading
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 {studentsLoading ? 'Saving...' : `Insert ${importedStudents.length > 0 ? `(${importedStudents.length})` : ''}`}

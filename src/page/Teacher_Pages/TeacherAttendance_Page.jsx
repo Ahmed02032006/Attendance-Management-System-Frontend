@@ -898,12 +898,12 @@ const TeacherAttendance_Page = () => {
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
-                              {student.time}
+                              {student.time == "null" ? "--" : student.time}
                             </span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                              Present
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${student.state == "Absent" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+                              {student.status}
                             </span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-right">
