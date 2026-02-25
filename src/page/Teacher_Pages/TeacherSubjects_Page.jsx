@@ -46,6 +46,7 @@ const TeacherSubjects_Page = () => {
   const [showResetModal, setShowResetModal] = useState(false)
   const [showViewStudentsModal, setShowViewStudentsModal] = useState(false)
   const [showImportStudentsModal, setShowImportStudentsModal] = useState(false)
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false) // New state for delete all confirmation
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
@@ -282,7 +283,7 @@ const TeacherSubjects_Page = () => {
         students: importedStudents
       })).unwrap();
 
-      toast.success(`${importedStudents.length} students added successfully!`);
+      toast.success('Students added successfully!');
       setShowImportStudentsModal(false);
       setImportedStudents([]);
 
@@ -330,6 +331,41 @@ const TeacherSubjects_Page = () => {
       }));
     } catch (error) {
       toast.error(error?.message || 'Failed to delete student');
+    }
+  };
+
+  // Open delete all confirmation modal
+  const openDeleteAllModal = () => {
+    setShowDeleteAllModal(true);
+  };
+
+  // Handle delete all registered students
+  const handleDeleteAllStudents = async () => {
+    if (!selectedSubject) return;
+
+    const studentCount = registeredStudents?.registeredStudents?.length || 0;
+
+    try {
+      const result = await dispatch(deleteAllRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      })).unwrap();
+
+      toast.success(result.message || `${studentCount} students deleted successfully!`);
+      setShowDeleteAllModal(false);
+
+      // Refresh the students list
+      await dispatch(getRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      }));
+
+      // Also refresh subjects to update the count
+      await dispatch(getSubjectsByUser(currentUserId));
+    } catch (error) {
+      console.error('Delete all students error:', error);
+      toast.error(error?.message || 'Failed to delete students');
+      setShowDeleteAllModal(false);
     }
   };
 
@@ -405,44 +441,6 @@ const TeacherSubjects_Page = () => {
       ? 'bg-green-100 text-green-700'
       : 'bg-gray-100 text-gray-700'
   }
-
-  // Handle delete all registered students
-  const handleDeleteAllStudents = async () => {
-    if (!selectedSubject) return;
-
-    const studentCount = registeredStudents?.registeredStudents?.length || 0;
-
-    if (studentCount === 0) {
-      toast.error('No students to delete');
-      return;
-    }
-
-    // Show confirmation dialog
-    if (!window.confirm(`Are you sure you want to delete ALL ${studentCount} students from "${selectedSubject.title}"? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      const result = await dispatch(deleteAllRegisteredStudents({
-        subjectId: selectedSubject.id,
-        teacherId: currentUserId
-      })).unwrap();
-
-      toast.success(result.message || `${studentCount} students deleted successfully!`);
-
-      // Refresh the students list
-      await dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id,
-        teacherId: currentUserId
-      }));
-
-      // Also refresh subjects to update the count
-      await dispatch(getSubjectsByUser(currentUserId));
-    } catch (error) {
-      console.error('Delete all students error:', error);
-      toast.error(error?.message || 'Failed to delete students');
-    }
-  };
 
   if (isLoading) {
     return (
@@ -1085,7 +1083,7 @@ const TeacherSubjects_Page = () => {
                 {/* Delete All Button - Only show if there are students */}
                 {registeredStudents?.registeredStudents?.length > 0 && (
                   <button
-                    onClick={handleDeleteAllStudents}
+                    onClick={openDeleteAllModal} // Changed to open modal instead of direct delete
                     className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium"
                   >
                     <FiTrash2 className="h-3.5 w-3.5 mr-1.5" />
@@ -1149,6 +1147,47 @@ const TeacherSubjects_Page = () => {
                 className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs rounded-md hover:bg-gray-200 font-medium"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete All Confirmation Modal */}
+      {showDeleteAllModal && selectedSubject && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full max-w-sm">
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h3 className="text-base font-medium text-gray-900">Delete All Students</h3>
+            </div>
+            <div className="p-4">
+              <div className="flex items-center justify-center mb-3">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <FiAlertCircle className="h-6 w-6 text-red-600" />
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 text-center">
+                Are you sure you want to delete all{' '}
+                <span className="font-bold text-red-600">{registeredStudents?.registeredStudents?.length || 0}</span>{' '}
+                students from <span className="font-semibold">"{selectedSubject.title}"</span>?
+              </p>
+              <p className="text-xs text-red-500 text-center mt-3">
+                This action cannot be undone!
+              </p>
+            </div>
+            <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
+              <button
+                onClick={() => setShowDeleteAllModal(false)}
+                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAllStudents}
+                className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium flex items-center"
+              >
+                <FiTrash2 className="h-3 w-3 mr-1" />
+                Delete All
               </button>
             </div>
           </div>
@@ -1252,7 +1291,7 @@ const TeacherSubjects_Page = () => {
               </div>
 
               {/* Template Link - Simple */}
-              <div className="text-right mb-3">
+              <div className="text-right mb-1">
                 <button
                   onClick={downloadDummyExcel}
                   className="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center"
@@ -1276,7 +1315,7 @@ const TeacherSubjects_Page = () => {
                   </div>
 
                   <div className="border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="max-h-40 overflow-y-auto"> {/* Reduced from max-h-60 to max-h-40 */}
+                    <div className="max-h-40 overflow-y-auto">
                       <table className="w-full">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
@@ -1286,7 +1325,7 @@ const TeacherSubjects_Page = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                          {importedStudents.map((student, index) => ( // Show only first 8
+                          {importedStudents.map((student, index) => (
                             <tr key={index} className="hover:bg-gray-50">
                               <td className="px-3 py-1.5 text-[11px] text-gray-600">{index + 1}</td>
                               <td className="px-3 py-1.5 text-[11px] text-gray-900 font-mono">{student.registrationNo}</td>
@@ -1295,11 +1334,6 @@ const TeacherSubjects_Page = () => {
                           ))}
                         </tbody>
                       </table>
-                      {importedStudents.length > 8 && (
-                        <div className="px-3 py-1.5 text-center text-[10px] text-gray-400 border-t border-gray-100 bg-gray-50">
-                          +{importedStudents.length - 8} more students
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -1321,8 +1355,8 @@ const TeacherSubjects_Page = () => {
                 onClick={handleInsertStudents}
                 disabled={importedStudents.length === 0 || studentsLoading}
                 className={`px-5 py-1.5 text-xs rounded-md font-medium transition-colors flex items-center ${importedStudents.length > 0 && !studentsLoading
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 {studentsLoading ? (
