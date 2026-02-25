@@ -345,7 +345,32 @@ const subjectSlicer = createSlice({
       })
       .addCase(deleteRegisteredStudent.rejected, (state, action) => {
         state.studentsLoading = false;
+      })
+
+      // Delete All Registered Students
+      .addCase(deleteAllRegisteredStudents.pending, (state) => {
+        state.studentsLoading = true;
+      })
+      .addCase(deleteAllRegisteredStudents.fulfilled, (state, action) => {
+        state.studentsLoading = false;
+        // Clear the registered students list
+        if (state.registeredStudents?.registeredStudents) {
+          state.registeredStudents.registeredStudents = [];
+        }
+        // Update the count in subjects list to 0
+        const subjectIndex = state.subjects.findIndex(
+          s => s.id === action.payload.subjectId
+        );
+        if (subjectIndex !== -1) {
+          state.subjects[subjectIndex].registeredStudentsCount = 0;
+        }
+        toast.success(action.payload.message || 'All students deleted successfully!');
+      })
+      .addCase(deleteAllRegisteredStudents.rejected, (state, action) => {
+        state.studentsLoading = false;
+        toast.error(action.payload?.message || 'Failed to delete students');
       });
+    ;
   },
 });
 

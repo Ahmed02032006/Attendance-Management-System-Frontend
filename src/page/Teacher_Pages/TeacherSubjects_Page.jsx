@@ -423,22 +423,23 @@ const TeacherSubjects_Page = () => {
     }
 
     try {
-      await dispatch(deleteAllRegisteredStudents({
+      const result = await dispatch(deleteAllRegisteredStudents({
         subjectId: selectedSubject.id,
         teacherId: currentUserId
       })).unwrap();
 
-      toast.success(`${studentCount} students deleted successfully!`);
+      toast.success(result.message || `${studentCount} students deleted successfully!`);
 
       // Refresh the students list
-      dispatch(getRegisteredStudents({
+      await dispatch(getRegisteredStudents({
         subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
 
       // Also refresh subjects to update the count
-      dispatch(getSubjectsByUser(currentUserId));
+      await dispatch(getSubjectsByUser(currentUserId));
     } catch (error) {
+      console.error('Delete all students error:', error);
       toast.error(error?.message || 'Failed to delete students');
     }
   };
