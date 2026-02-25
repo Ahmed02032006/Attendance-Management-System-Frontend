@@ -200,7 +200,7 @@ export const deleteAllRegisteredStudents = createAsyncThunk(
   'teacherSubject/deleteAllRegisteredStudents',
   async ({ subjectId, teacherId }, { rejectWithValue }) => {
     try {
-      const response = await api.delete(`${BASE_URL}/subject/${subjectId}/registered-students?teacherId=${teacherId}`);
+      const response = await axios.delete(`${BASE_URL}/subject/${subjectId}/registered-students?teacherId=${teacherId}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
