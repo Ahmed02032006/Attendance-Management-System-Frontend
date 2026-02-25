@@ -1155,24 +1155,20 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
-      {/* New Modern Import Students Modal */}
+      {/* Simplified Import Students Modal */}
       {showImportStudentsModal && selectedSubject && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all">
-            {/* Header with wave effect */}
-            <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl px-6 py-5 overflow-hidden">
-              {/* Decorative circles */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-10 -mt-10"></div>
-              <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full -mb-10 -ml-10"></div>
-
-              <div className="flex items-center justify-between relative z-10">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            {/* Simple Header */}
+            <div className="px-6 py-4 border-b border-gray-200 bg-white">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-                    <FiUpload className="h-5 w-5 text-white" />
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <FiUpload className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">Import Students</h3>
-                    <p className="text-xs text-blue-100 mt-0.5">
+                    <h3 className="text-lg font-semibold text-gray-900">Import Students</h3>
+                    <p className="text-sm text-gray-500">
                       {selectedSubject.title} • {selectedSubject.code}
                     </p>
                   </div>
@@ -1182,72 +1178,55 @@ const TeacherSubjects_Page = () => {
                     setShowImportStudentsModal(false);
                     setImportedStudents([]);
                   }}
-                  className="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all"
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <FiX className="h-5 w-5" />
                 </button>
               </div>
             </div>
 
-            {/* Body */}
-            <div className="p-6">
-              {/* Quick Stats Cards */}
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="bg-blue-50 rounded-xl p-3 text-center">
+            {/* Body - Reduced padding */}
+            <div className="p-5 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 130px)' }}>
+              {/* Quick Stats Cards - Made smaller */}
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="bg-blue-50 rounded-lg p-2 text-center">
                   <p className="text-xs text-blue-600 font-medium">Semester</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-1">{selectedSubject.semester}</p>
+                  <p className="text-sm font-semibold text-gray-800">{selectedSubject.semester}</p>
                 </div>
-                <div className="bg-green-50 rounded-xl p-3 text-center">
+                <div className="bg-green-50 rounded-lg p-2 text-center">
                   <p className="text-xs text-green-600 font-medium">Session</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-1">{selectedSubject.session}</p>
+                  <p className="text-sm font-semibold text-gray-800">{selectedSubject.session}</p>
                 </div>
-                <div className="bg-purple-50 rounded-xl p-3 text-center">
+                <div className="bg-purple-50 rounded-lg p-2 text-center">
                   <p className="text-xs text-purple-600 font-medium">Current</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-1">{selectedSubject.registeredStudentsCount || 0} Students</p>
+                  <p className="text-sm font-semibold text-gray-800">{selectedSubject.registeredStudentsCount || 0} Students</p>
                 </div>
               </div>
 
               {/* Two Column Layout */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 {/* Left Column - Instructions */}
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                  <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3">File Requirements</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center mt-0.5 mr-2 flex-shrink-0">
-                        <span className="text-blue-600 text-[10px] font-bold">1</span>
-                      </div>
-                      <span className="text-xs text-gray-600">Excel file (.xlsx, .xls) or CSV</span>
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                  <h4 className="text-xs font-semibold text-gray-700 mb-2">File Requirements</h4>
+                  <ul className="space-y-1.5">
+                    <li className="flex items-start text-xs">
+                      <span className="text-blue-600 font-bold mr-2">•</span>
+                      <span className="text-gray-600">Excel file (.xlsx, .xls) or CSV</span>
                     </li>
-                    <li className="flex items-start">
-                      <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center mt-0.5 mr-2 flex-shrink-0">
-                        <span className="text-blue-600 text-[10px] font-bold">2</span>
-                      </div>
-                      <span className="text-xs text-gray-600">Column: <span className="font-mono bg-white px-1.5 py-0.5 rounded text-blue-600">Registration No</span></span>
+                    <li className="flex items-start text-xs">
+                      <span className="text-blue-600 font-bold mr-2">•</span>
+                      <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded text-blue-600 text-[10px]">Registration No</span></span>
                     </li>
-                    <li className="flex items-start">
-                      <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center mt-0.5 mr-2 flex-shrink-0">
-                        <span className="text-blue-600 text-[10px] font-bold">3</span>
-                      </div>
-                      <span className="text-xs text-gray-600">Column: <span className="font-mono bg-white px-1.5 py-0.5 rounded text-blue-600">Student Name</span></span>
+                    <li className="flex items-start text-xs">
+                      <span className="text-blue-600 font-bold mr-2">•</span>
+                      <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded text-blue-600 text-[10px]">Student Name</span></span>
                     </li>
                   </ul>
-
-                  {/* Template Link */}
-                  <div className="mt-4 pt-3 border-t border-gray-200">
-                    <button
-                      onClick={downloadDummyExcel}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center"
-                    >
-                      <FiFileText className="h-3.5 w-3.5 mr-1.5" />
-                      Download sample template
-                    </button>
-                  </div>
                 </div>
 
                 {/* Right Column - Upload Area */}
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                  <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3">Upload File</h4>
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                  <h4 className="text-xs font-semibold text-gray-700 mb-2">Upload File</h4>
                   <label className="block cursor-pointer">
                     <input
                       type="file"
@@ -1256,61 +1235,71 @@ const TeacherSubjects_Page = () => {
                       className="hidden"
                       disabled={isUploading}
                     />
-                    <div className={`border-2 border-dashed rounded-xl p-5 text-center transition-all ${isUploading
+                    <div className={`border-2 border-dashed rounded-lg p-3 text-center transition-all ${isUploading
                       ? 'border-gray-300 bg-gray-100'
-                      : 'border-blue-200 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300'
+                      : 'border-blue-200 hover:border-blue-300 hover:bg-blue-50/50'
                       }`}>
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <FiUpload className={`h-4 w-4 ${isUploading ? 'text-gray-500' : 'text-blue-600'}`} />
-                      </div>
-                      <p className="text-xs font-medium text-gray-700 mb-1">
+                      <FiUpload className={`h-4 w-4 mx-auto mb-1 ${isUploading ? 'text-gray-400' : 'text-blue-600'}`} />
+                      <p className="text-xs font-medium text-gray-700">
                         {isUploading ? 'Uploading...' : 'Click to browse'}
                       </p>
-                      <p className="text-[10px] text-gray-500">
-                        Supports .xlsx, .xls, .csv
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        .xlsx, .xls, .csv
                       </p>
                     </div>
                   </label>
                 </div>
               </div>
 
-              {/* Preview Section - Updated to show ALL students */}
+              {/* Template Link - Simple */}
+              <div className="text-right mb-3">
+                <button
+                  onClick={downloadDummyExcel}
+                  className="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center"
+                >
+                  <FiFileText className="h-3 w-3 mr-1" />
+                  Download template
+                </button>
+              </div>
+
+              {/* Preview Section - Reduced height */}
               {importedStudents.length > 0 && (
-                <div className="mt-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-2">
-                        <FiUsers className="h-3 w-3 text-green-600" />
-                      </div>
-                      <h4 className="text-sm font-semibold text-gray-800">
-                        Preview ({importedStudents.length} students)
-                      </h4>
-                    </div>
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-medium text-gray-700 flex items-center">
+                      <FiUsers className="h-4 w-4 mr-1.5 text-blue-600" />
+                      Preview ({importedStudents.length})
+                    </h4>
+                    <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                       Ready to import
                     </span>
                   </div>
 
-                  <div className="border border-gray-200 rounded-xl overflow-hidden">
-                    <div className="max-h-60 overflow-y-auto">
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="max-h-40 overflow-y-auto"> {/* Reduced from max-h-60 to max-h-40 */}
                       <table className="w-full">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">#</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Registration No</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Student Name</th>
+                            <th className="px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase">#</th>
+                            <th className="px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase">Registration No</th>
+                            <th className="px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase">Student Name</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                          {importedStudents.map((student, index) => (
+                          {importedStudents.slice(0, 8).map((student, index) => ( // Show only first 8
                             <tr key={index} className="hover:bg-gray-50">
-                              <td className="px-4 py-2 text-xs text-gray-600">{index + 1}</td>
-                              <td className="px-4 py-2 text-xs text-gray-900 font-mono">{student.registrationNo}</td>
-                              <td className="px-4 py-2 text-xs text-gray-900">{student.studentName}</td>
+                              <td className="px-3 py-1.5 text-[11px] text-gray-600">{index + 1}</td>
+                              <td className="px-3 py-1.5 text-[11px] text-gray-900 font-mono">{student.registrationNo}</td>
+                              <td className="px-3 py-1.5 text-[11px] text-gray-900">{student.studentName}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
+                      {importedStudents.length > 8 && (
+                        <div className="px-3 py-1.5 text-center text-[10px] text-gray-400 border-t border-gray-100 bg-gray-50">
+                          +{importedStudents.length - 8} more students
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1318,33 +1307,33 @@ const TeacherSubjects_Page = () => {
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 rounded-b-2xl flex justify-end space-x-3">
+            <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 flex justify-end space-x-2">
               <button
                 onClick={() => {
                   setShowImportStudentsModal(false);
                   setImportedStudents([]);
                 }}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-lg transition-colors"
+                className="px-4 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleInsertStudents}
                 disabled={importedStudents.length === 0 || studentsLoading}
-                className={`px-6 py-2 text-sm rounded-lg font-medium transition-all flex items-center shadow-sm ${importedStudents.length > 0 && !studentsLoading
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-blue-200'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                className={`px-5 py-1.5 text-xs rounded-md font-medium transition-colors flex items-center ${importedStudents.length > 0 && !studentsLoading
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 {studentsLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                    <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1.5"></div>
                     Importing...
                   </>
                 ) : (
                   <>
-                    <FiUpload className="h-4 w-4 mr-2" />
-                    Import Students
+                    <FiUpload className="h-3 w-3 mr-1.5" />
+                    Import {importedStudents.length > 0 ? `(${importedStudents.length})` : ''}
                   </>
                 )}
               </button>
