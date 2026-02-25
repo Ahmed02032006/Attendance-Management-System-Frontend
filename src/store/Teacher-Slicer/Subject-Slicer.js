@@ -364,11 +364,9 @@ const subjectSlicer = createSlice({
         if (subjectIndex !== -1) {
           state.subjects[subjectIndex].registeredStudentsCount = 0;
         }
-        toast.success(action.payload.message || 'All students deleted successfully!');
       })
       .addCase(deleteAllRegisteredStudents.rejected, (state, action) => {
         state.studentsLoading = false;
-        toast.error(action.payload?.message || 'Failed to delete students');
       });
     ;
   },
