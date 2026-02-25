@@ -178,7 +178,15 @@ const TeacherAttendance_Page = () => {
   const getCurrentAttendanceRecords = () => {
     if (!selectedSubject) return [];
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
-    return subject && subject.attendance ? subject.attendance[currentDateString] || [] : [];
+    if (!subject || !subject.attendance) return [];
+
+    const records = subject.attendance[currentDateString] || [];
+
+    // Ensure each record has a status field
+    return records.map(record => ({
+      ...record,
+      status: record.status || (record.time ? 'Present' : 'Absent')
+    }));
   };
 
   const currentAttendanceRecords = getCurrentAttendanceRecords();
@@ -881,7 +889,7 @@ const TeacherAttendance_Page = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentStudents.length > 0 ? (
                       currentStudents.map((student) => (
-                        <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={student.id || student.rollNo} className="hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-3 whitespace-nowrap">
                             <button
                               onClick={() => handleStudentClick(student)}
@@ -897,23 +905,33 @@ const TeacherAttendance_Page = () => {
                             <span className="text-sm text-gray-600">{student.discipline}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
-                              {student.time == null ? "--" : student.time}
+                            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs ${student.status === 'Present'
+                              ? 'bg-gray-100 text-gray-700'
+                              : 'bg-gray-50 text-gray-400'
+                              }`}>
+                              {student.status === 'Present' ? student.time : '--'}
                             </span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${student.state == "Absent" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
-                              {student.status}
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${student.status === 'Present'
+                              ? 'bg-green-100 text-green-700'
+                              : student.status === 'Not Registered'
+                                ? 'bg-yellow-100 text-yellow-700'
+                                : 'bg-red-100 text-red-700'
+                              }`}>
+                              {student.status || (student.time ? 'Present' : 'Absent')}
                             </span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-right">
-                            <button
-                              onClick={() => handleDeleteClick(student.id)}
-                              className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                              title="Delete record"
-                            >
-                              <FiTrash2 className="w-4 h-4" />
-                            </button>
+                            {student.status === 'Present' && (
+                              <button
+                                onClick={() => handleDeleteClick(student.id)}
+                                className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                title="Delete record"
+                              >
+                                <FiTrash2 className="w-4 h-4" />
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))
