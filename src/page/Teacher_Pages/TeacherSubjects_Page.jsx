@@ -360,8 +360,7 @@ const TeacherSubjects_Page = () => {
         teacherId: currentUserId
       }));
 
-      // Also refresh subjects to update the count
-      await dispatch(getSubjectsByUser(currentUserId));
+      // await dispatch(getSubjectsByUser(currentUserId));
     } catch (error) {
       console.error('Delete all students error:', error);
       toast.error(error?.message || 'Failed to delete students');
