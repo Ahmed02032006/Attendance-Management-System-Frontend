@@ -16,7 +16,11 @@ import {
   FiClock,
   FiUsers,
   FiUpload,
-  FiUserMinus
+  FiUserMinus,
+  FiDownload,
+  FiFileText,
+  FiInfo,
+  FiAlertCircle
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import * as XLSX from 'xlsx'
@@ -166,6 +170,65 @@ const TeacherSubjects_Page = () => {
       toast.error(error?.message || 'Failed to reset subject attendance')
     }
   }
+
+  // Handle export all data
+  const handleExportAllData = (subject) => {
+    console.log("Export All Data");
+    // You can add more details in the console
+    console.log({
+      subject: subject.title,
+      code: subject.code,
+      semester: subject.semester,
+      session: subject.session,
+      registeredStudentsCount: subject.registeredStudentsCount || 0
+    });
+    toast.info(`Exporting all data for ${subject.title}`);
+  };
+
+  // Download dummy Excel file
+  const downloadDummyExcel = () => {
+    // Create dummy data
+    const dummyData = [
+      {
+        'Registration No': 'FA24-BCS-001',
+        'Student Name': 'John Doe'
+      },
+      {
+        'Registration No': 'FA24-BCS-002',
+        'Student Name': 'Jane Smith'
+      },
+      {
+        'Registration No': 'FA24-BCS-003',
+        'Student Name': 'Alice Johnson'
+      },
+      {
+        'Registration No': 'FA24-BCS-004',
+        'Student Name': 'Bob Williams'
+      },
+      {
+        'Registration No': 'FA24-BCS-005',
+        'Student Name': 'Charlie Brown'
+      }
+    ];
+
+    // Create worksheet
+    const ws = XLSX.utils.json_to_sheet(dummyData);
+    
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 20 }, // Registration No column width
+      { wch: 25 }  // Student Name column width
+    ];
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Students');
+
+    // Download file
+    XLSX.writeFile(wb, 'student_import_template.xlsx');
+    
+    toast.success('Dummy template downloaded successfully!');
+  };
 
   // Handle file upload for Excel
   const handleFileUpload = (e) => {
@@ -558,6 +621,13 @@ const TeacherSubjects_Page = () => {
                             title="Import Students"
                           >
                             <FiUpload className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleExportAllData(subject)}
+                            className="p-1.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors"
+                            title="Export All Data"
+                          >
+                            <FiDownload className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => openEditModal(subject)}
@@ -1035,31 +1105,61 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
-      {/* Import Students Modal */}
+      {/* Enhanced Import Students Modal */}
       {showImportStudentsModal && selectedSubject && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-2xl">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <h3 className="text-base font-medium text-gray-900">
-                Import Students - {selectedSubject.title}
-              </h3>
-              <button
-                onClick={() => {
-                  setShowImportStudentsModal(false);
-                  setImportedStudents([]);
-                }}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded"
-              >
-                <FiX className="h-4 w-4" />
-              </button>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <FiUpload className="h-5 w-5 text-purple-600 mr-2" />
+                    Import Students
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {selectedSubject.title} • {selectedSubject.code} • {selectedSubject.semester} Semester
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowImportStudentsModal(false);
+                    setImportedStudents([]);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <FiX className="h-5 w-5" />
+                </button>
+              </div>
             </div>
-            <div className="p-4">
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-2">
-                  Upload Excel file with columns: <span className="font-mono bg-gray-100 px-2 py-1 rounded">Registration No</span> and <span className="font-mono bg-gray-100 px-2 py-1 rounded">Student Name</span>
-                </p>
-                <div className="flex items-center space-x-3">
-                  <label className="relative">
+
+            {/* Body */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {/* Info Card */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start">
+                  <FiInfo className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-800">Instructions</h4>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Upload an Excel file (.xlsx, .xls) or CSV file with the following columns:
+                    </p>
+                    <ul className="text-sm text-blue-700 list-disc list-inside mt-2 space-y-1">
+                      <li><span className="font-medium">Registration No</span> - Student's registration number (e.g., FA24-BCS-001)</li>
+                      <li><span className="font-medium">Student Name</span> - Full name of the student</li>
+                    </ul>
+                    <p className="text-xs text-blue-600 mt-2">
+                      Note: Duplicate entries will be automatically handled.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                {/* Upload Button */}
+                <div className="flex-1">
+                  <label className="block">
                     <input
                       type="file"
                       accept=".xlsx,.xls,.csv"
@@ -1067,64 +1167,106 @@ const TeacherSubjects_Page = () => {
                       className="hidden"
                       disabled={isUploading}
                     />
-                    <div className={`px-4 py-2 ${isUploading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'} text-white text-sm rounded-md cursor-pointer transition-colors flex items-center`}>
-                      <FiUpload className="h-4 w-4 mr-2" />
-                      {isUploading ? 'Uploading...' : 'Upload Excel'}
+                    <div className={`w-full border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isUploading
+                      ? 'border-gray-300 bg-gray-50'
+                      : 'border-purple-300 hover:border-purple-400 bg-purple-50 hover:bg-purple-100'
+                      }`}>
+                      <FiUpload className={`h-8 w-8 mx-auto mb-2 ${isUploading ? 'text-gray-400' : 'text-purple-600'}`} />
+                      <p className={`text-sm font-medium ${isUploading ? 'text-gray-500' : 'text-purple-700'}`}>
+                        {isUploading ? 'Uploading...' : 'Click to upload Excel/CSV file'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Supports .xlsx, .xls, .csv files
+                      </p>
                     </div>
                   </label>
-                  {importedStudents.length > 0 && (
-                    <span className="text-sm text-green-600">
-                      {importedStudents.length} students loaded
-                    </span>
-                  )}
+                </div>
+
+                {/* Download Template Button */}
+                <div className="flex items-center justify-center sm:justify-start">
+                  <button
+                    onClick={downloadDummyExcel}
+                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <FiFileText className="h-4 w-4 mr-2" />
+                    Download Template
+                  </button>
                 </div>
               </div>
 
+              {/* Imported Students Preview */}
               {importedStudents.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Imported Students Preview:</h4>
-                  <div className="border border-gray-200 rounded-lg overflow-hidden max-h-60 overflow-y-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 sticky top-0">
-                        <tr>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Registration No</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {importedStudents.map((student, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
-                            <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
-                            <td className="px-4 py-2 text-sm text-gray-900">{student.studentName}</td>
+                <div className="mt-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold text-gray-800 flex items-center">
+                      <FiUsers className="h-4 w-4 mr-2 text-purple-600" />
+                      Preview ({importedStudents.length} students)
+                    </h4>
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                      Ready to import
+                    </span>
+                  </div>
+                  
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="max-h-60 overflow-y-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Registration No</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {importedStudents.map((student, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{student.studentName}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Summary Stats */}
+                  <div className="mt-3 flex gap-2">
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                      {importedStudents.length} students loaded
+                    </span>
                   </div>
                 </div>
               )}
             </div>
-            <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
               <button
                 onClick={() => {
                   setShowImportStudentsModal(false);
                   setImportedStudents([]);
                 }}
-                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-100 rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleInsertStudents}
                 disabled={importedStudents.length === 0 || studentsLoading}
-                className={`px-3 py-1.5 text-xs rounded-md font-medium ${importedStudents.length > 0 && !studentsLoading
-                  ? 'bg-green-600 text-white hover:bg-green-700'
+                className={`px-6 py-2 text-sm rounded-lg font-medium transition-colors flex items-center ${importedStudents.length > 0 && !studentsLoading
+                  ? 'bg-purple-600 text-white hover:bg-purple-700'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
-                {studentsLoading ? 'Saving...' : `Insert ${importedStudents.length > 0 ? `(${importedStudents.length})` : ''}`}
+                {studentsLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>Import {importedStudents.length > 0 ? `(${importedStudents.length})` : ''}</>
+                )}
               </button>
             </div>
           </div>
