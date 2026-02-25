@@ -351,7 +351,7 @@ const TeacherSubjects_Page = () => {
         teacherId: currentUserId
       })).unwrap();
 
-      toast.success(result.message || `${studentCount} students deleted successfully!`);
+      toast.success(result.message || `Students deleted successfully!`);
       setShowDeleteAllModal(false);
 
       // Refresh the students list
