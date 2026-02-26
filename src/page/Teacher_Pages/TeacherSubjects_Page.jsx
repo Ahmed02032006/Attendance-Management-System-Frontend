@@ -337,7 +337,7 @@ const TeacherSubjects_Page = () => {
       })).unwrap();
 
       toast.success('Student added successfully!');
-      
+
       // Clear form
       setIndividualStudent({
         registrationNo: '',
@@ -394,20 +394,20 @@ const TeacherSubjects_Page = () => {
       toast.error('Please enter student name');
       return;
     }
-  
+
     // Check for duplicates (excluding current student)
     const isDuplicate = registeredStudents?.registeredStudents?.some(
-      student => student._id !== editingStudent._id && 
-                 student.registrationNo.toLowerCase() === editFormData.registrationNo.toLowerCase()
+      student => student._id !== editingStudent._id &&
+        student.registrationNo.toLowerCase() === editFormData.registrationNo.toLowerCase()
     );
-  
+
     if (isDuplicate) {
       toast.error('Student with this registration number already exists');
       return;
     }
-  
+
     setIsEditingStudent(true);
-  
+
     try {
       // FIXED: Pass the parameters correctly to match the slicer
       await dispatch(updateRegisteredStudent({
@@ -419,16 +419,16 @@ const TeacherSubjects_Page = () => {
           studentName: editFormData.studentName.trim()
         }
       })).unwrap();
-  
+
       toast.success('Student updated successfully!');
-      
+
       // Clear edit state
       setEditingStudent(null);
       setEditFormData({
         registrationNo: '',
         studentName: ''
       });
-  
+
       // Refresh students list
       await dispatch(getRegisteredStudents({
         subjectId: selectedSubject.id,
@@ -1314,57 +1314,71 @@ const TeacherSubjects_Page = () => {
               {activeStudentTab === 'view' && (
                 <div>
                   {/* Add Individual Student Form */}
-                  <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
-                    <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
-                      <FiUserPlus className="h-4 w-4 text-blue-600 mr-2" />
-                      Add New Student
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <div>
-                        <input
-                          type="text"
-                          name="registrationNo"
-                          value={individualStudent.registrationNo}
-                          onChange={handleIndividualStudentChange}
-                          placeholder="Registration No. *"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                          disabled={isAddingStudent}
-                        />
+                  <div className="mb-6 bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    {/* Simple header */}
+                    <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center">
+                      <div className="p-1.5 bg-blue-100 rounded-md mr-2">
+                        <FiUserPlus className="h-3.5 w-3.5 text-blue-600" />
                       </div>
-                      <div>
-                        <input
-                          type="text"
-                          name="studentName"
-                          value={individualStudent.studentName}
-                          onChange={handleIndividualStudentChange}
-                          placeholder="Student Name *"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                          disabled={isAddingStudent}
-                        />
+                      <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        Quick Add Student
+                      </h4>
+                    </div>
+
+                    {/* Form */}
+                    <div className="p-4">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            name="registrationNo"
+                            value={individualStudent.registrationNo}
+                            onChange={handleIndividualStudentChange}
+                            placeholder="Registration Number *"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            disabled={isAddingStudent}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            name="studentName"
+                            value={individualStudent.studentName}
+                            onChange={handleIndividualStudentChange}
+                            placeholder="Student Name *"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            disabled={isAddingStudent}
+                          />
+                        </div>
+                        <div>
+                          <button
+                            onClick={handleAddIndividualStudent}
+                            disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
+                            className={`h-full px-4 py-2 text-sm rounded-md font-medium transition-all flex items-center whitespace-nowrap ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
+                              }`}
+                          >
+                            {isAddingStudent ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                Adding...
+                              </>
+                            ) : (
+                              <>
+                                <FiUserPlus className="h-4 w-4 mr-2" />
+                                Add
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <button
-                          onClick={handleAddIndividualStudent}
-                          disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
-                          className={`w-full px-4 py-2 text-sm rounded-md font-medium transition-colors flex items-center justify-center ${
-                            isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-blue-600 text-white hover:bg-blue-700'
-                          }`}
-                        >
-                          {isAddingStudent ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                              Adding...
-                            </>
-                          ) : (
-                            <>
-                              <FiUserPlus className="h-4 w-4 mr-2" />
-                              Add Student
-                            </>
-                          )}
-                        </button>
-                      </div>
+
+                      {/* Simple hint */}
+                      <p className="text-xs text-gray-400 mt-2 flex items-center">
+                        <FiInfo className="h-3 w-3 mr-1" />
+                        Registration number must be unique
+                      </p>
                     </div>
                   </div>
 
