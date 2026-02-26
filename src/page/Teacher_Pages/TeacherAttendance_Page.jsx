@@ -527,7 +527,7 @@ const TeacherAttendance_Page = () => {
       .then((res) => {
         if (res.payload.success) {
           toast.success('Manual attendance marked successfully!');
-          // dispatch(getSubjectsWithAttendance(userId)).unwrap();
+          dispatch(getSubjectsWithAttendance(userId)).unwrap();
           setFormData({
             studentName: '',
             rollNo: '',
