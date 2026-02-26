@@ -283,7 +283,7 @@ const TeacherSubjects_Page = () => {
       }));
 
       // Refresh subjects to update the count
-      dispatch(getSubjectsByUser(currentUserId));
+      // dispatch(getSubjectsByUser(currentUserId));
     } catch (error) {
       toast.error(error?.message || 'Failed to add students');
     }
