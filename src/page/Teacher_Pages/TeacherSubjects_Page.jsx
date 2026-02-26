@@ -48,17 +48,24 @@ const TeacherSubjects_Page = () => {
   const [showViewStudentsModal, setShowViewStudentsModal] = useState(false)
   const [showImportStudentsModal, setShowImportStudentsModal] = useState(false)
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
-  const [showStudentManagementModal, setShowStudentManagementModal] = useState(false) // New merged modal state
+  const [showStudentManagementModal, setShowStudentManagementModal] = useState(false)
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
   const [subjectsPerPage] = useState(5)
-  const [activeStudentTab, setActiveStudentTab] = useState('view') // 'view' or 'import'
+  const [activeStudentTab, setActiveStudentTab] = useState('view') // 'view', 'import', or 'add'
 
   // For imported students data
   const [importedStudents, setImportedStudents] = useState([])
   const [isUploading, setIsUploading] = useState(false)
+
+  // For individual student addition
+  const [individualStudent, setIndividualStudent] = useState({
+    registrationNo: '',
+    studentName: ''
+  })
+  const [isAddingStudent, setIsAddingStudent] = useState(false)
 
   const [subjectForm, setSubjectForm] = useState({
     subjectTitle: '',
@@ -121,7 +128,7 @@ const TeacherSubjects_Page = () => {
       const formData = {
         ...subjectForm,
         userId: currentUserId,
-        registeredStudents: [] // Initialize with empty students array
+        registeredStudents: []
       }
 
       await dispatch(createSubject(formData)).unwrap()
@@ -178,7 +185,6 @@ const TeacherSubjects_Page = () => {
 
   // Download dummy Excel file
   const downloadDummyExcel = () => {
-    // Create dummy data
     const dummyData = [
       {
         'Registration No': '25FA-001-BCS',
@@ -202,22 +208,15 @@ const TeacherSubjects_Page = () => {
       }
     ];
 
-    // Create worksheet
     const ws = XLSX.utils.json_to_sheet(dummyData);
-
-    // Set column widths
     ws['!cols'] = [
-      { wch: 20 }, // Registration No column width
-      { wch: 25 }  // Student Name column width
+      { wch: 20 },
+      { wch: 25 }
     ];
 
-    // Create workbook
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Students');
-
-    // Download file
     XLSX.writeFile(wb, 'student_import_template.xlsx');
-
     toast.success('Dummy template downloaded successfully!');
   };
 
@@ -237,7 +236,6 @@ const TeacherSubjects_Page = () => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        // Extract only Registration No and Student Name
         const students = jsonData.map(row => ({
           registrationNo: row['Registration No'] || row['registrationNo'] || row['Registration'] || '',
           studentName: row['Student Name'] || row['studentName'] || row['Name'] || row['name'] || ''
@@ -254,11 +252,10 @@ const TeacherSubjects_Page = () => {
     };
 
     reader.readAsArrayBuffer(file);
-    // Clear the input
     e.target.value = '';
   };
 
-  // Handle insert students
+  // Handle insert students from Excel
   const handleInsertStudents = async () => {
     if (importedStudents.length === 0) {
       toast.error('No students to insert');
@@ -274,7 +271,68 @@ const TeacherSubjects_Page = () => {
 
       toast.success('Students added successfully!');
       setImportedStudents([]);
-      setActiveStudentTab('view'); // Switch to view tab after successful import
+      setActiveStudentTab('view');
+
+      await dispatch(getRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      }));
+    } catch (error) {
+      toast.error(error?.message || 'Failed to add students');
+    }
+  };
+
+  // Handle individual student input change
+  const handleIndividualStudentChange = (e) => {
+    const { name, value } = e.target;
+    setIndividualStudent(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle add individual student
+  const handleAddIndividualStudent = async () => {
+    // Validate inputs
+    if (!individualStudent.registrationNo.trim()) {
+      toast.error('Please enter registration number');
+      return;
+    }
+    if (!individualStudent.studentName.trim()) {
+      toast.error('Please enter student name');
+      return;
+    }
+
+    // Check for duplicates in current list
+    const isDuplicate = registeredStudents?.registeredStudents?.some(
+      student => student.registrationNo.toLowerCase() === individualStudent.registrationNo.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      toast.error('Student with this registration number already exists');
+      return;
+    }
+
+    setIsAddingStudent(true);
+
+    try {
+      // Add the single student using the same API
+      await dispatch(addRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId,
+        students: [{
+          registrationNo: individualStudent.registrationNo.trim(),
+          studentName: individualStudent.studentName.trim()
+        }]
+      })).unwrap();
+
+      toast.success('Student added successfully!');
+      
+      // Clear form
+      setIndividualStudent({
+        registrationNo: '',
+        studentName: ''
+      });
 
       // Refresh students list
       await dispatch(getRegisteredStudents({
@@ -282,10 +340,11 @@ const TeacherSubjects_Page = () => {
         teacherId: currentUserId
       }));
 
-      // Refresh subjects to update the count
-      // dispatch(getSubjectsByUser(currentUserId));
+      // Stay on the same tab
     } catch (error) {
-      toast.error(error?.message || 'Failed to add students');
+      toast.error(error?.message || 'Failed to add student');
+    } finally {
+      setIsAddingStudent(false);
     }
   };
 
@@ -319,7 +378,6 @@ const TeacherSubjects_Page = () => {
 
       toast.success('Student removed successfully!');
 
-      // Refresh the students list
       dispatch(getRegisteredStudents({
         subjectId: selectedSubject.id,
         teacherId: currentUserId
@@ -349,7 +407,6 @@ const TeacherSubjects_Page = () => {
       toast.success(result.message || `Students deleted successfully!`);
       setShowDeleteAllModal(false);
 
-      // Refresh the students list
       await dispatch(getRegisteredStudents({
         subjectId: selectedSubject.id,
         teacherId: currentUserId
@@ -361,13 +418,16 @@ const TeacherSubjects_Page = () => {
     }
   };
 
-  // New merged function to handle student management
+  // Handle student management
   const handleStudentManagement = async (subject) => {
     setSelectedSubject(subject);
-    setActiveStudentTab('view'); // Default to view tab
-    setImportedStudents([]); // Reset imported students
+    setActiveStudentTab('view');
+    setImportedStudents([]);
+    setIndividualStudent({
+      registrationNo: '',
+      studentName: ''
+    });
 
-    // Fetch registered students
     try {
       await dispatch(getRegisteredStudents({
         subjectId: subject.id,
@@ -650,11 +710,10 @@ const TeacherSubjects_Page = () => {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center justify-center space-x-2">
-                          {/* Merged Student Management Button */}
                           <button
                             onClick={() => handleStudentManagement(subject)}
                             className="p-1.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
-                            title="Manage Students (View/Import)"
+                            title="Manage Students"
                           >
                             <FiUsers className="h-4 w-4" />
                           </button>
@@ -1050,7 +1109,7 @@ const TeacherSubjects_Page = () => {
 
       {/* Delete All Confirmation Modal */}
       {showDeleteAllModal && selectedSubject && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[100]"> {/* Changed z-50 to z-[100] */}
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[100]">
           <div className="bg-white rounded-lg w-full max-w-sm">
             <div className="px-4 py-3 border-b border-gray-200">
               <h3 className="text-base font-medium text-gray-900">Delete All Students</h3>
@@ -1111,6 +1170,7 @@ const TeacherSubjects_Page = () => {
                   onClick={() => {
                     setShowStudentManagementModal(false);
                     setImportedStudents([]);
+                    setIndividualStudent({ registrationNo: '', studentName: '' });
                   }}
                   className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
                 >
@@ -1125,6 +1185,7 @@ const TeacherSubjects_Page = () => {
                 onClick={() => {
                   setActiveStudentTab('view');
                   setImportedStudents([]);
+                  setIndividualStudent({ registrationNo: '', studentName: '' });
                 }}
                 className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'view'
                   ? 'border-blue-600 text-blue-600'
@@ -1133,6 +1194,19 @@ const TeacherSubjects_Page = () => {
               >
                 <FiUsers className="h-4 w-4 inline mr-2" />
                 View Students ({selectedSubject.registeredStudentsCount || 0})
+              </button>
+              <button
+                onClick={() => {
+                  setActiveStudentTab('add');
+                  setImportedStudents([]);
+                }}
+                className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'add'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+              >
+                <FiUserPlus className="h-4 w-4 inline mr-2" />
+                Add Individual
               </button>
               <button
                 onClick={() => {
@@ -1159,7 +1233,6 @@ const TeacherSubjects_Page = () => {
                       Total Registered: <span className="font-semibold">{registeredStudents?.registeredStudents?.length || 0}</span> students
                     </p>
 
-                    {/* Delete All Button - Only show if there are students */}
                     {registeredStudents?.registeredStudents?.length > 0 && (
                       <button
                         onClick={openDeleteAllModal}
@@ -1211,12 +1284,20 @@ const TeacherSubjects_Page = () => {
                                 <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
                                   <FiUsers className="h-8 w-8 text-gray-300 mx-auto mb-2" />
                                   No students registered yet
-                                  <button
-                                    onClick={() => setActiveStudentTab('import')}
-                                    className="block mx-auto mt-3 text-blue-600 hover:text-blue-700 text-xs font-medium"
-                                  >
-                                    Import students to get started
-                                  </button>
+                                  <div className="flex justify-center gap-2 mt-3">
+                                    <button
+                                      onClick={() => setActiveStudentTab('add')}
+                                      className="text-blue-600 hover:text-blue-700 text-xs font-medium px-3 py-1 border border-blue-200 rounded-lg"
+                                    >
+                                      Add Individual
+                                    </button>
+                                    <button
+                                      onClick={() => setActiveStudentTab('import')}
+                                      className="text-blue-600 hover:text-blue-700 text-xs font-medium px-3 py-1 border border-blue-200 rounded-lg"
+                                    >
+                                      Import Students
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             )}
@@ -1225,6 +1306,86 @@ const TeacherSubjects_Page = () => {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Add Individual Student Tab */}
+              {activeStudentTab === 'add' && (
+                <div>
+                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
+                      <FiInfo className="h-4 w-4 mr-1" />
+                      Add Student Manually
+                    </h4>
+                    <p className="text-xs text-blue-600">
+                      Enter the registration number and name of the student you want to add to this course.
+                    </p>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Registration Number <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="registrationNo"
+                          value={individualStudent.registrationNo}
+                          onChange={handleIndividualStudentChange}
+                          placeholder="e.g., 25FA-001-BCS"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={isAddingStudent}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Student Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="studentName"
+                          value={individualStudent.studentName}
+                          onChange={handleIndividualStudentChange}
+                          placeholder="e.g., John Doe"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={isAddingStudent}
+                        />
+                      </div>
+                      <div className="flex justify-end pt-2">
+                        <button
+                          onClick={handleAddIndividualStudent}
+                          disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
+                          className={`px-5 py-2 text-sm rounded-md font-medium transition-colors flex items-center ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                        >
+                          {isAddingStudent ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                              Adding...
+                            </>
+                          ) : (
+                            <>
+                              <FiUserPlus className="h-4 w-4 mr-2" />
+                              Add Student
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Tips */}
+                  <div className="mt-4 text-xs text-gray-500 border-t border-gray-100 pt-4">
+                    <p className="font-medium text-gray-600 mb-1">Tips:</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>Registration number should be unique for each student</li>
+                      <li>You can add multiple students one by one</li>
+                      <li>Use the Import tab to add multiple students at once via Excel</li>
+                    </ul>
+                  </div>
                 </div>
               )}
 
@@ -1249,7 +1410,6 @@ const TeacherSubjects_Page = () => {
 
                   {/* Two Column Layout */}
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    {/* Left Column - Instructions */}
                     <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                       <h4 className="text-xs font-semibold text-gray-700 mb-2">File Requirements</h4>
                       <ul className="space-y-1.5">
@@ -1268,7 +1428,6 @@ const TeacherSubjects_Page = () => {
                       </ul>
                     </div>
 
-                    {/* Right Column - Upload Area */}
                     <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                       <h4 className="text-xs font-semibold text-gray-700 mb-2">Upload File</h4>
                       <label className="block cursor-pointer">
@@ -1353,6 +1512,7 @@ const TeacherSubjects_Page = () => {
                 onClick={() => {
                   setShowStudentManagementModal(false);
                   setImportedStudents([]);
+                  setIndividualStudent({ registrationNo: '', studentName: '' });
                 }}
                 className="px-4 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
               >
