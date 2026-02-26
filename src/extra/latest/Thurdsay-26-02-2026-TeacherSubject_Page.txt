@@ -173,28 +173,42 @@ const TeacherSubjects_Page = () => {
     }
   }
 
+  // Handle export all data
+  const handleExportAllData = (subject) => {
+    console.log("Export All Data");
+    // You can add more details in the console
+    console.log({
+      subject: subject.title,
+      code: subject.code,
+      semester: subject.semester,
+      session: subject.session,
+      registeredStudentsCount: subject.registeredStudentsCount || 0
+    });
+    toast.info(`Exporting all data for ${subject.title}`);
+  };
+
   // Download dummy Excel file
   const downloadDummyExcel = () => {
     // Create dummy data
     const dummyData = [
       {
-        'Registration No': '25FA-001-BCS',
+        'Registration No': 'FA24-BCS-001',
         'Student Name': 'John Doe'
       },
       {
-        'Registration No': '25FA-002-BCS',
+        'Registration No': 'FA24-BCS-002',
         'Student Name': 'Jane Smith'
       },
       {
-        'Registration No': '25FA-003-BCS',
+        'Registration No': 'FA24-BCS-003',
         'Student Name': 'Alice Johnson'
       },
       {
-        'Registration No': '25FA-004-BCS',
+        'Registration No': 'FA24-BCS-004',
         'Student Name': 'Bob Williams'
       },
       {
-        'Registration No': '25FA-005-BCS',
+        'Registration No': 'FA24-BCS-005',
         'Student Name': 'Charlie Brown'
       }
     ];
@@ -640,9 +654,16 @@ const TeacherSubjects_Page = () => {
                           <button
                             onClick={() => openImportStudentsModal(subject)}
                             className="p-1.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
-                            title="Manage Students (Import/View)"
+                            title="Import Students"
                           >
                             <FiUpload className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleExportAllData(subject)}
+                            className="p-1.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors"
+                            title="Export All Data"
+                          >
+                            <FiDownload className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => openEditModal(subject)}
