@@ -1312,16 +1312,7 @@ const TeacherSubjects_Page = () => {
               {/* Add Individual Student Tab */}
               {activeStudentTab === 'add' && (
                 <div>
-                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                    <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
-                      <FiInfo className="h-4 w-4 mr-1" />
-                      Add Student Manually
-                    </h4>
-                    <p className="text-xs text-blue-600">
-                      Enter the registration number and name of the student you want to add to this course.
-                    </p>
-                  </div>
-
+                  
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="space-y-4">
                       <div>
