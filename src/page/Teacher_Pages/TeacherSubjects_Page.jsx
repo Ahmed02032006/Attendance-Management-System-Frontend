@@ -1098,7 +1098,7 @@ const TeacherSubjects_Page = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-purple-100 rounded-lg">
-                    <FiUsers className="h-5 w-5 text-purple-600" />
+                    <FiUsers className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Manage Students</h3>
@@ -1127,7 +1127,7 @@ const TeacherSubjects_Page = () => {
                   setImportedStudents([]);
                 }}
                 className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'view'
-                  ? 'border-purple-600 text-purple-600'
+                  ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
@@ -1140,7 +1140,7 @@ const TeacherSubjects_Page = () => {
                   setImportedStudents([]);
                 }}
                 className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'import'
-                  ? 'border-purple-600 text-purple-600'
+                  ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
@@ -1173,7 +1173,7 @@ const TeacherSubjects_Page = () => {
 
                   {studentsLoading ? (
                     <div className="text-center py-12">
-                      <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-purple-600"></div>
+                      <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
                       <p className="mt-3 text-sm text-gray-500">Loading students...</p>
                     </div>
                   ) : (
@@ -1213,7 +1213,7 @@ const TeacherSubjects_Page = () => {
                                   No students registered yet
                                   <button
                                     onClick={() => setActiveStudentTab('import')}
-                                    className="block mx-auto mt-3 text-purple-600 hover:text-purple-700 text-xs font-medium"
+                                    className="block mx-auto mt-3 text-blue-600 hover:text-blue-700 text-xs font-medium"
                                   >
                                     Import students to get started
                                   </button>
@@ -1254,16 +1254,16 @@ const TeacherSubjects_Page = () => {
                       <h4 className="text-xs font-semibold text-gray-700 mb-2">File Requirements</h4>
                       <ul className="space-y-1.5">
                         <li className="flex items-start text-xs">
-                          <span className="text-purple-600 font-bold mr-2">•</span>
+                          <span className="text-blue-600 font-bold mr-2">•</span>
                           <span className="text-gray-600">Excel file (.xlsx, .xls) or CSV</span>
                         </li>
                         <li className="flex items-start text-xs">
-                          <span className="text-purple-600 font-bold mr-2">•</span>
-                          <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded border border-purple-400 text-purple-600 text-[10px]">Registration No</span></span>
+                          <span className="text-blue-600 font-bold mr-2">•</span>
+                          <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded border border-blue-400 text-blue-600 text-[10px]">Registration No</span></span>
                         </li>
                         <li className="flex items-start text-xs">
-                          <span className="text-purple-600 font-bold mr-2">•</span>
-                          <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded border border-purple-400 text-purple-600 text-[10px]">Student Name</span></span>
+                          <span className="text-blue-600 font-bold mr-2">•</span>
+                          <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded border border-blue-400 text-blue-600 text-[10px]">Student Name</span></span>
                         </li>
                       </ul>
                     </div>
@@ -1281,9 +1281,9 @@ const TeacherSubjects_Page = () => {
                         />
                         <div className={`border-2 border-dashed rounded-lg p-3 text-center transition-all ${isUploading
                           ? 'border-gray-300 bg-gray-100'
-                          : 'border-purple-200 hover:border-purple-300 hover:bg-purple-50/50'
+                          : 'border-blue-200 hover:border-blue-300 hover:bg-blue-50/50'
                           }`}>
-                          <FiUpload className={`h-4 w-4 mx-auto mb-1 ${isUploading ? 'text-gray-400' : 'text-purple-600'}`} />
+                          <FiUpload className={`h-4 w-4 mx-auto mb-1 ${isUploading ? 'text-gray-400' : 'text-blue-600'}`} />
                           <p className="text-xs font-medium text-gray-700">
                             {isUploading ? 'Uploading...' : 'Click to browse'}
                           </p>
@@ -1299,7 +1299,7 @@ const TeacherSubjects_Page = () => {
                   <div className="text-right mb-1">
                     <button
                       onClick={downloadDummyExcel}
-                      className="text-xs text-purple-600 hover:text-purple-800 inline-flex items-center"
+                      className="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center"
                     >
                       <FiFileText className="h-3 w-3 mr-1" />
                       Download template
@@ -1311,7 +1311,7 @@ const TeacherSubjects_Page = () => {
                     <div className="mt-3">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-sm font-medium text-gray-700 flex items-center">
-                          <FiUsers className="h-4 w-4 mr-1.5 text-purple-600" />
+                          <FiUsers className="h-4 w-4 mr-1.5 text-blue-600" />
                           Preview ({importedStudents.length})
                         </h4>
                         <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
@@ -1363,7 +1363,7 @@ const TeacherSubjects_Page = () => {
                   onClick={handleInsertStudents}
                   disabled={importedStudents.length === 0 || studentsLoading}
                   className={`px-5 py-1.5 text-xs rounded-md font-medium transition-colors flex items-center ${importedStudents.length > 0 && !studentsLoading
-                    ? 'bg-purple-600 text-white hover:bg-purple-700'
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                 >
