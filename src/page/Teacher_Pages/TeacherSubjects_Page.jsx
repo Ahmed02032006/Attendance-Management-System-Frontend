@@ -22,11 +22,7 @@ import {
   FiInfo,
   FiAlertCircle,
   FiUserPlus,
-  FiSave,
-  FiUserCheck,
-  FiClipboard,
-  FiCheckCircle,
-  FiXCircle
+  FiSave
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import * as XLSX from 'xlsx'
@@ -40,7 +36,7 @@ import {
   addRegisteredStudents,
   deleteRegisteredStudent,
   deleteAllRegisteredStudents,
-  updateRegisteredStudent // You'll need to add this to your slicer
+  updateRegisteredStudent // Make sure this action exists in your slicer
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
@@ -55,15 +51,14 @@ const TeacherSubjects_Page = () => {
   const [showImportStudentsModal, setShowImportStudentsModal] = useState(false)
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
   const [showStudentManagementModal, setShowStudentManagementModal] = useState(false)
-  const [showEditStudentModal, setShowEditStudentModal] = useState(false)
+  const [showEditStudentModal, setShowEditStudentModal] = useState(false) // New state for edit student modal
   const [selectedSubject, setSelectedSubject] = useState(null)
-  const [selectedStudent, setSelectedStudent] = useState(null)
+  const [selectedStudent, setSelectedStudent] = useState(null) // New state for selected student
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
   const [subjectsPerPage] = useState(5)
   const [activeStudentTab, setActiveStudentTab] = useState('view') // 'view', 'import', or 'add'
-  const [studentSearchTerm, setStudentSearchTerm] = useState('') // For searching within students
 
   // For imported students data
   const [importedStudents, setImportedStudents] = useState([])
@@ -75,7 +70,6 @@ const TeacherSubjects_Page = () => {
     studentName: ''
   })
   const [isAddingStudent, setIsAddingStudent] = useState(false)
-  const [addSuccess, setAddSuccess] = useState(false)
 
   // For editing student
   const [editStudentForm, setEditStudentForm] = useState({
@@ -118,12 +112,6 @@ const TeacherSubjects_Page = () => {
 
     return matchesSearch && matchesFilter
   })
-
-  // Filter students within the selected subject
-  const filteredStudents = registeredStudents?.registeredStudents?.filter(student => {
-    return student.studentName?.toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
-           student.registrationNo?.toLowerCase().includes(studentSearchTerm.toLowerCase())
-  }) || []
 
   // Pagination
   const indexOfLastSubject = currentPage * subjectsPerPage
@@ -292,7 +280,7 @@ const TeacherSubjects_Page = () => {
         students: importedStudents
       })).unwrap();
 
-      toast.success(`${importedStudents.length} students added successfully!`);
+      toast.success('Students added successfully!');
       setImportedStudents([]);
       setActiveStudentTab('view');
 
@@ -337,7 +325,6 @@ const TeacherSubjects_Page = () => {
     }
 
     setIsAddingStudent(true);
-    setAddSuccess(false);
 
     try {
       await dispatch(addRegisteredStudents({
@@ -350,9 +337,8 @@ const TeacherSubjects_Page = () => {
       })).unwrap();
 
       toast.success('Student added successfully!');
-      setAddSuccess(true);
       
-      // Clear form after successful addition
+      // Clear form
       setIndividualStudent({
         registrationNo: '',
         studentName: ''
@@ -363,13 +349,25 @@ const TeacherSubjects_Page = () => {
         subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
-
-      // Reset success state after animation
-      setTimeout(() => setAddSuccess(false), 2000);
     } catch (error) {
       toast.error(error?.message || 'Failed to add student');
     } finally {
       setIsAddingStudent(false);
+    }
+  };
+
+  // Handle view registered students
+  const handleViewStudents = async (subject) => {
+    try {
+      const result = await dispatch(getRegisteredStudents({
+        subjectId: subject.id,
+        teacherId: currentUserId
+      })).unwrap();
+
+      setSelectedSubject(subject);
+      setShowViewStudentsModal(true);
+    } catch (error) {
+      toast.error(error?.message || 'Failed to fetch registered students');
     }
   };
 
@@ -404,21 +402,24 @@ const TeacherSubjects_Page = () => {
       return;
     }
 
-    // Check for duplicates (excluding current student)
-    const isDuplicate = registeredStudents?.registeredStudents?.some(
-      student => student._id !== selectedStudent._id && 
-                student.registrationNo.toLowerCase() === editStudentForm.registrationNo.toLowerCase()
-    );
+    // Check if registration number is changed and if it's duplicate
+    if (editStudentForm.registrationNo !== selectedStudent.registrationNo) {
+      const isDuplicate = registeredStudents?.registeredStudents?.some(
+        student => 
+          student._id !== selectedStudent._id && 
+          student.registrationNo.toLowerCase() === editStudentForm.registrationNo.toLowerCase()
+      );
 
-    if (isDuplicate) {
-      toast.error('Another student with this registration number already exists');
-      return;
+      if (isDuplicate) {
+        toast.error('Student with this registration number already exists');
+        return;
+      }
     }
 
     setIsEditingStudent(true);
 
     try {
-      // You'll need to implement this in your slicer
+      // Make sure you have this action in your slicer
       await dispatch(updateRegisteredStudent({
         subjectId: selectedSubject.id,
         studentId: selectedStudent._id,
@@ -442,21 +443,6 @@ const TeacherSubjects_Page = () => {
       toast.error(error?.message || 'Failed to update student');
     } finally {
       setIsEditingStudent(false);
-    }
-  };
-
-  // Handle view registered students
-  const handleViewStudents = async (subject) => {
-    try {
-      const result = await dispatch(getRegisteredStudents({
-        subjectId: subject.id,
-        teacherId: currentUserId
-      })).unwrap();
-
-      setSelectedSubject(subject);
-      setShowViewStudentsModal(true);
-    } catch (error) {
-      toast.error(error?.message || 'Failed to fetch registered students');
     }
   };
 
@@ -520,7 +506,6 @@ const TeacherSubjects_Page = () => {
     setSelectedSubject(subject);
     setActiveStudentTab('view');
     setImportedStudents([]);
-    setStudentSearchTerm('');
     setIndividualStudent({
       registrationNo: '',
       studentName: ''
@@ -1252,17 +1237,7 @@ const TeacherSubjects_Page = () => {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <FiEdit className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Edit Student</h3>
-                    <p className="text-sm text-gray-500">
-                      Update student information
-                    </p>
-                  </div>
-                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Edit Student</h3>
                 <button
                   onClick={() => {
                     setShowEditStudentModal(false);
@@ -1280,57 +1255,46 @@ const TeacherSubjects_Page = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Registration Number <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiClipboard className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      name="registrationNo"
-                      value={editStudentForm.registrationNo}
-                      onChange={handleEditStudentChange}
-                      className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="e.g., 25FA-001-BCS"
-                      disabled={isEditingStudent}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    name="registrationNo"
+                    value={editStudentForm.registrationNo}
+                    onChange={handleEditStudentChange}
+                    placeholder="e.g., 25FA-001-BCS"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={isEditingStudent}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Student Name <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiUserCheck className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      name="studentName"
-                      value={editStudentForm.studentName}
-                      onChange={handleEditStudentChange}
-                      className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="e.g., John Doe"
-                      disabled={isEditingStudent}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    name="studentName"
+                    value={editStudentForm.studentName}
+                    onChange={handleEditStudentChange}
+                    placeholder="e.g., John Doe"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={isEditingStudent}
+                  />
                 </div>
               </div>
             </div>
-            <div className="px-6 py-3 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
               <button
                 onClick={() => {
                   setShowEditStudentModal(false);
                   setSelectedStudent(null);
                 }}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-lg transition-colors"
-                disabled={isEditingStudent}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdateStudent}
                 disabled={isEditingStudent || !editStudentForm.registrationNo.trim() || !editStudentForm.studentName.trim()}
-                className={`px-5 py-2 text-sm rounded-lg font-medium transition-colors flex items-center ${
+                className={`px-5 py-2 text-sm rounded-md font-medium transition-colors flex items-center ${
                   isEditingStudent || !editStudentForm.registrationNo.trim() || !editStudentForm.studentName.trim()
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -1376,7 +1340,6 @@ const TeacherSubjects_Page = () => {
                     setShowStudentManagementModal(false);
                     setImportedStudents([]);
                     setIndividualStudent({ registrationNo: '', studentName: '' });
-                    setStudentSearchTerm('');
                   }}
                   className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
                 >
@@ -1393,13 +1356,12 @@ const TeacherSubjects_Page = () => {
                   setImportedStudents([]);
                   setIndividualStudent({ registrationNo: '', studentName: '' });
                 }}
-                className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center ${
-                  activeStudentTab === 'view'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'view'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
               >
-                <FiUsers className="h-4 w-4 mr-2" />
+                <FiUsers className="h-4 w-4 inline mr-2" />
                 View Students ({selectedSubject.registeredStudentsCount || 0})
               </button>
               <button
@@ -1407,13 +1369,12 @@ const TeacherSubjects_Page = () => {
                   setActiveStudentTab('add');
                   setImportedStudents([]);
                 }}
-                className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center ${
-                  activeStudentTab === 'add'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'add'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
               >
-                <FiUserPlus className="h-4 w-4 mr-2" />
+                <FiUserPlus className="h-4 w-4 inline mr-2" />
                 Add Individual
               </button>
               <button
@@ -1421,13 +1382,12 @@ const TeacherSubjects_Page = () => {
                   setActiveStudentTab('import');
                   setImportedStudents([]);
                 }}
-                className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center ${
-                  activeStudentTab === 'import'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'import'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
               >
-                <FiUpload className="h-4 w-4 mr-2" />
+                <FiUpload className="h-4 w-4 inline mr-2" />
                 Import Students
               </button>
             </div>
@@ -1437,43 +1397,20 @@ const TeacherSubjects_Page = () => {
               {/* View Students Tab */}
               {activeStudentTab === 'view' && (
                 <div>
-                  <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm text-gray-600">
-                        Total Registered: <span className="font-semibold text-blue-600">{filteredStudents.length}</span> students
-                      </p>
-                      {filteredStudents.length < (registeredStudents?.registeredStudents?.length || 0) && (
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                          Filtered from {(registeredStudents?.registeredStudents?.length || 0)}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                      {/* Student Search */}
-                      <div className="relative flex-1 sm:flex-none sm:w-64">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FiSearch className="h-3.5 w-3.5 text-gray-400" />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Search students..."
-                          value={studentSearchTerm}
-                          onChange={(e) => setStudentSearchTerm(e.target.value)}
-                          className="w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
+                  <div className="mb-4 flex justify-between items-center">
+                    <p className="text-sm text-gray-600">
+                      Total Registered: <span className="font-semibold">{registeredStudents?.registeredStudents?.length || 0}</span> students
+                    </p>
 
-                      {registeredStudents?.registeredStudents?.length > 0 && (
-                        <button
-                          onClick={openDeleteAllModal}
-                          className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium whitespace-nowrap"
-                        >
-                          <FiTrash2 className="h-3.5 w-3.5 mr-1.5" />
-                          Delete All
-                        </button>
-                      )}
-                    </div>
+                    {registeredStudents?.registeredStudents?.length > 0 && (
+                      <button
+                        onClick={openDeleteAllModal}
+                        className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium"
+                      >
+                        <FiTrash2 className="h-3.5 w-3.5 mr-1.5" />
+                        Delete All ({registeredStudents?.registeredStudents?.length || 0})
+                      </button>
+                    )}
                   </div>
 
                   {studentsLoading ? (
@@ -1494,8 +1431,8 @@ const TeacherSubjects_Page = () => {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200">
-                            {filteredStudents.length > 0 ? (
-                              filteredStudents.map((student, index) => (
+                            {registeredStudents?.registeredStudents?.length > 0 ? (
+                              registeredStudents.registeredStudents.map((student, index) => (
                                 <tr key={student._id} className="hover:bg-gray-50">
                                   <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
                                   <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
@@ -1504,7 +1441,7 @@ const TeacherSubjects_Page = () => {
                                     <div className="flex items-center justify-center space-x-2">
                                       <button
                                         onClick={() => handleEditStudent(student)}
-                                        className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                                        className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                                         title="Edit Student"
                                       >
                                         <FiEdit className="h-4 w-4" />
@@ -1523,37 +1460,22 @@ const TeacherSubjects_Page = () => {
                             ) : (
                               <tr>
                                 <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
-                                  {registeredStudents?.registeredStudents?.length > 0 ? (
-                                    <>
-                                      <FiSearch className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                                      No students match your search
-                                      <button
-                                        onClick={() => setStudentSearchTerm('')}
-                                        className="block mx-auto mt-3 text-blue-600 hover:text-blue-700 text-xs font-medium"
-                                      >
-                                        Clear search
-                                      </button>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <FiUsers className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                                      No students registered yet
-                                      <div className="flex justify-center gap-2 mt-3">
-                                        <button
-                                          onClick={() => setActiveStudentTab('add')}
-                                          className="text-blue-600 hover:text-blue-700 text-xs font-medium px-3 py-1 border border-blue-200 rounded-lg"
-                                        >
-                                          Add Individual
-                                        </button>
-                                        <button
-                                          onClick={() => setActiveStudentTab('import')}
-                                          className="text-blue-600 hover:text-blue-700 text-xs font-medium px-3 py-1 border border-blue-200 rounded-lg"
-                                        >
-                                          Import Students
-                                        </button>
-                                      </div>
-                                    </>
-                                  )}
+                                  <FiUsers className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                                  No students registered yet
+                                  <div className="flex justify-center gap-2 mt-3">
+                                    <button
+                                      onClick={() => setActiveStudentTab('add')}
+                                      className="text-blue-600 hover:text-blue-700 text-xs font-medium px-3 py-1 border border-blue-200 rounded-lg"
+                                    >
+                                      Add Individual
+                                    </button>
+                                    <button
+                                      onClick={() => setActiveStudentTab('import')}
+                                      className="text-blue-600 hover:text-blue-700 text-xs font-medium px-3 py-1 border border-blue-200 rounded-lg"
+                                    >
+                                      Import Students
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             )}
@@ -1565,166 +1487,82 @@ const TeacherSubjects_Page = () => {
                 </div>
               )}
 
-              {/* Add Individual Student Tab - Enhanced UI */}
+              {/* Add Individual Student Tab */}
               {activeStudentTab === 'add' && (
                 <div>
-                  {/* Info Card */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-100">
-                    <div className="flex items-start">
-                      <div className="p-2 bg-blue-100 rounded-lg mr-3">
-                        <FiInfo className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-blue-800 mb-1">Add Student Manually</h4>
-                        <p className="text-xs text-blue-600">
-                          Enter the registration number and name of the student you want to add to this course. 
-                          Registration numbers must be unique within this course.
-                        </p>
-                      </div>
-                    </div>
+                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
+                      <FiInfo className="h-4 w-4 mr-1" />
+                      Add Student Manually
+                    </h4>
+                    <p className="text-xs text-blue-600">
+                      Enter the registration number and name of the student you want to add to this course.
+                    </p>
                   </div>
 
-                  {/* Add Student Form Card */}
-                  <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                    <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
-                      <h4 className="text-sm font-medium text-gray-700 flex items-center">
-                        <FiUserPlus className="h-4 w-4 mr-2 text-blue-600" />
-                        Student Information
-                      </h4>
-                    </div>
-                    
-                    <div className="p-5">
-                      <div className="space-y-5">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                            Registration Number <span className="text-red-500">*</span>
-                          </label>
-                          <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <FiClipboard className="h-4 w-4 text-gray-400" />
-                            </div>
-                            <input
-                              type="text"
-                              name="registrationNo"
-                              value={individualStudent.registrationNo}
-                              onChange={handleIndividualStudentChange}
-                              placeholder="e.g., 25FA-001-BCS"
-                              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                                individualStudent.registrationNo ? 'border-blue-300 bg-blue-50/30' : 'border-gray-300'
-                              }`}
-                              disabled={isAddingStudent}
-                            />
-                            {individualStudent.registrationNo && (
-                              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                <FiCheckCircle className="h-4 w-4 text-green-500" />
-                              </div>
-                            )}
-                          </div>
-                          <p className="mt-1.5 text-xs text-gray-500">
-                            Format: [Session]-[Roll No]-[Department] e.g., 25FA-001-BCS
-                          </p>
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                            Student Name <span className="text-red-500">*</span>
-                          </label>
-                          <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <FiUserCheck className="h-4 w-4 text-gray-400" />
-                            </div>
-                            <input
-                              type="text"
-                              name="studentName"
-                              value={individualStudent.studentName}
-                              onChange={handleIndividualStudentChange}
-                              placeholder="e.g., John Doe"
-                              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                                individualStudent.studentName ? 'border-blue-300 bg-blue-50/30' : 'border-gray-300'
-                              }`}
-                              disabled={isAddingStudent}
-                            />
-                            {individualStudent.studentName && (
-                              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                <FiCheckCircle className="h-4 w-4 text-green-500" />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Quick Stats */}
-                        <div className="grid grid-cols-2 gap-3 pt-2">
-                          <div className="bg-gray-50 rounded-lg p-3 text-center">
-                            <p className="text-xs text-gray-500 mb-1">Current Total</p>
-                            <p className="text-lg font-semibold text-gray-800">{filteredStudents.length}</p>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-3 text-center">
-                            <p className="text-xs text-gray-500 mb-1">To be Added</p>
-                            <p className="text-lg font-semibold text-blue-600">
-                              {individualStudent.registrationNo && individualStudent.studentName ? '1' : '0'}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        {/* Action Buttons */}
-                        <div className="flex justify-end pt-3 border-t border-gray-100">
-                          <button
-                            onClick={handleAddIndividualStudent}
-                            disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
-                            className={`px-6 py-2.5 text-sm rounded-lg font-medium transition-all flex items-center ${
-                              isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
-                                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-sm hover:shadow'
-                            }`}
-                          >
-                            {isAddingStudent ? (
-                              <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                                Adding Student...
-                              </>
-                            ) : (
-                              <>
-                                <FiUserPlus className="h-4 w-4 mr-2" />
-                                Add Student
-                              </>
-                            )}
-                          </button>
-                        </div>
-
-                        {/* Success Message */}
-                        {addSuccess && (
-                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center text-green-700">
-                            <FiCheckCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-                            <span className="text-xs">Student added successfully! You can add another one.</span>
-                          </div>
-                        )}
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Registration Number <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="registrationNo"
+                          value={individualStudent.registrationNo}
+                          onChange={handleIndividualStudentChange}
+                          placeholder="e.g., 25FA-001-BCS"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={isAddingStudent}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Student Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="studentName"
+                          value={individualStudent.studentName}
+                          onChange={handleIndividualStudentChange}
+                          placeholder="e.g., John Doe"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={isAddingStudent}
+                        />
+                      </div>
+                      <div className="flex justify-end pt-2">
+                        <button
+                          onClick={handleAddIndividualStudent}
+                          disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
+                          className={`px-5 py-2 text-sm rounded-md font-medium transition-colors flex items-center ${
+                            isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                          }`}
+                        >
+                          {isAddingStudent ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                              Adding...
+                            </>
+                          ) : (
+                            <>
+                              <FiUserPlus className="h-4 w-4 mr-2" />
+                              Add Student
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>
 
                   {/* Quick Tips */}
-                  <div className="mt-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h5 className="text-xs font-semibold text-gray-700 mb-2 flex items-center">
-                      <FiInfo className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
-                      Quick Tips
-                    </h5>
-                    <ul className="space-y-1.5">
-                      <li className="flex items-start text-xs text-gray-600">
-                        <span className="text-blue-500 mr-2">•</span>
-                        Registration number must be unique - system will prevent duplicates
-                      </li>
-                      <li className="flex items-start text-xs text-gray-600">
-                        <span className="text-blue-500 mr-2">•</span>
-                        Student names should include first and last name
-                      </li>
-                      <li className="flex items-start text-xs text-gray-600">
-                        <span className="text-blue-500 mr-2">•</span>
-                        You can add multiple students one by one using this form
-                      </li>
-                      <li className="flex items-start text-xs text-gray-600">
-                        <span className="text-blue-500 mr-2">•</span>
-                        For bulk addition, use the Import Students tab
-                      </li>
+                  <div className="mt-4 text-xs text-gray-500 border-t border-gray-100 pt-4">
+                    <p className="font-medium text-gray-600 mb-1">Tips:</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>Registration number should be unique for each student</li>
+                      <li>You can add multiple students one by one</li>
+                      <li>Use the Import tab to add multiple students at once via Excel</li>
                     </ul>
                   </div>
                 </div>
@@ -1734,49 +1572,43 @@ const TeacherSubjects_Page = () => {
               {activeStudentTab === 'import' && (
                 <div>
                   {/* Quick Stats Cards */}
-                  <div className="grid grid-cols-3 gap-3 mb-5">
-                    <div className="bg-blue-50 rounded-lg p-3 text-center border border-blue-100">
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    <div className="bg-blue-50 rounded-lg p-2 text-center">
                       <p className="text-xs text-blue-600 font-medium">Semester</p>
-                      <p className="text-base font-semibold text-gray-800">{selectedSubject.semester}</p>
+                      <p className="text-sm font-semibold text-gray-800">{selectedSubject.semester}</p>
                     </div>
-                    <div className="bg-green-50 rounded-lg p-3 text-center border border-green-100">
+                    <div className="bg-green-50 rounded-lg p-2 text-center">
                       <p className="text-xs text-green-600 font-medium">Session</p>
-                      <p className="text-base font-semibold text-gray-800">{selectedSubject.session}</p>
+                      <p className="text-sm font-semibold text-gray-800">{selectedSubject.session}</p>
                     </div>
-                    <div className="bg-purple-50 rounded-lg p-3 text-center border border-purple-100">
+                    <div className="bg-purple-50 rounded-lg p-2 text-center">
                       <p className="text-xs text-purple-600 font-medium">Current</p>
-                      <p className="text-base font-semibold text-gray-800">{selectedSubject.registeredStudentsCount || 0} Students</p>
+                      <p className="text-sm font-semibold text-gray-800">{selectedSubject.registeredStudentsCount || 0} Students</p>
                     </div>
                   </div>
 
                   {/* Two Column Layout */}
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <h4 className="text-xs font-semibold text-gray-700 mb-3 flex items-center">
-                        <FiFileText className="h-3.5 w-3.5 mr-1.5 text-blue-600" />
-                        File Requirements
-                      </h4>
-                      <ul className="space-y-2">
+                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <h4 className="text-xs font-semibold text-gray-700 mb-2">File Requirements</h4>
+                      <ul className="space-y-1.5">
                         <li className="flex items-start text-xs">
                           <span className="text-blue-600 font-bold mr-2">•</span>
                           <span className="text-gray-600">Excel file (.xlsx, .xls) or CSV</span>
                         </li>
                         <li className="flex items-start text-xs">
                           <span className="text-blue-600 font-bold mr-2">•</span>
-                          <span className="text-gray-600">Required column: <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-blue-300 text-blue-600 text-[10px]">Registration No</span></span>
+                          <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded border border-blue-400 text-blue-600 text-[10px]">Registration No</span></span>
                         </li>
                         <li className="flex items-start text-xs">
                           <span className="text-blue-600 font-bold mr-2">•</span>
-                          <span className="text-gray-600">Required column: <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-blue-300 text-blue-600 text-[10px]">Student Name</span></span>
+                          <span className="text-gray-600">Column: <span className="font-mono bg-white px-1 py-0.5 rounded border border-blue-400 text-blue-600 text-[10px]">Student Name</span></span>
                         </li>
                       </ul>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <h4 className="text-xs font-semibold text-gray-700 mb-3 flex items-center">
-                        <FiUpload className="h-3.5 w-3.5 mr-1.5 text-blue-600" />
-                        Upload File
-                      </h4>
+                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <h4 className="text-xs font-semibold text-gray-700 mb-2">Upload File</h4>
                       <label className="block cursor-pointer">
                         <input
                           type="file"
@@ -1785,17 +1617,16 @@ const TeacherSubjects_Page = () => {
                           className="hidden"
                           disabled={isUploading}
                         />
-                        <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
-                          isUploading
-                            ? 'border-gray-300 bg-gray-100'
-                            : 'border-blue-200 hover:border-blue-300 hover:bg-blue-50/50'
-                        }`}>
-                          <FiUpload className={`h-5 w-5 mx-auto mb-2 ${isUploading ? 'text-gray-400' : 'text-blue-600'}`} />
+                        <div className={`border-2 border-dashed rounded-lg p-3 text-center transition-all ${isUploading
+                          ? 'border-gray-300 bg-gray-100'
+                          : 'border-blue-200 hover:border-blue-300 hover:bg-blue-50/50'
+                          }`}>
+                          <FiUpload className={`h-4 w-4 mx-auto mb-1 ${isUploading ? 'text-gray-400' : 'text-blue-600'}`} />
                           <p className="text-xs font-medium text-gray-700">
                             {isUploading ? 'Uploading...' : 'Click to browse'}
                           </p>
-                          <p className="text-[10px] text-gray-400 mt-1">
-                            .xlsx, .xls, .csv up to 5MB
+                          <p className="text-[10px] text-gray-400 mt-0.5">
+                            .xlsx, .xls, .csv
                           </p>
                         </div>
                       </label>
@@ -1803,12 +1634,12 @@ const TeacherSubjects_Page = () => {
                   </div>
 
                   {/* Template Link */}
-                  <div className="flex justify-end mb-3">
+                  <div className="text-right mb-1">
                     <button
                       onClick={downloadDummyExcel}
-                      className="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center px-2 py-1 hover:bg-blue-50 rounded"
+                      className="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center"
                     >
-                      <FiDownload className="h-3 w-3 mr-1.5" />
+                      <FiFileText className="h-3 w-3 mr-1" />
                       Download template
                     </button>
                   </div>
@@ -1816,42 +1647,34 @@ const TeacherSubjects_Page = () => {
                   {/* Preview Section */}
                   {importedStudents.length > 0 && (
                     <div className="mt-3">
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-2">
                         <h4 className="text-sm font-medium text-gray-700 flex items-center">
                           <FiUsers className="h-4 w-4 mr-1.5 text-blue-600" />
-                          Preview ({importedStudents.length} students)
+                          Preview ({importedStudents.length})
                         </h4>
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center">
-                          <FiCheckCircle className="h-3 w-3 mr-1" />
+                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                           Ready to import
                         </span>
                       </div>
 
                       <div className="border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="max-h-48 overflow-y-auto">
+                        <div className="max-h-40 overflow-y-auto">
                           <table className="w-full">
                             <thead className="bg-gray-50 sticky top-0">
                               <tr>
-                                <th className="px-3 py-2 text-left text-[10px] font-medium text-gray-500 uppercase">#</th>
-                                <th className="px-3 py-2 text-left text-[10px] font-medium text-gray-500 uppercase">Registration No</th>
-                                <th className="px-3 py-2 text-left text-[10px] font-medium text-gray-500 uppercase">Student Name</th>
+                                <th className="px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase">#</th>
+                                <th className="px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase">Registration No</th>
+                                <th className="px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase">Student Name</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                              {importedStudents.slice(0, 5).map((student, index) => (
+                              {importedStudents.map((student, index) => (
                                 <tr key={index} className="hover:bg-gray-50">
-                                  <td className="px-3 py-2 text-xs text-gray-600">{index + 1}</td>
-                                  <td className="px-3 py-2 text-xs text-gray-900 font-mono">{student.registrationNo}</td>
-                                  <td className="px-3 py-2 text-xs text-gray-900">{student.studentName}</td>
+                                  <td className="px-3 py-1.5 text-[11px] text-gray-600">{index + 1}</td>
+                                  <td className="px-3 py-1.5 text-[11px] text-gray-900 font-mono">{student.registrationNo}</td>
+                                  <td className="px-3 py-1.5 text-[11px] text-gray-900">{student.studentName}</td>
                                 </tr>
                               ))}
-                              {importedStudents.length > 5 && (
-                                <tr>
-                                  <td colSpan="3" className="px-3 py-2 text-xs text-gray-500 text-center border-t border-gray-100">
-                                    ... and {importedStudents.length - 5} more
-                                  </td>
-                                </tr>
-                              )}
                             </tbody>
                           </table>
                         </div>
@@ -1869,9 +1692,8 @@ const TeacherSubjects_Page = () => {
                   setShowStudentManagementModal(false);
                   setImportedStudents([]);
                   setIndividualStudent({ registrationNo: '', studentName: '' });
-                  setStudentSearchTerm('');
                 }}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
+                className="px-4 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
               >
                 Close
               </button>
@@ -1879,7 +1701,7 @@ const TeacherSubjects_Page = () => {
                 <button
                   onClick={handleInsertStudents}
                   disabled={importedStudents.length === 0 || studentsLoading}
-                  className={`px-5 py-2 text-sm rounded-md font-medium transition-colors flex items-center ${
+                  className={`px-5 py-1.5 text-xs rounded-md font-medium transition-colors flex items-center ${
                     importedStudents.length > 0 && !studentsLoading
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -1887,13 +1709,13 @@ const TeacherSubjects_Page = () => {
                 >
                   {studentsLoading ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1.5"></div>
                       Importing...
                     </>
                   ) : (
                     <>
-                      <FiUpload className="h-4 w-4 mr-2" />
-                      Import {importedStudents.length > 0 ? `${importedStudents.length} Students` : ''}
+                      <FiUpload className="h-3 w-3 mr-1.5" />
+                      Import {importedStudents.length > 0 ? `(${importedStudents.length})` : ''}
                     </>
                   )}
                 </button>
@@ -1902,6 +1724,7 @@ const TeacherSubjects_Page = () => {
           </div>
         </div>
       )}
+
     </div>
   )
 }
