@@ -21,7 +21,9 @@ import {
   FiFileText,
   FiInfo,
   FiAlertCircle,
-  FiUserPlus
+  FiUserPlus,
+  FiSave,
+  FiXCircle
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import * as XLSX from 'xlsx'
@@ -34,7 +36,8 @@ import {
   getRegisteredStudents,
   addRegisteredStudents,
   deleteRegisteredStudent,
-  deleteAllRegisteredStudents
+  deleteAllRegisteredStudents,
+  updateRegisteredStudent // You'll need to add this to your slicer
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
@@ -54,7 +57,7 @@ const TeacherSubjects_Page = () => {
   const [statusFilter, setStatusFilter] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
   const [subjectsPerPage] = useState(5)
-  const [activeStudentTab, setActiveStudentTab] = useState('view') // 'view', 'import', or 'add'
+  const [activeStudentTab, setActiveStudentTab] = useState('view') // 'view' or 'import'
 
   // For imported students data
   const [importedStudents, setImportedStudents] = useState([])
@@ -66,6 +69,14 @@ const TeacherSubjects_Page = () => {
     studentName: ''
   })
   const [isAddingStudent, setIsAddingStudent] = useState(false)
+
+  // For editing student
+  const [editingStudent, setEditingStudent] = useState(null)
+  const [editFormData, setEditFormData] = useState({
+    registrationNo: '',
+    studentName: ''
+  })
+  const [isEditingStudent, setIsEditingStudent] = useState(false)
 
   const [subjectForm, setSubjectForm] = useState({
     subjectTitle: '',
@@ -316,7 +327,6 @@ const TeacherSubjects_Page = () => {
     setIsAddingStudent(true);
 
     try {
-      // Add the single student using the same API
       await dispatch(addRegisteredStudents({
         subjectId: selectedSubject.id,
         teacherId: currentUserId,
@@ -339,12 +349,95 @@ const TeacherSubjects_Page = () => {
         subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
-
-      // Stay on the same tab
     } catch (error) {
       toast.error(error?.message || 'Failed to add student');
     } finally {
       setIsAddingStudent(false);
+    }
+  };
+
+  // Handle edit student - start editing
+  const handleEditStudent = (student) => {
+    setEditingStudent(student);
+    setEditFormData({
+      registrationNo: student.registrationNo,
+      studentName: student.studentName
+    });
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setEditingStudent(null);
+    setEditFormData({
+      registrationNo: '',
+      studentName: ''
+    });
+  };
+
+  // Handle edit form input change
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle save edit
+  const handleSaveEdit = async () => {
+    // Validate inputs
+    if (!editFormData.registrationNo.trim()) {
+      toast.error('Please enter registration number');
+      return;
+    }
+    if (!editFormData.studentName.trim()) {
+      toast.error('Please enter student name');
+      return;
+    }
+
+    // Check for duplicates (excluding current student)
+    const isDuplicate = registeredStudents?.registeredStudents?.some(
+      student => student._id !== editingStudent._id && 
+                 student.registrationNo.toLowerCase() === editFormData.registrationNo.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      toast.error('Student with this registration number already exists');
+      return;
+    }
+
+    setIsEditingStudent(true);
+
+    try {
+      // You'll need to implement this in your slicer
+      await dispatch(updateRegisteredStudent({
+        subjectId: selectedSubject.id,
+        studentId: editingStudent._id,
+        teacherId: currentUserId,
+        studentData: {
+          registrationNo: editFormData.registrationNo.trim(),
+          studentName: editFormData.studentName.trim()
+        }
+      })).unwrap();
+
+      toast.success('Student updated successfully!');
+      
+      // Clear edit state
+      setEditingStudent(null);
+      setEditFormData({
+        registrationNo: '',
+        studentName: ''
+      });
+
+      // Refresh students list
+      await dispatch(getRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      }));
+    } catch (error) {
+      toast.error(error?.message || 'Failed to update student');
+    } finally {
+      setIsEditingStudent(false);
     }
   };
 
@@ -427,6 +520,7 @@ const TeacherSubjects_Page = () => {
       registrationNo: '',
       studentName: ''
     });
+    setEditingStudent(null);
 
     try {
       await dispatch(getRegisteredStudents({
@@ -1171,6 +1265,7 @@ const TeacherSubjects_Page = () => {
                     setShowStudentManagementModal(false);
                     setImportedStudents([]);
                     setIndividualStudent({ registrationNo: '', studentName: '' });
+                    setEditingStudent(null);
                   }}
                   className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
                 >
@@ -1186,6 +1281,7 @@ const TeacherSubjects_Page = () => {
                   setActiveStudentTab('view');
                   setImportedStudents([]);
                   setIndividualStudent({ registrationNo: '', studentName: '' });
+                  setEditingStudent(null);
                 }}
                 className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'view'
                   ? 'border-blue-600 text-blue-600'
@@ -1197,21 +1293,9 @@ const TeacherSubjects_Page = () => {
               </button>
               <button
                 onClick={() => {
-                  setActiveStudentTab('add');
-                  setImportedStudents([]);
-                }}
-                className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'add'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-              >
-                <FiUserPlus className="h-4 w-4 inline mr-2" />
-                Add Individual
-              </button>
-              <button
-                onClick={() => {
                   setActiveStudentTab('import');
                   setImportedStudents([]);
+                  setEditingStudent(null);
                 }}
                 className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'import'
                   ? 'border-blue-600 text-blue-600'
@@ -1225,9 +1309,65 @@ const TeacherSubjects_Page = () => {
 
             {/* Tab Content */}
             <div className="flex-1 overflow-y-auto p-6">
-              {/* View Students Tab */}
+              {/* View Students Tab - Now with Add Individual Form */}
               {activeStudentTab === 'view' && (
                 <div>
+                  {/* Add Individual Student Form */}
+                  <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                      <FiUserPlus className="h-4 w-4 text-blue-600 mr-2" />
+                      Add New Student
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <input
+                          type="text"
+                          name="registrationNo"
+                          value={individualStudent.registrationNo}
+                          onChange={handleIndividualStudentChange}
+                          placeholder="Registration No. *"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={isAddingStudent}
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          name="studentName"
+                          value={individualStudent.studentName}
+                          onChange={handleIndividualStudentChange}
+                          placeholder="Student Name *"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={isAddingStudent}
+                        />
+                      </div>
+                      <div>
+                        <button
+                          onClick={handleAddIndividualStudent}
+                          disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
+                          className={`w-full px-4 py-2 text-sm rounded-md font-medium transition-colors flex items-center justify-center ${
+                            isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                          }`}
+                        >
+                          {isAddingStudent ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                              Adding...
+                            </>
+                          ) : (
+                            <>
+                              <FiUserPlus className="h-4 w-4 mr-2" />
+                              Add Student
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Students List */}
                   <div className="mb-4 flex justify-between items-center">
                     <p className="text-sm text-gray-600">
                       Total Registered: <span className="font-semibold">{registeredStudents?.registeredStudents?.length || 0}</span> students
@@ -1266,16 +1406,71 @@ const TeacherSubjects_Page = () => {
                               registeredStudents.registeredStudents.map((student, index) => (
                                 <tr key={student._id} className="hover:bg-gray-50">
                                   <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
-                                  <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
-                                  <td className="px-4 py-2 text-sm text-gray-900">{student.studentName}</td>
+                                  <td className="px-4 py-2 text-sm text-gray-900 font-mono">
+                                    {editingStudent && editingStudent._id === student._id ? (
+                                      <input
+                                        type="text"
+                                        name="registrationNo"
+                                        value={editFormData.registrationNo}
+                                        onChange={handleEditFormChange}
+                                        className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                        autoFocus
+                                      />
+                                    ) : (
+                                      student.registrationNo
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2 text-sm text-gray-900">
+                                    {editingStudent && editingStudent._id === student._id ? (
+                                      <input
+                                        type="text"
+                                        name="studentName"
+                                        value={editFormData.studentName}
+                                        onChange={handleEditFormChange}
+                                        className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                      />
+                                    ) : (
+                                      student.studentName
+                                    )}
+                                  </td>
                                   <td className="px-4 py-2 text-sm text-center">
-                                    <button
-                                      onClick={() => handleDeleteStudent(student._id)}
-                                      className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                                      title="Remove Student"
-                                    >
-                                      <FiUserMinus className="h-4 w-4" />
-                                    </button>
+                                    {editingStudent && editingStudent._id === student._id ? (
+                                      <div className="flex items-center justify-center space-x-1">
+                                        <button
+                                          onClick={handleSaveEdit}
+                                          disabled={isEditingStudent}
+                                          className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
+                                          title="Save"
+                                        >
+                                          <FiSave className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={handleCancelEdit}
+                                          disabled={isEditingStudent}
+                                          className="p-1 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                                          title="Cancel"
+                                        >
+                                          <FiXCircle className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center justify-center space-x-1">
+                                        <button
+                                          onClick={() => handleEditStudent(student)}
+                                          className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                                          title="Edit Student"
+                                        >
+                                          <FiEdit className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteStudent(student._id)}
+                                          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                                          title="Remove Student"
+                                        >
+                                          <FiUserMinus className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    )}
                                   </td>
                                 </tr>
                               ))
@@ -1284,20 +1479,9 @@ const TeacherSubjects_Page = () => {
                                 <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
                                   <FiUsers className="h-8 w-8 text-gray-300 mx-auto mb-2" />
                                   No students registered yet
-                                  <div className="flex justify-center gap-2 mt-3">
-                                    <button
-                                      onClick={() => setActiveStudentTab('add')}
-                                      className="text-blue-600 hover:text-blue-700 text-xs font-medium px-3 py-1 border border-blue-200 rounded-lg"
-                                    >
-                                      Add Individual
-                                    </button>
-                                    <button
-                                      onClick={() => setActiveStudentTab('import')}
-                                      className="text-blue-600 hover:text-blue-700 text-xs font-medium px-3 py-1 border border-blue-200 rounded-lg"
-                                    >
-                                      Import Students
-                                    </button>
-                                  </div>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    Use the form above to add students
+                                  </p>
                                 </td>
                               </tr>
                             )}
@@ -1306,77 +1490,6 @@ const TeacherSubjects_Page = () => {
                       </div>
                     </div>
                   )}
-                </div>
-              )}
-
-              {/* Add Individual Student Tab */}
-              {activeStudentTab === 'add' && (
-                <div>
-                  
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Registration Number <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="registrationNo"
-                          value={individualStudent.registrationNo}
-                          onChange={handleIndividualStudentChange}
-                          placeholder="e.g., 25FA-001-BCS"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                          disabled={isAddingStudent}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Student Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="studentName"
-                          value={individualStudent.studentName}
-                          onChange={handleIndividualStudentChange}
-                          placeholder="e.g., John Doe"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                          disabled={isAddingStudent}
-                        />
-                      </div>
-                      <div className="flex justify-end pt-2">
-                        <button
-                          onClick={handleAddIndividualStudent}
-                          disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
-                          className={`px-5 py-2 text-sm rounded-md font-medium transition-colors flex items-center ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
-                        >
-                          {isAddingStudent ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                              Adding...
-                            </>
-                          ) : (
-                            <>
-                              <FiUserPlus className="h-4 w-4 mr-2" />
-                              Add Student
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Quick Tips */}
-                  <div className="mt-4 text-xs text-gray-500 border-t border-gray-100 pt-4">
-                    <p className="font-medium text-gray-600 mb-1">Tips:</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>Registration number should be unique for each student</li>
-                      <li>You can add multiple students one by one</li>
-                      <li>Use the Import tab to add multiple students at once via Excel</li>
-                    </ul>
-                  </div>
                 </div>
               )}
 
@@ -1504,6 +1617,7 @@ const TeacherSubjects_Page = () => {
                   setShowStudentManagementModal(false);
                   setImportedStudents([]);
                   setIndividualStudent({ registrationNo: '', studentName: '' });
+                  setEditingStudent(null);
                 }}
                 className="px-4 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
               >
