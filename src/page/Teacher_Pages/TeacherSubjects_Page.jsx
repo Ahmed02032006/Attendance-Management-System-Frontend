@@ -1097,7 +1097,7 @@ const TeacherSubjects_Page = () => {
             <div className="px-6 py-4 border-b border-gray-200 bg-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-purple-100 rounded-lg">
+                  <div className="p-2 bg-blue-100 rounded-lg">
                     <FiUsers className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
