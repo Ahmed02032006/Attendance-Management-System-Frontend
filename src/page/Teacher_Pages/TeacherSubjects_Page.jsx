@@ -1406,7 +1406,7 @@ const TeacherSubjects_Page = () => {
                     </div>
                   ) : (
                     <div className="border border-gray-200 rounded-lg overflow-hidden">
-                      <div className="max-h-[400px] overflow-y-auto">
+                      <div className="max-h-[370px] overflow-y-auto">
                         <table className="w-full">
                           <thead className="bg-gray-50 sticky top-0 z-10">
                             <tr>
