@@ -275,13 +275,13 @@ const TeacherSubjects_Page = () => {
       toast.success('Students added successfully!');
       setImportedStudents([]);
       setActiveStudentTab('view'); // Switch to view tab after successful import
-      
+
       // Refresh students list
       await dispatch(getRegisteredStudents({
         subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
-      
+
       // Refresh subjects to update the count
       dispatch(getSubjectsByUser(currentUserId));
     } catch (error) {
@@ -366,14 +366,14 @@ const TeacherSubjects_Page = () => {
     setSelectedSubject(subject);
     setActiveStudentTab('view'); // Default to view tab
     setImportedStudents([]); // Reset imported students
-    
+
     // Fetch registered students
     try {
       await dispatch(getRegisteredStudents({
         subjectId: subject.id,
         teacherId: currentUserId
       })).unwrap();
-      
+
       setShowStudentManagementModal(true);
     } catch (error) {
       toast.error(error?.message || 'Failed to fetch registered students');
@@ -1050,7 +1050,7 @@ const TeacherSubjects_Page = () => {
 
       {/* Delete All Confirmation Modal */}
       {showDeleteAllModal && selectedSubject && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[100]"> {/* Changed z-50 to z-[100] */}
           <div className="bg-white rounded-lg w-full max-w-sm">
             <div className="px-4 py-3 border-b border-gray-200">
               <h3 className="text-base font-medium text-gray-900">Delete All Students</h3>
