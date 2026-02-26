@@ -394,22 +394,22 @@ const TeacherSubjects_Page = () => {
       toast.error('Please enter student name');
       return;
     }
-
+  
     // Check for duplicates (excluding current student)
     const isDuplicate = registeredStudents?.registeredStudents?.some(
       student => student._id !== editingStudent._id && 
                  student.registrationNo.toLowerCase() === editFormData.registrationNo.toLowerCase()
     );
-
+  
     if (isDuplicate) {
       toast.error('Student with this registration number already exists');
       return;
     }
-
+  
     setIsEditingStudent(true);
-
+  
     try {
-      // You'll need to implement this in your slicer
+      // FIXED: Pass the parameters correctly to match the slicer
       await dispatch(updateRegisteredStudent({
         subjectId: selectedSubject.id,
         studentId: editingStudent._id,
@@ -419,7 +419,7 @@ const TeacherSubjects_Page = () => {
           studentName: editFormData.studentName.trim()
         }
       })).unwrap();
-
+  
       toast.success('Student updated successfully!');
       
       // Clear edit state
@@ -428,13 +428,14 @@ const TeacherSubjects_Page = () => {
         registrationNo: '',
         studentName: ''
       });
-
+  
       // Refresh students list
       await dispatch(getRegisteredStudents({
         subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
     } catch (error) {
+      console.error('Update error:', error);
       toast.error(error?.message || 'Failed to update student');
     } finally {
       setIsEditingStudent(false);

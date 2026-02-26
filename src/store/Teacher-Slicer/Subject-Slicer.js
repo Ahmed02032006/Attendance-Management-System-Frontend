@@ -157,11 +157,15 @@ export const addRegisteredStudents = createAsyncThunk(
 // NEW: Update a registered student
 export const updateRegisteredStudent = createAsyncThunk(
   "subjects/updateRegisteredStudent",
-  async ({ subjectId, studentId, teacherId, registrationNo, studentName }, { rejectWithValue }) => {
+  async ({ subjectId, studentId, teacherId, studentData }, { rejectWithValue }) => {
     try {
       const response = await axios.put(
         `${BASE_URL}/subject/${subjectId}/registered-students/${studentId}`,
-        { teacherId, registrationNo, studentName }
+        {
+          teacherId,
+          registrationNo: studentData.registrationNo,
+          studentName: studentData.studentName
+        }
       );
 
       if (response.status !== 200) {
