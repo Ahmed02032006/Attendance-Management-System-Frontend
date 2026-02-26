@@ -21,8 +21,7 @@ import {
   FiFileText,
   FiInfo,
   FiAlertCircle,
-  FiUserPlus,
-  FiSave
+  FiUserPlus
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import * as XLSX from 'xlsx'
@@ -35,8 +34,7 @@ import {
   getRegisteredStudents,
   addRegisteredStudents,
   deleteRegisteredStudent,
-  deleteAllRegisteredStudents,
-  updateRegisteredStudent // Make sure this action exists in your slicer
+  deleteAllRegisteredStudents
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
@@ -51,9 +49,7 @@ const TeacherSubjects_Page = () => {
   const [showImportStudentsModal, setShowImportStudentsModal] = useState(false)
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
   const [showStudentManagementModal, setShowStudentManagementModal] = useState(false)
-  const [showEditStudentModal, setShowEditStudentModal] = useState(false) // New state for edit student modal
   const [selectedSubject, setSelectedSubject] = useState(null)
-  const [selectedStudent, setSelectedStudent] = useState(null) // New state for selected student
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
@@ -70,13 +66,6 @@ const TeacherSubjects_Page = () => {
     studentName: ''
   })
   const [isAddingStudent, setIsAddingStudent] = useState(false)
-
-  // For editing student
-  const [editStudentForm, setEditStudentForm] = useState({
-    registrationNo: '',
-    studentName: ''
-  })
-  const [isEditingStudent, setIsEditingStudent] = useState(false)
 
   const [subjectForm, setSubjectForm] = useState({
     subjectTitle: '',
@@ -327,6 +316,7 @@ const TeacherSubjects_Page = () => {
     setIsAddingStudent(true);
 
     try {
+      // Add the single student using the same API
       await dispatch(addRegisteredStudents({
         subjectId: selectedSubject.id,
         teacherId: currentUserId,
@@ -349,6 +339,8 @@ const TeacherSubjects_Page = () => {
         subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
+
+      // Stay on the same tab
     } catch (error) {
       toast.error(error?.message || 'Failed to add student');
     } finally {
@@ -368,81 +360,6 @@ const TeacherSubjects_Page = () => {
       setShowViewStudentsModal(true);
     } catch (error) {
       toast.error(error?.message || 'Failed to fetch registered students');
-    }
-  };
-
-  // Handle edit student - open modal
-  const handleEditStudent = (student) => {
-    setSelectedStudent(student);
-    setEditStudentForm({
-      registrationNo: student.registrationNo,
-      studentName: student.studentName
-    });
-    setShowEditStudentModal(true);
-  };
-
-  // Handle edit student input change
-  const handleEditStudentChange = (e) => {
-    const { name, value } = e.target;
-    setEditStudentForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Handle update student
-  const handleUpdateStudent = async () => {
-    // Validate inputs
-    if (!editStudentForm.registrationNo.trim()) {
-      toast.error('Please enter registration number');
-      return;
-    }
-    if (!editStudentForm.studentName.trim()) {
-      toast.error('Please enter student name');
-      return;
-    }
-
-    // Check if registration number is changed and if it's duplicate
-    if (editStudentForm.registrationNo !== selectedStudent.registrationNo) {
-      const isDuplicate = registeredStudents?.registeredStudents?.some(
-        student => 
-          student._id !== selectedStudent._id && 
-          student.registrationNo.toLowerCase() === editStudentForm.registrationNo.toLowerCase()
-      );
-
-      if (isDuplicate) {
-        toast.error('Student with this registration number already exists');
-        return;
-      }
-    }
-
-    setIsEditingStudent(true);
-
-    try {
-      // Make sure you have this action in your slicer
-      await dispatch(updateRegisteredStudent({
-        subjectId: selectedSubject.id,
-        studentId: selectedStudent._id,
-        teacherId: currentUserId,
-        studentData: {
-          registrationNo: editStudentForm.registrationNo.trim(),
-          studentName: editStudentForm.studentName.trim()
-        }
-      })).unwrap();
-
-      toast.success('Student updated successfully!');
-      setShowEditStudentModal(false);
-      setSelectedStudent(null);
-
-      // Refresh students list
-      await dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id,
-        teacherId: currentUserId
-      }));
-    } catch (error) {
-      toast.error(error?.message || 'Failed to update student');
-    } finally {
-      setIsEditingStudent(false);
     }
   };
 
@@ -1231,92 +1148,6 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
-      {/* Edit Student Modal */}
-      {showEditStudentModal && selectedStudent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[150]">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Edit Student</h3>
-                <button
-                  onClick={() => {
-                    setShowEditStudentModal(false);
-                    setSelectedStudent(null);
-                  }}
-                  className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <FiX className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Registration Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="registrationNo"
-                    value={editStudentForm.registrationNo}
-                    onChange={handleEditStudentChange}
-                    placeholder="e.g., 25FA-001-BCS"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    disabled={isEditingStudent}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Student Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="studentName"
-                    value={editStudentForm.studentName}
-                    onChange={handleEditStudentChange}
-                    placeholder="e.g., John Doe"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    disabled={isEditingStudent}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setShowEditStudentModal(false);
-                  setSelectedStudent(null);
-                }}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdateStudent}
-                disabled={isEditingStudent || !editStudentForm.registrationNo.trim() || !editStudentForm.studentName.trim()}
-                className={`px-5 py-2 text-sm rounded-md font-medium transition-colors flex items-center ${
-                  isEditingStudent || !editStudentForm.registrationNo.trim() || !editStudentForm.studentName.trim()
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                {isEditingStudent ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                    Updating...
-                  </>
-                ) : (
-                  <>
-                    <FiSave className="h-4 w-4 mr-2" />
-                    Update Student
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Merged Student Management Modal */}
       {showStudentManagementModal && selectedSubject && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -1438,22 +1269,13 @@ const TeacherSubjects_Page = () => {
                                   <td className="px-4 py-2 text-sm text-gray-900 font-mono">{student.registrationNo}</td>
                                   <td className="px-4 py-2 text-sm text-gray-900">{student.studentName}</td>
                                   <td className="px-4 py-2 text-sm text-center">
-                                    <div className="flex items-center justify-center space-x-2">
-                                      <button
-                                        onClick={() => handleEditStudent(student)}
-                                        className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
-                                        title="Edit Student"
-                                      >
-                                        <FiEdit className="h-4 w-4" />
-                                      </button>
-                                      <button
-                                        onClick={() => handleDeleteStudent(student._id)}
-                                        className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                                        title="Remove Student"
-                                      >
-                                        <FiUserMinus className="h-4 w-4" />
-                                      </button>
-                                    </div>
+                                    <button
+                                      onClick={() => handleDeleteStudent(student._id)}
+                                      className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                                      title="Remove Student"
+                                    >
+                                      <FiUserMinus className="h-4 w-4" />
+                                    </button>
                                   </td>
                                 </tr>
                               ))
@@ -1487,68 +1309,71 @@ const TeacherSubjects_Page = () => {
                 </div>
               )}
 
-              {/* Add Individual Student Tab */}
+              {/* Add Individual Student Tab - Improved UI */}
               {activeStudentTab === 'add' && (
-                <div>
-                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                    <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
-                      <FiInfo className="h-4 w-4 mr-1" />
-                      Add Student Manually
-                    </h4>
-                    <p className="text-xs text-blue-600">
-                      Enter the registration number and name of the student you want to add to this course.
-                    </p>
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="max-w-md mx-auto">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 mb-4 border border-blue-100">
+                    <div className="flex items-center mb-4">
+                      <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-200">
+                        <FiUserPlus className="h-5 w-5 text-white" />
+                      </div>
+                      <h4 className="text-base font-semibold text-gray-800 ml-3">Add New Student</h4>
+                    </div>
+                    
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-medium text-gray-600 mb-1.5">
                           Registration Number <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="text"
-                          name="registrationNo"
-                          value={individualStudent.registrationNo}
-                          onChange={handleIndividualStudentChange}
-                          placeholder="e.g., 25FA-001-BCS"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                          disabled={isAddingStudent}
-                        />
+                        <div className="relative">
+                          <input
+                            type="text"
+                            name="registrationNo"
+                            value={individualStudent.registrationNo}
+                            onChange={handleIndividualStudentChange}
+                            placeholder="e.g., 25FA-001-BCS"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            disabled={isAddingStudent}
+                          />
+                        </div>
                       </div>
+                      
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-medium text-gray-600 mb-1.5">
                           Student Name <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="text"
-                          name="studentName"
-                          value={individualStudent.studentName}
-                          onChange={handleIndividualStudentChange}
-                          placeholder="e.g., John Doe"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                          disabled={isAddingStudent}
-                        />
+                        <div className="relative">
+                          <input
+                            type="text"
+                            name="studentName"
+                            value={individualStudent.studentName}
+                            onChange={handleIndividualStudentChange}
+                            placeholder="e.g., John Doe"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            disabled={isAddingStudent}
+                          />
+                        </div>
                       </div>
-                      <div className="flex justify-end pt-2">
+
+                      <div className="pt-4">
                         <button
                           onClick={handleAddIndividualStudent}
                           disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
-                          className={`px-5 py-2 text-sm rounded-md font-medium transition-colors flex items-center ${
+                          className={`w-full px-5 py-2.5 text-sm rounded-lg font-medium transition-all flex items-center justify-center ${
                             isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 hover:shadow-lg transform hover:-translate-y-0.5'
                           }`}
                         >
                           {isAddingStudent ? (
                             <>
                               <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                              Adding...
+                              Adding Student...
                             </>
                           ) : (
                             <>
                               <FiUserPlus className="h-4 w-4 mr-2" />
-                              Add Student
+                              Add Student to Course
                             </>
                           )}
                         </button>
@@ -1556,13 +1381,24 @@ const TeacherSubjects_Page = () => {
                     </div>
                   </div>
 
-                  {/* Quick Tips */}
-                  <div className="mt-4 text-xs text-gray-500 border-t border-gray-100 pt-4">
-                    <p className="font-medium text-gray-600 mb-1">Tips:</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>Registration number should be unique for each student</li>
-                      <li>You can add multiple students one by one</li>
-                      <li>Use the Import tab to add multiple students at once via Excel</li>
+                  <div className="bg-white border border-gray-200 rounded-xl p-4">
+                    <h5 className="text-xs font-semibold text-gray-700 mb-2 flex items-center">
+                      <FiInfo className="h-3.5 w-3.5 text-blue-500 mr-1.5" />
+                      Quick Tips
+                    </h5>
+                    <ul className="space-y-2">
+                      <li className="flex items-start text-xs text-gray-600">
+                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2"></span>
+                        <span>Registration number should be unique for each student</span>
+                      </li>
+                      <li className="flex items-start text-xs text-gray-600">
+                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2"></span>
+                        <span>You can add multiple students one by one</span>
+                      </li>
+                      <li className="flex items-start text-xs text-gray-600">
+                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2"></span>
+                        <span>Use the Import tab to add multiple students at once via Excel</span>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -1701,11 +1537,10 @@ const TeacherSubjects_Page = () => {
                 <button
                   onClick={handleInsertStudents}
                   disabled={importedStudents.length === 0 || studentsLoading}
-                  className={`px-5 py-1.5 text-xs rounded-md font-medium transition-colors flex items-center ${
-                    importedStudents.length > 0 && !studentsLoading
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                  className={`px-5 py-1.5 text-xs rounded-md font-medium transition-colors flex items-center ${importedStudents.length > 0 && !studentsLoading
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
                 >
                   {studentsLoading ? (
                     <>
