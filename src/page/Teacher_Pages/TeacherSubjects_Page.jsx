@@ -1309,71 +1309,67 @@ const TeacherSubjects_Page = () => {
                 </div>
               )}
 
-              {/* Add Individual Student Tab - Improved UI */}
+              {/* Add Individual Student Tab */}
               {activeStudentTab === 'add' && (
-                <div className="max-w-md mx-auto">
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 mb-4 border border-blue-100">
-                    <div className="flex items-center mb-4">
-                      <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-200">
-                        <FiUserPlus className="h-5 w-5 text-white" />
-                      </div>
-                      <h4 className="text-base font-semibold text-gray-800 ml-3">Add New Student</h4>
-                    </div>
-                    
+                <div>
+                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
+                      <FiInfo className="h-4 w-4 mr-1" />
+                      Add Student Manually
+                    </h4>
+                    <p className="text-xs text-blue-600">
+                      Enter the registration number and name of the student you want to add to this course.
+                    </p>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
                           Registration Number <span className="text-red-500">*</span>
                         </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            name="registrationNo"
-                            value={individualStudent.registrationNo}
-                            onChange={handleIndividualStudentChange}
-                            placeholder="e.g., 25FA-001-BCS"
-                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            disabled={isAddingStudent}
-                          />
-                        </div>
+                        <input
+                          type="text"
+                          name="registrationNo"
+                          value={individualStudent.registrationNo}
+                          onChange={handleIndividualStudentChange}
+                          placeholder="e.g., 25FA-001-BCS"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={isAddingStudent}
+                        />
                       </div>
-                      
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
                           Student Name <span className="text-red-500">*</span>
                         </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            name="studentName"
-                            value={individualStudent.studentName}
-                            onChange={handleIndividualStudentChange}
-                            placeholder="e.g., John Doe"
-                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            disabled={isAddingStudent}
-                          />
-                        </div>
+                        <input
+                          type="text"
+                          name="studentName"
+                          value={individualStudent.studentName}
+                          onChange={handleIndividualStudentChange}
+                          placeholder="e.g., John Doe"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={isAddingStudent}
+                        />
                       </div>
-
-                      <div className="pt-4">
+                      <div className="flex justify-end pt-2">
                         <button
                           onClick={handleAddIndividualStudent}
                           disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
-                          className={`w-full px-5 py-2.5 text-sm rounded-lg font-medium transition-all flex items-center justify-center ${
-                            isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
-                              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                              : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 hover:shadow-lg transform hover:-translate-y-0.5'
-                          }`}
+                          className={`px-5 py-2 text-sm rounded-md font-medium transition-colors flex items-center ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
                         >
                           {isAddingStudent ? (
                             <>
                               <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                              Adding Student...
+                              Adding...
                             </>
                           ) : (
                             <>
                               <FiUserPlus className="h-4 w-4 mr-2" />
-                              Add Student to Course
+                              Add Student
                             </>
                           )}
                         </button>
@@ -1381,24 +1377,13 @@ const TeacherSubjects_Page = () => {
                     </div>
                   </div>
 
-                  <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <h5 className="text-xs font-semibold text-gray-700 mb-2 flex items-center">
-                      <FiInfo className="h-3.5 w-3.5 text-blue-500 mr-1.5" />
-                      Quick Tips
-                    </h5>
-                    <ul className="space-y-2">
-                      <li className="flex items-start text-xs text-gray-600">
-                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2"></span>
-                        <span>Registration number should be unique for each student</span>
-                      </li>
-                      <li className="flex items-start text-xs text-gray-600">
-                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2"></span>
-                        <span>You can add multiple students one by one</span>
-                      </li>
-                      <li className="flex items-start text-xs text-gray-600">
-                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2"></span>
-                        <span>Use the Import tab to add multiple students at once via Excel</span>
-                      </li>
+                  {/* Quick Tips */}
+                  <div className="mt-4 text-xs text-gray-500 border-t border-gray-100 pt-4">
+                    <p className="font-medium text-gray-600 mb-1">Tips:</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>Registration number should be unique for each student</li>
+                      <li>You can add multiple students one by one</li>
+                      <li>Use the Import tab to add multiple students at once via Excel</li>
                     </ul>
                   </div>
                 </div>
