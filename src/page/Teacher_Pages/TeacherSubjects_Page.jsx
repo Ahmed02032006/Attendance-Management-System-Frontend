@@ -252,7 +252,7 @@ const TeacherSubjects_Page = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       handleFileUpload({ target: { files: [files[0]] } });
@@ -267,7 +267,7 @@ const TeacherSubjects_Page = () => {
     // Validate file type
     const validTypes = ['.xlsx', '.xls', '.csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv'];
     const fileType = file.name.split('.').pop().toLowerCase();
-    
+
     if (!['xlsx', 'xls', 'csv'].includes(fileType)) {
       toast.error('Please upload a valid Excel or CSV file');
       return;
@@ -1410,8 +1410,8 @@ const TeacherSubjects_Page = () => {
                             onClick={handleAddIndividualStudent}
                             disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
                             className={`h-full px-4 py-2 text-sm rounded-md font-medium transition-all flex items-center whitespace-nowrap ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
                               }`}
                           >
                             {isAddingStudent ? (
@@ -1579,7 +1579,7 @@ const TeacherSubjects_Page = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-lg p-3 border border-green-200 shadow-sm">
                       <div className="flex items-center justify-between">
                         <div>
@@ -1591,31 +1591,29 @@ const TeacherSubjects_Page = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-lg p-3 border border-purple-200 shadow-sm">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs text-purple-600 font-medium mb-1">Current</p>
+                          <p className="text-xs text-purple-600 font-medium mb-1">Registered students</p>
                           <p className="text-lg font-bold text-gray-800">{selectedSubject.registeredStudentsCount || 0}</p>
                         </div>
                         <div className="w-8 h-8 bg-purple-200 rounded-lg flex items-center justify-center">
                           <FiUsers className="h-4 w-4 text-purple-700" />
                         </div>
                       </div>
-                      <p className="text-[10px] text-purple-500 mt-1">Registered students</p>
                     </div>
                   </div>
 
                   {/* Enhanced Upload Area */}
                   <div className="mb-5">
-                    <div 
-                      className={`relative border-2 border-dashed rounded-xl transition-all duration-200 ${
-                        dragActive 
-                          ? 'border-blue-400 bg-blue-50/50' 
-                          : importedStudents.length > 0 
-                            ? 'border-green-300 bg-green-50/30' 
+                    <div
+                      className={`relative border-2 border-dashed rounded-xl transition-all duration-200 ${dragActive
+                          ? 'border-blue-400 bg-blue-50/50'
+                          : importedStudents.length > 0
+                            ? 'border-green-300 bg-green-50/30'
                             : 'border-gray-300 hover:border-blue-300 hover:bg-gray-50/50'
-                      }`}
+                        }`}
                       onDragEnter={handleDrag}
                       onDragLeave={handleDrag}
                       onDragOver={handleDrag}
@@ -1628,7 +1626,7 @@ const TeacherSubjects_Page = () => {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         disabled={isUploading}
                       />
-                      
+
                       <div className="p-6 text-center">
                         {isUploading ? (
                           <div className="flex flex-col items-center">
@@ -1723,7 +1721,7 @@ const TeacherSubjects_Page = () => {
                             {importedStudents.length} students
                           </span>
                         </div>
-                        
+
                         <button
                           onClick={clearImportedStudents}
                           className="flex items-center px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
@@ -1754,7 +1752,7 @@ const TeacherSubjects_Page = () => {
                             </tbody>
                           </table>
                         </div>
-                        
+
                         {importedStudents.length > 10 && (
                           <div className="bg-gray-50 px-4 py-2 border-t border-gray-200 text-[10px] text-gray-500 text-center">
                             Showing first 10 of {importedStudents.length} students
@@ -1784,11 +1782,10 @@ const TeacherSubjects_Page = () => {
                 <button
                   onClick={handleInsertStudents}
                   disabled={importedStudents.length === 0 || studentsLoading}
-                  className={`px-5 py-2 text-xs rounded-lg font-medium transition-all flex items-center shadow-sm ${
-                    importedStudents.length > 0 && !studentsLoading
+                  className={`px-5 py-2 text-xs rounded-lg font-medium transition-all flex items-center shadow-sm ${importedStudents.length > 0 && !studentsLoading
                       ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   {studentsLoading ? (
                     <>
