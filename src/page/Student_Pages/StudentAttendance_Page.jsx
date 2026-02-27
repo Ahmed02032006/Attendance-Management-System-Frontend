@@ -9,6 +9,7 @@ const StudentAttendance_Page = () => {
   const [formData, setFormData] = useState({
     studentName: '',
     rollNo: '',
+    discipline: '',
     uniqueCode: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -202,88 +203,83 @@ const StudentAttendance_Page = () => {
     return text.toUpperCase();
   };
 
-  // Validate roll number format
-  const validateRollNoFormat = (value) => {
-    // Format: 2 numbers, FA or SP, -, 0, user number, -, discipline
-    // Example: 25FA-015-CE
-    const pattern = /^\d{2}(FA|SP)-\d{3}-[A-Z]{2,4}$/;
+  // Function to validate and format roll number
+  const validateAndFormatRollNo = (value) => {
+    // Remove all spaces and convert to uppercase
+    let cleaned = value.replace(/\s/g, '').toUpperCase();
     
-    if (!value) {
+    // Check if it matches the pattern: 2 digits + FA/SP + - + 0 + 2 digits + - + 2-3 letters
+    const pattern = /^(\d{2})(FA|SP)-0?(\d{1,2})-([A-Z]{2,3})$/;
+    const match = cleaned.match(pattern);
+    
+    if (match) {
+      const [_, year, semester, roll, discipline] = match;
+      // Format as: YYsemester-0roll-discipline (with leading zero for roll)
+      const formattedRoll = `${year}${semester}-0${roll.padStart(2, '0')}-${discipline}`;
+      
+      // Auto-fill discipline
+      setFormData(prev => ({
+        ...prev,
+        discipline: discipline,
+        rollNo: formattedRoll
+      }));
       setRollNoError('');
-      return false;
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        rollNo: cleaned,
+        discipline: ''
+      }));
+      
+      // Provide helpful error message
+      if (cleaned.length > 0) {
+        setRollNoError('Format: YYFA/SP-0XX-DISCIPLINE (e.g., 25FA-015-CE)');
+      } else {
+        setRollNoError('');
+      }
     }
-    
-    if (!pattern.test(value)) {
-      setRollNoError('Format: 25FA-015-CE (2 digits + FA/SP + - + 0 + number + - + discipline)');
-      return false;
-    }
-    
-    setRollNoError('');
-    return true;
-  };
-
-  // Extract discipline from roll number
-  const extractDisciplineFromRollNo = (rollNo) => {
-    if (!rollNo) return '';
-    const parts = rollNo.split('-');
-    return parts.length === 3 ? parts[2] : '';
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    let processedValue = value;
-    
+    // Prevent autofill by setting autocomplete="off" and handling paste events
     if (name === 'studentName') {
-      processedValue = capitalizeText(value);
+      // Only allow letters, spaces, and dots for student name
+      const processedValue = capitalizeText(value.replace(/[^A-Za-z\s.]/g, ''));
+      setFormData(prev => ({
+        ...prev,
+        [name]: processedValue
+      }));
     } else if (name === 'rollNo') {
-      // Auto-format roll number as user types
-      let formatted = value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
-      
-      // Auto-insert hyphens at appropriate positions
-      if (formatted.length > 2 && !formatted.includes('-') && formatted.substring(0, 2).match(/^\d{2}$/)) {
-        // After first 2 digits, add FA/SP suggestions
-        if (formatted.length === 3) {
-          if (formatted[2] === 'F') formatted = formatted.substring(0, 2) + 'F';
-          else if (formatted[2] === 'S') formatted = formatted.substring(0, 2) + 'S';
-        }
-      }
-      
-      // Auto-add first hyphen after FA/SP
-      if (formatted.length >= 4 && formatted.substring(2, 4) === 'FA' || formatted.substring(2, 4) === 'SP') {
-        if (!formatted.includes('-', 4)) {
-          formatted = formatted.substring(0, 4) + '-' + formatted.substring(4);
-        }
-      }
-      
-      // Auto-add second hyphen before discipline
-      if (formatted.length >= 8 && formatted[7] === '-') {
-        // Already has hyphen
-      } else if (formatted.length >= 8 && !formatted.includes('-', 7)) {
-        formatted = formatted.substring(0, 7) + '-' + formatted.substring(7);
-      }
-      
-      processedValue = formatted;
-      
-      // Validate the format
-      validateRollNoFormat(processedValue);
+      // Only allow alphanumeric and hyphens for roll number
+      const processedValue = value.replace(/[^A-Za-z0-9-]/g, '').toUpperCase();
+      validateAndFormatRollNo(processedValue);
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
     }
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: processedValue
-    }));
   };
 
-  // Disable autofill by setting autocomplete off and using non-standard attributes
-  const disableAutofillProps = {
-    autoComplete: "off",
-    autoCorrect: "off",
-    autoCapitalize: "off",
-    spellCheck: "false",
-    "data-lpignore": "true",
-    "data-form-type": "other",
+  // Prevent paste events to avoid autofill
+  const handlePaste = (e) => {
+    e.preventDefault();
+    toast.warning('Please type manually to avoid formatting issues');
   };
+
+  // Prevent browser autofill
+  useEffect(() => {
+    // Add autocomplete="off" to all inputs after mount
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+      input.setAttribute('autocomplete', 'off');
+      input.setAttribute('autocorrect', 'off');
+      input.setAttribute('autocapitalize', 'off');
+      input.setAttribute('spellcheck', 'false');
+    });
+  }, []);
 
   // Get or create persistent device fingerprint
   const getUniqueDeviceFingerprint = async () => {
@@ -355,24 +351,15 @@ const StudentAttendance_Page = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.studentName.trim()) {
-      toast.error('Please enter your full name');
+    if (!formData.studentName.trim() || !formData.rollNo.trim() || !formData.uniqueCode.trim()) {
+      toast.error('Please fill all fields');
       return;
     }
 
-    if (!formData.rollNo.trim()) {
-      toast.error('Please enter your roll number');
-      return;
-    }
-
-    // Validate roll number format
-    if (!validateRollNoFormat(formData.rollNo)) {
-      toast.error('Please enter roll number in correct format: 25FA-015-CE');
-      return;
-    }
-
-    if (!formData.uniqueCode.trim()) {
-      toast.error('Invalid attendance session');
+    // Validate roll number format before submission
+    const rollNoPattern = /^\d{2}(FA|SP)-0\d{2}-[A-Z]{2,3}$/;
+    if (!rollNoPattern.test(formData.rollNo)) {
+      toast.error('Please enter a valid roll number format: YYFA/SP-0XX-DISCIPLINE (e.g., 25FA-015-CE)');
       return;
     }
 
@@ -380,9 +367,6 @@ const StudentAttendance_Page = () => {
       toast.error('Invalid attendance session');
       return;
     }
-
-    // Extract discipline from roll number
-    const discipline = extractDisciplineFromRollNo(formData.rollNo);
 
     // Check if QR code is expired
     if (qrData.expiryTimestamp) {
@@ -410,11 +394,13 @@ const StudentAttendance_Page = () => {
     try {
       const currentTime = formatTime();
 
+      // Extract discipline from roll number (after last hyphen)
+      const disciplineFromRoll = formData.rollNo.split('-').pop() || '';
+
       const AttendanceData = {
-        studentName: formData.studentName,
-        rollNo: formData.rollNo,
+        ...formData,
+        discipline: disciplineFromRoll, // Auto-filled from roll number
         uniqueCode: originalCode, // Send original code to backend
-        discipline: discipline, // Extracted from roll number
         subjectName: qrData.subjectName || qrData.subject || 'Unknown Subject',
         subjectCode: qrData.subjectCode || 'N/A', // Include subject code if needed
         subjectId: qrData.subject, // This is the subject ID
@@ -430,9 +416,9 @@ const StudentAttendance_Page = () => {
             setFormData({
               studentName: '',
               rollNo: '',
+              discipline: '',
               uniqueCode: ''
             });
-            setRollNoError('');
             navigate("/scan-attendance");
           } else {
             toast.error(res.payload.message)
@@ -593,7 +579,7 @@ const StudentAttendance_Page = () => {
 
           {/* Attendance Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Student Name - with autofill disabled */}
+            {/* Student Name */}
             <div>
               <label htmlFor="studentName" className="block text-sm font-medium text-gray-700 mb-2">
                 Full Name *
@@ -604,15 +590,19 @@ const StudentAttendance_Page = () => {
                 name="studentName"
                 value={formData.studentName}
                 onChange={handleInputChange}
+                onPaste={handlePaste}
                 placeholder="Enter your full name"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
                 required
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 style={{ textTransform: 'uppercase' }}
-                {...disableAutofillProps}
               />
             </div>
 
-            {/* Roll Number - with format: 25FA-015-CE */}
+            {/* Roll Number */}
             <div>
               <label htmlFor="rollNo" className="block text-sm font-medium text-gray-700 mb-2">
                 Roll Number *
@@ -623,19 +613,26 @@ const StudentAttendance_Page = () => {
                 name="rollNo"
                 value={formData.rollNo}
                 onChange={handleInputChange}
-                placeholder="25FA-015-CE"
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors uppercase ${
-                  rollNoError ? 'border-red-500' : 'border-gray-300'
-                }`}
+                onPaste={handlePaste}
+                placeholder="e.g., 25FA-015-CE"
+                className={`w-full px-3 py-2 border ${rollNoError ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase`}
                 required
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 style={{ textTransform: 'uppercase' }}
-                {...disableAutofillProps}
               />
               {rollNoError && (
-                <p className="mt-1 text-xs text-red-600">{rollNoError}</p>
+                <p className="mt-1 text-xs text-red-600 flex items-center">
+                  <svg className="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  {rollNoError}
+                </p>
               )}
               <p className="mt-1 text-xs text-gray-500">
-                Format: 2 digits + FA/SP + - + 0 + number + - + discipline (e.g., 25FA-015-CE)
+                Format: 2 digits + FA/SP + - + 0 + 2 digits + - + discipline code (e.g., 25FA-015-CE)
               </p>
             </div>
 
@@ -648,10 +645,11 @@ const StudentAttendance_Page = () => {
                 type="text"
                 id="uniqueCode"
                 name="uniqueCode"
+                // Extract code before underscore for display
                 value={formData.uniqueCode.split('_')[0]}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-md focus:outline-none cursor-not-allowed"
-                {...disableAutofillProps}
+                autoComplete="off"
               />
               <p className="mt-1 text-xs text-gray-500">This code is automatically filled from the QR code</p>
             </div>
@@ -684,7 +682,6 @@ const StudentAttendance_Page = () => {
             <ul className="text-[12px] text-gray-600 space-y-1">
               <li>• <strong>Browser:</strong> Google Chrome browser required</li>
               <li>• Fill in your full name and roll number accurately</li>
-              <li>• Roll number format: <strong>25FA-015-CE</strong> (2 digits + FA/SP + - + 0 + number + - + discipline)</li>
               <li>• Make sure you're in the correct class session</li>
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
