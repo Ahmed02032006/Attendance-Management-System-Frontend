@@ -245,6 +245,16 @@ const TeacherAttendance_Page = () => {
           aValue = a.discipline?.toLowerCase() || '';
           bValue = b.discipline?.toLowerCase() || '';
           break;
+        case 'status':
+          // Define priority: Present > Not Registered > Absent
+          const statusPriority = {
+            'Present': 1,
+            'Not Registered': 2,
+            'Absent': 3
+          };
+          aValue = statusPriority[a.status || (a.time ? 'Present' : 'Absent')] || 4;
+          bValue = statusPriority[b.status || (b.time ? 'Present' : 'Absent')] || 4;
+          break;
         default:
           return 0;
       }
@@ -878,8 +888,15 @@ const TeacherAttendance_Page = () => {
                           {getSortIcon('time')}
                         </div>
                       </th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                      <th
+                        scope="col"
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('status')}
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Status</span>
+                          {getSortIcon('status')}
+                        </div>
                       </th>
                       <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
