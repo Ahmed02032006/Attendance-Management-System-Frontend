@@ -1309,10 +1309,10 @@ const TeacherSubjects_Page = () => {
             </div>
 
             {/* Tab Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 min-h-[400px]">
               {/* View Students Tab - Now with Add Individual Form */}
               {activeStudentTab === 'view' && (
-                <div>
+                <div className="h-full flex flex-col">
                   {/* Add Individual Student Form */}
                   <div className="mb-6 bg-white rounded-lg border border-gray-200 overflow-hidden">
                     {/* Simple header */}
@@ -1405,7 +1405,7 @@ const TeacherSubjects_Page = () => {
                       <p className="mt-3 text-sm text-gray-500">Loading students...</p>
                     </div>
                   ) : (
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="border border-gray-200 rounded-lg overflow-hidden flex-1">
                       <div className="max-h-[400px] overflow-y-auto">
                         <table className="w-full">
                           <thead className="bg-gray-50 sticky top-0 z-10">
@@ -1508,9 +1508,9 @@ const TeacherSubjects_Page = () => {
                 </div>
               )}
 
-              {/* Import Students Tab */}
+              {/* Import Students Tab - Now with same height as view tab */}
               {activeStudentTab === 'import' && (
-                <div>
+                <div className="h-full flex flex-col">
                   {/* Quick Stats Cards */}
                   <div className="grid grid-cols-3 gap-2 mb-4">
                     <div className="bg-blue-50 rounded-lg p-2 text-center">
@@ -1586,7 +1586,7 @@ const TeacherSubjects_Page = () => {
 
                   {/* Preview Section */}
                   {importedStudents.length > 0 && (
-                    <div className="mt-3">
+                    <div className="mt-3 flex-1 flex flex-col min-h-0">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-sm font-medium text-gray-700 flex items-center">
                           <FiUsers className="h-4 w-4 mr-1.5 text-blue-600" />
@@ -1597,8 +1597,8 @@ const TeacherSubjects_Page = () => {
                         </span>
                       </div>
 
-                      <div className="border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="max-h-40 overflow-y-auto">
+                      <div className="border border-gray-200 rounded-lg overflow-hidden flex-1 flex flex-col min-h-0">
+                        <div className="max-h-[300px] overflow-y-auto">
                           <table className="w-full">
                             <thead className="bg-gray-50 sticky top-0">
                               <tr>
