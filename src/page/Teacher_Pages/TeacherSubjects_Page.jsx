@@ -1681,10 +1681,6 @@ const TeacherSubjects_Page = () => {
                           <span className="text-blue-600 font-bold mr-2">•</span>
                           <span className="text-gray-600">Both columns are required</span>
                         </li>
-                        <li className="flex items-start text-xs">
-                          <span className="text-blue-600 font-bold mr-2">•</span>
-                          <span className="text-gray-600">Max 500 students per import</span>
-                        </li>
                       </ul>
                     </div>
 
