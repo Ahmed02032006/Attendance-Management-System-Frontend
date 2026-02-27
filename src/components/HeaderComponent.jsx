@@ -19,7 +19,7 @@ const HeaderComponent = ({ heading, subHeading, role = "superAdmin" }) => {
         <div>
             {/* Enhanced Clean Header with Real-time Timestamp */}
             <header className="bg-white border-b border-gray-200">
-                <div className={`px-6 ${role == "superAdmin" ? 'py-[15px]' : 'py-[12px]'} flex items-center justify-between`}>
+                <div className={`px-6 ${role == "superAdmin" ? 'py-[15px]' : 'py-[11.5px]'} flex items-center justify-between`}>
                     <div>
                         <h1 className="text-xl font-semibold text-gray-800 tracking-tight">
                             {heading}
