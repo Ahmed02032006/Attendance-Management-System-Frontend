@@ -26,7 +26,8 @@ import {
   FiXCircle,
   FiCheckCircle,
   FiDownloadCloud,
-  FiTable
+  FiTable,
+  FiUploadCloud 
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import * as XLSX from 'xlsx'
