@@ -150,7 +150,7 @@ const AdminDashboardLayout = () => {
                   <>
                     <div className='flex items-center gap-4'>
                       <img src="/Side-Logo/1.png" width={"40px"} height={"25px"} />
-                      <p className='text-2xl orbitron'>Attmark</p>
+                      <p className='text-2xl orbitron'>ATTMARK</p>
                     </div>
                   </>
                 ) :
