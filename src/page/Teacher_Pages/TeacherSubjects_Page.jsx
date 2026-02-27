@@ -26,6 +26,7 @@ import {
   FiXCircle,
   FiCheckCircle,
   FiDownloadCloud,
+  FiUploadCloud,
   FiTable
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
