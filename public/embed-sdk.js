@@ -1,5 +1,5 @@
 (function(window) {
-    class AttendlyWidget {
+    class AttmarkWidget {
       constructor() {
         this.defaults = {
           theme: 'light',
@@ -14,7 +14,7 @@
         const container = document.querySelector(config.container);
         
         if (!container) {
-          console.error('AttendlyWidget: Container element not found');
+          console.error('AttmarkWidget: Container element not found');
           return;
         }
   
@@ -53,5 +53,5 @@
       }
     }
   
-    window.AttendlyWidget = new AttendlyWidget();
+    window.AttmarkWidget = new AttmarkWidget();
   })(window);

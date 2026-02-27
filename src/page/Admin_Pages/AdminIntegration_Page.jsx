@@ -9,7 +9,7 @@ const AdminIntegration_Page = () => {
 
   const baseUrl = "https://attendance-management-system-fronte-two.vercel.app";
 
-  const iframeCode = `<!-- Attendly Integration -->
+  const iframeCode = `<!-- Attmark Integration -->
 <iframe 
   src="${baseUrl}/auth/login?embed=true" 
   width="100%" 
@@ -24,9 +24,9 @@ const AdminIntegration_Page = () => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website with Attendly</title>
+    <title>My Website with Attmark</title>
     <style>
-        .attendly-container {
+        .Attmark-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
@@ -34,11 +34,11 @@ const AdminIntegration_Page = () => {
     </style>
 </head>
 <body>
-    <div class="attendly-container">
+    <div class="Attmark-container">
         <h1>Welcome to My Website</h1>
         <p>Here's our attendance management system:</p>
         
-        <!-- Attendly Integration -->
+        <!-- Attmark Integration -->
         <iframe 
             src="${baseUrl}/auth/login?embed=true" 
             width="100%" 
@@ -111,7 +111,7 @@ const AdminIntegration_Page = () => {
       {/* Header */}
       <HeaderComponent
         heading={"Website Integration"}
-        subHeading={"Add Attendly to Your Site"}
+        subHeading={"Add Attmark to Your Site"}
         role="admin"
       />
 
@@ -306,7 +306,7 @@ const AdminIntegration_Page = () => {
                   <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-slate-600">Attendly Attendance System</span>
+                      <span className="text-xs font-medium text-slate-600">Attmark Attendance System</span>
                     </div>
                     <span className="text-xs text-slate-400">iframe</span>
                   </div>
