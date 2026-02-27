@@ -149,7 +149,7 @@ const AdminDashboardLayout = () => {
                 sidebarOpen ? (
                   <>
                     <div className='flex items-center gap-4'>
-                      <img src="/Side-Logo/1.png" width={"40px"} height={"25px"} />
+                      <img src="/Side-Logo/1.png" width={"35px"} height={"20px"} />
                       <p className='text-2xl orbitron'>ATTMARK</p>
                     </div>
                   </>
