@@ -27,7 +27,7 @@ import {
   FiCheckCircle,
   FiDownloadCloud,
   FiTable,
-  FiUploadCloud
+  FiUploadCloud 
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import * as XLSX from 'xlsx'
@@ -252,7 +252,7 @@ const TeacherSubjects_Page = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
+    
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       handleFileUpload({ target: { files: [files[0]] } });
@@ -267,7 +267,7 @@ const TeacherSubjects_Page = () => {
     // Validate file type
     const validTypes = ['.xlsx', '.xls', '.csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv'];
     const fileType = file.name.split('.').pop().toLowerCase();
-
+    
     if (!['xlsx', 'xls', 'csv'].includes(fileType)) {
       toast.error('Please upload a valid Excel or CSV file');
       return;
@@ -1410,8 +1410,8 @@ const TeacherSubjects_Page = () => {
                             onClick={handleAddIndividualStudent}
                             disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
                             className={`h-full px-4 py-2 text-sm rounded-md font-medium transition-all flex items-center whitespace-nowrap ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
-                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                              : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
                               }`}
                           >
                             {isAddingStudent ? (
@@ -1563,149 +1563,97 @@ const TeacherSubjects_Page = () => {
                 </div>
               )}
 
-              {/* Import Students Tab - Alternative Modern Design */}
+              {/* Import Students Tab - Enhanced Design */}
               {activeStudentTab === 'import' && (
                 <div className="h-full flex flex-col">
-                  {/* Header with Progress Bar */}
-                  <div className="mb-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-semibold text-gray-800 flex items-center">
-                        <span className="w-5 h-5 bg-indigo-100 rounded-full flex items-center justify-center mr-2">
-                          <span className="text-indigo-600 text-xs font-bold">3</span>
-                        </span>
-                        Bulk Import Students
-                      </h3>
-                      <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
-                        Step 3 of 3
-                      </span>
+                  {/* Quick Stats Cards with improved design */}
+                  <div className="grid grid-cols-3 gap-3 mb-5">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg p-3 border border-blue-200 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-blue-600 font-medium mb-1">Semester</p>
+                          <p className="text-lg font-bold text-gray-800">{selectedSubject.semester}</p>
+                        </div>
+                        <div className="w-8 h-8 bg-blue-200 rounded-lg flex items-center justify-center">
+                          <FiBook className="h-4 w-4 text-blue-700" />
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full w-2/3 bg-indigo-500 rounded-full"></div>
+                    
+                    <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-lg p-3 border border-green-200 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-green-600 font-medium mb-1">Session</p>
+                          <p className="text-lg font-bold text-gray-800">{selectedSubject.session}</p>
+                        </div>
+                        <div className="w-8 h-8 bg-green-200 rounded-lg flex items-center justify-center">
+                          <FiCalendar className="h-4 w-4 text-green-700" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-lg p-3 border border-purple-200 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-purple-600 font-medium mb-1">Current</p>
+                          <p className="text-lg font-bold text-gray-800">{selectedSubject.registeredStudentsCount || 0}</p>
+                        </div>
+                        <div className="w-8 h-8 bg-purple-200 rounded-lg flex items-center justify-center">
+                          <FiUsers className="h-4 w-4 text-purple-700" />
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-purple-500 mt-1">Registered students</p>
                     </div>
                   </div>
 
-                  {/* Course Info Card - Minimal */}
-                  <div className="bg-white border border-gray-200 rounded-lg p-3 mb-5 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-indigo-50 rounded-md flex items-center justify-center">
-                        <FiBook className="h-4 w-4 text-indigo-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Selected Course</p>
-                        <p className="text-sm font-medium text-gray-800">{selectedSubject.title} • {selectedSubject.code}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-500">Current Students</p>
-                      <p className="text-sm font-medium text-gray-800">{selectedSubject.registeredStudentsCount || 0}</p>
-                    </div>
-                  </div>
-
-                  {/* Two Column Layout - Modern Split */}
-                  <div className="grid grid-cols-5 gap-4 mb-5">
-                    {/* Left Column - Instructions */}
-                    <div className="col-span-2 bg-gradient-to-br from-indigo-50 to-white rounded-lg p-4 border border-indigo-100">
-                      <div className="flex items-center mb-3">
-                        <div className="w-6 h-6 bg-indigo-200 rounded-md flex items-center justify-center mr-2">
-                          <FiInfo className="h-3.5 w-3.5 text-indigo-700" />
-                        </div>
-                        <h4 className="text-xs font-semibold text-indigo-900 uppercase tracking-wider">Quick Guide</h4>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-start">
-                          <div className="w-4 h-4 bg-indigo-200 rounded-full flex items-center justify-center mr-2 mt-0.5">
-                            <span className="text-indigo-700 text-[8px] font-bold">1</span>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-gray-700">Download template</p>
-                            <p className="text-[10px] text-gray-500">Use our Excel template format</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start">
-                          <div className="w-4 h-4 bg-indigo-200 rounded-full flex items-center justify-center mr-2 mt-0.5">
-                            <span className="text-indigo-700 text-[8px] font-bold">2</span>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-gray-700">Fill student details</p>
-                            <p className="text-[10px] text-gray-500">Registration No & Student Name</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start">
-                          <div className="w-4 h-4 bg-indigo-200 rounded-full flex items-center justify-center mr-2 mt-0.5">
-                            <span className="text-indigo-700 text-[8px] font-bold">3</span>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-gray-700">Upload & import</p>
-                            <p className="text-[10px] text-gray-500">Drag & drop or browse files</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 pt-3 border-t border-indigo-200">
-                        <button
-                          onClick={downloadDummyExcel}
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-indigo-300 rounded-md text-xs font-medium text-indigo-700 hover:bg-indigo-50 transition-colors"
-                        >
-                          <FiDownload className="h-3.5 w-3.5" />
-                          Get Template File
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Right Column - Upload Area */}
-                    <div className="col-span-3">
-                      <div
-                        className={`h-full border-2 rounded-lg transition-all duration-200 flex flex-col items-center justify-center p-6 ${dragActive
-                            ? 'border-indigo-400 bg-indigo-50/50'
-                            : importedStudents.length > 0
-                              ? 'border-emerald-300 bg-emerald-50/30'
-                              : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
-                          }`}
-                        onDragEnter={handleDrag}
-                        onDragLeave={handleDrag}
-                        onDragOver={handleDrag}
-                        onDrop={handleDrop}
-                      >
-                        <input
-                          type="file"
-                          accept=".xlsx,.xls,.csv"
-                          onChange={handleFileUpload}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          disabled={isUploading}
-                        />
-
+                  {/* Enhanced Upload Area */}
+                  <div className="mb-5">
+                    <div 
+                      className={`relative border-2 border-dashed rounded-xl transition-all duration-200 ${
+                        dragActive 
+                          ? 'border-blue-400 bg-blue-50/50' 
+                          : importedStudents.length > 0 
+                            ? 'border-green-300 bg-green-50/30' 
+                            : 'border-gray-300 hover:border-blue-300 hover:bg-gray-50/50'
+                      }`}
+                      onDragEnter={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDragOver={handleDrag}
+                      onDrop={handleDrop}
+                    >
+                      <input
+                        type="file"
+                        accept=".xlsx,.xls,.csv"
+                        onChange={handleFileUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        disabled={isUploading}
+                      />
+                      
+                      <div className="p-6 text-center">
                         {isUploading ? (
-                          <div className="text-center">
-                            <div className="relative">
-                              <div className="w-12 h-12 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto"></div>
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-3 h-3 bg-indigo-600 rounded-full animate-pulse"></div>
-                              </div>
-                            </div>
-                            <p className="text-xs font-medium text-gray-600 mt-3">Processing file...</p>
-                            <p className="text-[10px] text-gray-400 mt-1">Please wait</p>
+                          <div className="flex flex-col items-center">
+                            <div className="animate-spin rounded-full h-10 w-10 border-3 border-blue-200 border-t-blue-600 mb-3"></div>
+                            <p className="text-sm font-medium text-gray-700">Uploading file...</p>
+                            <p className="text-xs text-gray-400 mt-1">Please wait</p>
                           </div>
                         ) : importedStudents.length > 0 ? (
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                              <FiCheckCircle className="h-6 w-6 text-emerald-600" />
+                          <div className="flex flex-col items-center">
+                            <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                              <FiCheckCircle className="h-7 w-7 text-green-600" />
                             </div>
-                            <p className="text-sm font-semibold text-gray-800">{importedStudents.length} Students Loaded</p>
-                            <p className="text-[10px] text-gray-500 mt-1">Ready for import</p>
+                            <p className="text-sm font-semibold text-gray-800">{importedStudents.length} students ready to import</p>
+                            <p className="text-xs text-gray-500 mt-1">Click or drag to replace file</p>
                           </div>
                         ) : (
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                              <FiUpload className="h-5 w-5 text-indigo-500" />
+                          <div className="flex flex-col items-center">
+                            <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mb-3">
+                              <FiUploadCloud className="h-7 w-7 text-blue-500" />
                             </div>
-                            <p className="text-xs font-medium text-gray-700">
-                              <span className="text-indigo-600">Browse</span> or drop file here
+                            <p className="text-sm font-medium text-gray-700">
+                              <span className="text-blue-600 font-semibold">Click to upload</span> or drag and drop
                             </p>
-                            <p className="text-[10px] text-gray-400 mt-1">
-                              Supports .xlsx, .xls, .csv
+                            <p className="text-xs text-gray-400 mt-1">
+                              Excel files (.xlsx, .xls) or CSV (max 5MB)
                             </p>
                           </div>
                         )}
@@ -1713,84 +1661,108 @@ const TeacherSubjects_Page = () => {
                     </div>
                   </div>
 
-                  {/* Preview Section - Card Style */}
-                  {importedStudents.length > 0 && (
-                    <div className="flex-1 flex flex-col min-h-0 bg-white rounded-lg border border-gray-200 overflow-hidden">
-                      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <FiUsers className="h-4 w-4 text-indigo-600" />
-                          <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Preview Import
-                          </h4>
+                  {/* File Requirements and Template - Two Column Layout */}
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                      <div className="flex items-center mb-3">
+                        <div className="p-1.5 bg-blue-100 rounded-lg mr-2">
+                          <FiInfo className="h-3.5 w-3.5 text-blue-600" />
                         </div>
-                        <div className="flex items-center space-x-3">
-                          <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-medium">
+                        <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Requirements</h4>
+                      </div>
+                      <ul className="space-y-2">
+                        <li className="flex items-start text-xs">
+                          <span className="text-blue-600 font-bold mr-2">•</span>
+                          <span className="text-gray-600">Columns: <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-gray-300 text-blue-600 text-[10px]">Registration No</span></span>
+                        </li>
+                        <li className="flex items-start text-xs">
+                          <span className="text-blue-600 font-bold mr-2">•</span>
+                          <span className="text-gray-600">Columns: <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-gray-300 text-blue-600 text-[10px]">Student Name</span></span>
+                        </li>
+                        <li className="flex items-start text-xs">
+                          <span className="text-blue-600 font-bold mr-2">•</span>
+                          <span className="text-gray-600">Both columns are required</span>
+                        </li>
+                        <li className="flex items-start text-xs">
+                          <span className="text-blue-600 font-bold mr-2">•</span>
+                          <span className="text-gray-600">Max 500 students per import</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+                      <div className="flex items-center mb-3">
+                        <div className="p-1.5 bg-blue-200 rounded-lg mr-2">
+                          <FiFileText className="h-3.5 w-3.5 text-blue-700" />
+                        </div>
+                        <h4 className="text-xs font-semibold text-blue-700 uppercase tracking-wider">Template</h4>
+                      </div>
+                      <p className="text-xs text-gray-600 mb-3">
+                        Download our template to ensure correct format
+                      </p>
+                      <button
+                        onClick={downloadDummyExcel}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-blue-300 rounded-lg text-xs font-medium text-blue-700 hover:bg-blue-50 transition-colors"
+                      >
+                        <FiDownloadCloud className="h-4 w-4" />
+                        Download Template (.xlsx)
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Preview Section with Enhanced Design */}
+                  {importedStudents.length > 0 && (
+                    <div className="mt-2 flex-1 flex flex-col min-h-0">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <div className="p-1.5 bg-green-100 rounded-lg mr-2">
+                            <FiTable className="h-4 w-4 text-green-600" />
+                          </div>
+                          <h4 className="text-sm font-semibold text-gray-800">Preview Import</h4>
+                          <span className="ml-2 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-medium">
                             {importedStudents.length} students
                           </span>
-                          <button
-                            onClick={clearImportedStudents}
-                            className="text-[10px] text-red-600 hover:text-red-700 font-medium flex items-center"
-                          >
-                            <FiX className="h-3 w-3 mr-0.5" />
-                            Clear
-                          </button>
                         </div>
+                        
+                        <button
+                          onClick={clearImportedStudents}
+                          className="flex items-center px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                        >
+                          <FiX className="h-3 w-3 mr-1" />
+                          Clear
+                        </button>
                       </div>
 
-                      <div className="flex-1 overflow-y-auto p-2">
-                        <div className="space-y-1.5">
-                          {importedStudents.slice(0, 8).map((student, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
-                            >
-                              <div className="flex items-center space-x-3">
-                                <span className="text-[10px] font-medium text-gray-400 w-5">{index + 1}</span>
-                                <span className="text-xs font-mono font-medium text-gray-700">{student.registrationNo}</span>
-                              </div>
-                              <span className="text-xs text-gray-600 truncate max-w-[150px]">{student.studentName}</span>
-                            </div>
-                          ))}
-
-                          {importedStudents.length > 8 && (
-                            <div className="p-2 text-center text-[10px] text-gray-400 border-t border-gray-200">
-                              +{importedStudents.length - 8} more students
-                            </div>
-                          )}
+                      <div className="border border-gray-200 rounded-xl overflow-hidden flex-1 flex flex-col min-h-0 shadow-sm">
+                        <div className="max-h-[250px] overflow-y-auto">
+                          <table className="w-full">
+                            <thead className="bg-gray-50 sticky top-0">
+                              <tr>
+                                <th className="px-4 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">#</th>
+                                <th className="px-4 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Registration No</th>
+                                <th className="px-4 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Student Name</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                              {importedStudents.map((student, index) => (
+                                <tr key={index} className="hover:bg-gray-50 transition-colors">
+                                  <td className="px-4 py-2 text-xs text-gray-500">{index + 1}</td>
+                                  <td className="px-4 py-2 text-xs font-mono text-gray-800 font-medium">{student.registrationNo}</td>
+                                  <td className="px-4 py-2 text-xs text-gray-800">{student.studentName}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
+                        
+                        {importedStudents.length > 10 && (
+                          <div className="bg-gray-50 px-4 py-2 border-t border-gray-200 text-[10px] text-gray-500 text-center">
+                            Showing first 10 of {importedStudents.length} students
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
-
-                  {/* Action Buttons - Minimal */}
-                  <div className="mt-4 flex justify-end space-x-2">
-                    <button
-                      onClick={() => {
-                        setActiveStudentTab('view');
-                        setImportedStudents([]);
-                      }}
-                      className="px-4 py-2 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
-                    >
-                      Back to List
-                    </button>
-                    <button
-                      onClick={handleInsertStudents}
-                      disabled={importedStudents.length === 0 || studentsLoading}
-                      className={`px-5 py-2 text-xs rounded-md font-medium transition-colors ${importedStudents.length > 0 && !studentsLoading
-                          ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm'
-                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        }`}
-                    >
-                      {studentsLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent inline mr-1.5"></div>
-                          Importing...
-                        </>
-                      ) : (
-                        `Import ${importedStudents.length > 0 ? `(${importedStudents.length})` : ''}`
-                      )}
-                    </button>
-                  </div>
                 </div>
               )}
             </div>
@@ -1812,10 +1784,11 @@ const TeacherSubjects_Page = () => {
                 <button
                   onClick={handleInsertStudents}
                   disabled={importedStudents.length === 0 || studentsLoading}
-                  className={`px-5 py-2 text-xs rounded-lg font-medium transition-all flex items-center shadow-sm ${importedStudents.length > 0 && !studentsLoading
+                  className={`px-5 py-2 text-xs rounded-lg font-medium transition-all flex items-center shadow-sm ${
+                    importedStudents.length > 0 && !studentsLoading
                       ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
+                  }`}
                 >
                   {studentsLoading ? (
                     <>
