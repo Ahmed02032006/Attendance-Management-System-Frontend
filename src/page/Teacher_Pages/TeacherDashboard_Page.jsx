@@ -485,6 +485,54 @@ const TeacherDashboard_Page = () => {
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(initialChat));
   };
 
+  // Calculate how many students consistently attend
+  const calculateRetention = () => {
+    const studentAttendanceCount = {};
+    const totalClasses = {};
+
+    dashboardSubjects.forEach(subject => {
+      const subjectAttendance = dashboardAttendance[subject.id];
+      if (subjectAttendance) {
+        const dates = Object.keys(subjectAttendance);
+        totalClasses[subject.id] = dates.length;
+
+        dates.forEach(date => {
+          subjectAttendance[date].forEach(record => {
+            const studentId = record.studentId || record.id;
+            if (!studentAttendanceCount[studentId]) {
+              studentAttendanceCount[studentId] = {};
+            }
+            studentAttendanceCount[studentId][subject.id] =
+              (studentAttendanceCount[studentId][subject.id] || 0) + 1;
+          });
+        });
+      }
+    });
+
+    // Students who attend > 80% of classes
+    let consistentStudents = 0;
+    let totalActiveStudents = Object.keys(studentAttendanceCount).length;
+
+    Object.values(studentAttendanceCount).forEach(studentSubjects => {
+      Object.entries(studentSubjects).forEach(([subjectId, attended]) => {
+        if (totalClasses[subjectId] > 0) {
+          const attendanceRate = (attended / totalClasses[subjectId]) * 100;
+          if (attendanceRate >= 80) {
+            consistentStudents++;
+          }
+        }
+      });
+    });
+
+    const retentionRate = totalActiveStudents > 0
+      ? Math.round((consistentStudents / totalActiveStudents) * 100)
+      : 0;
+
+    return { rate: retentionRate, consistent: consistentStudents, total: totalActiveStudents };
+  };
+
+  const retention = calculateRetention();
+
   // Loading state
   if (isLoading || !dataLoaded) {
     return (
@@ -512,8 +560,8 @@ const TeacherDashboard_Page = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {/* Quick Stats - Now only 2 columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        {/* Quick Stats - Light and Clean */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
