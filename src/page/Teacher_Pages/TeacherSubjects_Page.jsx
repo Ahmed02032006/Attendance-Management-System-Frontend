@@ -1566,7 +1566,7 @@ const TeacherSubjects_Page = () => {
               {/* Import Students Tab - Enhanced Design */}
               {activeStudentTab === 'import' && (
                 <div className="h-full flex flex-col">
-                  
+
                   {/* Course Info Card */}
                   <div className="bg-white border border-gray-200 rounded-xl p-4 mb-5 shadow-xs">
                     <div className="flex items-center justify-between">
@@ -1583,9 +1583,9 @@ const TeacherSubjects_Page = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="text-right bg-purple-50 px-4 py-2 rounded-lg">
-                        <p className="text-xs text-purple-600 font-medium">Registered</p>
-                        <p className="text-xl font-bold text-purple-700">{selectedSubject.registeredStudentsCount || 0}</p>
+                      <div className="text-right bg-blue-50 px-4 py-2 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Registered</p>
+                        <p className="text-xl font-bold text-center text-blue-700">{selectedSubject.registeredStudentsCount || 0}</p>
                       </div>
                     </div>
                   </div>
@@ -1601,10 +1601,10 @@ const TeacherSubjects_Page = () => {
 
                       <div
                         className={`relative border-2 rounded-xl transition-all duration-200 ${dragActive
-                            ? 'border-blue-400 bg-blue-50'
-                            : importedStudents.length > 0
-                              ? 'border-green-300 bg-green-50'
-                              : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                          ? 'border-blue-400 bg-blue-50'
+                          : importedStudents.length > 0
+                            ? 'border-green-300 bg-green-50'
+                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                           }`}
                         onDragEnter={handleDrag}
                         onDragLeave={handleDrag}
@@ -1767,39 +1767,6 @@ const TeacherSubjects_Page = () => {
                       </div>
                     </div>
                   )}
-
-                  {/* Action Buttons */}
-                  <div className="mt-4 flex justify-end space-x-3">
-                    <button
-                      onClick={() => {
-                        setActiveStudentTab('view');
-                        setImportedStudents([]);
-                      }}
-                      className="px-4 py-2 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      Back to List
-                    </button>
-                    <button
-                      onClick={handleInsertStudents}
-                      disabled={importedStudents.length === 0 || studentsLoading}
-                      className={`px-5 py-2 text-xs rounded-lg font-medium transition-all flex items-center ${importedStudents.length > 0 && !studentsLoading
-                          ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm hover:shadow'
-                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        }`}
-                    >
-                      {studentsLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent mr-2"></div>
-                          Importing...
-                        </>
-                      ) : (
-                        <>
-                          <FiUpload className="h-4 w-4 mr-2" />
-                          Import Students {importedStudents.length > 0 ? `(${importedStudents.length})` : ''}
-                        </>
-                      )}
-                    </button>
-                  </div>
                 </div>
               )}
             </div>
