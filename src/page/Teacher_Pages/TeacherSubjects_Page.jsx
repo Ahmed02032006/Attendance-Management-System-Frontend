@@ -1368,33 +1368,10 @@ const TeacherSubjects_Page = () => {
               {/* View Students Tab - Now with Add Individual Form */}
               {activeStudentTab === 'view' && (
                 <div className="h-full flex flex-col">
-                  {/* Course Info Card - Matching import tab style */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-4 mb-5 shadow-xs">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <FiUsers className="h-5 w-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 mb-0.5">Current Course</p>
-                          <p className="text-sm font-semibold text-gray-800">{selectedSubject.title}</p>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">{selectedSubject.code}</span>
-                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">Sem {selectedSubject.semester}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right bg-purple-50 px-4 py-2 rounded-lg">
-                        <p className="text-xs text-purple-600 font-medium">Total Students</p>
-                        <p className="text-xl font-bold text-center text-purple-700">{registeredStudents?.registeredStudents?.length || 0}</p>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Quick Add Student Form - Matching card style */}
                   <div className="bg-white rounded-xl border border-gray-200 p-5 mb-5 shadow-xs">
                     <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center">
-                      <span className="w-1 h-4 bg-purple-500 rounded-full mr-2"></span>
+                      <span className="w-1 h-4 bg-blue-500 rounded-full mr-2"></span>
                       Quick Add Student
                     </h4>
 
@@ -1406,7 +1383,7 @@ const TeacherSubjects_Page = () => {
                           value={individualStudent.registrationNo}
                           onChange={handleIndividualStudentChange}
                           placeholder="Registration Number *"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           disabled={isAddingStudent}
                         />
                       </div>
@@ -1417,7 +1394,7 @@ const TeacherSubjects_Page = () => {
                           value={individualStudent.studentName}
                           onChange={handleIndividualStudentChange}
                           placeholder="Student Name *"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           disabled={isAddingStudent}
                         />
                       </div>
@@ -1427,7 +1404,7 @@ const TeacherSubjects_Page = () => {
                           disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
                           className={`h-full px-5 py-2 text-sm rounded-lg font-medium transition-all flex items-center whitespace-nowrap ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
                               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                              : 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm hover:shadow'
+                              : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
                             }`}
                         >
                           {isAddingStudent ? (
@@ -1457,11 +1434,11 @@ const TeacherSubjects_Page = () => {
                     {/* Table Header with Actions */}
                     <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <div className="p-1 bg-purple-100 rounded-md">
-                          <FiUsers className="h-3.5 w-3.5 text-purple-600" />
+                        <div className="p-1 bg-blue-100 rounded-md">
+                          <FiUsers className="h-3.5 w-3.5 text-blue-600" />
                         </div>
                         <h4 className="text-xs font-semibold text-gray-700">Registered Students</h4>
-                        <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-medium">
+                        <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-medium">
                           {registeredStudents?.registeredStudents?.length || 0} students
                         </span>
                       </div>
@@ -1481,7 +1458,7 @@ const TeacherSubjects_Page = () => {
                     {studentsLoading ? (
                       <div className="flex-1 flex items-center justify-center py-12">
                         <div className="text-center">
-                          <div className="inline-block animate-spin rounded-full h-8 w-8 border-3 border-gray-200 border-t-purple-600"></div>
+                          <div className="inline-block animate-spin rounded-full h-8 w-8 border-3 border-gray-200 border-t-blue-600"></div>
                           <p className="mt-2 text-xs text-gray-500">Loading students...</p>
                         </div>
                       </div>
@@ -1509,7 +1486,7 @@ const TeacherSubjects_Page = () => {
                                           name="registrationNo"
                                           value={editFormData.registrationNo}
                                           onChange={handleEditFormChange}
-                                          className="w-full px-2 py-1 border border-purple-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
+                                          className="w-full px-2 py-1 border border-blue-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                                           autoFocus
                                         />
                                       ) : (
@@ -1523,7 +1500,7 @@ const TeacherSubjects_Page = () => {
                                           name="studentName"
                                           value={editFormData.studentName}
                                           onChange={handleEditFormChange}
-                                          className="w-full px-2 py-1 border border-purple-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
+                                          className="w-full px-2 py-1 border border-blue-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                                         />
                                       ) : (
                                         student.studentName
@@ -1591,30 +1568,6 @@ const TeacherSubjects_Page = () => {
               {/* Import Students Tab - Enhanced Design */}
               {activeStudentTab === 'import' && (
                 <div className="h-full flex flex-col">
-
-                  {/* Course Info Card */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-4 mb-5 shadow-xs">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <FiBook className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 mb-0.5">Selected Course</p>
-                          <p className="text-sm font-semibold text-gray-800">{selectedSubject.title}</p>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">{selectedSubject.code}</span>
-                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">Sem {selectedSubject.semester}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right bg-blue-50 px-4 py-2 rounded-lg">
-                        <p className="text-xs text-blue-600 font-medium">Registered</p>
-                        <p className="text-xl font-bold text-center text-blue-700">{selectedSubject.registeredStudentsCount || 0}</p>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Main Upload Section - Modern Card Layout */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     {/* Left Column - Upload Area */}
