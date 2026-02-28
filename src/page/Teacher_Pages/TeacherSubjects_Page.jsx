@@ -1566,30 +1566,13 @@ const TeacherSubjects_Page = () => {
               {/* Import Students Tab - Enhanced Design */}
               {activeStudentTab === 'import' && (
                 <div className="h-full flex flex-col">
-                  {/* Header with Progress Indicator */}
-                  <div className="mb-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-semibold text-gray-800 flex items-center">
-                        <span className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center mr-2">
-                          <FiUpload className="h-3.5 w-3.5 text-indigo-600" />
-                        </span>
-                        Bulk Import Students
-                      </h3>
-                      <span className="text-xs text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full font-medium">
-                        Step 2 of 2
-                      </span>
-                    </div>
-                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full w-full bg-indigo-500 rounded-full"></div>
-                    </div>
-                  </div>
-
+                  
                   {/* Course Info Card */}
                   <div className="bg-white border border-gray-200 rounded-xl p-4 mb-5 shadow-xs">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                          <FiBook className="h-5 w-5 text-indigo-600" />
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <FiBook className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 mb-0.5">Selected Course</p>
@@ -1612,16 +1595,16 @@ const TeacherSubjects_Page = () => {
                     {/* Left Column - Upload Area */}
                     <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-xs">
                       <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center">
-                        <span className="w-1 h-4 bg-indigo-500 rounded-full mr-2"></span>
+                        <span className="w-1 h-4 bg-blue-500 rounded-full mr-2"></span>
                         Upload File
                       </h4>
 
                       <div
                         className={`relative border-2 rounded-xl transition-all duration-200 ${dragActive
-                            ? 'border-indigo-400 bg-indigo-50'
+                            ? 'border-blue-400 bg-blue-50'
                             : importedStudents.length > 0
                               ? 'border-green-300 bg-green-50'
-                              : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                           }`}
                         onDragEnter={handleDrag}
                         onDragLeave={handleDrag}
@@ -1640,9 +1623,9 @@ const TeacherSubjects_Page = () => {
                           {isUploading ? (
                             <div className="flex flex-col items-center">
                               <div className="relative">
-                                <div className="w-14 h-14 border-3 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                                <div className="w-14 h-14 border-3 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                  <div className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse"></div>
+                                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
                                 </div>
                               </div>
                               <p className="text-sm font-medium text-gray-700 mt-3">Processing file...</p>
@@ -1658,11 +1641,11 @@ const TeacherSubjects_Page = () => {
                             </div>
                           ) : (
                             <div className="flex flex-col items-center">
-                              <div className="w-14 h-14 bg-indigo-50 rounded-full flex items-center justify-center mb-2">
-                                <FiUploadCloud className="h-7 w-7 text-indigo-500" />
+                              <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mb-2">
+                                <FiUploadCloud className="h-7 w-7 text-blue-500" />
                               </div>
                               <p className="text-sm font-medium text-gray-700">
-                                <span className="text-indigo-600 font-semibold">Click to upload</span> or drag & drop
+                                <span className="text-blue-600 font-semibold">Click to upload</span> or drag & drop
                               </p>
                               <p className="text-xs text-gray-400 mt-1">
                                 Excel files (.xlsx, .xls, .csv)
@@ -1681,7 +1664,7 @@ const TeacherSubjects_Page = () => {
                       {/* Requirements Card */}
                       <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs">
                         <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
-                          <span className="w-1 h-4 bg-indigo-500 rounded-full mr-2"></span>
+                          <span className="w-1 h-4 bg-blue-500 rounded-full mr-2"></span>
                           File Requirements
                         </h4>
 
@@ -1690,13 +1673,13 @@ const TeacherSubjects_Page = () => {
                             <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2">
                               <span className="text-green-600 text-[10px] font-bold">✓</span>
                             </div>
-                            <span className="text-xs text-gray-600">Column: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-indigo-600 text-[10px] font-medium">Registration No</span></span>
+                            <span className="text-xs text-gray-600">Column: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-blue-600 text-[10px] font-medium">Registration No</span></span>
                           </div>
                           <div className="flex items-center">
                             <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2">
                               <span className="text-green-600 text-[10px] font-bold">✓</span>
                             </div>
-                            <span className="text-xs text-gray-600">Column: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-indigo-600 text-[10px] font-medium">Student Name</span></span>
+                            <span className="text-xs text-gray-600">Column: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-blue-600 text-[10px] font-medium">Student Name</span></span>
                           </div>
                           <div className="flex items-center">
                             <div className="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center mr-2">
@@ -1708,19 +1691,19 @@ const TeacherSubjects_Page = () => {
                       </div>
 
                       {/* Template Card */}
-                      <div className="bg-indigo-50 rounded-xl border border-indigo-200 p-4">
+                      <div className="bg-blue-50 rounded-xl border border-blue-200 p-4">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h4 className="text-xs font-semibold text-indigo-800 mb-1">Need a template?</h4>
-                            <p className="text-[10px] text-indigo-600 mb-3">Download our sample file to get started</p>
+                            <h4 className="text-xs font-semibold text-blue-800 mb-1">Need a template?</h4>
+                            <p className="text-[10px] text-blue-600 mb-3">Download our sample file to get started</p>
                           </div>
-                          <div className="w-8 h-8 bg-indigo-200 rounded-lg flex items-center justify-center">
-                            <FiFileText className="h-4 w-4 text-indigo-700" />
+                          <div className="w-8 h-8 bg-blue-200 rounded-lg flex items-center justify-center">
+                            <FiFileText className="h-4 w-4 text-blue-700" />
                           </div>
                         </div>
                         <button
                           onClick={downloadDummyExcel}
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-indigo-300 rounded-lg text-xs font-medium text-indigo-700 hover:bg-indigo-100 transition-colors"
+                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-blue-300 rounded-lg text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
                         >
                           <FiDownload className="h-3.5 w-3.5" />
                           Download Template
