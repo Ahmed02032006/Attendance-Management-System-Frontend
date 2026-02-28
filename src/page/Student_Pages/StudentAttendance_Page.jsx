@@ -205,9 +205,16 @@ const StudentAttendance_Page = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    const processedValue = (name === 'studentName' || name === 'rollNo' || name === 'discipline')
-      ? capitalizeText(value)
-      : value;
+    let processedValue;
+    
+    if (name === 'discipline') {
+      // For discipline, limit to 5 characters and capitalize
+      processedValue = value.slice(0, 5).toUpperCase();
+    } else if (name === 'studentName' || name === 'rollNo') {
+      processedValue = capitalizeText(value);
+    } else {
+      processedValue = value;
+    }
 
     setFormData(prev => ({
       ...prev,
@@ -540,10 +547,10 @@ const StudentAttendance_Page = () => {
               />
             </div>
 
-            {/* Discipline */}
+            {/* Discipline - Limited to 5 characters */}
             <div>
               <label htmlFor="discipline" className="block text-sm font-medium text-gray-700 mb-2">
-                Discipline *
+                Discipline Code *
               </label>
               <input
                 type="text"
@@ -551,12 +558,19 @@ const StudentAttendance_Page = () => {
                 name="discipline"
                 value={formData.discipline}
                 onChange={handleInputChange}
-                placeholder="Enter your discipline"
+                placeholder="e.g., BCS, BEE, BBA"
+                maxLength="5"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
                 required
                 autoComplete="off"
                 style={{ textTransform: 'uppercase' }}
               />
+              <p className="mt-1 text-xs text-amber-600 flex items-center">
+                <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Only enter discipline code (max 5 characters)
+              </p>
             </div>
 
             {/* Unique Code (Read-only) */}
@@ -605,7 +619,7 @@ const StudentAttendance_Page = () => {
             <ul className="text-[12px] text-gray-600 space-y-1">
               <li>• <strong>Browser:</strong> Google Chrome browser required</li>
               <li>• Fill in your full name and roll number accurately</li>
-              <li>• Make sure you're in the correct class session</li>
+              <li>• Use discipline code only (e.g., BCS, BEE, BBA) - max 5 characters</li>
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
             </ul>

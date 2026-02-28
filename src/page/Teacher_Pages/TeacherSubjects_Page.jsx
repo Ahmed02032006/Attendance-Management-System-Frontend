@@ -972,7 +972,7 @@ const TeacherSubjects_Page = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Department Offering *
+                    Discipline *
                   </label>
                   <input
                     type="text"
