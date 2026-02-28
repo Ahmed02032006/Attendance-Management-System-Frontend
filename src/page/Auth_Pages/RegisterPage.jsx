@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Shield, ArrowRight, CheckCircle } from 'lucide-react';
+import { User, Mail, Lock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { registerUser } from '../../store/Auth-Slicer/Auth-Slicer';
@@ -13,10 +13,7 @@ const RegisterPage = () => {
     confirmPassword: '',
     userRole: 'Teacher',
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -29,13 +26,6 @@ const RegisterPage = () => {
     });
   };
 
-  const validatePassword = () => {
-    if (formData.userPassword.length < 6) {
-      return "Password must be at least 6 characters";
-    }
-    return null;
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -44,8 +34,8 @@ const RegisterPage = () => {
       return;
     }
 
-    if (!acceptedTerms) {
-      toast.error("Please accept the terms and conditions");
+    if (formData.userPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
@@ -54,26 +44,15 @@ const RegisterPage = () => {
     dispatch(registerUser(formData))
       .then((res) => {
         if (res.payload?.status === "Success") {
-          toast.success(
-            <div className="flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-              <span>Account created successfully!</span>
-            </div>
-          );
+          toast.success("Account created successfully!");
           setTimeout(() => {
             navigate("/auth/login");
-          }, 2000);
-          setFormData({
-            userName: '',
-            userEmail: '',
-            userPassword: '',
-            confirmPassword: '',
-          });
+          }, 1500);
         } else if (res.payload?.status === "Error") {
           toast.error(res.payload.message || "Registration failed");
         }
       })
-      .catch((err) => {
+      .catch(() => {
         toast.error("An unexpected error occurred");
       })
       .finally(() => {
@@ -81,28 +60,21 @@ const RegisterPage = () => {
       });
   };
 
-  const passwordError = validatePassword();
+  const passwordsMatch = formData.confirmPassword && formData.userPassword === formData.confirmPassword;
+  const showPasswordError = formData.confirmPassword && formData.userPassword !== formData.confirmPassword;
 
   return (
-    <div className="w-full">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          Create Account
-        </h2>
-        <p className="text-gray-500 mt-2 text-sm">Join AttendEase to start managing attendance</p>
-      </div>
+    <>
+      <h2 className="text-2xl font-semibold text-gray-800 text-center mb-2">Create Account</h2>
+      <p className="text-center text-gray-500 text-sm mb-8">Fill in your details to get started</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Full Name */}
-        <div className="space-y-1.5">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
             Full Name
           </label>
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <User className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-            </div>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               id="name"
@@ -110,21 +82,18 @@ const RegisterPage = () => {
               value={formData.userName}
               onChange={handleInputChange}
               placeholder="John Doe"
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50/50 focus:bg-white"
+              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
               required
             />
           </div>
         </div>
 
-        {/* Email */}
-        <div className="space-y-1.5">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
             Email Address
           </label>
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-            </div>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="email"
               id="email"
@@ -132,151 +101,95 @@ const RegisterPage = () => {
               value={formData.userEmail}
               onChange={handleInputChange}
               placeholder="you@example.com"
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50/50 focus:bg-white"
+              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
               required
             />
           </div>
         </div>
 
-        {/* Password */}
-        <div className="space-y-1.5">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
             Password
           </label>
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-            </div>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
-              type={showPassword ? "text" : "password"}
+              type="password"
               id="password"
               name="userPassword"
               value={formData.userPassword}
               onChange={handleInputChange}
               placeholder="••••••••"
-              className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50/50 focus:bg-white ${
-                formData.userPassword && passwordError ? 'border-red-300' : 'border-gray-200'
-              }`}
+              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
               required
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
-            >
-              <span className="text-xs text-gray-500 hover:text-gray-700">
-                {showPassword ? 'Hide' : 'Show'}
-              </span>
-            </button>
           </div>
-          {formData.userPassword && passwordError && (
-            <p className="mt-1 text-xs text-red-500">{passwordError}</p>
-          )}
         </div>
 
-        {/* Confirm Password */}
-        <div className="space-y-1.5">
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+        <div>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
             Confirm Password
           </label>
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-            </div>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
-              type={showConfirmPassword ? "text" : "password"}
+              type="password"
               id="confirmPassword"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleInputChange}
               placeholder="••••••••"
-              className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50/50 focus:bg-white ${
-                formData.confirmPassword && formData.userPassword !== formData.confirmPassword
-                  ? 'border-red-300'
-                  : formData.confirmPassword && formData.userPassword === formData.confirmPassword
-                  ? 'border-green-300'
-                  : 'border-gray-200'
+              className={`w-full pl-9 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm ${
+                showPasswordError ? 'border-red-300' : passwordsMatch ? 'border-green-300' : 'border-gray-300'
               }`}
               required
             />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
-            >
-              <span className="text-xs text-gray-500 hover:text-gray-700">
-                {showConfirmPassword ? 'Hide' : 'Show'}
-              </span>
-            </button>
           </div>
-          {formData.confirmPassword && formData.userPassword === formData.confirmPassword && (
-            <p className="mt-1 text-xs text-green-500 flex items-center">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Passwords match
-            </p>
+          {showPasswordError && (
+            <p className="mt-1 text-xs text-red-500">Passwords don't match</p>
+          )}
+          {passwordsMatch && (
+            <p className="mt-1 text-xs text-green-500">Passwords match</p>
           )}
         </div>
 
-        {/* Terms & Conditions */}
-        <div className="flex items-start space-x-3">
+        <div className="flex items-start">
           <input
             id="terms"
-            name="terms"
             type="checkbox"
-            checked={acceptedTerms}
-            onChange={(e) => setAcceptedTerms(e.target.checked)}
             className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            required
           />
-          <label htmlFor="terms" className="text-sm text-gray-600">
+          <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
             I agree to the{' '}
-            <Link to="/auth/terms" className="text-blue-600 hover:text-blue-700 hover:underline">
-              Terms of Service
+            <Link to="/auth/terms" className="text-blue-600 hover:text-blue-500">
+              Terms
             </Link>{' '}
             and{' '}
-            <Link to="/auth/privacy" className="text-blue-600 hover:text-blue-700 hover:underline">
+            <Link to="/auth/privacy" className="text-blue-600 hover:text-blue-500">
               Privacy Policy
             </Link>
           </label>
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center group"
+          className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
-          {isLoading ? (
-            <div className="flex items-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
-              Creating account...
-            </div>
-          ) : (
-            <>
-              Create Account
-              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </>
-          )}
+          {isLoading ? "Creating Account..." : "Create Account"}
         </button>
       </form>
 
-      {/* Login Link */}
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
           Already have an account?{' '}
-          <Link to="/auth/login" className="font-medium text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center">
+          <Link to="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
             Sign in
-            <ArrowRight className="ml-1 h-3 w-3" />
           </Link>
         </p>
       </div>
-
-      {/* Role Info */}
-      <div className="mt-4 text-center">
-        <p className="text-xs text-gray-400">
-          By registering, you'll get access to teacher dashboard and attendance management features
-        </p>
-      </div>
-    </div>
+    </>
   );
 };
 
