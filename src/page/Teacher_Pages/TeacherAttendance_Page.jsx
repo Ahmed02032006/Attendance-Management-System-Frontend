@@ -19,6 +19,14 @@ import {
   FiCalendar,
   FiBookOpen,
   FiChevronDown,
+  FiUpload,
+  FiDownload,
+  FiInfo,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiUsers,
+  FiPlusCircle,
+  FiX
 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
@@ -26,6 +34,7 @@ import {
   clearAttendance,
   createAttendance
 } from '../../store/Teacher-Slicer/Attendance-Slicer.js'
+import * as XLSX from 'xlsx'
 
 const TeacherAttendance_Page = () => {
   const dispatch = useDispatch()
@@ -61,6 +70,12 @@ const TeacherAttendance_Page = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
+
+  // Import students states
+  const [importedStudents, setImportedStudents] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [showImportTab, setShowImportTab] = useState(false);
 
   // QR Auto-refresh states
   const [qrExpiryTime, setQrExpiryTime] = useState(null);
@@ -172,6 +187,189 @@ const TeacherAttendance_Page = () => {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
+  };
+
+  // Download dummy Excel file for import
+  const downloadDummyExcel = () => {
+    const dummyData = [
+      {
+        'Student Name': 'John Doe',
+        'Roll No': '25FA-001-BCS',
+        'Discipline': 'BCS'
+      },
+      {
+        'Student Name': 'Jane Smith',
+        'Roll No': '25FA-002-BCS',
+        'Discipline': 'BCS'
+      },
+      {
+        'Student Name': 'Alice Johnson',
+        'Roll No': '25FA-003-BCS',
+        'Discipline': 'BCS'
+      },
+      {
+        'Student Name': 'Bob Williams',
+        'Roll No': '25FA-004-BCS',
+        'Discipline': 'BCS'
+      },
+      {
+        'Student Name': 'Charlie Brown',
+        'Roll No': '25FA-005-BCS',
+        'Discipline': 'BCS'
+      }
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(dummyData);
+    ws['!cols'] = [
+      { wch: 25 },
+      { wch: 20 },
+      { wch: 10 }
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Students');
+    XLSX.writeFile(wb, 'student_import_template.xlsx');
+    toast.success('Template downloaded successfully!');
+  };
+
+  // Handle drag events
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  // Handle drop event
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleFileUpload({ target: { files: [files[0]] } });
+    }
+  };
+
+  // Handle file upload for Excel
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const fileType = file.name.split('.').pop().toLowerCase();
+    
+    if (!['xlsx', 'xls', 'csv'].includes(fileType)) {
+      toast.error('Please upload a valid Excel or CSV file');
+      return;
+    }
+
+    setIsUploading(true);
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        const students = jsonData.map(row => ({
+          studentName: row['Student Name'] || row['studentName'] || row['Student'] || row['student'] || '',
+          rollNo: row['Roll No'] || row['rollNo'] || row['Roll'] || row['roll'] || '',
+          discipline: row['Discipline'] || row['discipline'] || row['Disc'] || row['disc'] || ''
+        })).filter(student => student.studentName && student.rollNo && student.discipline);
+
+        setImportedStudents(students);
+        toast.success(
+          <div>
+            <div className="font-medium">{students.length} students loaded successfully!</div>
+            <div className="text-xs mt-1">Ready to mark attendance</div>
+          </div>
+        );
+      } catch (error) {
+        toast.error('Error parsing Excel file. Please check the format.');
+        console.error('Error parsing Excel:', error);
+      } finally {
+        setIsUploading(false);
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+    e.target.value = '';
+  };
+
+  // Handle import all students
+  const handleImportAllStudents = async () => {
+    if (importedStudents.length === 0) {
+      toast.error('No students to import');
+      return;
+    }
+
+    // Get subject details
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+    const currentTime = new Date();
+    const hours = currentTime.getHours();
+    const minutes = currentTime.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+    const formattedTime = `${formattedHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+    const currentDateStr = formatDate(currentDate);
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const student of importedStudents) {
+      const attendanceRecord = {
+        studentName: student.studentName,
+        rollNo: student.rollNo,
+        discipline: student.discipline,
+        time: formattedTime,
+        subjectId: selectedSubject,
+        subjectName: subject?.title || 'Unknown Subject',
+        date: currentDateStr,
+        ipAddress: generateRandomIP(),
+        title: subject?.title || 'Unknown Subject'
+      };
+
+      try {
+        const res = await dispatch(createAttendance(attendanceRecord)).unwrap();
+        if (res.payload?.success) {
+          successCount++;
+        } else {
+          errorCount++;
+        }
+      } catch (error) {
+        errorCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(`${successCount} students marked present successfully!`);
+      if (errorCount > 0) {
+        toast.warning(`${errorCount} students failed to import`);
+      }
+      
+      // Refresh data
+      await dispatch(getSubjectsWithAttendance(userId)).unwrap();
+      
+      // Clear imported students and switch to manual tab
+      setImportedStudents([]);
+      setShowImportTab(false);
+    } else {
+      toast.error('Failed to import students');
+    }
+  };
+
+  // Clear imported students
+  const clearImportedStudents = () => {
+    setImportedStudents([]);
+    toast.info('Imported list cleared');
   };
 
   // Get current attendance records from Redux state
@@ -367,7 +565,7 @@ const TeacherAttendance_Page = () => {
             `"${student.discipline}"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
-            `"${student.title || student.subject || 'N/A'}"` // Fix: Use title instead of subject
+            `"${student.title || student.subject || 'N/A'}"`
           ].join(',')
         )
       ].join('\n');
@@ -386,8 +584,6 @@ const TeacherAttendance_Page = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // toast.success('Data exported successfully!');
     } catch (error) {
       toast.error('Failed to export data');
     }
@@ -508,6 +704,8 @@ const TeacherAttendance_Page = () => {
     });
     setShowManualModal(true);
     setShowAttendanceDropdown(false);
+    setShowImportTab(false);
+    setImportedStudents([]);
   };
 
   const handleSubmitManualAttendance = () => {
@@ -538,10 +736,14 @@ const TeacherAttendance_Page = () => {
         if (res.payload.success) {
           toast.success('Manual attendance marked successfully!');
           dispatch(getSubjectsWithAttendance(userId)).unwrap();
-          setFormData({
+          setManualAttendanceForm({
             studentName: '',
             rollNo: '',
-            discipline: ''
+            discipline: '',
+            subjectId: '',
+            date: '',
+            time: '',
+            ipAddress: ''
           });
         } else {
           toast.error(res.payload.message)
@@ -552,17 +754,6 @@ const TeacherAttendance_Page = () => {
       });
 
     setShowManualModal(false);
-
-    // Reset form
-    setManualAttendanceForm({
-      studentName: '',
-      rollNo: '',
-      discipline: '',
-      subjectId: '',
-      date: '',
-      time: '',
-      ipAddress: ''
-    });
   };
 
   // Toggle QR zoom
@@ -761,7 +952,7 @@ const TeacherAttendance_Page = () => {
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-2m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <span>Export Excel</span>
                 </button>
@@ -1154,60 +1345,17 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Manual Attendance Modal - Updated without time/date fields and with discipline */}
+      {/* Manual Attendance Modal - WITH ENHANCED IMPORT TAB */}
       {showManualModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-800">Manual Attendance</h3>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Student Name *
-                </label>
-                <input
-                  type="text"
-                  name="studentName"
-                  value={manualAttendanceForm.studentName}
-                  onChange={handleManualInputChange}
-                  placeholder="Enter student name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Roll No *
-                </label>
-                <input
-                  type="text"
-                  name="rollNo"
-                  value={manualAttendanceForm.rollNo}
-                  onChange={handleManualInputChange}
-                  placeholder="Enter roll number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Discipline *
-                </label>
-                <input
-                  type="text"
-                  name="discipline"
-                  value={manualAttendanceForm.discipline}
-                  onChange={handleManualInputChange}
-                  placeholder="Enter discipline"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button
                 onClick={() => {
                   setShowManualModal(false);
+                  setShowImportTab(false);
+                  setImportedStudents([]);
                   setManualAttendanceForm({
                     studentName: '',
                     rollNo: '',
@@ -1218,16 +1366,285 @@ const TeacherAttendance_Page = () => {
                     ipAddress: ''
                   });
                 }}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-200 px-6">
+              <button
+                onClick={() => {
+                  setShowImportTab(false);
+                  setImportedStudents([]);
+                }}
+                className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${!showImportTab
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+              >
+                <FiUser className="h-4 w-4 inline mr-2" />
+                Single Entry
+              </button>
+              <button
+                onClick={() => {
+                  setShowImportTab(true);
+                }}
+                className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${showImportTab
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+              >
+                <FiUpload className="h-4 w-4 inline mr-2" />
+                Bulk Import
+              </button>
+            </div>
+
+            {/* Content Area */}
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              {!showImportTab ? (
+                /* Single Entry Form */
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Student Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="studentName"
+                      value={manualAttendanceForm.studentName}
+                      onChange={handleManualInputChange}
+                      placeholder="Enter student name"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Roll No *
+                    </label>
+                    <input
+                      type="text"
+                      name="rollNo"
+                      value={manualAttendanceForm.rollNo}
+                      onChange={handleManualInputChange}
+                      placeholder="Enter roll number"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Discipline *
+                    </label>
+                    <input
+                      type="text"
+                      name="discipline"
+                      value={manualAttendanceForm.discipline}
+                      onChange={handleManualInputChange}
+                      placeholder="Enter discipline"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              ) : (
+                /* ENHANCED IMPORT TAB */
+                <div className="space-y-6">
+                  {/* Header with Stats */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold text-gray-800 flex items-center">
+                        <FiUsers className="h-4 w-4 mr-2 text-blue-600" />
+                        Bulk Import Students
+                      </h4>
+                      {importedStudents.length > 0 && (
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
+                          {importedStudents.length} loaded
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      Upload an Excel file with student details to mark attendance in bulk
+                    </p>
+                  </div>
+
+                  {/* Template Download Card */}
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <FiFileText className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h5 className="text-sm font-medium text-gray-800">Download Template</h5>
+                          <p className="text-xs text-gray-500">Use our template for correct format</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={downloadDummyExcel}
+                        className="flex items-center px-3 py-2 bg-white border border-blue-300 rounded-md text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                      >
+                        <FiDownload className="h-3.5 w-3.5 mr-1.5" />
+                        Template.xlsx
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Upload Area */}
+                  <div 
+                    className={`relative border-2 border-dashed rounded-lg transition-all duration-200 ${
+                      dragActive 
+                        ? 'border-blue-400 bg-blue-50' 
+                        : importedStudents.length > 0 
+                          ? 'border-green-300 bg-green-50' 
+                          : 'border-gray-300 hover:border-blue-300 hover:bg-gray-50'
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      onChange={handleFileUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      disabled={isUploading}
+                    />
+                    
+                    <div className="p-6 text-center">
+                      {isUploading ? (
+                        <div className="flex flex-col items-center">
+                          <div className="animate-spin rounded-full h-10 w-10 border-3 border-blue-200 border-t-blue-600 mb-3"></div>
+                          <p className="text-sm font-medium text-gray-700">Uploading file...</p>
+                          <p className="text-xs text-gray-400 mt-1">Please wait</p>
+                        </div>
+                      ) : importedStudents.length > 0 ? (
+                        <div className="flex flex-col items-center">
+                          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                            <FiCheckCircle className="h-6 w-6 text-green-600" />
+                          </div>
+                          <p className="text-sm font-semibold text-gray-800">{importedStudents.length} students ready</p>
+                          <p className="text-xs text-gray-500 mt-1">Click or drag to replace file</p>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center">
+                          <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3">
+                            <FiUpload className="h-6 w-6 text-blue-500" />
+                          </div>
+                          <p className="text-sm font-medium text-gray-700">
+                            <span className="text-blue-600 font-semibold">Click to upload</span> or drag and drop
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Excel files (.xlsx, .xls) or CSV
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* File Requirements */}
+                  <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                    <div className="flex items-start space-x-2">
+                      <FiInfo className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs font-medium text-amber-800">Required Columns:</p>
+                        <p className="text-xs text-amber-700 mt-1">
+                          <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-300">Student Name</span>,{' '}
+                          <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-300">Roll No</span>,{' '}
+                          <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-300">Discipline</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Preview Section */}
+                  {importedStudents.length > 0 && (
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <FiUsers className="h-4 w-4 text-gray-500" />
+                          <span className="text-xs font-medium text-gray-700">Preview ({importedStudents.length})</span>
+                        </div>
+                        <button
+                          onClick={clearImportedStudents}
+                          className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center"
+                        >
+                          <FiX className="h-3 w-3 mr-1" />
+                          Clear
+                        </button>
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        <table className="w-full text-xs">
+                          <thead className="bg-gray-50 sticky top-0">
+                            <tr>
+                              <th className="px-4 py-2 text-left font-medium text-gray-500">#</th>
+                              <th className="px-4 py-2 text-left font-medium text-gray-500">Student Name</th>
+                              <th className="px-4 py-2 text-left font-medium text-gray-500">Roll No</th>
+                              <th className="px-4 py-2 text-left font-medium text-gray-500">Discipline</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {importedStudents.map((student, index) => (
+                              <tr key={index} className="hover:bg-gray-50">
+                                <td className="px-4 py-2 text-gray-500">{index + 1}</td>
+                                <td className="px-4 py-2 font-medium text-gray-900">{student.studentName}</td>
+                                <td className="px-4 py-2 text-gray-600">{student.rollNo}</td>
+                                <td className="px-4 py-2 text-gray-600">{student.discipline}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowManualModal(false);
+                  setShowImportTab(false);
+                  setImportedStudents([]);
+                  setManualAttendanceForm({
+                    studentName: '',
+                    rollNo: '',
+                    discipline: '',
+                    subjectId: '',
+                    date: '',
+                    time: '',
+                    ipAddress: ''
+                  });
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSubmitManualAttendance}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium transition-colors"
-              >
-                Submit Attendance
-              </button>
+              {!showImportTab ? (
+                <button
+                  onClick={handleSubmitManualAttendance}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium transition-colors"
+                >
+                  Submit Attendance
+                </button>
+              ) : (
+                <button
+                  onClick={handleImportAllStudents}
+                  disabled={importedStudents.length === 0}
+                  className={`px-5 py-2 rounded-md font-medium transition-colors flex items-center ${
+                    importedStudents.length > 0
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  <FiUpload className="h-4 w-4 mr-2" />
+                  Import {importedStudents.length > 0 ? `(${importedStudents.length})` : ''}
+                </button>
+              )}
             </div>
           </div>
         </div>
