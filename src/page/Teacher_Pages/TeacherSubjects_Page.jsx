@@ -1368,206 +1368,228 @@ const TeacherSubjects_Page = () => {
               {/* View Students Tab - Now with Add Individual Form */}
               {activeStudentTab === 'view' && (
                 <div className="h-full flex flex-col">
-                  {/* Quick Add Student Form - Matching card style */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-5 mb-5 shadow-xs">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center">
-                      <span className="w-1 h-4 bg-blue-500 rounded-full mr-2"></span>
-                      Quick Add Student
-                    </h4>
+                  {/* Add Individual Student Form */}
+                  <div className="mb-6 bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    {/* Simple header */}
+                    <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center">
+                      <div className="p-1.5 bg-blue-100 rounded-md mr-2">
+                        <FiUserPlus className="h-3.5 w-3.5 text-blue-600" />
+                      </div>
+                      <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        Quick Add Student
+                      </h4>
+                    </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <div className="flex-1">
-                        <input
-                          type="text"
-                          name="registrationNo"
-                          value={individualStudent.registrationNo}
-                          onChange={handleIndividualStudentChange}
-                          placeholder="Registration Number *"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          disabled={isAddingStudent}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <input
-                          type="text"
-                          name="studentName"
-                          value={individualStudent.studentName}
-                          onChange={handleIndividualStudentChange}
-                          placeholder="Student Name *"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          disabled={isAddingStudent}
-                        />
-                      </div>
-                      <div>
-                        <button
-                          onClick={handleAddIndividualStudent}
-                          disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
-                          className={`h-full px-5 py-2 text-sm rounded-lg font-medium transition-all flex items-center whitespace-nowrap ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
+                    {/* Form */}
+                    <div className="p-4">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            name="registrationNo"
+                            value={individualStudent.registrationNo}
+                            onChange={handleIndividualStudentChange}
+                            placeholder="Registration Number *"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            disabled={isAddingStudent}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            name="studentName"
+                            value={individualStudent.studentName}
+                            onChange={handleIndividualStudentChange}
+                            placeholder="Student Name *"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            disabled={isAddingStudent}
+                          />
+                        </div>
+                        <div>
+                          <button
+                            onClick={handleAddIndividualStudent}
+                            disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
+                            className={`h-full px-4 py-2 text-sm rounded-md font-medium transition-all flex items-center whitespace-nowrap ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
                               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                               : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
-                            }`}
-                        >
-                          {isAddingStudent ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                              Adding...
-                            </>
-                          ) : (
-                            <>
-                              <FiUserPlus className="h-4 w-4 mr-2" />
-                              Add Student
-                            </>
-                          )}
-                        </button>
+                              }`}
+                          >
+                            {isAddingStudent ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                Adding...
+                              </>
+                            ) : (
+                              <>
+                                <FiUserPlus className="h-4 w-4 mr-2" />
+                                Add
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Hint */}
-                    <p className="text-xs text-gray-400 mt-3 flex items-center">
-                      <FiInfo className="h-3 w-3 mr-1" />
-                      Registration number must be unique
-                    </p>
+                      {/* Simple hint */}
+                      <p className="text-xs text-gray-400 mt-2 flex items-center">
+                        <FiInfo className="h-3 w-3 mr-1" />
+                        Registration number must be unique
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Students List - Modern Table Design matching import preview */}
-                  <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
-                    {/* Table Header with Actions */}
-                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="p-1 bg-blue-100 rounded-md">
-                          <FiUsers className="h-3.5 w-3.5 text-blue-600" />
-                        </div>
-                        <h4 className="text-xs font-semibold text-gray-700">Registered Students</h4>
-                        <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-medium">
-                          {registeredStudents?.registeredStudents?.length || 0} students
-                        </span>
-                      </div>
+                  {/* Students List */}
+                  <div className="mb-4 flex justify-between items-center">
+                    <p className="text-sm text-gray-600">
+                      Total Registered: <span className="font-semibold">{registeredStudents?.registeredStudents?.length || 0}</span> students
+                    </p>
 
-                      {registeredStudents?.registeredStudents?.length > 0 && (
-                        <button
-                          onClick={openDeleteAllModal}
-                          className="flex items-center px-2 py-1 text-[10px] text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <FiTrash2 className="h-3 w-3 mr-1" />
-                          Delete All
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Table */}
-                    {studentsLoading ? (
-                      <div className="flex-1 flex items-center justify-center py-12">
-                        <div className="text-center">
-                          <div className="inline-block animate-spin rounded-full h-8 w-8 border-3 border-gray-200 border-t-blue-600"></div>
-                          <p className="mt-2 text-xs text-gray-500">Loading students...</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex-1 overflow-y-auto p-2">
-                        {registeredStudents?.registeredStudents?.length > 0 ? (
-                          <div className="border border-gray-100 rounded-lg overflow-hidden">
-                            <table className="w-full">
-                              <thead className="bg-gray-50">
-                                <tr>
-                                  <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">#</th>
-                                  <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Registration No</th>
-                                  <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Student Name</th>
-                                  <th className="px-3 py-2 text-center text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-gray-100">
-                                {registeredStudents.registeredStudents.map((student, index) => (
-                                  <tr key={student._id} className="hover:bg-gray-50">
-                                    <td className="px-3 py-2 text-[11px] text-gray-500">{index + 1}</td>
-                                    <td className="px-3 py-2 text-[11px] font-mono font-medium text-gray-800">
-                                      {editingStudent && editingStudent._id === student._id ? (
-                                        <input
-                                          type="text"
-                                          name="registrationNo"
-                                          value={editFormData.registrationNo}
-                                          onChange={handleEditFormChange}
-                                          className="w-full px-2 py-1 border border-blue-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                          autoFocus
-                                        />
-                                      ) : (
-                                        student.registrationNo
-                                      )}
-                                    </td>
-                                    <td className="px-3 py-2 text-[11px] text-gray-700">
-                                      {editingStudent && editingStudent._id === student._id ? (
-                                        <input
-                                          type="text"
-                                          name="studentName"
-                                          value={editFormData.studentName}
-                                          onChange={handleEditFormChange}
-                                          className="w-full px-2 py-1 border border-blue-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                        />
-                                      ) : (
-                                        student.studentName
-                                      )}
-                                    </td>
-                                    <td className="px-3 py-2 text-center">
-                                      {editingStudent && editingStudent._id === student._id ? (
-                                        <div className="flex items-center justify-center space-x-1">
-                                          <button
-                                            onClick={handleSaveEdit}
-                                            disabled={isEditingStudent}
-                                            className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
-                                            title="Save"
-                                          >
-                                            <FiSave className="h-3.5 w-3.5" />
-                                          </button>
-                                          <button
-                                            onClick={handleCancelEdit}
-                                            disabled={isEditingStudent}
-                                            className="p-1 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
-                                            title="Cancel"
-                                          >
-                                            <FiXCircle className="h-3.5 w-3.5" />
-                                          </button>
-                                        </div>
-                                      ) : (
-                                        <div className="flex items-center justify-center space-x-1">
-                                          <button
-                                            onClick={() => handleEditStudent(student)}
-                                            className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
-                                            title="Edit Student"
-                                          >
-                                            <FiEdit className="h-3.5 w-3.5" />
-                                          </button>
-                                          <button
-                                            onClick={() => handleDeleteStudent(student._id)}
-                                            className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                                            title="Remove Student"
-                                          >
-                                            <FiUserMinus className="h-3.5 w-3.5" />
-                                          </button>
-                                        </div>
-                                      )}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center py-12">
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                              <FiUsers className="h-6 w-6 text-gray-400" />
-                            </div>
-                            <p className="text-sm font-medium text-gray-600">No students registered yet</p>
-                            <p className="text-xs text-gray-400 mt-1">Use the form above to add students</p>
-                          </div>
-                        )}
-                      </div>
+                    {registeredStudents?.registeredStudents?.length > 0 && (
+                      <button
+                        onClick={openDeleteAllModal}
+                        className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium"
+                      >
+                        <FiTrash2 className="h-3.5 w-3.5 mr-1.5" />
+                        Delete All ({registeredStudents?.registeredStudents?.length || 0})
+                      </button>
                     )}
                   </div>
+
+                  {studentsLoading ? (
+                    <div className="text-center py-12">
+                      <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
+                      <p className="mt-3 text-sm text-gray-500">Loading students...</p>
+                    </div>
+                  ) : (
+                    <div className="border border-gray-200 rounded-lg overflow-hidden flex-1">
+                      <div className="max-h-[400px] overflow-y-auto">
+                        <table className="w-full">
+                          <thead className="bg-gray-50 sticky top-0 z-10">
+                            <tr>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Registration No</th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
+                              <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {registeredStudents?.registeredStudents?.length > 0 ? (
+                              registeredStudents.registeredStudents.map((student, index) => (
+                                <tr key={student._id} className="hover:bg-gray-50">
+                                  <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
+                                  <td className="px-4 py-2 text-sm text-gray-900 font-mono">
+                                    {editingStudent && editingStudent._id === student._id ? (
+                                      <input
+                                        type="text"
+                                        name="registrationNo"
+                                        value={editFormData.registrationNo}
+                                        onChange={handleEditFormChange}
+                                        className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                        autoFocus
+                                      />
+                                    ) : (
+                                      student.registrationNo
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2 text-sm text-gray-900">
+                                    {editingStudent && editingStudent._id === student._id ? (
+                                      <input
+                                        type="text"
+                                        name="studentName"
+                                        value={editFormData.studentName}
+                                        onChange={handleEditFormChange}
+                                        className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                      />
+                                    ) : (
+                                      student.studentName
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2 text-sm text-center">
+                                    {editingStudent && editingStudent._id === student._id ? (
+                                      <div className="flex items-center justify-center space-x-1">
+                                        <button
+                                          onClick={handleSaveEdit}
+                                          disabled={isEditingStudent}
+                                          className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
+                                          title="Save"
+                                        >
+                                          <FiSave className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={handleCancelEdit}
+                                          disabled={isEditingStudent}
+                                          className="p-1 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                                          title="Cancel"
+                                        >
+                                          <FiXCircle className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center justify-center space-x-1">
+                                        <button
+                                          onClick={() => handleEditStudent(student)}
+                                          className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                                          title="Edit Student"
+                                        >
+                                          <FiEdit className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteStudent(student._id)}
+                                          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                                          title="Remove Student"
+                                        >
+                                          <FiUserMinus className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
+                                  <FiUsers className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                                  No students registered yet
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    Use the form above to add students
+                                  </p>
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Import Students Tab - Enhanced Design */}
               {activeStudentTab === 'import' && (
                 <div className="h-full flex flex-col">
+
+                  {/* Course Info Card */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-4 mb-5 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <FiBook className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 mb-0.5">Selected Course</p>
+                          <p className="text-sm font-semibold text-gray-800">{selectedSubject.title}</p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">{selectedSubject.code}</span>
+                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">Sem {selectedSubject.semester}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right bg-purple-50 px-4 py-2 rounded-lg">
+                        <p className="text-xs text-purple-600 font-medium">Registered</p>
+                        <p className="text-xl font-bold text-purple-700">{selectedSubject.registeredStudentsCount || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Main Upload Section - Modern Card Layout */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     {/* Left Column - Upload Area */}
@@ -1745,6 +1767,39 @@ const TeacherSubjects_Page = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Action Buttons */}
+                  <div className="mt-4 flex justify-end space-x-3">
+                    <button
+                      onClick={() => {
+                        setActiveStudentTab('view');
+                        setImportedStudents([]);
+                      }}
+                      className="px-4 py-2 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      Back to List
+                    </button>
+                    <button
+                      onClick={handleInsertStudents}
+                      disabled={importedStudents.length === 0 || studentsLoading}
+                      className={`px-5 py-2 text-xs rounded-lg font-medium transition-all flex items-center ${importedStudents.length > 0 && !studentsLoading
+                        ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm hover:shadow'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                    >
+                      {studentsLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent mr-2"></div>
+                          Importing...
+                        </>
+                      ) : (
+                        <>
+                          <FiUpload className="h-4 w-4 mr-2" />
+                          Import Students {importedStudents.length > 0 ? `(${importedStudents.length})` : ''}
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
