@@ -1,109 +1,73 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { FiCheckCircle, FiUsers, FiClock, FiTrendingUp } from 'react-icons/fi';
+import { FiCalendar, FiCheckSquare, FiBarChart2 } from 'react-icons/fi';
 
 const AuthLayout = () => {
   return (
-    <div className="min-h-screen w-full bg-white flex">
-      {/* Left Side - Modern Pattern Design */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#0f172a]">
-        {/* Geometric Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 rounded-full filter blur-3xl"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-500 rounded-full filter blur-3xl"></div>
-        </div>
-
-        {/* Grid Pattern */}
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }}></div>
+    <div className="min-h-screen w-full bg-[#f8fafc] flex">
+      {/* Left Side - Minimalist Pattern */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-white">
+        {/* Subtle Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" 
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234f46e5' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        ></div>
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-between h-full w-full p-12">
-          {/* Logo Area */}
+        <div className="relative z-10 flex flex-col justify-between h-full w-full p-16">
+          {/* Brand */}
           <div>
-            <div className="inline-flex items-center space-x-3 bg-white/10 backdrop-blur-sm px-5 py-3 rounded-2xl border border-white/20">
-              <div className="w-10 h-10 bg-gradient-to-tr from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
-                <FiCheckCircle className="h-6 w-6 text-white" />
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <FiCalendar className="h-4 w-4 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">AttendFlow</span>
+              <span className="text-xl font-medium text-gray-800">Presence</span>
             </div>
           </div>
 
-          {/* Main Message */}
-          <div className="space-y-6">
-            <h1 className="text-5xl font-bold text-white leading-tight">
-              Track Attendance
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
-                Effortlessly
-              </span>
-            </h1>
+          {/* Center Quote */}
+          <div className="space-y-8">
+            <div className="text-5xl font-light text-gray-800 leading-tight">
+              attendance
+              <span className="block text-indigo-600">reimagined</span>
+            </div>
             
-            <p className="text-gray-300 text-lg max-w-md">
-              Streamline your attendance management with real-time tracking, instant reports, and smart analytics.
-            </p>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 gap-4 max-w-md mt-8">
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                <FiUsers className="h-6 w-6 text-blue-400 mb-2" />
-                <div className="text-2xl font-bold text-white">500+</div>
-                <div className="text-xs text-gray-400">Active Users</div>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3 text-gray-600">
+                <FiCheckSquare className="h-5 w-5 text-indigo-500" />
+                <span>QR code scanning</span>
               </div>
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                <FiClock className="h-6 w-6 text-indigo-400 mb-2" />
-                <div className="text-2xl font-bold text-white">10k+</div>
-                <div className="text-xs text-gray-400">Daily Entries</div>
+              <div className="flex items-center space-x-3 text-gray-600">
+                <FiBarChart2 className="h-5 w-5 text-indigo-500" />
+                <span>real-time analytics</span>
               </div>
             </div>
           </div>
 
-          {/* Testimonial */}
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 max-w-md">
-            <p className="text-gray-300 text-sm italic">
-              "This system has completely transformed how we manage attendance. It's intuitive, fast, and the reports are incredibly detailed."
-            </p>
-            <div className="flex items-center mt-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full flex items-center justify-center text-white font-semibold">
-                AS
-              </div>
-              <div className="ml-3">
-                <p className="text-white text-sm font-medium">Dr. Sarah Khan</p>
-                <p className="text-gray-400 text-xs">Dean, University of Technology</p>
-              </div>
-            </div>
+          {/* Author */}
+          <div className="text-sm text-gray-400">
+            <p>© 2024 Presence</p>
           </div>
         </div>
       </div>
 
       {/* Right Side - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-gradient-to-br from-gray-50 to-white">
-        <div className="w-full max-w-md">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-sm">
           {/* Mobile Header */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl">
-              <FiCheckCircle className="h-5 w-5" />
-              <span className="font-semibold">AttendFlow</span>
+          <div className="lg:hidden text-center mb-12">
+            <div className="inline-flex items-center space-x-2">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <FiCalendar className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-xl font-medium text-gray-800">Presence</span>
             </div>
           </div>
 
-          {/* Auth Card with Unique Shape */}
-          <div className="relative">
-            {/* Decorative Elements */}
-            <div className="absolute -top-3 -right-3 w-20 h-20 bg-blue-500 rounded-full opacity-20"></div>
-            <div className="absolute -bottom-3 -left-3 w-32 h-32 bg-indigo-500 rounded-full opacity-20"></div>
-            
-            {/* Main Card */}
-            <div className="relative bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-              <Outlet />
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="mt-6 text-center text-xs text-gray-400">
-            <p>Protected by industry-standard encryption</p>
+          {/* Auth Container */}
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+            <Outlet />
           </div>
         </div>
       </div>
