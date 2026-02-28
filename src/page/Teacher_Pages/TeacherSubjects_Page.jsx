@@ -1568,7 +1568,7 @@ const TeacherSubjects_Page = () => {
                 <div className="h-full flex flex-col">
                   {/* Quick Stats Cards with improved design */}
                   <div className="grid grid-cols-3 gap-3 mb-5">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg p-3 border border-blue-200 shadow-sm">
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100/50 rounded-lg p-3 border border-blue-200 shadow-sm">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-xs text-blue-600 font-medium mb-1">Semester</p>
@@ -1580,7 +1580,7 @@ const TeacherSubjects_Page = () => {
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-lg p-3 border border-green-200 shadow-sm">
+                    <div className="bg-linear-to-br from-green-50 to-green-100/50 rounded-lg p-3 border border-green-200 shadow-sm">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-xs text-green-600 font-medium mb-1">Session</p>
@@ -1592,7 +1592,7 @@ const TeacherSubjects_Page = () => {
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-lg p-3 border border-purple-200 shadow-sm">
+                    <div className="bg-linear-to-br from-purple-50 to-purple-100/50 rounded-lg p-3 border border-purple-200 shadow-sm">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-xs text-purple-600 font-medium mb-1">Registered students</p>
@@ -1684,7 +1684,7 @@ const TeacherSubjects_Page = () => {
                       </ul>
                     </div>
 
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+                    <div className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
                       <div className="flex items-center mb-3">
                         <div className="p-1.5 bg-blue-200 rounded-lg mr-2">
                           <FiFileText className="h-3.5 w-3.5 text-blue-700" />
@@ -1779,7 +1779,7 @@ const TeacherSubjects_Page = () => {
                   onClick={handleInsertStudents}
                   disabled={importedStudents.length === 0 || studentsLoading}
                   className={`px-5 py-2 text-xs rounded-lg font-medium transition-all flex items-center shadow-sm ${importedStudents.length > 0 && !studentsLoading
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow'
+                      ? 'bg-linear-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                 >
