@@ -13,10 +13,7 @@ import {
   FiCalendar,
   FiClock,
   FiHeart,
-  FiUsers,
-  FiUserCheck,
-  FiUserPlus,
-  FiUserX
+  FiUsers
 } from 'react-icons/fi'
 import { BiSupport } from "react-icons/bi";
 
@@ -347,21 +344,8 @@ const TeacherDashboard_Page = () => {
   const currentAttendanceRecords = getCurrentAttendanceRecords();
   const selectedSubjectData = dashboardSubjects.find(subject => subject.id === selectedSubject);
 
-  // Calculate total registered students across all subjects
-  const totalRegisteredStudents = dashboardSubjects.reduce((acc, subject) => acc + (subject.students || 0), 0);
-
-  // Calculate average students per subject
-  const averageStudentsPerSubject = dashboardSubjects.length > 0 
-    ? Math.round(totalRegisteredStudents / dashboardSubjects.length) 
-    : 0;
-
-  // Find subject with most students
-  const subjectWithMostStudents = dashboardSubjects.length > 0
-    ? dashboardSubjects.reduce((max, subject) => (subject.students || 0) > (max.students || 0) ? subject : max, dashboardSubjects[0])
-    : null;
-
   // Quick stats
-  const totalStudents = totalRegisteredStudents;
+  const totalStudents = dashboardSubjects.reduce((acc, subject) => acc + (subject.students || 0), 0);
   const attendanceRate = selectedSubjectData ?
     Math.round((currentAttendanceRecords.length / (selectedSubjectData.students || 1)) * 100) : 0;
 
@@ -528,8 +512,8 @@ const TeacherDashboard_Page = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {/* Quick Stats - Now with Registered Students Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+        {/* Quick Stats - Now only 2 columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -545,39 +529,11 @@ const TeacherDashboard_Page = () => {
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Registered Students</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">{totalRegisteredStudents}</p>
+                <p className="text-sm text-gray-500">Total Students</p>
+                <p className="text-2xl font-semibold text-gray-900 mt-1">{totalStudents}</p>
               </div>
               <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
                 <FiUsers className="h-5 w-5 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Avg Students/Course</p>
-                <p className="text-2xl font-semibold text-gray-900 mt-1">{averageStudentsPerSubject}</p>
-              </div>
-              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                <FiUserCheck className="h-5 w-5 text-purple-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Largest Course</p>
-                <p className="text-xl font-semibold text-gray-900 mt-1 truncate max-w-[120px]">
-                  {subjectWithMostStudents?.title?.substring(0, 10) || 'N/A'}
-                  {subjectWithMostStudents?.title?.length > 10 ? '...' : ''}
-                </p>
-                <p className="text-xs text-gray-400 mt-0.5">{subjectWithMostStudents?.students || 0} students</p>
-              </div>
-              <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                <FiUserPlus className="h-5 w-5 text-orange-600" />
               </div>
             </div>
           </div>
