@@ -1437,7 +1437,7 @@ const TeacherSubjects_Page = () => {
                     </div>
                   </div>
 
-                  {/* Students List Header */}
+                  {/* Students List */}
                   <div className="mb-4 flex justify-between items-center">
                     <p className="text-sm text-gray-600">
                       Total Registered: <span className="font-semibold">{registeredStudents?.registeredStudents?.length || 0}</span> students
@@ -1473,104 +1473,77 @@ const TeacherSubjects_Page = () => {
                           </thead>
                           <tbody className="divide-y divide-gray-200">
                             {registeredStudents?.registeredStudents?.length > 0 ? (
-                              <>
-                                {/* Show only first 5 students */}
-                                {registeredStudents.registeredStudents.slice(0, 5).map((student, index) => (
-                                  <tr key={student._id} className="hover:bg-gray-50">
-                                    <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
-                                    <td className="px-4 py-2 text-sm text-gray-900 font-mono">
-                                      {editingStudent && editingStudent._id === student._id ? (
-                                        <input
-                                          type="text"
-                                          name="registrationNo"
-                                          value={editFormData.registrationNo}
-                                          onChange={handleEditFormChange}
-                                          className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                          autoFocus
-                                        />
-                                      ) : (
-                                        student.registrationNo
-                                      )}
-                                    </td>
-                                    <td className="px-4 py-2 text-sm text-gray-900">
-                                      {editingStudent && editingStudent._id === student._id ? (
-                                        <input
-                                          type="text"
-                                          name="studentName"
-                                          value={editFormData.studentName}
-                                          onChange={handleEditFormChange}
-                                          className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                        />
-                                      ) : (
-                                        student.studentName
-                                      )}
-                                    </td>
-                                    <td className="px-4 py-2 text-sm text-center">
-                                      {editingStudent && editingStudent._id === student._id ? (
-                                        <div className="flex items-center justify-center space-x-1">
-                                          <button
-                                            onClick={handleSaveEdit}
-                                            disabled={isEditingStudent}
-                                            className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
-                                            title="Save"
-                                          >
-                                            <FiSave className="h-4 w-4" />
-                                          </button>
-                                          <button
-                                            onClick={handleCancelEdit}
-                                            disabled={isEditingStudent}
-                                            className="p-1 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
-                                            title="Cancel"
-                                          >
-                                            <FiXCircle className="h-4 w-4" />
-                                          </button>
-                                        </div>
-                                      ) : (
-                                        <div className="flex items-center justify-center space-x-1">
-                                          <button
-                                            onClick={() => handleEditStudent(student)}
-                                            className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
-                                            title="Edit Student"
-                                          >
-                                            <FiEdit className="h-4 w-4" />
-                                          </button>
-                                          <button
-                                            onClick={() => handleDeleteStudent(student._id)}
-                                            className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                                            title="Remove Student"
-                                          >
-                                            <FiUserMinus className="h-4 w-4" />
-                                          </button>
-                                        </div>
-                                      )}
-                                    </td>
-                                  </tr>
-                                ))}
-
-                                {/* Show "View All" message if there are more than 5 students */}
-                                {registeredStudents.registeredStudents.length > 5 && (
-                                  <tr>
-                                    <td colSpan="4" className="px-4 py-4 text-center">
-                                      <div className="flex flex-col items-center justify-center">
-                                        <div className="text-sm text-gray-500 mb-2">
-                                          +{registeredStudents.registeredStudents.length - 5} more students
-                                        </div>
+                              registeredStudents.registeredStudents.map((student, index) => (
+                                <tr key={student._id} className="hover:bg-gray-50">
+                                  <td className="px-4 py-2 text-sm text-gray-600">{index + 1}</td>
+                                  <td className="px-4 py-2 text-sm text-gray-900 font-mono">
+                                    {editingStudent && editingStudent._id === student._id ? (
+                                      <input
+                                        type="text"
+                                        name="registrationNo"
+                                        value={editFormData.registrationNo}
+                                        onChange={handleEditFormChange}
+                                        className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                        autoFocus
+                                      />
+                                    ) : (
+                                      student.registrationNo
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2 text-sm text-gray-900">
+                                    {editingStudent && editingStudent._id === student._id ? (
+                                      <input
+                                        type="text"
+                                        name="studentName"
+                                        value={editFormData.studentName}
+                                        onChange={handleEditFormChange}
+                                        className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                      />
+                                    ) : (
+                                      student.studentName
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2 text-sm text-center">
+                                    {editingStudent && editingStudent._id === student._id ? (
+                                      <div className="flex items-center justify-center space-x-1">
                                         <button
-                                          onClick={() => {
-                                            // You can implement a view all functionality here
-                                            // For example, open a modal with all students or expand the list
-                                            toast.info(`Total ${registeredStudents.registeredStudents.length} students registered`);
-                                          }}
-                                          className="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md text-xs font-medium transition-colors"
+                                          onClick={handleSaveEdit}
+                                          disabled={isEditingStudent}
+                                          className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
+                                          title="Save"
                                         >
-                                          <FiUsers className="h-3.5 w-3.5 mr-1.5" />
-                                          View All {registeredStudents.registeredStudents.length} Students
+                                          <FiSave className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={handleCancelEdit}
+                                          disabled={isEditingStudent}
+                                          className="p-1 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                                          title="Cancel"
+                                        >
+                                          <FiXCircle className="h-4 w-4" />
                                         </button>
                                       </div>
-                                    </td>
-                                  </tr>
-                                )}
-                              </>
+                                    ) : (
+                                      <div className="flex items-center justify-center space-x-1">
+                                        <button
+                                          onClick={() => handleEditStudent(student)}
+                                          className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                                          title="Edit Student"
+                                        >
+                                          <FiEdit className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteStudent(student._id)}
+                                          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                                          title="Remove Student"
+                                        >
+                                          <FiUserMinus className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))
                             ) : (
                               <tr>
                                 <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
