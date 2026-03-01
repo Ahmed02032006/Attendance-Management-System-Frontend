@@ -11,13 +11,11 @@ import {
   FiSearch
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-import { useReactToPrint } from 'react-to-print'
 
 const TeacherCourseReport_Page = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
   const { subjects } = useSelector((state) => state.teacherSubject)
-  const componentRef = useRef()
 
   // Form states
   const [selectedCourse, setSelectedCourse] = useState('')
@@ -106,6 +104,56 @@ const TeacherCourseReport_Page = () => {
         ],
         presentCount: 15,
         absentCount: 1
+      },
+      { 
+        id: 4,
+        name: 'Usman Ali', 
+        rollNo: '25FA-022-BCS',
+        attendance: [
+          { date: '2024-01-15', status: 'Present' },
+          { date: '2024-01-16', status: 'Present' },
+          { date: '2024-01-17', status: 'Present' },
+          { date: '2024-01-18', status: 'Absent' },
+          { date: '2024-01-19', status: 'Present' },
+          { date: '2024-01-20', status: 'Present' },
+          { date: '2024-01-21', status: 'Absent' },
+          { date: '2024-01-22', status: 'Present' },
+          { date: '2024-01-23', status: 'Present' },
+          { date: '2024-01-24', status: 'Present' },
+          { date: '2024-01-25', status: 'Absent' },
+          { date: '2024-01-26', status: 'Present' },
+          { date: '2024-01-27', status: 'Present' },
+          { date: '2024-01-28', status: 'Present' },
+          { date: '2024-01-29', status: 'Present' },
+          { date: '2024-01-30', status: 'Present' },
+        ],
+        presentCount: 12,
+        absentCount: 4
+      },
+      { 
+        id: 5,
+        name: 'Fatima Zaidi', 
+        rollNo: '25FA-031-BCS',
+        attendance: [
+          { date: '2024-01-15', status: 'Present' },
+          { date: '2024-01-16', status: 'Present' },
+          { date: '2024-01-17', status: 'Present' },
+          { date: '2024-01-18', status: 'Present' },
+          { date: '2024-01-19', status: 'Present' },
+          { date: '2024-01-20', status: 'Present' },
+          { date: '2024-01-21', status: 'Present' },
+          { date: '2024-01-22', status: 'Present' },
+          { date: '2024-01-23', status: 'Present' },
+          { date: '2024-01-24', status: 'Present' },
+          { date: '2024-01-25', status: 'Present' },
+          { date: '2024-01-26', status: 'Present' },
+          { date: '2024-01-27', status: 'Present' },
+          { date: '2024-01-28', status: 'Present' },
+          { date: '2024-01-29', status: 'Present' },
+          { date: '2024-01-30', status: 'Present' },
+        ],
+        presentCount: 16,
+        absentCount: 0
       }
     ]
     return mockData
@@ -176,62 +224,147 @@ const TeacherCourseReport_Page = () => {
     }
   }
 
-  // Print function
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle: `Attendance_Report_${fromDate}_to_${toDate}`,
-    onAfterPrint: () => toast.success('Print completed'),
-    pageStyle: `
-      @page { 
-        size: landscape; 
-        margin: 1cm;
-      }
-      body { 
-        -webkit-print-color-adjust: exact; 
-        print-color-adjust: exact;
-        font-family: Arial, sans-serif;
-      }
-      .print\\:hidden {
-        display: none !important;
-      }
-      .bg-green-100 { 
-        background-color: #dcfce7 !important; 
-        color: #166534 !important;
-      }
-      .bg-red-100 { 
-        background-color: #fee2e2 !important; 
-        color: #991b1b !important;
-      }
-      table { 
-        border-collapse: collapse; 
-        width: 100%;
-        font-size: 10pt;
-      }
-      th { 
-        background-color: #f3f4f6 !important; 
-        font-weight: bold;
-        padding: 8px;
-        border: 1px solid #e5e7eb;
-      }
-      td { 
-        padding: 6px 8px;
-        border: 1px solid #e5e7eb;
-      }
-      .report-header {
-        margin-bottom: 20px;
-        text-align: center;
-      }
-      .report-header h2 {
-        font-size: 16pt;
-        margin: 0 0 5px 0;
-      }
-      .report-header p {
-        font-size: 11pt;
-        margin: 0;
-        color: #4b5563;
-      }
+  // Native print function
+  const handlePrint = () => {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank')
+    
+    // Get course details
+    const course = subjects.find(s => s.id === selectedCourse)
+    
+    // Generate table rows HTML
+    const tableRows = reportData.map(student => {
+      const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
+      const attendanceCells = student.attendance.map(record => 
+        `<td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 9999px; font-size: 11px; font-weight: 500; ${record.status === 'Present' ? 'background-color: #dcfce7; color: #166534;' : 'background-color: #fee2e2; color: #991b1b;'}">
+            ${record.status === 'Present' ? 'P' : 'A'}
+          </span>
+        </td>`
+      ).join('')
+      
+      return `
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; font-weight: 500;">${student.name}</td>
+          <td style="padding: 6px 8px; border: 1px solid #e5e7eb;">${student.rollNo}</td>
+          ${attendanceCells}
+          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center; color: #166534; font-weight: 500;">${student.presentCount}</td>
+          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center; color: #991b1b; font-weight: 500;">${student.absentCount}</td>
+          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">
+            <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; ${percentage >= 75 ? 'background-color: #dcfce7; color: #166534;' : percentage >= 50 ? 'background-color: #fef3c7; color: #92400e;' : 'background-color: #fee2e2; color: #991b1b;'}">
+              ${percentage}%
+            </span>
+          </td>
+        </tr>
+      `
+    }).join('')
+    
+    // Generate date headers
+    const dateHeaders = reportData[0]?.attendance.map(record => 
+      `<th style="padding: 8px; border: 1px solid #e5e7eb; text-align: center; font-size: 11px; font-weight: 600; text-transform: uppercase; background-color: #f3f4f6;">
+        ${new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+      </th>`
+    ).join('')
+    
+    // Complete HTML for print
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Attendance Report</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              font-size: 24px;
+              margin: 0 0 5px 0;
+              color: #111827;
+            }
+            .header p {
+              font-size: 14px;
+              margin: 5px 0;
+              color: #4b5563;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 12px;
+              margin-top: 20px;
+            }
+            th {
+              background-color: #f3f4f6 !important;
+              font-weight: 600;
+              padding: 8px;
+              border: 1px solid #e5e7eb;
+              text-align: left;
+            }
+            td {
+              padding: 6px 8px;
+              border: 1px solid #e5e7eb;
+            }
+            .footer {
+              margin-top: 30px;
+              font-size: 11px;
+              color: #6b7280;
+              text-align: right;
+            }
+            @media print {
+              body {
+                padding: 0.5in;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Attendance Report</h1>
+            <p>${course?.title} (${course?.code})</p>
+            <p>${new Date(fromDate).toLocaleDateString()} to ${new Date(toDate).toLocaleDateString()}</p>
+            <p>Total Students: ${reportData.length}</p>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align: left;">Student Name</th>
+                <th style="text-align: left;">Roll No.</th>
+                ${dateHeaders}
+                <th style="text-align: center;">Present</th>
+                <th style="text-align: center;">Absent</th>
+                <th style="text-align: center;">%</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+          
+          <div class="footer">
+            <p>Generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+          </div>
+          
+          <script>
+            window.onload = function() {
+              window.print();
+            }
+          </script>
+        </body>
+      </html>
     `
-  })
+    
+    // Write to new window and print
+    printWindow.document.write(printContent)
+    printWindow.document.close()
+  }
 
   // Get selected course details
   const getSelectedCourseDetails = () => {
@@ -257,7 +390,7 @@ const TeacherCourseReport_Page = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Report Generation Form */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 print:hidden">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Generate Attendance Report</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -341,8 +474,8 @@ const TeacherCourseReport_Page = () => {
         {/* Report Display */}
         {showReport && reportData.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            {/* Report Header with Actions - Hidden in Print */}
-            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center print:hidden">
+            {/* Report Header with Actions */}
+            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
               <div>
                 <h3 className="text-base font-medium text-gray-900">
                   Attendance Report: {getSelectedCourseDetails()?.title}
@@ -369,102 +502,86 @@ const TeacherCourseReport_Page = () => {
               </div>
             </div>
 
-            {/* Report Content - Printable */}
-            <div ref={componentRef} className="p-6">
-              {/* Print Header */}
-              <div className="hidden print:block report-header">
-                <h2 className="text-xl font-bold">Attendance Report</h2>
-                <p>{getSelectedCourseDetails()?.title} ({getSelectedCourseDetails()?.code})</p>
-                <p>{formatDate(fromDate)} to {formatDate(toDate)}</p>
-                <p>Total Students: {reportData.length}</p>
-              </div>
-
-              {/* Report Table - No Scroll */}
-              <div className="overflow-visible">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        Student Name
+            {/* Report Table - No Scroll */}
+            <div className="p-4">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Student Name
+                    </th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Roll No.
+                    </th>
+                    {/* Date Headers */}
+                    {reportData[0]?.attendance.map((record, index) => (
+                      <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                        {new Date(record.date).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        Roll No.
-                      </th>
-                      {/* Date Headers */}
-                      {reportData[0]?.attendance.map((record, index) => (
-                        <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                          {new Date(record.date).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric' 
-                          })}
-                        </th>
-                      ))}
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                        Present
-                      </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                        Absent
-                      </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                        %
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {reportData.map((student) => {
-                      const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
-                      
-                      return (
-                        <tr key={student.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {student.name}
-                          </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
-                            {student.rollNo}
-                          </td>
-                          {/* Attendance Status for each date */}
-                          {student.attendance.map((record, idx) => (
-                            <td key={idx} className="px-4 py-2 whitespace-nowrap text-center">
-                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium
-                                ${record.status === 'Present' 
-                                  ? 'bg-green-100 text-green-700' 
-                                  : 'bg-red-100 text-red-700'
-                                }`}
-                              >
-                                {record.status === 'Present' ? 'P' : 'A'}
-                              </span>
-                            </td>
-                          ))}
-                          <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
-                            {student.presentCount}
-                          </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-red-600">
-                            {student.absentCount}
-                          </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-center">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                              ${percentage >= 75 ? 'bg-green-100 text-green-700' : 
-                                percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 
-                                'bg-red-100 text-red-700'}`}
+                    ))}
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                      Present
+                    </th>
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                      Absent
+                    </th>
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                      %
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {reportData.map((student) => {
+                    const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
+                    
+                    return (
+                      <tr key={student.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {student.name}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
+                          {student.rollNo}
+                        </td>
+                        {/* Attendance Status for each date */}
+                        {student.attendance.map((record, idx) => (
+                          <td key={idx} className="px-4 py-2 whitespace-nowrap text-center">
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium
+                              ${record.status === 'Present' 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-red-100 text-red-700'
+                              }`}
                             >
-                              {percentage}%
+                              {record.status === 'Present' ? 'P' : 'A'}
                             </span>
                           </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Print Footer */}
-              <div className="hidden print:block mt-8 text-xs text-gray-500">
-                <p>Generated on: {new Date().toLocaleDateString()}</p>
-              </div>
+                        ))}
+                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
+                          {student.presentCount}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-red-600">
+                          {student.absentCount}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-center">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                            ${percentage >= 75 ? 'bg-green-100 text-green-700' : 
+                              percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 
+                              'bg-red-100 text-red-700'}`}
+                          >
+                            {percentage}%
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
 
-            {/* Summary Footer - Hidden in Print */}
-            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 print:hidden">
+            {/* Summary Footer */}
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
