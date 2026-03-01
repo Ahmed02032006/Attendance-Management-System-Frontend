@@ -15,7 +15,7 @@ export const getSubjectAttendanceReport = createAsyncThunk(
   async ({ subjectId, teacherId, fromDate, toDate }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/attendance/report/${subjectId}`,
+        `${BASE_URL}/report/${subjectId}`,
         {
           params: {
             teacherId,
@@ -42,7 +42,7 @@ export const exportAttendanceReport = createAsyncThunk(
   async ({ subjectId, teacherId, fromDate, toDate, format = 'csv' }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/attendance/report/${subjectId}/export`,
+        `${BASE_URL}/report/${subjectId}/export`,
         {
           params: {
             teacherId,
