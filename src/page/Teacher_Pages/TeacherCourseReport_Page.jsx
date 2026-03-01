@@ -11,7 +11,7 @@ import {
   FiRefreshCw
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { getCourseAttendanceReport, exportAttendanceReport } from '../../redux/slices/teacherReportSlice'; // You'll need to create this slice
+import { getCourseAttendanceReport, exportAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer';
 
 const TeacherCourseReport_Page = () => {
   const dispatch = useDispatch();
