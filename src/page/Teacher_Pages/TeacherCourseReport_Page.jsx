@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import {
-  FiCalendar,
-  FiBook,
-  FiUsers,
   FiFileText,
   FiDownload,
   FiSearch,
-  FiRefreshCw
+  FiUsers
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer.js'
@@ -16,8 +13,11 @@ import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Sl
 const TeacherCourseReport_Page = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
-  const { subjects } = useSelector((state) => state.teacherSubject)
-  const { reportData, isLoading } = useSelector((state) => state.attendanceReport)
+  const { subjects } = useSelector((state) => state.teacherSubject || { subjects: [] })
+  
+  // Safe navigation with fallback
+  const attendanceReportState = useSelector((state) => state.attendanceReport) || {}
+  const { reportData, isLoading } = attendanceReportState
 
   // Form states
   const [selectedCourse, setSelectedCourse] = useState('')
@@ -169,11 +169,15 @@ const TeacherCourseReport_Page = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="">Choose a course</option>
-                {subjects.map(subject => (
-                  <option key={subject.id} value={subject.id}>
-                    {subject.title} ({subject.code}) - {subject.session}
-                  </option>
-                ))}
+                {subjects && subjects.length > 0 ? (
+                  subjects.map(subject => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.title} ({subject.code}) - {subject.session}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No subjects available</option>
+                )}
               </select>
             </div>
 
@@ -232,20 +236,20 @@ const TeacherCourseReport_Page = () => {
           </div>
         </div>
 
-        {/* Report Display */}
+        {/* Report Display - with safe checks */}
         {showReport && reportData && reportData.students && reportData.students.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            {/* Report Header with Actions */}
+            {/* Report Header */}
             <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
               <div>
                 <h3 className="text-base font-medium text-gray-900">
-                  Attendance Report: {reportData.subjectDetails.title} ({reportData.subjectDetails.code})
+                  Attendance Report: {reportData.subjectDetails?.title} ({reportData.subjectDetails?.code})
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  {formatDate(reportData.dateRange.fromDate)} to {formatDate(reportData.dateRange.toDate)} • 
-                  Total Students: {reportData.summary.totalStudents} • 
-                  Total Days: {reportData.summary.totalDays} •
-                  Avg Attendance: {reportData.summary.averageAttendance}%
+                  {formatDate(reportData.dateRange?.fromDate)} to {formatDate(reportData.dateRange?.toDate)} • 
+                  Total Students: {reportData.summary?.totalStudents} • 
+                  Total Days: {reportData.summary?.totalDays} •
+                  Avg Attendance: {reportData.summary?.averageAttendance}%
                 </p>
               </div>
               <div className="flex space-x-2">
@@ -259,7 +263,7 @@ const TeacherCourseReport_Page = () => {
               </div>
             </div>
 
-            {/* Report Table with Horizontal Scroll */}
+            {/* Report Table */}
             <div className="overflow-x-auto max-w-full" style={{ maxHeight: '500px' }}>
               <div className="inline-block min-w-full align-middle">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -272,7 +276,7 @@ const TeacherCourseReport_Page = () => {
                         Roll No.
                       </th>
                       {/* Date Headers */}
-                      {reportData.summary.dates.map((date, index) => (
+                      {reportData.summary?.dates?.map((date, index) => (
                         <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[70px]">
                           <div className="flex flex-col">
                             <span>{new Date(date).toLocaleDateString('en-US', { month: 'short' })}</span>
@@ -301,7 +305,7 @@ const TeacherCourseReport_Page = () => {
                           {student.rollNo}
                         </td>
                         {/* Attendance Status for each date */}
-                        {student.attendance.map((record, idx) => (
+                        {student.attendance?.map((record, idx) => (
                           <td key={idx} className="px-4 py-2 whitespace-nowrap text-center">
                             <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium
                               ${record.status === 'Present' 
@@ -341,23 +345,23 @@ const TeacherCourseReport_Page = () => {
               <div className="grid grid-cols-5 gap-2 text-sm">
                 <div className="text-center">
                   <span className="text-gray-500">Average Attendance</span>
-                  <p className="font-medium text-gray-900">{reportData.summary.averageAttendance}%</p>
+                  <p className="font-medium text-gray-900">{reportData.summary?.averageAttendance}%</p>
                 </div>
                 <div className="text-center">
                   <span className="text-gray-500">Students ≥75%</span>
-                  <p className="font-medium text-green-600">{reportData.summary.studentsAbove75}</p>
+                  <p className="font-medium text-green-600">{reportData.summary?.studentsAbove75}</p>
                 </div>
                 <div className="text-center">
                   <span className="text-gray-500">Students &lt;75%</span>
-                  <p className="font-medium text-yellow-600">{reportData.summary.studentsBelow75}</p>
+                  <p className="font-medium text-yellow-600">{reportData.summary?.studentsBelow75}</p>
                 </div>
                 <div className="text-center">
                   <span className="text-gray-500">Students &lt;50%</span>
-                  <p className="font-medium text-orange-600">{reportData.summary.studentsBelow50}</p>
+                  <p className="font-medium text-orange-600">{reportData.summary?.studentsBelow50}</p>
                 </div>
                 <div className="text-center">
                   <span className="text-gray-500">Students &lt;25%</span>
-                  <p className="font-medium text-red-600">{reportData.summary.studentsBelow25}</p>
+                  <p className="font-medium text-red-600">{reportData.summary?.studentsBelow25}</p>
                 </div>
               </div>
               <div className="flex items-center justify-center mt-2 space-x-4">
