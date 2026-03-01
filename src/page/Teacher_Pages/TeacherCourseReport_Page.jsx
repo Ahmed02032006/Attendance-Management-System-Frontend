@@ -5,7 +5,8 @@ import {
   FiFileText,
   FiDownload,
   FiSearch,
-  FiUsers
+  FiUsers,
+  FiAlertCircle
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer.js'
@@ -17,7 +18,7 @@ const TeacherCourseReport_Page = () => {
   
   // Safe navigation with fallback
   const attendanceReportState = useSelector((state) => state.attendanceReport) || {}
-  const { reportData, isLoading } = attendanceReportState
+  const { reportData, isLoading, error } = attendanceReportState
 
   // Form states
   const [selectedCourse, setSelectedCourse] = useState('')
@@ -25,6 +26,7 @@ const TeacherCourseReport_Page = () => {
   const [toDate, setToDate] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [showReport, setShowReport] = useState(false)
+  const [processedData, setProcessedData] = useState(null) // Store processed data for display
 
   // Set default dates on component mount (last 30 days)
   useEffect(() => {
@@ -35,6 +37,100 @@ const TeacherCourseReport_Page = () => {
     setToDate(today.toISOString().split('T')[0])
     setFromDate(thirtyDaysAgo.toISOString().split('T')[0])
   }, [])
+
+  // Process the API data into the format expected by the component
+  const processReportData = (apiData) => {
+    if (!apiData || !apiData.students) return null
+
+    // Get all unique dates from all students' attendance
+    const allDates = []
+    apiData.students.forEach(student => {
+      student.attendance.forEach(record => {
+        if (!allDates.includes(record.date)) {
+          allDates.push(record.date)
+        }
+      })
+    })
+    allDates.sort() // Sort dates chronologically
+
+    // Process each student
+    const processedStudents = apiData.students.map(student => {
+      // Create a map of attendance by date for quick lookup
+      const attendanceMap = new Map()
+      student.attendance.forEach(record => {
+        attendanceMap.set(record.date, record)
+      })
+
+      // Create attendance array for all dates
+      const attendance = allDates.map(date => {
+        const record = attendanceMap.get(date)
+        if (record) {
+          return {
+            date: record.date,
+            status: record.status,
+            time: record.time || null,
+            discipline: record.discipline || null,
+            attendanceId: record.attendanceId || null
+          }
+        } else {
+          return {
+            date: date,
+            status: 'Absent',
+            time: null,
+            discipline: null,
+            attendanceId: null
+          }
+        }
+      })
+
+      return {
+        id: student.id || student.studentId,
+        name: student.name,
+        rollNo: student.rollNo,
+        presentCount: student.presentCount || 0,
+        absentCount: student.absentCount || 0,
+        percentage: student.percentage || 0,
+        attendance: attendance
+      }
+    })
+
+    // Calculate summary statistics
+    const totalStudents = processedStudents.length
+    const totalDays = allDates.length
+    const averageAttendance = totalStudents > 0 
+      ? (processedStudents.reduce((sum, s) => sum + s.percentage, 0) / totalStudents).toFixed(1)
+      : 0
+
+    const studentsAbove75 = processedStudents.filter(s => s.percentage >= 75).length
+    const studentsBelow75 = processedStudents.filter(s => s.percentage < 75 && s.percentage >= 50).length
+    const studentsBelow50 = processedStudents.filter(s => s.percentage < 50 && s.percentage >= 25).length
+    const studentsBelow25 = processedStudents.filter(s => s.percentage < 25).length
+
+    return {
+      subjectDetails: apiData.subjectDetails || {
+        title: apiData.subjectTitle || 'Subject',
+        code: apiData.subjectCode || '',
+        department: apiData.department || '',
+        semester: apiData.semester || '',
+        session: apiData.session || ''
+      },
+      dateRange: apiData.dateRange || {
+        fromDate: fromDate,
+        toDate: toDate
+      },
+      summary: {
+        totalStudents,
+        totalDays,
+        averageAttendance,
+        studentsAbove75,
+        studentsBelow75,
+        studentsBelow50,
+        studentsBelow25,
+        dates: allDates
+      },
+      students: processedStudents
+    }
+  }
 
   const handleGenerateReport = () => {
     // Validate inputs
@@ -65,7 +161,13 @@ const TeacherCourseReport_Page = () => {
       toDate
     })).then((result) => {
       setIsGenerating(false)
+      console.log('API Response:', result)
+      console.log('Payload data:', result.payload)
+      
       if (result.payload?.success) {
+        // Process the data for display
+        const processed = processReportData(result.payload.data)
+        setProcessedData(processed)
         setShowReport(true)
         toast.success('Report generated successfully')
       } else {
@@ -75,12 +177,12 @@ const TeacherCourseReport_Page = () => {
   }
 
   const handleExportCSV = () => {
-    if (!reportData?.students || reportData.students.length === 0) {
+    if (!processedData?.students || processedData.students.length === 0) {
       toast.error('No data to export')
       return
     }
 
-    const { students, subjectDetails, dateRange, summary } = reportData
+    const { students, subjectDetails, dateRange, summary } = processedData
     
     // Create CSV content
     let csvContent = `"Attendance Report - ${subjectDetails.title} (${subjectDetails.code})"\n`
@@ -92,7 +194,7 @@ const TeacherCourseReport_Page = () => {
     
     // Add dates as headers
     if (students.length > 0) {
-      const dates = students[0].attendance.map(a => a.date)
+      const dates = summary.dates
       csvContent += dates.join(",") + ",Present Count,Absent Count,Percentage\n"
       
       // Add student data
@@ -127,13 +229,9 @@ const TeacherCourseReport_Page = () => {
     }
   }
 
-  // Get selected course details
-  const getSelectedCourseDetails = () => {
-    return subjects.find(s => s.id === selectedCourse)
-  }
-
   // Format date for display
   const formatDate = (dateString) => {
+    if (!dateString) return ''
     return new Date(dateString).toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric',
@@ -165,6 +263,7 @@ const TeacherCourseReport_Page = () => {
                 onChange={(e) => {
                   setSelectedCourse(e.target.value)
                   setShowReport(false)
+                  setProcessedData(null)
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
@@ -192,6 +291,7 @@ const TeacherCourseReport_Page = () => {
                 onChange={(e) => {
                   setFromDate(e.target.value)
                   setShowReport(false)
+                  setProcessedData(null)
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
@@ -208,6 +308,7 @@ const TeacherCourseReport_Page = () => {
                 onChange={(e) => {
                   setToDate(e.target.value)
                   setShowReport(false)
+                  setProcessedData(null)
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
@@ -236,20 +337,31 @@ const TeacherCourseReport_Page = () => {
           </div>
         </div>
 
-        {/* Report Display - with safe checks */}
-        {showReport && reportData && reportData.students && reportData.students.length > 0 && (
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start">
+            <FiAlertCircle className="text-red-500 h-5 w-5 mt-0.5 mr-3 flex-shrink-0" />
+            <div>
+              <h3 className="text-sm font-medium text-red-800">Error generating report</h3>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Report Display */}
+        {showReport && processedData && processedData.students && processedData.students.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             {/* Report Header */}
             <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
               <div>
                 <h3 className="text-base font-medium text-gray-900">
-                  Attendance Report: {reportData.subjectDetails?.title} ({reportData.subjectDetails?.code})
+                  Attendance Report: {processedData.subjectDetails?.title} ({processedData.subjectDetails?.code})
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  {formatDate(reportData.dateRange?.fromDate)} to {formatDate(reportData.dateRange?.toDate)} • 
-                  Total Students: {reportData.summary?.totalStudents} • 
-                  Total Days: {reportData.summary?.totalDays} •
-                  Avg Attendance: {reportData.summary?.averageAttendance}%
+                  {formatDate(processedData.dateRange?.fromDate)} to {formatDate(processedData.dateRange?.toDate)} • 
+                  Total Students: {processedData.summary?.totalStudents} • 
+                  Total Days: {processedData.summary?.totalDays} •
+                  Avg Attendance: {processedData.summary?.averageAttendance}%
                 </p>
               </div>
               <div className="flex space-x-2">
@@ -276,7 +388,7 @@ const TeacherCourseReport_Page = () => {
                         Roll No.
                       </th>
                       {/* Date Headers */}
-                      {reportData.summary?.dates?.map((date, index) => (
+                      {processedData.summary?.dates?.map((date, index) => (
                         <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[70px]">
                           <div className="flex flex-col">
                             <span>{new Date(date).toLocaleDateString('en-US', { month: 'short' })}</span>
@@ -296,7 +408,7 @@ const TeacherCourseReport_Page = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {reportData.students.map((student) => (
+                    {processedData.students.map((student) => (
                       <tr key={student.id} className="hover:bg-gray-50">
                         <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
                           {student.name}
@@ -345,23 +457,23 @@ const TeacherCourseReport_Page = () => {
               <div className="grid grid-cols-5 gap-2 text-sm">
                 <div className="text-center">
                   <span className="text-gray-500">Average Attendance</span>
-                  <p className="font-medium text-gray-900">{reportData.summary?.averageAttendance}%</p>
+                  <p className="font-medium text-gray-900">{processedData.summary?.averageAttendance}%</p>
                 </div>
                 <div className="text-center">
                   <span className="text-gray-500">Students ≥75%</span>
-                  <p className="font-medium text-green-600">{reportData.summary?.studentsAbove75}</p>
+                  <p className="font-medium text-green-600">{processedData.summary?.studentsAbove75}</p>
                 </div>
                 <div className="text-center">
                   <span className="text-gray-500">Students &lt;75%</span>
-                  <p className="font-medium text-yellow-600">{reportData.summary?.studentsBelow75}</p>
+                  <p className="font-medium text-yellow-600">{processedData.summary?.studentsBelow75}</p>
                 </div>
                 <div className="text-center">
                   <span className="text-gray-500">Students &lt;50%</span>
-                  <p className="font-medium text-orange-600">{reportData.summary?.studentsBelow50}</p>
+                  <p className="font-medium text-orange-600">{processedData.summary?.studentsBelow50}</p>
                 </div>
                 <div className="text-center">
                   <span className="text-gray-500">Students &lt;25%</span>
-                  <p className="font-medium text-red-600">{reportData.summary?.studentsBelow25}</p>
+                  <p className="font-medium text-red-600">{processedData.summary?.studentsBelow25}</p>
                 </div>
               </div>
               <div className="flex items-center justify-center mt-2 space-x-4">
@@ -379,7 +491,7 @@ const TeacherCourseReport_Page = () => {
         )}
 
         {/* No Students Registered */}
-        {showReport && reportData && reportData.students && reportData.students.length === 0 && (
+        {showReport && processedData && processedData.students && processedData.students.length === 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <FiUsers className="h-12 w-12 text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-medium text-gray-900 mb-1">No Students Registered</h3>
