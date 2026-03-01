@@ -15,7 +15,7 @@ export const getSubjectAttendanceReport = createAsyncThunk(
   async ({ subjectId, teacherId, fromDate, toDate }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/report/${subjectId}`,
+        `${BASE_URL}/reports/${subjectId}`,
         {
           params: {
             teacherId,
