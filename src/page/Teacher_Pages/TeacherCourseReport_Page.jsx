@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import {
@@ -8,7 +8,9 @@ import {
   FiFileText,
   FiDownload,
   FiPrinter,
-  FiSearch
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 
@@ -27,136 +29,98 @@ const TeacherCourseReport_Page = () => {
   // Mock report data (this would come from API after generation)
   const [reportData, setReportData] = useState([])
 
-  // Mock attendance data for demonstration
+  // Generate 30 days of attendance data
   const generateMockReport = () => {
+    // Generate 30 dates
+    const startDate = new Date('2024-01-15')
+    const dates = []
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(startDate)
+      date.setDate(startDate.getDate() + i)
+      dates.push(date.toISOString().split('T')[0])
+    }
+
     const mockData = [
       { 
         id: 1,
         name: 'Sarah Ahmed', 
         rollNo: '25FA-001-BCS',
-        attendance: [
-          { date: '2024-01-15', status: 'Present' },
-          { date: '2024-01-16', status: 'Present' },
-          { date: '2024-01-17', status: 'Present' },
-          { date: '2024-01-18', status: 'Present' },
-          { date: '2024-01-19', status: 'Present' },
-          { date: '2024-01-20', status: 'Present' },
-          { date: '2024-01-21', status: 'Present' },
-          { date: '2024-01-22', status: 'Present' },
-          { date: '2024-01-23', status: 'Present' },
-          { date: '2024-01-24', status: 'Present' },
-          { date: '2024-01-25', status: 'Present' },
-          { date: '2024-01-26', status: 'Present' },
-          { date: '2024-01-27', status: 'Present' },
-          { date: '2024-01-28', status: 'Present' },
-          { date: '2024-01-29', status: 'Present' },
-          { date: '2024-01-30', status: 'Present' },
-        ],
-        presentCount: 16,
-        absentCount: 0
+        attendance: dates.map(date => ({
+          date,
+          status: Math.random() > 0.1 ? 'Present' : 'Absent'
+        })),
       },
       { 
         id: 2,
         name: 'Bilal Khan', 
         rollNo: '25FA-015-BCS',
-        attendance: [
-          { date: '2024-01-15', status: 'Present' },
-          { date: '2024-01-16', status: 'Present' },
-          { date: '2024-01-17', status: 'Present' },
-          { date: '2024-01-18', status: 'Present' },
-          { date: '2024-01-19', status: 'Present' },
-          { date: '2024-01-20', status: 'Present' },
-          { date: '2024-01-21', status: 'Present' },
-          { date: '2024-01-22', status: 'Absent' },
-          { date: '2024-01-23', status: 'Present' },
-          { date: '2024-01-24', status: 'Present' },
-          { date: '2024-01-25', status: 'Present' },
-          { date: '2024-01-26', status: 'Present' },
-          { date: '2024-01-27', status: 'Present' },
-          { date: '2024-01-28', status: 'Present' },
-          { date: '2024-01-29', status: 'Present' },
-          { date: '2024-01-30', status: 'Present' },
-        ],
-        presentCount: 15,
-        absentCount: 1
+        attendance: dates.map(date => ({
+          date,
+          status: Math.random() > 0.15 ? 'Present' : 'Absent'
+        })),
       },
       { 
         id: 3,
         name: 'Ayesha Malik', 
         rollNo: '25FA-008-BCS',
-        attendance: [
-          { date: '2024-01-15', status: 'Present' },
-          { date: '2024-01-16', status: 'Present' },
-          { date: '2024-01-17', status: 'Present' },
-          { date: '2024-01-18', status: 'Present' },
-          { date: '2024-01-19', status: 'Present' },
-          { date: '2024-01-20', status: 'Present' },
-          { date: '2024-01-21', status: 'Present' },
-          { date: '2024-01-22', status: 'Present' },
-          { date: '2024-01-23', status: 'Present' },
-          { date: '2024-01-24', status: 'Present' },
-          { date: '2024-01-25', status: 'Absent' },
-          { date: '2024-01-26', status: 'Present' },
-          { date: '2024-01-27', status: 'Present' },
-          { date: '2024-01-28', status: 'Present' },
-          { date: '2024-01-29', status: 'Present' },
-          { date: '2024-01-30', status: 'Present' },
-        ],
-        presentCount: 15,
-        absentCount: 1
+        attendance: dates.map(date => ({
+          date,
+          status: Math.random() > 0.12 ? 'Present' : 'Absent'
+        })),
       },
       { 
         id: 4,
         name: 'Usman Ali', 
         rollNo: '25FA-022-BCS',
-        attendance: [
-          { date: '2024-01-15', status: 'Present' },
-          { date: '2024-01-16', status: 'Present' },
-          { date: '2024-01-17', status: 'Present' },
-          { date: '2024-01-18', status: 'Absent' },
-          { date: '2024-01-19', status: 'Present' },
-          { date: '2024-01-20', status: 'Present' },
-          { date: '2024-01-21', status: 'Absent' },
-          { date: '2024-01-22', status: 'Present' },
-          { date: '2024-01-23', status: 'Present' },
-          { date: '2024-01-24', status: 'Present' },
-          { date: '2024-01-25', status: 'Absent' },
-          { date: '2024-01-26', status: 'Present' },
-          { date: '2024-01-27', status: 'Present' },
-          { date: '2024-01-28', status: 'Present' },
-          { date: '2024-01-29', status: 'Present' },
-          { date: '2024-01-30', status: 'Present' },
-        ],
-        presentCount: 12,
-        absentCount: 4
+        attendance: dates.map(date => ({
+          date,
+          status: Math.random() > 0.2 ? 'Present' : 'Absent'
+        })),
       },
       { 
         id: 5,
         name: 'Fatima Zaidi', 
         rollNo: '25FA-031-BCS',
-        attendance: [
-          { date: '2024-01-15', status: 'Present' },
-          { date: '2024-01-16', status: 'Present' },
-          { date: '2024-01-17', status: 'Present' },
-          { date: '2024-01-18', status: 'Present' },
-          { date: '2024-01-19', status: 'Present' },
-          { date: '2024-01-20', status: 'Present' },
-          { date: '2024-01-21', status: 'Present' },
-          { date: '2024-01-22', status: 'Present' },
-          { date: '2024-01-23', status: 'Present' },
-          { date: '2024-01-24', status: 'Present' },
-          { date: '2024-01-25', status: 'Present' },
-          { date: '2024-01-26', status: 'Present' },
-          { date: '2024-01-27', status: 'Present' },
-          { date: '2024-01-28', status: 'Present' },
-          { date: '2024-01-29', status: 'Present' },
-          { date: '2024-01-30', status: 'Present' },
-        ],
-        presentCount: 16,
-        absentCount: 0
+        attendance: dates.map(date => ({
+          date,
+          status: Math.random() > 0.08 ? 'Present' : 'Absent'
+        })),
+      },
+      { 
+        id: 6,
+        name: 'Hamza Ali', 
+        rollNo: '25FA-042-BCS',
+        attendance: dates.map(date => ({
+          date,
+          status: Math.random() > 0.25 ? 'Present' : 'Absent'
+        })),
+      },
+      { 
+        id: 7,
+        name: 'Zara Khan', 
+        rollNo: '25FA-056-BCS',
+        attendance: dates.map(date => ({
+          date,
+          status: Math.random() > 0.1 ? 'Present' : 'Absent'
+        })),
+      },
+      { 
+        id: 8,
+        name: 'Omar Farooq', 
+        rollNo: '25FA-078-BCS',
+        attendance: dates.map(date => ({
+          date,
+          status: Math.random() > 0.05 ? 'Present' : 'Absent'
+        })),
       }
     ]
-    return mockData
+
+    // Calculate present/absent counts for each student
+    return mockData.map(student => ({
+      ...student,
+      presentCount: student.attendance.filter(a => a.status === 'Present').length,
+      absentCount: student.attendance.filter(a => a.status === 'Absent').length
+    }))
   }
 
   const handleGenerateReport = () => {
@@ -236,7 +200,7 @@ const TeacherCourseReport_Page = () => {
     const tableRows = reportData.map(student => {
       const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
       const attendanceCells = student.attendance.map(record => 
-        `<td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">
+        `<td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center; min-width: 50px;">
           <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 9999px; font-size: 11px; font-weight: 500; ${record.status === 'Present' ? 'background-color: #dcfce7; color: #166534;' : 'background-color: #fee2e2; color: #991b1b;'}">
             ${record.status === 'Present' ? 'P' : 'A'}
           </span>
@@ -245,12 +209,12 @@ const TeacherCourseReport_Page = () => {
       
       return `
         <tr style="border-bottom: 1px solid #e5e7eb;">
-          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; font-weight: 500;">${student.name}</td>
-          <td style="padding: 6px 8px; border: 1px solid #e5e7eb;">${student.rollNo}</td>
+          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; font-weight: 500; position: sticky; left: 0; background-color: white;">${student.name}</td>
+          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; position: sticky; left: 150px; background-color: white;">${student.rollNo}</td>
           ${attendanceCells}
-          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center; color: #166534; font-weight: 500;">${student.presentCount}</td>
-          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center; color: #991b1b; font-weight: 500;">${student.absentCount}</td>
-          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">
+          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center; color: #166534; font-weight: 500; min-width: 70px;">${student.presentCount}</td>
+          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center; color: #991b1b; font-weight: 500; min-width: 70px;">${student.absentCount}</td>
+          <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center; min-width: 70px;">
             <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; ${percentage >= 75 ? 'background-color: #dcfce7; color: #166534;' : percentage >= 50 ? 'background-color: #fef3c7; color: #92400e;' : 'background-color: #fee2e2; color: #991b1b;'}">
               ${percentage}%
             </span>
@@ -261,7 +225,7 @@ const TeacherCourseReport_Page = () => {
     
     // Generate date headers
     const dateHeaders = reportData[0]?.attendance.map(record => 
-      `<th style="padding: 8px; border: 1px solid #e5e7eb; text-align: center; font-size: 11px; font-weight: 600; text-transform: uppercase; background-color: #f3f4f6;">
+      `<th style="padding: 8px; border: 1px solid #e5e7eb; text-align: center; font-size: 11px; font-weight: 600; text-transform: uppercase; background-color: #f3f4f6; min-width: 60px;">
         ${new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
       </th>`
     ).join('')
@@ -294,11 +258,16 @@ const TeacherCourseReport_Page = () => {
               margin: 5px 0;
               color: #4b5563;
             }
+            .table-container {
+              overflow-x: auto;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+            }
             table {
               width: 100%;
               border-collapse: collapse;
               font-size: 12px;
-              margin-top: 20px;
+              min-width: 1000px;
             }
             th {
               background-color: #f3f4f6 !important;
@@ -317,9 +286,31 @@ const TeacherCourseReport_Page = () => {
               color: #6b7280;
               text-align: right;
             }
+            .sticky-col {
+              position: sticky;
+              left: 0;
+              background-color: white;
+              z-index: 10;
+            }
+            .sticky-col-second {
+              position: sticky;
+              left: 150px;
+              background-color: white;
+              z-index: 10;
+            }
             @media print {
               body {
-                padding: 0.5in;
+                padding: 0.25in;
+              }
+              .table-container {
+                overflow: visible;
+                border: none;
+              }
+              table {
+                min-width: auto;
+              }
+              .sticky-col, .sticky-col-second {
+                position: static;
               }
             }
           </style>
@@ -332,21 +323,23 @@ const TeacherCourseReport_Page = () => {
             <p>Total Students: ${reportData.length}</p>
           </div>
           
-          <table>
-            <thead>
-              <tr>
-                <th style="text-align: left;">Student Name</th>
-                <th style="text-align: left;">Roll No.</th>
-                ${dateHeaders}
-                <th style="text-align: center;">Present</th>
-                <th style="text-align: center;">Absent</th>
-                <th style="text-align: center;">%</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${tableRows}
-            </tbody>
-          </table>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="position: sticky; left: 0; background-color: #f3f4f6; z-index: 20;">Student Name</th>
+                  <th style="position: sticky; left: 150px; background-color: #f3f4f6; z-index: 20;">Roll No.</th>
+                  ${dateHeaders}
+                  <th style="text-align: center;">Present</th>
+                  <th style="text-align: center;">Absent</th>
+                  <th style="text-align: center;">%</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRows}
+              </tbody>
+            </table>
+          </div>
           
           <div class="footer">
             <p>Generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
@@ -481,7 +474,7 @@ const TeacherCourseReport_Page = () => {
                   Attendance Report: {getSelectedCourseDetails()?.title}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  {formatDate(fromDate)} to {formatDate(toDate)} • Total Students: {reportData.length}
+                  {formatDate(fromDate)} to {formatDate(toDate)} • Total Students: {reportData.length} • Total Days: {reportData[0]?.attendance.length}
                 </p>
               </div>
               <div className="flex space-x-2">
@@ -502,82 +495,96 @@ const TeacherCourseReport_Page = () => {
               </div>
             </div>
 
-            {/* Report Table - No Scroll */}
-            <div className="p-4">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                      Student Name
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                      Roll No.
-                    </th>
-                    {/* Date Headers */}
-                    {reportData[0]?.attendance.map((record, index) => (
-                      <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                        {new Date(record.date).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric' 
-                        })}
+            {/* Horizontal Scroll Indicator */}
+            <div className="bg-blue-50 px-4 py-2 border-b border-gray-200 flex items-center text-xs text-blue-600">
+              <FiChevronLeft className="h-4 w-4 mr-1" />
+              <span>Scroll horizontally to view all {reportData[0]?.attendance.length} days</span>
+              <FiChevronRight className="h-4 w-4 ml-1" />
+            </div>
+
+            {/* Report Table with Horizontal Scroll */}
+            <div className="overflow-x-auto max-w-full" style={{ maxHeight: '500px' }}>
+              <div className="inline-block min-w-full align-middle">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50 sticky top-0 z-10">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50 z-20 min-w-[180px]">
+                        Student Name
                       </th>
-                    ))}
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                      Present
-                    </th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                      Absent
-                    </th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                      %
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {reportData.map((student) => {
-                    const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
-                    
-                    return (
-                      <tr key={student.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {student.name}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
-                          {student.rollNo}
-                        </td>
-                        {/* Attendance Status for each date */}
-                        {student.attendance.map((record, idx) => (
-                          <td key={idx} className="px-4 py-2 whitespace-nowrap text-center">
-                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium
-                              ${record.status === 'Present' 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-red-100 text-red-700'
-                              }`}
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-[180px] bg-gray-50 z-20 min-w-[120px]">
+                        Roll No.
+                      </th>
+                      {/* Date Headers */}
+                      {reportData[0]?.attendance.map((record, index) => (
+                        <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[70px]">
+                          <div className="flex flex-col">
+                            <span>{new Date(record.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                            <span className="text-gray-400">{new Date(record.date).getDate()}</span>
+                          </div>
+                        </th>
+                      ))}
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[80px]">
+                        Present
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[80px]">
+                        Absent
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[80px]">
+                        %
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {reportData.map((student) => {
+                      const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
+                      
+                      return (
+                        <tr key={student.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
+                            {student.name}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 sticky left-[180px] bg-white z-10">
+                            {student.rollNo}
+                          </td>
+                          {/* Attendance Status for each date */}
+                          {student.attendance.map((record, idx) => (
+                            <td key={idx} className="px-4 py-2 whitespace-nowrap text-center">
+                              <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium
+                                ${record.status === 'Present' 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : 'bg-red-100 text-red-700'
+                                }`}
+                              >
+                                {record.status === 'Present' ? 'P' : 'A'}
+                              </span>
+                            </td>
+                          ))}
+                          <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
+                            {student.presentCount}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-red-600">
+                            {student.absentCount}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-center">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                              ${percentage >= 75 ? 'bg-green-100 text-green-700' : 
+                                percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 
+                                'bg-red-100 text-red-700'}`}
                             >
-                              {record.status === 'Present' ? 'P' : 'A'}
+                              {percentage}%
                             </span>
                           </td>
-                        ))}
-                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
-                          {student.presentCount}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-red-600">
-                          {student.absentCount}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                            ${percentage >= 75 ? 'bg-green-100 text-green-700' : 
-                              percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 
-                              'bg-red-100 text-red-700'}`}
-                          >
-                            {percentage}%
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Scroll Hint for Mobile */}
+            <div className="px-4 py-2 border-t border-gray-200 bg-gray-50 text-xs text-gray-500 text-center">
+              <span>←→ Scroll to see all {reportData[0]?.attendance.length} days of attendance</span>
             </div>
 
             {/* Summary Footer */}
@@ -594,7 +601,7 @@ const TeacherCourseReport_Page = () => {
                   </div>
                 </div>
                 <p className="text-gray-500">
-                  Total Classes: {reportData[0]?.attendance.length}
+                  Total Classes: {reportData[0]?.attendance.length} | Date Range: {reportData[0]?.attendance.length} days
                 </p>
               </div>
             </div>
