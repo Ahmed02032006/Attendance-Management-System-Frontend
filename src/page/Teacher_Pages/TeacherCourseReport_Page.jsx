@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import {
@@ -11,11 +11,13 @@ import {
   FiSearch
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
+import { useReactToPrint } from 'react-to-print'
 
 const TeacherCourseReport_Page = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
   const { subjects } = useSelector((state) => state.teacherSubject)
+  const componentRef = useRef()
 
   // Form states
   const [selectedCourse, setSelectedCourse] = useState('')
@@ -104,56 +106,6 @@ const TeacherCourseReport_Page = () => {
         ],
         presentCount: 15,
         absentCount: 1
-      },
-      { 
-        id: 4,
-        name: 'Usman Ali', 
-        rollNo: '25FA-022-BCS',
-        attendance: [
-          { date: '2024-01-15', status: 'Present' },
-          { date: '2024-01-16', status: 'Present' },
-          { date: '2024-01-17', status: 'Present' },
-          { date: '2024-01-18', status: 'Absent' },
-          { date: '2024-01-19', status: 'Present' },
-          { date: '2024-01-20', status: 'Present' },
-          { date: '2024-01-21', status: 'Absent' },
-          { date: '2024-01-22', status: 'Present' },
-          { date: '2024-01-23', status: 'Present' },
-          { date: '2024-01-24', status: 'Present' },
-          { date: '2024-01-25', status: 'Absent' },
-          { date: '2024-01-26', status: 'Present' },
-          { date: '2024-01-27', status: 'Present' },
-          { date: '2024-01-28', status: 'Present' },
-          { date: '2024-01-29', status: 'Present' },
-          { date: '2024-01-30', status: 'Present' },
-        ],
-        presentCount: 12,
-        absentCount: 4
-      },
-      { 
-        id: 5,
-        name: 'Fatima Zaidi', 
-        rollNo: '25FA-031-BCS',
-        attendance: [
-          { date: '2024-01-15', status: 'Present' },
-          { date: '2024-01-16', status: 'Present' },
-          { date: '2024-01-17', status: 'Present' },
-          { date: '2024-01-18', status: 'Present' },
-          { date: '2024-01-19', status: 'Present' },
-          { date: '2024-01-20', status: 'Present' },
-          { date: '2024-01-21', status: 'Present' },
-          { date: '2024-01-22', status: 'Present' },
-          { date: '2024-01-23', status: 'Present' },
-          { date: '2024-01-24', status: 'Present' },
-          { date: '2024-01-25', status: 'Present' },
-          { date: '2024-01-26', status: 'Present' },
-          { date: '2024-01-27', status: 'Present' },
-          { date: '2024-01-28', status: 'Present' },
-          { date: '2024-01-29', status: 'Present' },
-          { date: '2024-01-30', status: 'Present' },
-        ],
-        presentCount: 16,
-        absentCount: 0
       }
     ]
     return mockData
@@ -197,16 +149,18 @@ const TeacherCourseReport_Page = () => {
     // Add dates as headers
     if (reportData.length > 0) {
       const dates = reportData[0].attendance.map(a => a.date)
-      csvContent += dates.join(",") + ",Present Count,Absent Count\n"
+      csvContent += dates.join(",") + ",Present Count,Absent Count,Percentage\n"
       
       // Add student data
       reportData.forEach(student => {
+        const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
         const row = [
           student.name,
           student.rollNo,
           ...student.attendance.map(a => a.status),
           student.presentCount,
-          student.absentCount
+          student.absentCount,
+          percentage + '%'
         ]
         csvContent += row.join(",") + "\n"
       })
@@ -216,19 +170,81 @@ const TeacherCourseReport_Page = () => {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `attendance_report_${selectedCourse}_${fromDate}_to_${toDate}.csv`
+      a.download = `attendance_report_${fromDate}_to_${toDate}.csv`
       a.click()
       toast.success('Report exported successfully')
     }
   }
 
-  const handlePrint = () => {
-    window.print()
-  }
+  // Print function
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+    documentTitle: `Attendance_Report_${fromDate}_to_${toDate}`,
+    onAfterPrint: () => toast.success('Print completed'),
+    pageStyle: `
+      @page { 
+        size: landscape; 
+        margin: 1cm;
+      }
+      body { 
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact;
+        font-family: Arial, sans-serif;
+      }
+      .print\\:hidden {
+        display: none !important;
+      }
+      .bg-green-100 { 
+        background-color: #dcfce7 !important; 
+        color: #166534 !important;
+      }
+      .bg-red-100 { 
+        background-color: #fee2e2 !important; 
+        color: #991b1b !important;
+      }
+      table { 
+        border-collapse: collapse; 
+        width: 100%;
+        font-size: 10pt;
+      }
+      th { 
+        background-color: #f3f4f6 !important; 
+        font-weight: bold;
+        padding: 8px;
+        border: 1px solid #e5e7eb;
+      }
+      td { 
+        padding: 6px 8px;
+        border: 1px solid #e5e7eb;
+      }
+      .report-header {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .report-header h2 {
+        font-size: 16pt;
+        margin: 0 0 5px 0;
+      }
+      .report-header p {
+        font-size: 11pt;
+        margin: 0;
+        color: #4b5563;
+      }
+    `
+  })
 
   // Get selected course details
   const getSelectedCourseDetails = () => {
     return subjects.find(s => s.id === selectedCourse)
+  }
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    })
   }
 
   return (
@@ -241,7 +257,7 @@ const TeacherCourseReport_Page = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Report Generation Form */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 print:hidden">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Generate Attendance Report</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -320,28 +336,19 @@ const TeacherCourseReport_Page = () => {
               </button>
             </div>
           </div>
-
-          {/* Selected Range Info */}
-          {selectedCourse && fromDate && toDate && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-md">
-              <p className="text-sm text-blue-700">
-                <span className="font-medium">Selected Range:</span> {new Date(fromDate).toLocaleDateString()} to {new Date(toDate).toLocaleDateString()} for {getSelectedCourseDetails()?.title}
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Report Display */}
         {showReport && reportData.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            {/* Report Header */}
-            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+            {/* Report Header with Actions - Hidden in Print */}
+            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center print:hidden">
               <div>
                 <h3 className="text-base font-medium text-gray-900">
                   Attendance Report: {getSelectedCourseDetails()?.title}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  {new Date(fromDate).toLocaleDateString()} to {new Date(toDate).toLocaleDateString()} • Total Students: {reportData.length}
+                  {formatDate(fromDate)} to {formatDate(toDate)} • Total Students: {reportData.length}
                 </p>
               </div>
               <div className="flex space-x-2">
@@ -354,94 +361,110 @@ const TeacherCourseReport_Page = () => {
                 </button>
                 <button
                   onClick={handlePrint}
-                  className="px-3 py-1.5 text-xs bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center"
+                  className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
                 >
                   <FiPrinter className="h-3 w-3 mr-1" />
-                  Print
+                  Print / PDF
                 </button>
               </div>
             </div>
 
-            {/* Report Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50">
-                      Student Name
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                      Roll No.
-                    </th>
-                    {/* Date Headers */}
-                    {reportData[0]?.attendance.map((record, index) => (
-                      <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[100px]">
-                        {new Date(record.date).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric' 
-                        })}
+            {/* Report Content - Printable */}
+            <div ref={componentRef} className="p-6">
+              {/* Print Header */}
+              <div className="hidden print:block report-header">
+                <h2 className="text-xl font-bold">Attendance Report</h2>
+                <p>{getSelectedCourseDetails()?.title} ({getSelectedCourseDetails()?.code})</p>
+                <p>{formatDate(fromDate)} to {formatDate(toDate)}</p>
+                <p>Total Students: {reportData.length}</p>
+              </div>
+
+              {/* Report Table - No Scroll */}
+              <div className="overflow-visible">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        Student Name
                       </th>
-                    ))}
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                      Present
-                    </th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                      Absent
-                    </th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                      %
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {reportData.map((student) => {
-                    const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
-                    
-                    return (
-                      <tr key={student.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">
-                          {student.name}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
-                          {student.rollNo}
-                        </td>
-                        {/* Attendance Status for each date */}
-                        {student.attendance.map((record, idx) => (
-                          <td key={idx} className="px-4 py-2 whitespace-nowrap text-center">
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        Roll No.
+                      </th>
+                      {/* Date Headers */}
+                      {reportData[0]?.attendance.map((record, index) => (
+                        <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                          {new Date(record.date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                          })}
+                        </th>
+                      ))}
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                        Present
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                        Absent
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                        %
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {reportData.map((student) => {
+                      const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
+                      
+                      return (
+                        <tr key={student.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {student.name}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
+                            {student.rollNo}
+                          </td>
+                          {/* Attendance Status for each date */}
+                          {student.attendance.map((record, idx) => (
+                            <td key={idx} className="px-4 py-2 whitespace-nowrap text-center">
+                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium
+                                ${record.status === 'Present' 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : 'bg-red-100 text-red-700'
+                                }`}
+                              >
+                                {record.status === 'Present' ? 'P' : 'A'}
+                              </span>
+                            </td>
+                          ))}
+                          <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
+                            {student.presentCount}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-red-600">
+                            {student.absentCount}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap text-center">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                              ${record.status === 'Present' 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-red-100 text-red-700'
-                              }`}
+                              ${percentage >= 75 ? 'bg-green-100 text-green-700' : 
+                                percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 
+                                'bg-red-100 text-red-700'}`}
                             >
-                              {record.status === 'Present' ? 'P' : 'A'}
+                              {percentage}%
                             </span>
                           </td>
-                        ))}
-                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
-                          {student.presentCount}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-red-600">
-                          {student.absentCount}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                            ${percentage >= 75 ? 'bg-green-100 text-green-700' : 
-                              percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 
-                              'bg-red-100 text-red-700'}`}
-                          >
-                            {percentage}%
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Print Footer */}
+              <div className="hidden print:block mt-8 text-xs text-gray-500">
+                <p>Generated on: {new Date().toLocaleDateString()}</p>
+              </div>
             </div>
 
-            {/* Summary Footer */}
-            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+            {/* Summary Footer - Hidden in Print */}
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 print:hidden">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
@@ -454,8 +477,7 @@ const TeacherCourseReport_Page = () => {
                   </div>
                 </div>
                 <p className="text-gray-500">
-                  Total Classes: {reportData[0]?.attendance.length} | 
-                  Date Range: {new Date(fromDate).toLocaleDateString()} - {new Date(toDate).toLocaleDateString()}
+                  Total Classes: {reportData[0]?.attendance.length}
                 </p>
               </div>
             </div>
@@ -479,15 +501,6 @@ const TeacherCourseReport_Page = () => {
           </div>
         )}
       </div>
-
-      {/* Print Styles */}
-      <style jsx>{`
-        @media print {
-          .no-print {
-            display: none;
-          }
-        }
-      `}</style>
     </div>
   )
 }
