@@ -1,194 +1,95 @@
-import React, { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import HeaderComponent from '../../components/HeaderComponent'
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import HeaderComponent from '../../components/HeaderComponent';
 import {
   FiCalendar,
   FiBook,
   FiUsers,
   FiFileText,
   FiDownload,
-  FiSearch
-} from 'react-icons/fi'
-import { toast } from 'react-toastify'
+  FiSearch,
+  FiRefreshCw
+} from 'react-icons/fi';
+import { toast } from 'react-toastify';
+import { getCourseAttendanceReport, exportAttendanceReport } from '../../redux/slices/teacherReportSlice'; // You'll need to create this slice
 
 const TeacherCourseReport_Page = () => {
-  const dispatch = useDispatch()
-  const { user } = useSelector((state) => state.auth)
-  const { subjects } = useSelector((state) => state.teacherSubject)
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const { subjects } = useSelector((state) => state.teacherSubject);
+  const { reportData, isLoading, exportLoading } = useSelector((state) => state.teacherReport);
 
   // Form states
-  const [selectedCourse, setSelectedCourse] = useState('')
-  const [fromDate, setFromDate] = useState('')
-  const [toDate, setToDate] = useState('')
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [showReport, setShowReport] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [showReport, setShowReport] = useState(false);
 
-  // Mock report data (this would come from API after generation)
-  const [reportData, setReportData] = useState([])
+  // Set default dates on component mount
+  useEffect(() => {
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    setToDate(today.toISOString().split('T')[0]);
+    setFromDate(thirtyDaysAgo.toISOString().split('T')[0]);
+  }, []);
 
-  // Generate 30 days of attendance data
-  const generateMockReport = () => {
-    // Generate 30 dates
-    const startDate = new Date('2024-01-15')
-    const dates = []
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(startDate)
-      date.setDate(startDate.getDate() + i)
-      dates.push(date.toISOString().split('T')[0])
-    }
-
-    const mockData = [
-      { 
-        id: 1,
-        name: 'Sarah Ahmed', 
-        rollNo: '25FA-001-BCS',
-        attendance: dates.map(date => ({
-          date,
-          status: Math.random() > 0.1 ? 'Present' : 'Absent'
-        })),
-      },
-      { 
-        id: 2,
-        name: 'Bilal Khan', 
-        rollNo: '25FA-015-BCS',
-        attendance: dates.map(date => ({
-          date,
-          status: Math.random() > 0.15 ? 'Present' : 'Absent'
-        })),
-      },
-      { 
-        id: 3,
-        name: 'Ayesha Malik', 
-        rollNo: '25FA-008-BCS',
-        attendance: dates.map(date => ({
-          date,
-          status: Math.random() > 0.12 ? 'Present' : 'Absent'
-        })),
-      },
-      { 
-        id: 4,
-        name: 'Usman Ali', 
-        rollNo: '25FA-022-BCS',
-        attendance: dates.map(date => ({
-          date,
-          status: Math.random() > 0.2 ? 'Present' : 'Absent'
-        })),
-      },
-      { 
-        id: 5,
-        name: 'Fatima Zaidi', 
-        rollNo: '25FA-031-BCS',
-        attendance: dates.map(date => ({
-          date,
-          status: Math.random() > 0.08 ? 'Present' : 'Absent'
-        })),
-      },
-      { 
-        id: 6,
-        name: 'Hamza Ali', 
-        rollNo: '25FA-042-BCS',
-        attendance: dates.map(date => ({
-          date,
-          status: Math.random() > 0.25 ? 'Present' : 'Absent'
-        })),
-      },
-      { 
-        id: 7,
-        name: 'Zara Khan', 
-        rollNo: '25FA-056-BCS',
-        attendance: dates.map(date => ({
-          date,
-          status: Math.random() > 0.1 ? 'Present' : 'Absent'
-        })),
-      },
-      { 
-        id: 8,
-        name: 'Omar Farooq', 
-        rollNo: '25FA-078-BCS',
-        attendance: dates.map(date => ({
-          date,
-          status: Math.random() > 0.05 ? 'Present' : 'Absent'
-        })),
-      }
-    ]
-
-    // Calculate present/absent counts for each student
-    return mockData.map(student => ({
-      ...student,
-      presentCount: student.attendance.filter(a => a.status === 'Present').length,
-      absentCount: student.attendance.filter(a => a.status === 'Absent').length
-    }))
-  }
-
-  const handleGenerateReport = () => {
+  const handleGenerateReport = async () => {
     // Validate inputs
     if (!selectedCourse) {
-      toast.error('Please select a course')
-      return
+      toast.error('Please select a course');
+      return;
     }
     if (!fromDate) {
-      toast.error('Please select from date')
-      return
+      toast.error('Please select from date');
+      return;
     }
     if (!toDate) {
-      toast.error('Please select to date')
-      return
+      toast.error('Please select to date');
+      return;
     }
     if (new Date(fromDate) > new Date(toDate)) {
-      toast.error('From date cannot be greater than to date')
-      return
+      toast.error('From date cannot be greater than to date');
+      return;
     }
 
-    setIsGenerating(true)
-    
-    // Simulate API call
-    setTimeout(() => {
-      const mockData = generateMockReport()
-      setReportData(mockData)
-      setShowReport(true)
-      setIsGenerating(false)
-      toast.success('Report generated successfully')
-    }, 1500)
-  }
+    try {
+      const result = await dispatch(getCourseAttendanceReport({
+        subjectId: selectedCourse,
+        fromDate,
+        toDate,
+        teacherId: user?.id
+      })).unwrap();
 
-  const handleExportCSV = () => {
-    // Create CSV content
-    let csvContent = "Student Name,Roll No.,"
-    
-    // Add dates as headers
-    if (reportData.length > 0) {
-      const dates = reportData[0].attendance.map(a => a.date)
-      csvContent += dates.join(",") + ",Present Count,Absent Count,Percentage\n"
-      
-      // Add student data
-      reportData.forEach(student => {
-        const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
-        const row = [
-          student.name,
-          student.rollNo,
-          ...student.attendance.map(a => a.status),
-          student.presentCount,
-          student.absentCount,
-          percentage + '%'
-        ]
-        csvContent += row.join(",") + "\n"
-      })
-      
-      // Download CSV
-      const blob = new Blob([csvContent], { type: 'text/csv' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `attendance_report_${fromDate}_to_${toDate}.csv`
-      a.click()
-      toast.success('Report exported successfully')
+      if (result.success) {
+        setShowReport(true);
+        toast.success('Report generated successfully');
+      }
+    } catch (error) {
+      toast.error(error?.message || 'Failed to generate report');
     }
-  }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      await dispatch(exportAttendanceReport({
+        subjectId: selectedCourse,
+        fromDate,
+        toDate,
+        teacherId: user?.id
+      })).unwrap();
+      
+      toast.success('Report exported successfully');
+    } catch (error) {
+      toast.error(error?.message || 'Failed to export report');
+    }
+  };
 
   // Get selected course details
   const getSelectedCourseDetails = () => {
-    return subjects.find(s => s.id === selectedCourse)
-  }
+    return subjects.find(s => s.id === selectedCourse);
+  };
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -196,8 +97,8 @@ const TeacherCourseReport_Page = () => {
       month: 'short', 
       day: 'numeric',
       year: 'numeric'
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -221,10 +122,11 @@ const TeacherCourseReport_Page = () => {
               <select
                 value={selectedCourse}
                 onChange={(e) => {
-                  setSelectedCourse(e.target.value)
-                  setShowReport(false)
+                  setSelectedCourse(e.target.value);
+                  setShowReport(false);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                disabled={isLoading}
               >
                 <option value="">Choose a course</option>
                 {subjects.map(subject => (
@@ -244,10 +146,11 @@ const TeacherCourseReport_Page = () => {
                 type="date"
                 value={fromDate}
                 onChange={(e) => {
-                  setFromDate(e.target.value)
-                  setShowReport(false)
+                  setFromDate(e.target.value);
+                  setShowReport(false);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                disabled={isLoading}
               />
             </div>
 
@@ -260,10 +163,11 @@ const TeacherCourseReport_Page = () => {
                 type="date"
                 value={toDate}
                 onChange={(e) => {
-                  setToDate(e.target.value)
-                  setShowReport(false)
+                  setToDate(e.target.value);
+                  setShowReport(false);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                disabled={isLoading}
               />
             </div>
 
@@ -271,12 +175,12 @@ const TeacherCourseReport_Page = () => {
             <div className="flex items-end">
               <button
                 onClick={handleGenerateReport}
-                disabled={isGenerating}
+                disabled={isLoading || !selectedCourse || !fromDate || !toDate}
                 className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                {isGenerating ? (
+                {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                    <FiRefreshCw className="h-4 w-4 mr-2 animate-spin" />
                     Generating...
                   </>
                 ) : (
@@ -291,25 +195,37 @@ const TeacherCourseReport_Page = () => {
         </div>
 
         {/* Report Display */}
-        {showReport && reportData.length > 0 && (
+        {showReport && reportData && (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             {/* Report Header with Actions */}
             <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
               <div>
                 <h3 className="text-base font-medium text-gray-900">
-                  Attendance Report: {getSelectedCourseDetails()?.title}
+                  Attendance Report: {reportData.subjectInfo?.title}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  {formatDate(fromDate)} to {formatDate(toDate)} • Total Students: {reportData.length} • Total Days: {reportData[0]?.attendance.length}
+                  {formatDate(reportData.dateRange?.fromDate)} to {formatDate(reportData.dateRange?.toDate)} • 
+                  Total Students: {reportData.summary?.totalStudents} • 
+                  Total Days: {reportData.summary?.totalDays}
                 </p>
               </div>
               <div className="flex space-x-2">
                 <button
                   onClick={handleExportCSV}
-                  className="px-3 py-1.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center"
+                  disabled={exportLoading}
+                  className="px-3 py-1.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center"
                 >
-                  <FiDownload className="h-3 w-3 mr-1" />
-                  Export CSV
+                  {exportLoading ? (
+                    <>
+                      <FiRefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                      Exporting...
+                    </>
+                  ) : (
+                    <>
+                      <FiDownload className="h-3 w-3 mr-1" />
+                      Export CSV
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -327,11 +243,11 @@ const TeacherCourseReport_Page = () => {
                         Roll No.
                       </th>
                       {/* Date Headers */}
-                      {reportData[0]?.attendance.map((record, index) => (
+                      {reportData.summary?.attendanceDates?.map((date, index) => (
                         <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[70px]">
                           <div className="flex flex-col">
-                            <span>{new Date(record.date).toLocaleDateString('en-US', { month: 'short' })}</span>
-                            <span className="text-gray-400">{new Date(record.date).getDate()}</span>
+                            <span>{new Date(date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                            <span className="text-gray-400">{new Date(date).getDate()}</span>
                           </div>
                         </th>
                       ))}
@@ -347,48 +263,44 @@ const TeacherCourseReport_Page = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {reportData.map((student) => {
-                      const percentage = ((student.presentCount / student.attendance.length) * 100).toFixed(1)
-                      
-                      return (
-                        <tr key={student.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
-                            {student.name}
-                          </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 sticky left-[180px] bg-white z-10">
-                            {student.rollNo}
-                          </td>
-                          {/* Attendance Status for each date */}
-                          {student.attendance.map((record, idx) => (
-                            <td key={idx} className="px-4 py-2 whitespace-nowrap text-center">
-                              <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium
-                                ${record.status === 'Present' 
-                                  ? 'bg-green-100 text-green-700' 
-                                  : 'bg-red-100 text-red-700'
-                                }`}
-                              >
-                                {record.status === 'Present' ? 'P' : 'A'}
-                              </span>
-                            </td>
-                          ))}
-                          <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
-                            {student.presentCount}
-                          </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-red-600">
-                            {student.absentCount}
-                          </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-center">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                              ${percentage >= 75 ? 'bg-green-100 text-green-700' : 
-                                percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 
-                                'bg-red-100 text-red-700'}`}
+                    {reportData.students?.map((student) => (
+                      <tr key={student.studentId} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
+                          {student.name}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 sticky left-[180px] bg-white z-10">
+                          {student.rollNo}
+                        </td>
+                        {/* Attendance Status for each date */}
+                        {student.attendance?.map((record, idx) => (
+                          <td key={idx} className="px-4 py-2 whitespace-nowrap text-center">
+                            <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium
+                              ${record.status === 'Present' 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-red-100 text-red-700'
+                              }`}
                             >
-                              {percentage}%
+                              {record.status === 'Present' ? 'P' : 'A'}
                             </span>
                           </td>
-                        </tr>
-                      )
-                    })}
+                        ))}
+                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
+                          {student.presentCount}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-red-600">
+                          {student.absentCount}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-center">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                            ${student.percentage >= 75 ? 'bg-green-100 text-green-700' : 
+                              student.percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 
+                              'bg-red-100 text-red-700'}`}
+                          >
+                            {student.percentage}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -407,16 +319,17 @@ const TeacherCourseReport_Page = () => {
                     <span className="text-gray-600">Absent (A)</span>
                   </div>
                 </div>
-                <p className="text-gray-500">
-                  Total Classes: {reportData[0]?.attendance.length}
-                </p>
+                <div className="text-gray-500">
+                  <span className="font-medium">Overall Attendance:</span>{' '}
+                  {reportData.summary?.overallPresentCount} Present, {reportData.summary?.overallAbsentCount} Absent ({reportData.summary?.overallPercentage}%)
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {/* No Report State */}
-        {!showReport && selectedCourse && fromDate && toDate && (
+        {!showReport && selectedCourse && fromDate && toDate && !isLoading && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <FiFileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">Click Generate Report to view attendance data</p>
@@ -424,7 +337,7 @@ const TeacherCourseReport_Page = () => {
         )}
 
         {/* Empty State */}
-        {!selectedCourse && !fromDate && !toDate && (
+        {!selectedCourse && !fromDate && !toDate && !isLoading && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <FiSearch className="h-12 w-12 text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-medium text-gray-900 mb-1">No Report Generated</h3>
@@ -433,7 +346,7 @@ const TeacherCourseReport_Page = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TeacherCourseReport_Page
+export default TeacherCourseReport_Page;
