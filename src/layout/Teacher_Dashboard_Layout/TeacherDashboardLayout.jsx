@@ -1,4 +1,4 @@
-import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, MapPin, Menu, MessageSquare, UserCheck, Users, X } from 'lucide-react';
+import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, FileBarChart, MapPin, Menu, MessageSquare, UserCheck, Users, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -86,6 +86,12 @@ const TeacherDashboardLayout = () => {
       icon: UserCheck,
       label: "Manage Attendance",
       path: "/teacher/attendance"
+    },
+    {
+      name: "CourseReport",
+      icon: FileBarChart,
+      label: "Course Report",
+      path: "/teacher/courseReport"
     },
   ];
 

@@ -19,6 +19,7 @@ import AdminDashboardLayout from './layout/Admin_Dashboard_Layout/AdminDashboard
 import AdminDashboard_Page from './page/Admin_Pages/AdminDashboard_Page';
 import AdminComplaints_Page from './page/Admin_Pages/AdminComplaints_Page';
 import AdminIntegration_Page from './page/Admin_Pages/AdminIntegration_Page';
+import TeacherCourseReport_Page from './page/Teacher_Pages/TeacherCourseReport_Page';
 
 const App = () => {
 
@@ -64,6 +65,7 @@ const App = () => {
           <Route path="dashboard" element={<TeacherDashboard_Page />} />
           <Route path="subject" element={<TeacherSubjects_Page />} />
           <Route path="attendance" element={<TeacherAttendance_Page />} />
+          <Route path="courseReport" element={<TeacherCourseReport_Page />} />
         </Route>
 
         {/* =====>] Admin Routes [<===== */}
