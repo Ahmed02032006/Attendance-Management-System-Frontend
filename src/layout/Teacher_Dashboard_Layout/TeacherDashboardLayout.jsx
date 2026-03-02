@@ -88,9 +88,9 @@ const TeacherDashboardLayout = () => {
       path: "/teacher/attendance"
     },
     {
-      name: "CourseReport",
+      name: "AttendanceReport",
       icon: FileBarChart,
-      label: "Course Report",
+      label: "Attendance Report",
       path: "/teacher/courseReport"
     },
   ];
