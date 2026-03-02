@@ -6,7 +6,8 @@ import {
   FiDownload,
   FiSearch,
   FiUsers,
-  FiAlertCircle
+  FiAlertCircle,
+  FiLayers
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer.js'
@@ -16,7 +17,7 @@ const TeacherCourseReport_Page = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
   const { subjects, isLoading: subjectsLoading } = useSelector((state) => state.teacherSubject || { subjects: [], isLoading: false })
-  
+
   // Safe navigation with fallback
   const attendanceReportState = useSelector((state) => state.attendanceReport) || {}
   const { reportData, isLoading, error } = attendanceReportState
@@ -45,7 +46,7 @@ const TeacherCourseReport_Page = () => {
     const today = new Date()
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(today.getDate() - 30)
-    
+
     setToDate(today.toISOString().split('T')[0])
     setFromDate(thirtyDaysAgo.toISOString().split('T')[0])
   }, [])
@@ -109,7 +110,7 @@ const TeacherCourseReport_Page = () => {
     // Calculate summary statistics
     const totalStudents = processedStudents.length
     const totalDays = allDates.length
-    const averageAttendance = totalStudents > 0 
+    const averageAttendance = totalStudents > 0
       ? (processedStudents.reduce((sum, s) => sum + s.percentage, 0) / totalStudents).toFixed(1)
       : 0
 
@@ -164,7 +165,7 @@ const TeacherCourseReport_Page = () => {
     }
 
     setIsGenerating(true)
-    
+
     // Dispatch action to fetch real report data
     dispatch(getSubjectAttendanceReport({
       subjectId: selectedCourse,
@@ -175,7 +176,7 @@ const TeacherCourseReport_Page = () => {
       setIsGenerating(false)
       console.log('API Response:', result)
       console.log('Payload data:', result.payload)
-      
+
       if (result.payload?.success) {
         // Process the data for display
         const processed = processReportData(result.payload.data)
@@ -195,20 +196,20 @@ const TeacherCourseReport_Page = () => {
     }
 
     const { students, subjectDetails, dateRange, summary } = processedData
-    
+
     // Create CSV content
     let csvContent = `"Attendance Report - ${subjectDetails.title} (${subjectDetails.code})"\n`
     csvContent += `"Period: ${dateRange.fromDate} to ${dateRange.toDate}"\n`
     csvContent += `"Total Students: ${summary.totalStudents}", "Total Days: ${summary.totalDays}"\n\n`
-    
+
     // Add headers
     csvContent += "Student Name,Roll No.,"
-    
+
     // Add dates as headers
     if (students.length > 0) {
       const dates = summary.dates
       csvContent += dates.join(",") + ",Present Count,Absent Count,Percentage\n"
-      
+
       // Add student data
       students.forEach(student => {
         const row = [
@@ -221,7 +222,7 @@ const TeacherCourseReport_Page = () => {
         ]
         csvContent += row.join(",") + "\n"
       })
-      
+
       // Add summary
       csvContent += "\nSummary\n"
       csvContent += `Average Attendance,${summary.averageAttendance}%\n`
@@ -229,7 +230,7 @@ const TeacherCourseReport_Page = () => {
       csvContent += `Students <75%,${summary.studentsBelow75}\n`
       csvContent += `Students <50%,${summary.studentsBelow50}\n`
       csvContent += `Students <25%,${summary.studentsBelow25}\n`
-      
+
       // Download CSV
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const url = window.URL.createObjectURL(blob)
@@ -244,11 +245,28 @@ const TeacherCourseReport_Page = () => {
   // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return ''
-    return new Date(dateString).toLocaleDateString('en-US', { 
-      month: 'short', 
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
       year: 'numeric'
     })
+  }
+
+  if (subjectsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
+        <div className="text-center">
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <FiLayers className="h-8 w-8 text-blue-600 animate-pulse" />
+            </div>
+          </div>
+          <p className="mt-6 text-lg font-medium text-gray-700">Loading Courses...</p>
+          <p className="mt-2 text-sm text-gray-500">Preparing courses assigned to you</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -263,7 +281,7 @@ const TeacherCourseReport_Page = () => {
         {/* Report Generation Form */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Generate Attendance Report</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Course Selection */}
             <div>
@@ -357,14 +375,6 @@ const TeacherCourseReport_Page = () => {
           </div>
         </div>
 
-        {/* Loading State for Subjects */}
-        {subjectsLoading && (
-          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600 mb-3"></div>
-            <p className="text-gray-500">Loading your courses...</p>
-          </div>
-        )}
-
         {/* Error Display */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start">
@@ -386,8 +396,8 @@ const TeacherCourseReport_Page = () => {
                   Attendance Report: {processedData.subjectDetails?.title} ({processedData.subjectDetails?.code})
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  {formatDate(processedData.dateRange?.fromDate)} to {formatDate(processedData.dateRange?.toDate)} • 
-                  Total Students: {processedData.summary?.totalStudents} • 
+                  {formatDate(processedData.dateRange?.fromDate)} to {formatDate(processedData.dateRange?.toDate)} •
+                  Total Students: {processedData.summary?.totalStudents} •
                   Total Days: {processedData.summary?.totalDays} •
                   Avg Attendance: {processedData.summary?.averageAttendance}%
                 </p>
@@ -448,8 +458,8 @@ const TeacherCourseReport_Page = () => {
                         {student.attendance?.map((record, idx) => (
                           <td key={idx} className="px-4 py-2 whitespace-nowrap text-center">
                             <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium
-                              ${record.status === 'Present' 
-                                ? 'bg-green-100 text-green-700' 
+                              ${record.status === 'Present'
+                                ? 'bg-green-100 text-green-700'
                                 : 'bg-red-100 text-red-700'
                               }`}
                               title={record.time ? `Time: ${record.time}` : ''}
@@ -466,9 +476,9 @@ const TeacherCourseReport_Page = () => {
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-center">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                            ${student.percentage >= 75 ? 'bg-green-100 text-green-700' : 
-                              student.percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 
-                              'bg-red-100 text-red-700'}`}
+                            ${student.percentage >= 75 ? 'bg-green-100 text-green-700' :
+                              student.percentage >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'}`}
                           >
                             {student.percentage}%
                           </span>
