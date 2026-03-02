@@ -10,11 +10,12 @@ import {
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer.js'
+import { getSubjectsByUser } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherCourseReport_Page = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
-  const { subjects } = useSelector((state) => state.teacherSubject || { subjects: [] })
+  const { subjects, isLoading: subjectsLoading } = useSelector((state) => state.teacherSubject || { subjects: [], isLoading: false })
   
   // Safe navigation with fallback
   const attendanceReportState = useSelector((state) => state.attendanceReport) || {}
@@ -27,6 +28,17 @@ const TeacherCourseReport_Page = () => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showReport, setShowReport] = useState(false)
   const [processedData, setProcessedData] = useState(null) // Store processed data for display
+
+  // Fetch subjects when component mounts
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(getSubjectsByUser(user.id)).unwrap()
+        .catch(error => {
+          console.error('Failed to fetch subjects:', error)
+          toast.error('Failed to load courses')
+        })
+    }
+  }, [dispatch, user?.id])
 
   // Set default dates on component mount (last 30 days)
   useEffect(() => {
@@ -266,6 +278,7 @@ const TeacherCourseReport_Page = () => {
                   setProcessedData(null)
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                disabled={subjectsLoading}
               >
                 <option value="">Choose a course</option>
                 {subjects && subjects.length > 0 ? (
@@ -275,9 +288,16 @@ const TeacherCourseReport_Page = () => {
                     </option>
                   ))
                 ) : (
-                  <option disabled>No subjects available</option>
+                  <option disabled value="">
+                    {subjectsLoading ? 'Loading courses...' : 'No courses available'}
+                  </option>
                 )}
               </select>
+              {subjects.length === 0 && !subjectsLoading && (
+                <p className="text-xs text-amber-600 mt-1">
+                  No courses found. Please add courses first.
+                </p>
+              )}
             </div>
 
             {/* From Date */}
@@ -318,7 +338,7 @@ const TeacherCourseReport_Page = () => {
             <div className="flex items-end">
               <button
                 onClick={handleGenerateReport}
-                disabled={isGenerating || isLoading}
+                disabled={isGenerating || isLoading || subjectsLoading}
                 className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {isGenerating || isLoading ? (
@@ -336,6 +356,14 @@ const TeacherCourseReport_Page = () => {
             </div>
           </div>
         </div>
+
+        {/* Loading State for Subjects */}
+        {subjectsLoading && (
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600 mb-3"></div>
+            <p className="text-gray-500">Loading your courses...</p>
+          </div>
+        )}
 
         {/* Error Display */}
         {error && (
@@ -500,7 +528,7 @@ const TeacherCourseReport_Page = () => {
         )}
 
         {/* No Report State */}
-        {!showReport && selectedCourse && fromDate && toDate && (
+        {!showReport && selectedCourse && fromDate && toDate && !subjectsLoading && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <FiFileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">Click Generate Report to view attendance data</p>
@@ -508,7 +536,16 @@ const TeacherCourseReport_Page = () => {
         )}
 
         {/* Empty State */}
-        {!selectedCourse && !fromDate && !toDate && (
+        {!selectedCourse && !fromDate && !toDate && !subjectsLoading && subjects.length === 0 && (
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <FiSearch className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+            <h3 className="text-base font-medium text-gray-900 mb-1">No Courses Available</h3>
+            <p className="text-sm text-gray-500">Please create courses first to generate attendance reports</p>
+          </div>
+        )}
+
+        {/* Empty State - With courses but no report generated */}
+        {!selectedCourse && !fromDate && !toDate && !subjectsLoading && subjects.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <FiSearch className="h-12 w-12 text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-medium text-gray-900 mb-1">No Report Generated</h3>
