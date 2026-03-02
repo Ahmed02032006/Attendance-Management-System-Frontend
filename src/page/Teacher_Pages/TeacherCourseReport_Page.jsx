@@ -404,33 +404,33 @@ const TeacherCourseReport_Page = () => {
             </div>
 
             {/* Report Table */}
-            <div className="overflow-x-auto max-w-full" style={{ maxHeight: '500px' }}>
+            <div className="overflow-x-auto max-w-full relative" style={{ maxHeight: '500px' }}>
               <div className="inline-block min-w-full align-middle">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50 sticky top-0 z-10">
+                  <thead className="bg-gray-50 sticky top-0 z-20">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50 z-20 min-w-[180px]">
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50 z-30 min-w-[180px] border-r border-gray-200">
                         Student Name
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-[180px] bg-gray-50 z-20 min-w-[120px]">
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-[180px] bg-gray-50 z-30 min-w-[120px] border-r border-gray-200">
                         Roll No.
                       </th>
                       {/* Date Headers */}
                       {processedData.summary?.dates?.map((date, index) => (
-                        <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[70px]">
+                        <th key={index} className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[70px] bg-gray-50">
                           <div className="flex flex-col">
                             <span>{new Date(date).toLocaleDateString('en-US', { month: 'short' })}</span>
                             <span className="text-gray-400">{new Date(date).getDate()}</span>
                           </div>
                         </th>
                       ))}
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[80px]">
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[80px] bg-gray-50">
                         Present
                       </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[80px]">
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[80px] bg-gray-50">
                         Absent
                       </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[80px]">
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[80px] bg-gray-50">
                         %
                       </th>
                     </tr>
@@ -438,10 +438,10 @@ const TeacherCourseReport_Page = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {processedData.students.map((student) => (
                       <tr key={student.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
+                        <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r border-gray-200">
                           {student.name}
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 sticky left-[180px] bg-white z-10">
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 sticky left-[180px] bg-white z-10 border-r border-gray-200">
                           {student.rollNo}
                         </td>
                         {/* Attendance Status for each date */}
