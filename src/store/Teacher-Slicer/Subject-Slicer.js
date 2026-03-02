@@ -351,7 +351,7 @@ const subjectSlicer = createSlice({
         state.studentsLoading = false;
       })
 
-      // Delete all registered students
+      // Delete All Registered Students
       .addCase(deleteAllRegisteredStudents.pending, (state) => {
         state.studentsLoading = true;
       })
@@ -363,7 +363,7 @@ const subjectSlicer = createSlice({
         }
         // Update the count in subjects list to 0
         const subjectIndex = state.subjects.findIndex(
-          s => (s.id === action.meta.arg.subjectId || s._id === action.meta.arg.subjectId)
+          s => s.id === action.payload.subjectId
         );
         if (subjectIndex !== -1) {
           state.subjects[subjectIndex].registeredStudentsCount = 0;

@@ -41,7 +41,7 @@ import {
   addRegisteredStudents,
   deleteRegisteredStudent,
   deleteAllRegisteredStudents,
-  updateRegisteredStudent
+  updateRegisteredStudent // You'll need to add this to your slicer
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
@@ -61,7 +61,7 @@ const TeacherSubjects_Page = () => {
   const [statusFilter, setStatusFilter] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
   const [subjectsPerPage] = useState(5)
-  const [activeStudentTab, setActiveStudentTab] = useState('view')
+  const [activeStudentTab, setActiveStudentTab] = useState('view') // 'view' or 'import'
 
   // For imported students data
   const [importedStudents, setImportedStudents] = useState([])
@@ -103,7 +103,7 @@ const TeacherSubjects_Page = () => {
     }
   }, [dispatch, currentUserId])
 
-  // Filter subjects - handle both _id and id
+  // Filter subjects
   const filteredSubjects = subjects.filter(subject => {
     const matchesSearch =
       subject.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -147,18 +147,8 @@ const TeacherSubjects_Page = () => {
         registeredStudents: []
       }
 
-      const result = await dispatch(createSubject(formData)).unwrap();
-      
-      // Immediately update local state with the new subject
-      // The API returns _id but we need to ensure it's accessible as id
-      const newSubject = result.data;
-      if (newSubject) {
-        // Ensure we have an id property (use _id if id doesn't exist)
-        if (!newSubject.id && newSubject._id) {
-          newSubject.id = newSubject._id;
-        }
-      }
-      
+      await dispatch(createSubject(formData)).unwrap()
+      dispatch(getSubjectsByUser(currentUserId)).unwrap();
       setShowCreateModal(false)
       resetForm()
       toast.success('Subject created successfully!')
@@ -176,13 +166,11 @@ const TeacherSubjects_Page = () => {
     }
 
     try {
-      const result = await dispatch(updateSubject({
-        id: selectedSubject.id || selectedSubject._id,
+      await dispatch(updateSubject({
+        id: selectedSubject.id,
         formData: subjectForm
       })).unwrap();
-      
-      // Refresh the subjects list
-      await dispatch(getSubjectsByUser(currentUserId)).unwrap();
+      dispatch(getSubjectsByUser(currentUserId)).unwrap();
 
       setShowEditModal(false)
       resetForm()
@@ -194,9 +182,8 @@ const TeacherSubjects_Page = () => {
 
   const handleDeleteSubject = async () => {
     try {
-      const subjectId = selectedSubject.id || selectedSubject._id;
-      await dispatch(deleteSubject(subjectId)).unwrap();
-      
+      await dispatch(deleteSubject(selectedSubject.id)).unwrap()
+      dispatch(getSubjectsByUser(currentUserId)).unwrap();
       setShowDeleteModal(false)
       toast.success('Subject deleted successfully!')
     } catch (error) {
@@ -206,8 +193,7 @@ const TeacherSubjects_Page = () => {
 
   const handleResetSubject = async () => {
     try {
-      const subjectId = selectedSubject.id || selectedSubject._id;
-      await dispatch(resetSubjectAttendance(subjectId)).unwrap()
+      await dispatch(resetSubjectAttendance(selectedSubject.id)).unwrap()
       setShowResetModal(false)
       toast.success('Subject attendance records cleared successfully!')
     } catch (error) {
@@ -335,7 +321,7 @@ const TeacherSubjects_Page = () => {
 
     try {
       await dispatch(addRegisteredStudents({
-        subjectId: selectedSubject.id || selectedSubject._id,
+        subjectId: selectedSubject.id,
         teacherId: currentUserId,
         students: importedStudents
       })).unwrap();
@@ -350,7 +336,7 @@ const TeacherSubjects_Page = () => {
       setActiveStudentTab('view');
 
       await dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id || selectedSubject._id,
+        subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
     } catch (error) {
@@ -399,7 +385,7 @@ const TeacherSubjects_Page = () => {
 
     try {
       await dispatch(addRegisteredStudents({
-        subjectId: selectedSubject.id || selectedSubject._id,
+        subjectId: selectedSubject.id,
         teacherId: currentUserId,
         students: [{
           registrationNo: individualStudent.registrationNo.trim(),
@@ -417,7 +403,7 @@ const TeacherSubjects_Page = () => {
 
       // Refresh students list
       await dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id || selectedSubject._id,
+        subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
     } catch (error) {
@@ -480,8 +466,9 @@ const TeacherSubjects_Page = () => {
     setIsEditingStudent(true);
 
     try {
+      // FIXED: Pass the parameters correctly to match the slicer
       await dispatch(updateRegisteredStudent({
-        subjectId: selectedSubject.id || selectedSubject._id,
+        subjectId: selectedSubject.id,
         studentId: editingStudent._id,
         teacherId: currentUserId,
         studentData: {
@@ -501,7 +488,7 @@ const TeacherSubjects_Page = () => {
 
       // Refresh students list
       await dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id || selectedSubject._id,
+        subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
     } catch (error) {
@@ -516,7 +503,7 @@ const TeacherSubjects_Page = () => {
   const handleViewStudents = async (subject) => {
     try {
       const result = await dispatch(getRegisteredStudents({
-        subjectId: subject.id || subject._id,
+        subjectId: subject.id,
         teacherId: currentUserId
       })).unwrap();
 
@@ -535,7 +522,7 @@ const TeacherSubjects_Page = () => {
 
     try {
       await dispatch(deleteRegisteredStudent({
-        subjectId: selectedSubject.id || selectedSubject._id,
+        subjectId: selectedSubject.id,
         studentId: studentId,
         teacherId: currentUserId
       })).unwrap();
@@ -543,7 +530,7 @@ const TeacherSubjects_Page = () => {
       toast.success('Student removed successfully!');
 
       dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id || selectedSubject._id,
+        subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
     } catch (error) {
@@ -560,9 +547,11 @@ const TeacherSubjects_Page = () => {
   const handleDeleteAllStudents = async () => {
     if (!selectedSubject) return;
 
+    const studentCount = registeredStudents?.registeredStudents?.length || 0;
+
     try {
       const result = await dispatch(deleteAllRegisteredStudents({
-        subjectId: selectedSubject.id || selectedSubject._id,
+        subjectId: selectedSubject.id,
         teacherId: currentUserId
       })).unwrap();
 
@@ -570,7 +559,7 @@ const TeacherSubjects_Page = () => {
       setShowDeleteAllModal(false);
 
       await dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id || selectedSubject._id,
+        subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
     } catch (error) {
@@ -593,7 +582,7 @@ const TeacherSubjects_Page = () => {
 
     try {
       await dispatch(getRegisteredStudents({
-        subjectId: subject.id || subject._id,
+        subjectId: subject.id,
         teacherId: currentUserId
       })).unwrap();
 
@@ -825,7 +814,7 @@ const TeacherSubjects_Page = () => {
               <tbody className="divide-y divide-gray-200">
                 {currentSubjects.length > 0 ? (
                   currentSubjects.map((subject) => (
-                    <tr key={subject.id || subject._id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={subject.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className={`w-8 h-8 ${subject.color || 'bg-blue-500'} rounded-md flex items-center justify-center text-white font-medium text-sm shrink-0`}>
