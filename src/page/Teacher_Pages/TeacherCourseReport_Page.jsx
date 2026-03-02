@@ -262,7 +262,7 @@ const TeacherCourseReport_Page = () => {
               <FiLayers className="h-8 w-8 text-blue-600 animate-pulse" />
             </div>
           </div>
-          <p className="mt-6 text-lg font-medium text-gray-700">Loading Reports...</p>
+          <p className="mt-6 text-lg font-medium text-gray-700">Loading Course Reports...</p>
           <p className="mt-2 text-sm text-gray-500">Gathering course report data for you</p>
         </div>
       </div>
