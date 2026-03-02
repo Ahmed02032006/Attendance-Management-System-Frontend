@@ -1055,13 +1055,12 @@ const TeacherAttendance_Page = () => {
                 </button>
 
                 <button
-                  onClick={() => handleRefresh()}
+                  onClick={() => window.location.reload()}
                   className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-md transition-colors"
                 >
                   Refresh
                 </button>
               </div>
-
             </div>
           </div>
         )}
