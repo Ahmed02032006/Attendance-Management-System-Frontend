@@ -1039,10 +1039,10 @@ const TeacherAttendance_Page = () => {
 
               {/* Text Content */}
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No Subjects Found
+                No Courses Found
               </h3>
               <p className="text-sm text-gray-500 mb-6 max-w-sm">
-                You don't have any subjects with attendance data yet. Create your first subject to get started.
+                You don't have any courses with attendance data yet. Create your first course to get started.
               </p>
 
               {/* Action Buttons */}
@@ -1051,7 +1051,7 @@ const TeacherAttendance_Page = () => {
                   onClick={() => window.location.href = '/teacher/subject'}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
                 >
-                  Create New Subject
+                  Create New Course
                 </button>
 
                 <button
