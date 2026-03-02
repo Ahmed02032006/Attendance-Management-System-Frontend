@@ -1048,27 +1048,20 @@ const TeacherAttendance_Page = () => {
               {/* Action Buttons */}
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => window.location.href = '/teacher/subject/create'}
+                  onClick={() => window.location.href = '/teacher/subject'}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
                 >
                   Create New Subject
                 </button>
 
                 <button
-                  onClick={() => window.location.reload()}
+                  onClick={() => handleRefresh()}
                   className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-md transition-colors"
                 >
                   Refresh
                 </button>
               </div>
 
-              {/* Optional Help Link */}
-              <p className="text-xs text-gray-400 mt-6">
-                Need help?{' '}
-                <a href="/help" className="text-blue-600 hover:underline">
-                  Visit help center
-                </a>
-              </p>
             </div>
           </div>
         )}
