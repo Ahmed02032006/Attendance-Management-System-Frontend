@@ -982,9 +982,6 @@ const TeacherSubjects_Page = () => {
                     <tr key={subject.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className={`w-8 h-8 ${subject.color || 'bg-blue-500'} rounded-md flex items-center justify-center text-white font-medium text-sm shrink-0`}>
-                            {subject.title?.charAt(0).toUpperCase()}
-                          </div>
                           <div className="ml-3">
                             <div className="text-sm font-medium text-gray-900">
                               {subject.title}
