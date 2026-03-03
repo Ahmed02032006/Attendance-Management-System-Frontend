@@ -61,12 +61,26 @@ const TeacherSubjects_Page = () => {
   const [subjectsPerPage] = useState(5)
   const [activeStudentTab, setActiveStudentTab] = useState('view')
 
+  // Generate time options from 00:00 to 23:30 in 30-minute intervals
+  const generateTimeOptions = () => {
+    const times = [];
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        times.push(timeString);
+      }
+    }
+    return times;
+  };
+
+  const timeOptions = generateTimeOptions();
+
   // For class schedule
   const [classSchedule, setClassSchedule] = useState([])
   const [currentSchedule, setCurrentSchedule] = useState({
     day: 'Monday',
-    startTime: '',
-    endTime: ''
+    startTime: '09:00',
+    endTime: '10:30'
   })
 
   // For imported students data
@@ -151,23 +165,23 @@ const TeacherSubjects_Page = () => {
 
   const addSchedule = () => {
     if (!currentSchedule.startTime || !currentSchedule.endTime) {
-      toast.error('Please enter both start and end time')
-      return
+      toast.error('Please select both start and end time')
+      return false
     }
 
-    // Validate time format (HH:MM)
-    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
-    if (!timeRegex.test(currentSchedule.startTime) || !timeRegex.test(currentSchedule.endTime)) {
-      toast.error('Please enter valid time in HH:MM format (e.g., 09:00, 14:30)')
-      return
+    // Validate that end time is after start time
+    if (currentSchedule.startTime >= currentSchedule.endTime) {
+      toast.error('End time must be after start time')
+      return false
     }
 
     setClassSchedule(prev => [...prev, { ...currentSchedule }])
     setCurrentSchedule({
       day: 'Monday',
-      startTime: '',
-      endTime: ''
+      startTime: '09:00',
+      endTime: '10:30'
     })
+    return true
   }
 
   const removeSchedule = (index) => {
@@ -204,6 +218,12 @@ const TeacherSubjects_Page = () => {
       return
     }
 
+    // Check if at least one schedule is added (mandatory)
+    if (classSchedule.length === 0) {
+      toast.error('Please add at least one class schedule')
+      return
+    }
+
     try {
       const formData = {
         ...subjectForm,
@@ -228,6 +248,12 @@ const TeacherSubjects_Page = () => {
     if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session || 
         !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
+      return
+    }
+
+    // Check if at least one schedule is added (mandatory)
+    if (classSchedule.length === 0) {
+      toast.error('Please add at least one class schedule')
       return
     }
 
@@ -669,6 +695,11 @@ const TeacherSubjects_Page = () => {
   const openCreateModal = () => {
     resetForm()
     setClassSchedule([])
+    setCurrentSchedule({
+      day: 'Monday',
+      startTime: '09:00',
+      endTime: '10:30'
+    })
     setShowCreateModal(true)
   }
 
@@ -685,6 +716,11 @@ const TeacherSubjects_Page = () => {
       userId: subject.userId
     })
     setClassSchedule(subject.classSchedule || [])
+    setCurrentSchedule({
+      day: 'Monday',
+      startTime: '09:00',
+      endTime: '10:30'
+    })
     setShowEditModal(true)
   }
 
@@ -1037,10 +1073,11 @@ const TeacherSubjects_Page = () => {
                   />
                 </div>
 
-                {/* Class Schedule Section */}
-                <div className="border border-gray-200 rounded-lg p-3">
-                  <label className="block text-xs font-medium text-gray-700 mb-2">
-                    Class Schedule (Optional)
+                {/* Class Schedule Section - Mandatory */}
+                <div className="border border-gray-200 rounded-lg p-3 bg-blue-50">
+                  <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
+                    <span className="text-red-500 mr-1">*</span>
+                    Class Schedule (Required)
                   </label>
                   
                   {/* Schedule Input Row */}
@@ -1049,7 +1086,7 @@ const TeacherSubjects_Page = () => {
                       name="day"
                       value={currentSchedule.day}
                       onChange={handleScheduleChange}
-                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                     >
                       <option value="Monday">Monday</option>
                       <option value="Tuesday">Tuesday</option>
@@ -1059,28 +1096,34 @@ const TeacherSubjects_Page = () => {
                       <option value="Saturday">Saturday</option>
                       <option value="Sunday">Sunday</option>
                     </select>
-                    <input
-                      type="text"
+                    
+                    <select
                       name="startTime"
                       value={currentSchedule.startTime}
                       onChange={handleScheduleChange}
-                      placeholder="Start (HH:MM)"
-                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                    <input
-                      type="text"
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    >
+                      {timeOptions.map(time => (
+                        <option key={`start-${time}`} value={time}>{time}</option>
+                      ))}
+                    </select>
+                    
+                    <select
                       name="endTime"
                       value={currentSchedule.endTime}
                       onChange={handleScheduleChange}
-                      placeholder="End (HH:MM)"
-                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    >
+                      {timeOptions.map(time => (
+                        <option key={`end-${time}`} value={time}>{time}</option>
+                      ))}
+                    </select>
                   </div>
                   
                   <button
                     type="button"
                     onClick={addSchedule}
-                    className="w-full px-3 py-1.5 bg-blue-50 text-blue-600 text-xs rounded-md hover:bg-blue-100 font-medium flex items-center justify-center"
+                    className="w-full px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium flex items-center justify-center"
                   >
                     <FiPlus className="h-3 w-3 mr-1" />
                     Add Schedule
@@ -1090,8 +1133,8 @@ const TeacherSubjects_Page = () => {
                   {classSchedule.length > 0 && (
                     <div className="mt-3 space-y-1">
                       {classSchedule.map((schedule, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
-                          <span className="text-xs">
+                        <div key={index} className="flex items-center justify-between bg-white p-2 rounded-md border border-gray-200">
+                          <span className="text-xs font-medium">
                             {schedule.day}: {schedule.startTime} - {schedule.endTime}
                           </span>
                           <button
@@ -1104,6 +1147,10 @@ const TeacherSubjects_Page = () => {
                         </div>
                       ))}
                     </div>
+                  )}
+                  
+                  {classSchedule.length === 0 && (
+                    <p className="text-xs text-red-500 mt-2">Please add at least one class schedule</p>
                   )}
                 </div>
 
@@ -1227,10 +1274,11 @@ const TeacherSubjects_Page = () => {
                   />
                 </div>
 
-                {/* Class Schedule Section - Edit */}
-                <div className="border border-gray-200 rounded-lg p-3">
-                  <label className="block text-xs font-medium text-gray-700 mb-2">
-                    Class Schedule (Optional)
+                {/* Class Schedule Section - Mandatory */}
+                <div className="border border-gray-200 rounded-lg p-3 bg-blue-50">
+                  <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
+                    <span className="text-red-500 mr-1">*</span>
+                    Class Schedule (Required)
                   </label>
                   
                   {/* Schedule Input Row */}
@@ -1239,7 +1287,7 @@ const TeacherSubjects_Page = () => {
                       name="day"
                       value={currentSchedule.day}
                       onChange={handleScheduleChange}
-                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                     >
                       <option value="Monday">Monday</option>
                       <option value="Tuesday">Tuesday</option>
@@ -1249,28 +1297,34 @@ const TeacherSubjects_Page = () => {
                       <option value="Saturday">Saturday</option>
                       <option value="Sunday">Sunday</option>
                     </select>
-                    <input
-                      type="text"
+                    
+                    <select
                       name="startTime"
                       value={currentSchedule.startTime}
                       onChange={handleScheduleChange}
-                      placeholder="Start (HH:MM)"
-                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                    <input
-                      type="text"
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    >
+                      {timeOptions.map(time => (
+                        <option key={`start-${time}`} value={time}>{time}</option>
+                      ))}
+                    </select>
+                    
+                    <select
                       name="endTime"
                       value={currentSchedule.endTime}
                       onChange={handleScheduleChange}
-                      placeholder="End (HH:MM)"
-                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    >
+                      {timeOptions.map(time => (
+                        <option key={`end-${time}`} value={time}>{time}</option>
+                      ))}
+                    </select>
                   </div>
                   
                   <button
                     type="button"
                     onClick={addSchedule}
-                    className="w-full px-3 py-1.5 bg-blue-50 text-blue-600 text-xs rounded-md hover:bg-blue-100 font-medium flex items-center justify-center"
+                    className="w-full px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium flex items-center justify-center"
                   >
                     <FiPlus className="h-3 w-3 mr-1" />
                     Add Schedule
@@ -1280,8 +1334,8 @@ const TeacherSubjects_Page = () => {
                   {classSchedule.length > 0 && (
                     <div className="mt-3 space-y-1">
                       {classSchedule.map((schedule, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
-                          <span className="text-xs">
+                        <div key={index} className="flex items-center justify-between bg-white p-2 rounded-md border border-gray-200">
+                          <span className="text-xs font-medium">
                             {schedule.day}: {schedule.startTime} - {schedule.endTime}
                           </span>
                           <button
@@ -1294,6 +1348,10 @@ const TeacherSubjects_Page = () => {
                         </div>
                       ))}
                     </div>
+                  )}
+                  
+                  {classSchedule.length === 0 && (
+                    <p className="text-xs text-red-500 mt-2">Please add at least one class schedule</p>
                   )}
                 </div>
 
