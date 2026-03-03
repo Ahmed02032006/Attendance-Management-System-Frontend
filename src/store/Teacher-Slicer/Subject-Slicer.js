@@ -247,7 +247,23 @@ const subjectSlicer = createSlice({
       })
       .addCase(createSubject.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.subjects.unshift(action.payload.data);
+        // Format the created subject to match frontend structure
+        const createdSubject = action.payload.data;
+        const formattedSubject = {
+          id: createdSubject._id.toString(),
+          title: createdSubject.subjectTitle,
+          departmentOffering: createdSubject.departmentOffering,
+          code: createdSubject.subjectCode,
+          creditHours: createdSubject.creditHours,
+          session: createdSubject.session,
+          semester: createdSubject.semester,
+          registeredStudentsCount: createdSubject.registeredStudents?.length || 0,
+          status: createdSubject.status,
+          createdAt: createdSubject.createdDate,
+          color: 'bg-blue-500', // Default color for new subjects
+          classSchedule: createdSubject.classSchedule || []
+        };
+        state.subjects.unshift(formattedSubject);
       })
       .addCase(createSubject.rejected, (state, action) => {
         state.isLoading = false;

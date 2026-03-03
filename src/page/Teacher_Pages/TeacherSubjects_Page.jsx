@@ -114,11 +114,11 @@ const TeacherSubjects_Page = () => {
   // Filter subjects
   const filteredSubjects = subjects.filter(subject => {
     const matchesSearch =
-      subject.subjectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.departmentOffering?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.session?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.creditHours?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      subject.subjectCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.semester?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesFilter = statusFilter === 'All' || subject.status === statusFilter
@@ -675,9 +675,9 @@ const TeacherSubjects_Page = () => {
   const openEditModal = (subject) => {
     setSelectedSubject(subject)
     setSubjectForm({
-      subjectTitle: subject.subjectTitle,
+      subjectTitle: subject.title,
       departmentOffering: subject.departmentOffering,
-      subjectCode: subject.subjectCode,
+      subjectCode: subject.code,
       semester: subject.semester,
       creditHours: subject.creditHours,
       session: subject.session,
@@ -882,11 +882,11 @@ const TeacherSubjects_Page = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className={`w-8 h-8 ${subject.color || 'bg-blue-500'} rounded-md flex items-center justify-center text-white font-medium text-sm shrink-0`}>
-                            {subject.subjectTitle?.charAt(0).toUpperCase()}
+                            {subject.title?.charAt(0).toUpperCase()}
                           </div>
                           <div className="ml-3">
                             <div className="text-sm font-medium text-gray-900">
-                              {subject.subjectTitle}
+                              {subject.title}
                             </div>
                             <div className="text-xs text-gray-500">
                               {subject.session} | {subject.creditHours} Cr
@@ -901,7 +901,7 @@ const TeacherSubjects_Page = () => {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="text-sm text-gray-600 font-mono">
-                          {subject.subjectCode}
+                          {subject.code}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
@@ -1407,7 +1407,7 @@ const TeacherSubjects_Page = () => {
             <div className="p-4">
               <p className="text-sm text-gray-600">
                 Are you sure you want to delete{' '}
-                <span className="font-bold text-gray-900">"{selectedSubject?.subjectTitle}"</span>?
+                <span className="font-bold text-gray-900">"{selectedSubject?.title}"</span>?
               </p>
               <p className="text-xs text-red-600 mt-2">
                 This will delete all associated students and attendance records.
@@ -1441,7 +1441,7 @@ const TeacherSubjects_Page = () => {
             <div className="p-4">
               <p className="text-sm text-gray-600">
                 Clear all attendance records for{' '}
-                <span className="font-medium text-gray-900">"{selectedSubject?.subjectTitle}"</span>?
+                <span className="font-medium text-gray-900">"{selectedSubject?.title}"</span>?
               </p>
               <p className="text-xs text-yellow-600 mt-2">
                 This will permanently delete all attendance data but keep registered students.
@@ -1481,7 +1481,7 @@ const TeacherSubjects_Page = () => {
               <p className="text-sm text-gray-600 text-center">
                 Are you sure you want to delete all{' '}
                 <span className="font-bold text-red-600">{registeredStudents?.registeredStudents?.length || 0}</span>{' '}
-                students from <span className="font-semibold">"{selectedSubject.subjectTitle}"</span>?
+                students from <span className="font-semibold">"{selectedSubject.title}"</span>?
               </p>
               <p className="text-xs text-red-500 text-center mt-3">
                 This action cannot be undone!
@@ -1520,7 +1520,7 @@ const TeacherSubjects_Page = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Manage Students</h3>
                     <p className="text-sm text-gray-500">
-                      {selectedSubject.subjectTitle} • {selectedSubject.subjectCode} • Sem {selectedSubject.semester} • {selectedSubject.session}
+                      {selectedSubject.title} • {selectedSubject.code} • Sem {selectedSubject.semester} • {selectedSubject.session}
                     </p>
                   </div>
                 </div>
@@ -1809,9 +1809,9 @@ const TeacherSubjects_Page = () => {
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 mb-0.5">Selected Course</p>
-                          <p className="text-sm font-semibold text-gray-800">{selectedSubject.subjectTitle}</p>
+                          <p className="text-sm font-semibold text-gray-800">{selectedSubject.title}</p>
                           <div className="flex items-center space-x-2 mt-1">
-                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">{selectedSubject.subjectCode}</span>
+                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">{selectedSubject.code}</span>
                             <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">Sem {selectedSubject.semester}</span>
                           </div>
                         </div>
