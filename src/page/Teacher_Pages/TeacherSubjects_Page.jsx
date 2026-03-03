@@ -201,6 +201,32 @@ const TeacherSubjects_Page = () => {
     })
   }
 
+  // Function to check if schedule already exists for the same day and time
+  const isScheduleDuplicate = (day, startTime, endTime) => {
+    return classSchedule.some(schedule => 
+      schedule.day === day && 
+      schedule.startTime === startTime && 
+      schedule.endTime === endTime
+    );
+  };
+
+  // Function to check if time overlaps with existing schedules on the same day
+  const isTimeOverlapping = (day, startTime, endTime) => {
+    // Convert times to minutes for comparison
+    const startMinutes = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1]);
+    const endMinutes = parseInt(endTime.split(':')[0]) * 60 + parseInt(endTime.split(':')[1]);
+
+    return classSchedule.some(schedule => {
+      if (schedule.day !== day) return false;
+      
+      const existingStart = parseInt(schedule.startTime.split(':')[0]) * 60 + parseInt(schedule.startTime.split(':')[1]);
+      const existingEnd = parseInt(schedule.endTime.split(':')[0]) * 60 + parseInt(schedule.endTime.split(':')[1]);
+
+      // Check for any overlap
+      return (startMinutes < existingEnd && endMinutes > existingStart);
+    });
+  };
+
   const addSchedule = () => {
     if (!currentSchedule.startTime || !currentSchedule.endTime) {
       toast.error('Please select both start and end time')
@@ -213,11 +239,23 @@ const TeacherSubjects_Page = () => {
       return false
     }
 
+    // Check for exact duplicate
+    if (isScheduleDuplicate(currentSchedule.day, currentSchedule.startTime, currentSchedule.endTime)) {
+      toast.error('This schedule already exists for the selected day')
+      return false
+    }
+
+    // Check for time overlap
+    if (isTimeOverlapping(currentSchedule.day, currentSchedule.startTime, currentSchedule.endTime)) {
+      toast.error('This time overlaps with an existing schedule on the same day')
+      return false
+    }
+
     // Format times to ensure proper HH:MM format with leading zeros
     const formattedSchedule = {
       day: currentSchedule.day,
-      startTime: currentSchedule.startTime, // Already in HH:MM format from time input
-      endTime: currentSchedule.endTime       // Already in HH:MM format from time input
+      startTime: currentSchedule.startTime,
+      endTime: currentSchedule.endTime
     }
 
     setClassSchedule(prev => [...prev, formattedSchedule])
@@ -758,10 +796,8 @@ const TeacherSubjects_Page = () => {
     setClassSchedule([])
     setCurrentSchedule({
       day: 'Monday',
-      startHour: '09',
-      startMinute: '00',
-      endHour: '10',
-      endMinute: '30'
+      startTime: '09:00',
+      endTime: '10:30'
     })
     setShowCreateModal(true)
   }
@@ -781,10 +817,8 @@ const TeacherSubjects_Page = () => {
     setClassSchedule(subject.classSchedule || [])
     setCurrentSchedule({
       day: 'Monday',
-      startHour: '09',
-      startMinute: '00',
-      endHour: '10',
-      endMinute: '30'
+      startTime: '09:00',
+      endTime: '10:30'
     })
     setShowEditModal(true)
   }
@@ -982,6 +1016,9 @@ const TeacherSubjects_Page = () => {
                     <tr key={subject.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center">
+                          <div className={`w-8 h-8 ${subject.color || 'bg-blue-500'} rounded-md flex items-center justify-center text-white font-medium text-sm shrink-0`}>
+                            {subject.title?.charAt(0).toUpperCase()}
+                          </div>
                           <div className="ml-3">
                             <div className="text-sm font-medium text-gray-900">
                               {subject.title}
@@ -1190,6 +1227,7 @@ const TeacherSubjects_Page = () => {
                       type="button"
                       onClick={addSchedule}
                       className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 flex items-center"
+                      title="Add schedule"
                     >
                       <FiPlus className="h-4 w-4" />
                     </button>
@@ -1208,6 +1246,7 @@ const TeacherSubjects_Page = () => {
                             type="button"
                             onClick={() => removeSchedule(index)}
                             className="text-gray-400 hover:text-red-500"
+                            title="Remove schedule"
                           >
                             <FiX className="h-4 w-4" />
                           </button>
@@ -1396,6 +1435,7 @@ const TeacherSubjects_Page = () => {
                       type="button"
                       onClick={addSchedule}
                       className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 flex items-center"
+                      title="Add schedule"
                     >
                       <FiPlus className="h-4 w-4" />
                     </button>
@@ -1414,6 +1454,7 @@ const TeacherSubjects_Page = () => {
                             type="button"
                             onClick={() => removeSchedule(index)}
                             className="text-gray-400 hover:text-red-500"
+                            title="Remove schedule"
                           >
                             <FiX className="h-4 w-4" />
                           </button>
