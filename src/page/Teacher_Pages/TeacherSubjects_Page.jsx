@@ -213,9 +213,16 @@ const TeacherSubjects_Page = () => {
       return false
     }
 
-    setClassSchedule(prev => [...prev, { ...currentSchedule }])
+    // Format times to ensure proper HH:MM format with leading zeros
+    const formattedSchedule = {
+      day: currentSchedule.day,
+      startTime: currentSchedule.startTime, // Already in HH:MM format from time input
+      endTime: currentSchedule.endTime       // Already in HH:MM format from time input
+    }
 
-    // Reset to default values and close time pickers by resetting to simple state
+    setClassSchedule(prev => [...prev, formattedSchedule])
+
+    // Reset to default values
     setCurrentSchedule({
       day: 'Monday',
       startTime: '09:00',
@@ -239,7 +246,8 @@ const TeacherSubjects_Page = () => {
       if (!acc[curr.day]) {
         acc[curr.day] = [];
       }
-      acc[curr.day].push(`${curr.startTime}-${curr.endTime}`);
+      // Ensure times are displayed with proper format
+      acc[curr.day].push(`${curr.startTime} - ${curr.endTime}`);
       return acc;
     }, {});
 
