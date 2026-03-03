@@ -188,7 +188,7 @@ const TeacherSubjects_Page = () => {
         ...subjectForm,
         userId: currentUserId,
         registeredStudents: [],
-        classSchedule: classSchedule // Add class schedule
+        classSchedule: classSchedule
       }
 
       await dispatch(createSubject(formData)).unwrap()
@@ -213,7 +213,7 @@ const TeacherSubjects_Page = () => {
     try {
       const formData = {
         ...subjectForm,
-        classSchedule: classSchedule // Include updated class schedule
+        classSchedule: classSchedule
       }
 
       await dispatch(updateSubject({
@@ -565,6 +565,59 @@ const TeacherSubjects_Page = () => {
       toast.error(error?.message || 'Failed to update student');
     } finally {
       setIsEditingStudent(false);
+    }
+  };
+
+  // Handle delete registered student
+  const handleDeleteStudent = async (studentId) => {
+    if (!window.confirm('Are you sure you want to remove this student?')) {
+      return;
+    }
+
+    try {
+      await dispatch(deleteRegisteredStudent({
+        subjectId: selectedSubject.id,
+        studentId: studentId,
+        teacherId: currentUserId
+      })).unwrap();
+
+      toast.success('Student removed successfully!');
+
+      dispatch(getRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      }));
+    } catch (error) {
+      toast.error(error?.message || 'Failed to delete student');
+    }
+  };
+
+  // Open delete all confirmation modal
+  const openDeleteAllModal = () => {
+    setShowDeleteAllModal(true);
+  };
+
+  // Handle delete all registered students
+  const handleDeleteAllStudents = async () => {
+    if (!selectedSubject) return;
+
+    try {
+      await dispatch(deleteAllRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      })).unwrap();
+
+      toast.success('All students deleted successfully!');
+      setShowDeleteAllModal(false);
+
+      await dispatch(getRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      }));
+    } catch (error) {
+      console.error('Delete all students error:', error);
+      toast.error(error?.message || 'Failed to delete students');
+      setShowDeleteAllModal(false);
     }
   };
 
