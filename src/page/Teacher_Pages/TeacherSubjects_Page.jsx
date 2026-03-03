@@ -1321,16 +1321,15 @@ const TeacherSubjects_Page = () => {
                   />
                 </div>
 
-                {/* Class Schedule Section - Mandatory with Time Picker */}
+                {/* Class Schedule Section - Mandatory with Time Input */}
                 <div className="border border-gray-200 rounded-lg p-3 bg-blue-50">
                   <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
                     <span className="text-red-500 mr-1">*</span>
                     Class Schedule (Required)
                   </label>
 
-                  {/* Schedule Input Row with Time Picker */}
+                  {/* Schedule Input Row */}
                   <div className="space-y-3 mb-3">
-                    {/* Day Selection */}
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Day</label>
                       <select
@@ -1349,92 +1348,28 @@ const TeacherSubjects_Page = () => {
                       </select>
                     </div>
 
-                    {/* Start Time - Visual Time Picker */}
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Start Time</label>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 flex items-center border border-gray-300 rounded-md bg-white">
-                          <div className="flex-1 text-center">
-                            <button
-                              type="button"
-                              onClick={() => incrementHour('startHour')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-tl-md"
-                            >
-                              <FiArrowUp className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                            <div className="py-1 font-medium text-sm">{currentSchedule.startHour}</div>
-                            <button
-                              type="button"
-                              onClick={() => decrementHour('startHour')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-bl-md"
-                            >
-                              <FiArrowDown className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                          </div>
-                          <div className="text-gray-400 font-bold">:</div>
-                          <div className="flex-1 text-center">
-                            <button
-                              type="button"
-                              onClick={() => incrementMinute('startMinute')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-tr-md"
-                            >
-                              <FiArrowUp className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                            <div className="py-1 font-medium text-sm">{currentSchedule.startMinute}</div>
-                            <button
-                              type="button"
-                              onClick={() => decrementMinute('startMinute')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-br-md"
-                            >
-                              <FiArrowDown className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <input
+                        type="time"
+                        name="startTime"
+                        value={currentSchedule.startTime}
+                        onChange={handleScheduleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                        step="1800" // 30-minute intervals
+                      />
                     </div>
 
-                    {/* End Time - Visual Time Picker */}
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">End Time</label>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 flex items-center border border-gray-300 rounded-md bg-white">
-                          <div className="flex-1 text-center">
-                            <button
-                              type="button"
-                              onClick={() => incrementHour('endHour')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-tl-md"
-                            >
-                              <FiArrowUp className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                            <div className="py-1 font-medium text-sm">{currentSchedule.endHour}</div>
-                            <button
-                              type="button"
-                              onClick={() => decrementHour('endHour')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-bl-md"
-                            >
-                              <FiArrowDown className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                          </div>
-                          <div className="text-gray-400 font-bold">:</div>
-                          <div className="flex-1 text-center">
-                            <button
-                              type="button"
-                              onClick={() => incrementMinute('endMinute')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-tr-md"
-                            >
-                              <FiArrowUp className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                            <div className="py-1 font-medium text-sm">{currentSchedule.endMinute}</div>
-                            <button
-                              type="button"
-                              onClick={() => decrementMinute('endMinute')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-br-md"
-                            >
-                              <FiArrowDown className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <input
+                        type="time"
+                        name="endTime"
+                        value={currentSchedule.endTime}
+                        onChange={handleScheduleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                        step="1800" // 30-minute intervals
+                      />
                     </div>
                   </div>
 
