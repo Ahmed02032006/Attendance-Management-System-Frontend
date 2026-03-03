@@ -67,10 +67,8 @@ const TeacherSubjects_Page = () => {
   const [classSchedule, setClassSchedule] = useState([])
   const [currentSchedule, setCurrentSchedule] = useState({
     day: 'Monday',
-    startHour: '09',
-    startMinute: '00',
-    endHour: '10',
-    endMinute: '30'
+    startTime: '09:00',
+    endTime: '10:30'
   })
 
   // Time options
@@ -204,30 +202,22 @@ const TeacherSubjects_Page = () => {
   }
 
   const addSchedule = () => {
-    const startTime = `${currentSchedule.startHour}:${currentSchedule.startMinute}`
-    const endTime = `${currentSchedule.endHour}:${currentSchedule.endMinute}`
+    if (!currentSchedule.startTime || !currentSchedule.endTime) {
+      toast.error('Please select both start and end time')
+      return false
+    }
 
     // Validate that end time is after start time
-    const startMinutes = parseInt(currentSchedule.startHour) * 60 + parseInt(currentSchedule.startMinute)
-    const endMinutes = parseInt(currentSchedule.endHour) * 60 + parseInt(currentSchedule.endMinute)
-    
-    if (endMinutes <= startMinutes) {
+    if (currentSchedule.startTime >= currentSchedule.endTime) {
       toast.error('End time must be after start time')
       return false
     }
 
-    setClassSchedule(prev => [...prev, {
-      day: currentSchedule.day,
-      startTime: startTime,
-      endTime: endTime
-    }])
-    
+    setClassSchedule(prev => [...prev, { ...currentSchedule }])
     setCurrentSchedule({
       day: 'Monday',
-      startHour: '09',
-      startMinute: '00',
-      endHour: '10',
-      endMinute: '30'
+      startTime: '09:00',
+      endTime: '10:30'
     })
     return true
   }
@@ -239,7 +229,7 @@ const TeacherSubjects_Page = () => {
   // Format schedule for display
   const formatSchedule = (schedules) => {
     if (!schedules || schedules.length === 0) return 'No schedule';
-    
+
     // Group by day
     const grouped = schedules.reduce((acc, curr) => {
       if (!acc[curr.day]) {
@@ -252,7 +242,7 @@ const TeacherSubjects_Page = () => {
     // Format each day's schedules
     return Object.entries(grouped).map(([day, times]) => (
       <div key={day} className="text-xs">
-        <span className="font-medium">{day.substring(0,3)}:</span> {times.join(', ')}
+        <span className="font-medium">{day.substring(0, 3)}:</span> {times.join(', ')}
       </div>
     ));
   };
@@ -260,8 +250,8 @@ const TeacherSubjects_Page = () => {
   const handleCreateSubject = async (e) => {
     e.preventDefault()
 
-    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session || 
-        !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
+    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session ||
+      !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
     }
@@ -293,8 +283,8 @@ const TeacherSubjects_Page = () => {
   const handleEditSubject = async (e) => {
     e.preventDefault()
 
-    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session || 
-        !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
+    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session ||
+      !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
     }
@@ -315,7 +305,7 @@ const TeacherSubjects_Page = () => {
         id: selectedSubject.id,
         formData: formData
       })).unwrap();
-      
+
       setShowEditModal(false)
       resetForm()
       setClassSchedule([])
@@ -1125,16 +1115,15 @@ const TeacherSubjects_Page = () => {
                   />
                 </div>
 
-                {/* Class Schedule Section - Mandatory with Time Picker */}
+                {/* Class Schedule Section - Mandatory with Time Input */}
                 <div className="border border-gray-200 rounded-lg p-3 bg-blue-50">
                   <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
                     <span className="text-red-500 mr-1">*</span>
                     Class Schedule (Required)
                   </label>
-                  
-                  {/* Schedule Input Row with Time Picker */}
+
+                  {/* Schedule Input Row */}
                   <div className="space-y-3 mb-3">
-                    {/* Day Selection */}
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Day</label>
                       <select
@@ -1153,95 +1142,31 @@ const TeacherSubjects_Page = () => {
                       </select>
                     </div>
 
-                    {/* Start Time - Visual Time Picker */}
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Start Time</label>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 flex items-center border border-gray-300 rounded-md bg-white">
-                          <div className="flex-1 text-center">
-                            <button
-                              type="button"
-                              onClick={() => incrementHour('startHour')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-tl-md"
-                            >
-                              <FiArrowUp className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                            <div className="py-1 font-medium text-sm">{currentSchedule.startHour}</div>
-                            <button
-                              type="button"
-                              onClick={() => decrementHour('startHour')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-bl-md"
-                            >
-                              <FiArrowDown className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                          </div>
-                          <div className="text-gray-400 font-bold">:</div>
-                          <div className="flex-1 text-center">
-                            <button
-                              type="button"
-                              onClick={() => incrementMinute('startMinute')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-tr-md"
-                            >
-                              <FiArrowUp className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                            <div className="py-1 font-medium text-sm">{currentSchedule.startMinute}</div>
-                            <button
-                              type="button"
-                              onClick={() => decrementMinute('startMinute')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-br-md"
-                            >
-                              <FiArrowDown className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <input
+                        type="time"
+                        name="startTime"
+                        value={currentSchedule.startTime}
+                        onChange={handleScheduleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                        step="1800" // 30-minute intervals
+                      />
                     </div>
 
-                    {/* End Time - Visual Time Picker */}
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">End Time</label>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 flex items-center border border-gray-300 rounded-md bg-white">
-                          <div className="flex-1 text-center">
-                            <button
-                              type="button"
-                              onClick={() => incrementHour('endHour')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-tl-md"
-                            >
-                              <FiArrowUp className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                            <div className="py-1 font-medium text-sm">{currentSchedule.endHour}</div>
-                            <button
-                              type="button"
-                              onClick={() => decrementHour('endHour')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-bl-md"
-                            >
-                              <FiArrowDown className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                          </div>
-                          <div className="text-gray-400 font-bold">:</div>
-                          <div className="flex-1 text-center">
-                            <button
-                              type="button"
-                              onClick={() => incrementMinute('endMinute')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-tr-md"
-                            >
-                              <FiArrowUp className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                            <div className="py-1 font-medium text-sm">{currentSchedule.endMinute}</div>
-                            <button
-                              type="button"
-                              onClick={() => decrementMinute('endMinute')}
-                              className="w-full py-1 hover:bg-gray-100 rounded-br-md"
-                            >
-                              <FiArrowDown className="h-3 w-3 mx-auto text-gray-600" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <input
+                        type="time"
+                        name="endTime"
+                        value={currentSchedule.endTime}
+                        onChange={handleScheduleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                        step="1800" // 30-minute intervals
+                      />
                     </div>
                   </div>
-                  
+
                   <button
                     type="button"
                     onClick={addSchedule}
@@ -1270,7 +1195,7 @@ const TeacherSubjects_Page = () => {
                       ))}
                     </div>
                   )}
-                  
+
                   {classSchedule.length === 0 && (
                     <p className="text-xs text-red-500 mt-2">Please add at least one class schedule</p>
                   )}
@@ -1402,7 +1327,7 @@ const TeacherSubjects_Page = () => {
                     <span className="text-red-500 mr-1">*</span>
                     Class Schedule (Required)
                   </label>
-                  
+
                   {/* Schedule Input Row with Time Picker */}
                   <div className="space-y-3 mb-3">
                     {/* Day Selection */}
@@ -1512,7 +1437,7 @@ const TeacherSubjects_Page = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <button
                     type="button"
                     onClick={addSchedule}
@@ -1541,7 +1466,7 @@ const TeacherSubjects_Page = () => {
                       ))}
                     </div>
                   )}
-                  
+
                   {classSchedule.length === 0 && (
                     <p className="text-xs text-red-500 mt-2">Please add at least one class schedule</p>
                   )}
