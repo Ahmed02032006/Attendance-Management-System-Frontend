@@ -41,7 +41,7 @@ import {
   addRegisteredStudents,
   deleteRegisteredStudent,
   deleteAllRegisteredStudents,
-  updateRegisteredStudent // You'll need to add this to your slicer
+  updateRegisteredStudent
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
 const TeacherSubjects_Page = () => {
@@ -52,16 +52,22 @@ const TeacherSubjects_Page = () => {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
-  const [showViewStudentsModal, setShowViewStudentsModal] = useState(false)
-  const [showImportStudentsModal, setShowImportStudentsModal] = useState(false)
-  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
   const [showStudentManagementModal, setShowStudentManagementModal] = useState(false)
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
   const [subjectsPerPage] = useState(5)
-  const [activeStudentTab, setActiveStudentTab] = useState('view') // 'view' or 'import'
+  const [activeStudentTab, setActiveStudentTab] = useState('view')
+
+  // For class schedule
+  const [classSchedule, setClassSchedule] = useState([])
+  const [currentSchedule, setCurrentSchedule] = useState({
+    day: 'Monday',
+    startTime: '',
+    endTime: ''
+  })
 
   // For imported students data
   const [importedStudents, setImportedStudents] = useState([])
@@ -71,7 +77,8 @@ const TeacherSubjects_Page = () => {
   // For individual student addition
   const [individualStudent, setIndividualStudent] = useState({
     registrationNo: '',
-    studentName: ''
+    studentName: '',
+    discipline: ''
   })
   const [isAddingStudent, setIsAddingStudent] = useState(false)
 
@@ -79,7 +86,8 @@ const TeacherSubjects_Page = () => {
   const [editingStudent, setEditingStudent] = useState(null)
   const [editFormData, setEditFormData] = useState({
     registrationNo: '',
-    studentName: ''
+    studentName: '',
+    discipline: ''
   })
   const [isEditingStudent, setIsEditingStudent] = useState(false)
 
@@ -132,10 +140,45 @@ const TeacherSubjects_Page = () => {
     }))
   }
 
+  // Class schedule handlers
+  const handleScheduleChange = (e) => {
+    const { name, value } = e.target
+    setCurrentSchedule(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const addSchedule = () => {
+    if (!currentSchedule.startTime || !currentSchedule.endTime) {
+      toast.error('Please enter both start and end time')
+      return
+    }
+
+    // Validate time format (HH:MM)
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
+    if (!timeRegex.test(currentSchedule.startTime) || !timeRegex.test(currentSchedule.endTime)) {
+      toast.error('Please enter valid time in HH:MM format (e.g., 09:00, 14:30)')
+      return
+    }
+
+    setClassSchedule(prev => [...prev, { ...currentSchedule }])
+    setCurrentSchedule({
+      day: 'Monday',
+      startTime: '',
+      endTime: ''
+    })
+  }
+
+  const removeSchedule = (index) => {
+    setClassSchedule(prev => prev.filter((_, i) => i !== index))
+  }
+
   const handleCreateSubject = async (e) => {
     e.preventDefault()
 
-    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session || !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
+    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session || 
+        !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
     }
@@ -144,50 +187,56 @@ const TeacherSubjects_Page = () => {
       const formData = {
         ...subjectForm,
         userId: currentUserId,
-        registeredStudents: []
+        registeredStudents: [],
+        classSchedule: classSchedule // Add class schedule
       }
 
       await dispatch(createSubject(formData)).unwrap()
-      dispatch(getSubjectsByUser(currentUserId)).unwrap();
       setShowCreateModal(false)
       resetForm()
-      toast.success('Subject created successfully!')
+      setClassSchedule([])
+      toast.success('Course created successfully!')
     } catch (error) {
-      toast.error(error?.message || 'Failed to create subject')
+      toast.error(error?.message || 'Failed to create course')
     }
   }
 
   const handleEditSubject = async (e) => {
     e.preventDefault()
 
-    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session || !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
+    if (!subjectForm.subjectTitle || !subjectForm.departmentOffering || !subjectForm.session || 
+        !subjectForm.creditHours || !subjectForm.subjectCode || !subjectForm.semester) {
       toast.error('Please fill all required fields')
       return
     }
 
     try {
+      const formData = {
+        ...subjectForm,
+        classSchedule: classSchedule // Include updated class schedule
+      }
+
       await dispatch(updateSubject({
         id: selectedSubject.id,
-        formData: subjectForm
+        formData: formData
       })).unwrap();
-      dispatch(getSubjectsByUser(currentUserId)).unwrap();
-
+      
       setShowEditModal(false)
       resetForm()
-      toast.success('Subject updated successfully!')
+      setClassSchedule([])
+      toast.success('Course updated successfully!')
     } catch (error) {
-      toast.error(error?.message || 'Failed to update subject')
+      toast.error(error?.message || 'Failed to update course')
     }
   }
 
   const handleDeleteSubject = async () => {
     try {
       await dispatch(deleteSubject(selectedSubject.id)).unwrap()
-      dispatch(getSubjectsByUser(currentUserId)).unwrap();
       setShowDeleteModal(false)
-      toast.success('Subject deleted successfully!')
+      toast.success('Course deleted successfully!')
     } catch (error) {
-      toast.error(error?.message || 'Failed to delete subject')
+      toast.error(error?.message || 'Failed to delete course')
     }
   }
 
@@ -195,9 +244,9 @@ const TeacherSubjects_Page = () => {
     try {
       await dispatch(resetSubjectAttendance(selectedSubject.id)).unwrap()
       setShowResetModal(false)
-      toast.success('Subject attendance records cleared successfully!')
+      toast.success('Course attendance records cleared successfully!')
     } catch (error) {
-      toast.error(error?.message || 'Failed to reset subject attendance')
+      toast.error(error?.message || 'Failed to reset course attendance')
     }
   }
 
@@ -206,30 +255,36 @@ const TeacherSubjects_Page = () => {
     const dummyData = [
       {
         'Registration No': '25FA-001-BCS',
-        'Student Name': 'John Doe'
+        'Student Name': 'John Doe',
+        'Discipline': 'BCS'
       },
       {
         'Registration No': '25FA-002-BCS',
-        'Student Name': 'Jane Smith'
+        'Student Name': 'Jane Smith',
+        'Discipline': 'BCS'
       },
       {
-        'Registration No': '25FA-003-BCS',
-        'Student Name': 'Alice Johnson'
+        'Registration No': '25FA-003-BSE',
+        'Student Name': 'Alice Johnson',
+        'Discipline': 'BSE'
       },
       {
         'Registration No': '25FA-004-BCS',
-        'Student Name': 'Bob Williams'
+        'Student Name': 'Bob Williams',
+        'Discipline': 'BCS'
       },
       {
-        'Registration No': '25FA-005-BCS',
-        'Student Name': 'Charlie Brown'
+        'Registration No': '25FA-005-BEE',
+        'Student Name': 'Charlie Brown',
+        'Discipline': 'BEE'
       }
     ];
 
     const ws = XLSX.utils.json_to_sheet(dummyData);
     ws['!cols'] = [
       { wch: 20 },
-      { wch: 25 }
+      { wch: 25 },
+      { wch: 15 }
     ];
 
     const wb = XLSX.utils.book_new();
@@ -288,15 +343,16 @@ const TeacherSubjects_Page = () => {
 
         const students = jsonData.map(row => ({
           registrationNo: row['Registration No'] || row['registrationNo'] || row['Registration'] || '',
-          studentName: row['Student Name'] || row['studentName'] || row['Name'] || row['name'] || ''
-        })).filter(student => student.registrationNo && student.studentName);
+          studentName: row['Student Name'] || row['studentName'] || row['Name'] || row['name'] || '',
+          discipline: row['Discipline'] || row['discipline'] || ''
+        })).filter(student => student.registrationNo && student.studentName && student.discipline);
 
         setImportedStudents(students);
         toast.success(
           <div>
             <div className="font-medium">{students.length} students imported successfully!</div>
             {students.length === 0 && (
-              <div className="text-xs mt-1">Make sure your file has 'Registration No' and 'Student Name' columns</div>
+              <div className="text-xs mt-1">Make sure your file has 'Registration No', 'Student Name', and 'Discipline' columns</div>
             )}
           </div>
         );
@@ -370,6 +426,10 @@ const TeacherSubjects_Page = () => {
       toast.error('Please enter student name');
       return;
     }
+    if (!individualStudent.discipline.trim()) {
+      toast.error('Please enter student discipline');
+      return;
+    }
 
     // Check for duplicates in current list
     const isDuplicate = registeredStudents?.registeredStudents?.some(
@@ -389,7 +449,8 @@ const TeacherSubjects_Page = () => {
         teacherId: currentUserId,
         students: [{
           registrationNo: individualStudent.registrationNo.trim(),
-          studentName: individualStudent.studentName.trim()
+          studentName: individualStudent.studentName.trim(),
+          discipline: individualStudent.discipline.trim()
         }]
       })).unwrap();
 
@@ -398,7 +459,8 @@ const TeacherSubjects_Page = () => {
       // Clear form
       setIndividualStudent({
         registrationNo: '',
-        studentName: ''
+        studentName: '',
+        discipline: ''
       });
 
       // Refresh students list
@@ -418,7 +480,8 @@ const TeacherSubjects_Page = () => {
     setEditingStudent(student);
     setEditFormData({
       registrationNo: student.registrationNo,
-      studentName: student.studentName
+      studentName: student.studentName,
+      discipline: student.discipline || ''
     });
   };
 
@@ -427,7 +490,8 @@ const TeacherSubjects_Page = () => {
     setEditingStudent(null);
     setEditFormData({
       registrationNo: '',
-      studentName: ''
+      studentName: '',
+      discipline: ''
     });
   };
 
@@ -451,6 +515,10 @@ const TeacherSubjects_Page = () => {
       toast.error('Please enter student name');
       return;
     }
+    if (!editFormData.discipline.trim()) {
+      toast.error('Please enter student discipline');
+      return;
+    }
 
     // Check for duplicates (excluding current student)
     const isDuplicate = registeredStudents?.registeredStudents?.some(
@@ -466,14 +534,14 @@ const TeacherSubjects_Page = () => {
     setIsEditingStudent(true);
 
     try {
-      // FIXED: Pass the parameters correctly to match the slicer
       await dispatch(updateRegisteredStudent({
         subjectId: selectedSubject.id,
         studentId: editingStudent._id,
         teacherId: currentUserId,
         studentData: {
           registrationNo: editFormData.registrationNo.trim(),
-          studentName: editFormData.studentName.trim()
+          studentName: editFormData.studentName.trim(),
+          discipline: editFormData.discipline.trim()
         }
       })).unwrap();
 
@@ -483,7 +551,8 @@ const TeacherSubjects_Page = () => {
       setEditingStudent(null);
       setEditFormData({
         registrationNo: '',
-        studentName: ''
+        studentName: '',
+        discipline: ''
       });
 
       // Refresh students list
@@ -499,76 +568,6 @@ const TeacherSubjects_Page = () => {
     }
   };
 
-  // Handle view registered students
-  const handleViewStudents = async (subject) => {
-    try {
-      const result = await dispatch(getRegisteredStudents({
-        subjectId: subject.id,
-        teacherId: currentUserId
-      })).unwrap();
-
-      setSelectedSubject(subject);
-      setShowViewStudentsModal(true);
-    } catch (error) {
-      toast.error(error?.message || 'Failed to fetch registered students');
-    }
-  };
-
-  // Handle delete registered student
-  const handleDeleteStudent = async (studentId) => {
-    if (!window.confirm('Are you sure you want to remove this student?')) {
-      return;
-    }
-
-    try {
-      await dispatch(deleteRegisteredStudent({
-        subjectId: selectedSubject.id,
-        studentId: studentId,
-        teacherId: currentUserId
-      })).unwrap();
-
-      toast.success('Student removed successfully!');
-
-      dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id,
-        teacherId: currentUserId
-      }));
-    } catch (error) {
-      toast.error(error?.message || 'Failed to delete student');
-    }
-  };
-
-  // Open delete all confirmation modal
-  const openDeleteAllModal = () => {
-    setShowDeleteAllModal(true);
-  };
-
-  // Handle delete all registered students
-  const handleDeleteAllStudents = async () => {
-    if (!selectedSubject) return;
-
-    const studentCount = registeredStudents?.registeredStudents?.length || 0;
-
-    try {
-      const result = await dispatch(deleteAllRegisteredStudents({
-        subjectId: selectedSubject.id,
-        teacherId: currentUserId
-      })).unwrap();
-
-      toast.success(result.message || `Students deleted successfully!`);
-      setShowDeleteAllModal(false);
-
-      await dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id,
-        teacherId: currentUserId
-      }));
-    } catch (error) {
-      console.error('Delete all students error:', error);
-      toast.error(error?.message || 'Failed to delete students');
-      setShowDeleteAllModal(false);
-    }
-  };
-
   // Handle student management
   const handleStudentManagement = async (subject) => {
     setSelectedSubject(subject);
@@ -576,7 +575,8 @@ const TeacherSubjects_Page = () => {
     setImportedStudents([]);
     setIndividualStudent({
       registrationNo: '',
-      studentName: ''
+      studentName: '',
+      discipline: ''
     });
     setEditingStudent(null);
 
@@ -594,6 +594,7 @@ const TeacherSubjects_Page = () => {
 
   const openCreateModal = () => {
     resetForm()
+    setClassSchedule([])
     setShowCreateModal(true)
   }
 
@@ -609,6 +610,7 @@ const TeacherSubjects_Page = () => {
       status: subject.status,
       userId: subject.userId
     })
+    setClassSchedule(subject.classSchedule || [])
     setShowEditModal(true)
   }
 
@@ -872,7 +874,7 @@ const TeacherSubjects_Page = () => {
                           <button
                             onClick={() => openEditModal(subject)}
                             className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
-                            title="Edit Subject"
+                            title="Edit Course"
                           >
                             <FiEdit className="h-4 w-4" />
                           </button>
@@ -886,7 +888,7 @@ const TeacherSubjects_Page = () => {
                           <button
                             onClick={() => openDeleteModal(subject)}
                             className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                            title="Delete Subject"
+                            title="Delete Course"
                           >
                             <FiTrash2 className="h-4 w-4" />
                           </button>
@@ -899,7 +901,7 @@ const TeacherSubjects_Page = () => {
                     <td colSpan="8" className="px-4 py-8 text-center">
                       <div className="text-gray-500">
                         <FiBook className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-sm">No subjects found</p>
+                        <p className="text-sm">No courses found</p>
                         {searchTerm && (
                           <p className="text-xs text-gray-400 mt-1">
                             Try adjusting your search
@@ -946,8 +948,8 @@ const TeacherSubjects_Page = () => {
       {/* Create Subject Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-md">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 sticky top-0 bg-white">
               <h3 className="text-base font-medium text-gray-900">Create New Course</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -972,6 +974,77 @@ const TeacherSubjects_Page = () => {
                     required
                   />
                 </div>
+
+                {/* Class Schedule Section */}
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Class Schedule (Optional)
+                  </label>
+                  
+                  {/* Schedule Input Row */}
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    <select
+                      name="day"
+                      value={currentSchedule.day}
+                      onChange={handleScheduleChange}
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="Monday">Monday</option>
+                      <option value="Tuesday">Tuesday</option>
+                      <option value="Wednesday">Wednesday</option>
+                      <option value="Thursday">Thursday</option>
+                      <option value="Friday">Friday</option>
+                      <option value="Saturday">Saturday</option>
+                      <option value="Sunday">Sunday</option>
+                    </select>
+                    <input
+                      type="text"
+                      name="startTime"
+                      value={currentSchedule.startTime}
+                      onChange={handleScheduleChange}
+                      placeholder="Start (HH:MM)"
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <input
+                      type="text"
+                      name="endTime"
+                      value={currentSchedule.endTime}
+                      onChange={handleScheduleChange}
+                      placeholder="End (HH:MM)"
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <button
+                    type="button"
+                    onClick={addSchedule}
+                    className="w-full px-3 py-1.5 bg-blue-50 text-blue-600 text-xs rounded-md hover:bg-blue-100 font-medium flex items-center justify-center"
+                  >
+                    <FiPlus className="h-3 w-3 mr-1" />
+                    Add Schedule
+                  </button>
+
+                  {/* Display Added Schedules */}
+                  {classSchedule.length > 0 && (
+                    <div className="mt-3 space-y-1">
+                      {classSchedule.map((schedule, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                          <span className="text-xs">
+                            {schedule.day}: {schedule.startTime} - {schedule.endTime}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeSchedule(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <FiX className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
                     Discipline *
@@ -1043,7 +1116,7 @@ const TeacherSubjects_Page = () => {
                   />
                 </div>
               </div>
-              <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
+              <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2 sticky bottom-0 bg-white">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
@@ -1066,8 +1139,8 @@ const TeacherSubjects_Page = () => {
       {/* Edit Subject Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-md">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 sticky top-0 bg-white">
               <h3 className="text-base font-medium text-gray-900">Edit Course</h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1091,6 +1164,77 @@ const TeacherSubjects_Page = () => {
                     required
                   />
                 </div>
+
+                {/* Class Schedule Section - Edit */}
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Class Schedule (Optional)
+                  </label>
+                  
+                  {/* Schedule Input Row */}
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    <select
+                      name="day"
+                      value={currentSchedule.day}
+                      onChange={handleScheduleChange}
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="Monday">Monday</option>
+                      <option value="Tuesday">Tuesday</option>
+                      <option value="Wednesday">Wednesday</option>
+                      <option value="Thursday">Thursday</option>
+                      <option value="Friday">Friday</option>
+                      <option value="Saturday">Saturday</option>
+                      <option value="Sunday">Sunday</option>
+                    </select>
+                    <input
+                      type="text"
+                      name="startTime"
+                      value={currentSchedule.startTime}
+                      onChange={handleScheduleChange}
+                      placeholder="Start (HH:MM)"
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <input
+                      type="text"
+                      name="endTime"
+                      value={currentSchedule.endTime}
+                      onChange={handleScheduleChange}
+                      placeholder="End (HH:MM)"
+                      className="px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <button
+                    type="button"
+                    onClick={addSchedule}
+                    className="w-full px-3 py-1.5 bg-blue-50 text-blue-600 text-xs rounded-md hover:bg-blue-100 font-medium flex items-center justify-center"
+                  >
+                    <FiPlus className="h-3 w-3 mr-1" />
+                    Add Schedule
+                  </button>
+
+                  {/* Display Added Schedules */}
+                  {classSchedule.length > 0 && (
+                    <div className="mt-3 space-y-1">
+                      {classSchedule.map((schedule, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                          <span className="text-xs">
+                            {schedule.day}: {schedule.startTime} - {schedule.endTime}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeSchedule(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <FiX className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
                     Discipline *
@@ -1171,7 +1315,7 @@ const TeacherSubjects_Page = () => {
                   </select>
                 </div>
               </div>
-              <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
+              <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2 sticky bottom-0 bg-white">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
@@ -1322,7 +1466,7 @@ const TeacherSubjects_Page = () => {
                   onClick={() => {
                     setShowStudentManagementModal(false);
                     setImportedStudents([]);
-                    setIndividualStudent({ registrationNo: '', studentName: '' });
+                    setIndividualStudent({ registrationNo: '', studentName: '', discipline: '' });
                     setEditingStudent(null);
                   }}
                   className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
@@ -1338,7 +1482,7 @@ const TeacherSubjects_Page = () => {
                 onClick={() => {
                   setActiveStudentTab('view');
                   setImportedStudents([]);
-                  setIndividualStudent({ registrationNo: '', studentName: '' });
+                  setIndividualStudent({ registrationNo: '', studentName: '', discipline: '' });
                   setEditingStudent(null);
                 }}
                 className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'view'
@@ -1407,11 +1551,22 @@ const TeacherSubjects_Page = () => {
                             disabled={isAddingStudent}
                           />
                         </div>
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            name="discipline"
+                            value={individualStudent.discipline}
+                            onChange={handleIndividualStudentChange}
+                            placeholder="Discipline *"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            disabled={isAddingStudent}
+                          />
+                        </div>
                         <div>
                           <button
                             onClick={handleAddIndividualStudent}
-                            disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()}
-                            className={`h-full px-4 py-2 text-sm rounded-md font-medium transition-all flex items-center whitespace-nowrap ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim()
+                            disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim() || !individualStudent.discipline.trim()}
+                            className={`h-full px-4 py-2 text-sm rounded-md font-medium transition-all flex items-center whitespace-nowrap ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim() || !individualStudent.discipline.trim()
                               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                               : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
                               }`}
@@ -1470,6 +1625,7 @@ const TeacherSubjects_Page = () => {
                               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
                               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Registration No</th>
                               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Discipline</th>
                               <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
                           </thead>
@@ -1503,6 +1659,19 @@ const TeacherSubjects_Page = () => {
                                       />
                                     ) : (
                                       student.studentName
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2 text-sm text-gray-900">
+                                    {editingStudent && editingStudent._id === student._id ? (
+                                      <input
+                                        type="text"
+                                        name="discipline"
+                                        value={editFormData.discipline}
+                                        onChange={handleEditFormChange}
+                                        className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                      />
+                                    ) : (
+                                      student.discipline || '-'
                                     )}
                                   </td>
                                   <td className="px-4 py-2 text-sm text-center">
@@ -1548,7 +1717,7 @@ const TeacherSubjects_Page = () => {
                               ))
                             ) : (
                               <tr>
-                                <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
+                                <td colSpan="5" className="px-4 py-8 text-center text-sm text-gray-500">
                                   <FiUsers className="h-8 w-8 text-gray-300 mx-auto mb-2" />
                                   No students registered yet
                                   <p className="text-xs text-gray-400 mt-1">
@@ -1684,10 +1853,16 @@ const TeacherSubjects_Page = () => {
                             <span className="text-xs text-gray-600">Column: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-blue-600 text-[10px] font-medium">Student Name</span></span>
                           </div>
                           <div className="flex items-center">
+                            <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2">
+                              <span className="text-green-600 text-[10px] font-bold">✓</span>
+                            </div>
+                            <span className="text-xs text-gray-600">Column: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-blue-600 text-[10px] font-medium">Discipline</span></span>
+                          </div>
+                          <div className="flex items-center">
                             <div className="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center mr-2">
                               <span className="text-yellow-600 text-[10px] font-bold">!</span>
                             </div>
-                            <span className="text-xs text-gray-600">Both columns are required</span>
+                            <span className="text-xs text-gray-600">All three columns are required</span>
                           </div>
                         </div>
                       </div>
@@ -1747,6 +1922,7 @@ const TeacherSubjects_Page = () => {
                                 <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">#</th>
                                 <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Registration No</th>
                                 <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Student Name</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Discipline</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -1755,6 +1931,7 @@ const TeacherSubjects_Page = () => {
                                   <td className="px-3 py-2 text-[11px] text-gray-500">{index + 1}</td>
                                   <td className="px-3 py-2 text-[11px] font-mono font-medium text-gray-800">{student.registrationNo}</td>
                                   <td className="px-3 py-2 text-[11px] text-gray-700">{student.studentName}</td>
+                                  <td className="px-3 py-2 text-[11px] text-gray-700">{student.discipline}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -1779,7 +1956,7 @@ const TeacherSubjects_Page = () => {
                 onClick={() => {
                   setShowStudentManagementModal(false);
                   setImportedStudents([]);
-                  setIndividualStudent({ registrationNo: '', studentName: '' });
+                  setIndividualStudent({ registrationNo: '', studentName: '', discipline: '' });
                   setEditingStudent(null);
                 }}
                 className="px-4 py-2 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors"

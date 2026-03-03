@@ -5,7 +5,7 @@ const initialState = {
   subjects: [],
   isLoading: false,
   currentSubject: null,
-  registeredStudents: [], // New state for registered students
+  registeredStudents: [],
   studentsLoading: false
 };
 
@@ -113,7 +113,7 @@ export const resetSubjectAttendance = createAsyncThunk(
   }
 );
 
-// NEW: Get registered students by subject ID
+// Get registered students by subject ID
 export const getRegisteredStudents = createAsyncThunk(
   "subjects/getRegisteredStudents",
   async ({ subjectId, teacherId }, { rejectWithValue }) => {
@@ -133,7 +133,7 @@ export const getRegisteredStudents = createAsyncThunk(
   }
 );
 
-// NEW: Add registered students to a subject
+// Add registered students to a subject
 export const addRegisteredStudents = createAsyncThunk(
   "subjects/addRegisteredStudents",
   async ({ subjectId, teacherId, students }, { rejectWithValue }) => {
@@ -154,7 +154,7 @@ export const addRegisteredStudents = createAsyncThunk(
   }
 );
 
-// NEW: Update a registered student
+// Update a registered student
 export const updateRegisteredStudent = createAsyncThunk(
   "subjects/updateRegisteredStudent",
   async ({ subjectId, studentId, teacherId, studentData }, { rejectWithValue }) => {
@@ -164,7 +164,8 @@ export const updateRegisteredStudent = createAsyncThunk(
         {
           teacherId,
           registrationNo: studentData.registrationNo,
-          studentName: studentData.studentName
+          studentName: studentData.studentName,
+          discipline: studentData.discipline
         }
       );
 
@@ -179,7 +180,7 @@ export const updateRegisteredStudent = createAsyncThunk(
   }
 );
 
-// NEW: Delete a registered student
+// Delete a registered student
 export const deleteRegisteredStudent = createAsyncThunk(
   "subjects/deleteRegisteredStudent",
   async ({ subjectId, studentId, teacherId }, { rejectWithValue }) => {
@@ -252,30 +253,41 @@ const subjectSlicer = createSlice({
         state.isLoading = false;
       })
 
-      // Update Subject
+      // Update Subject - FIXED: Now updates immediately
       .addCase(updateSubject.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(updateSubject.fulfilled, (state, action) => {
         state.isLoading = false;
         const updatedSubject = action.payload.data;
-        const index = state.subjects.findIndex(subject => subject._id === updatedSubject._id);
+        const index = state.subjects.findIndex(subject => subject.id === updatedSubject._id);
         if (index !== -1) {
-          state.subjects[index] = updatedSubject;
+          // Format the updated subject to match the frontend structure
+          state.subjects[index] = {
+            ...state.subjects[index],
+            title: updatedSubject.subjectTitle,
+            departmentOffering: updatedSubject.departmentOffering,
+            code: updatedSubject.subjectCode,
+            creditHours: updatedSubject.creditHours,
+            session: updatedSubject.session,
+            semester: updatedSubject.semester,
+            status: updatedSubject.status,
+            classSchedule: updatedSubject.classSchedule || []
+          };
         }
       })
       .addCase(updateSubject.rejected, (state, action) => {
         state.isLoading = false;
       })
 
-      // Delete Subject
+      // Delete Subject - FIXED: Now deletes immediately
       .addCase(deleteSubject.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(deleteSubject.fulfilled, (state, action) => {
         state.isLoading = false;
         state.subjects = state.subjects.filter(
-          subject => subject._id !== action.payload.deletedId
+          subject => subject.id !== action.payload.deletedId
         );
       })
       .addCase(deleteSubject.rejected, (state, action) => {
@@ -293,7 +305,7 @@ const subjectSlicer = createSlice({
         state.isLoading = false;
       })
 
-      // NEW: Get Registered Students
+      // Get Registered Students
       .addCase(getRegisteredStudents.pending, (state) => {
         state.studentsLoading = true;
       })
@@ -306,7 +318,7 @@ const subjectSlicer = createSlice({
         state.registeredStudents = [];
       })
 
-      // NEW: Add Registered Students
+      // Add Registered Students
       .addCase(addRegisteredStudents.pending, (state) => {
         state.studentsLoading = true;
       })
@@ -325,7 +337,7 @@ const subjectSlicer = createSlice({
         state.studentsLoading = false;
       })
 
-      // NEW: Delete Registered Student
+      // Delete Registered Student
       .addCase(deleteRegisteredStudent.pending, (state) => {
         state.studentsLoading = true;
       })
@@ -363,7 +375,7 @@ const subjectSlicer = createSlice({
         }
         // Update the count in subjects list to 0
         const subjectIndex = state.subjects.findIndex(
-          s => s.id === action.payload.subjectId
+          s => s.id === action.payload.data?.subjectId
         );
         if (subjectIndex !== -1) {
           state.subjects[subjectIndex].registeredStudentsCount = 0;
@@ -372,7 +384,6 @@ const subjectSlicer = createSlice({
       .addCase(deleteAllRegisteredStudents.rejected, (state, action) => {
         state.studentsLoading = false;
       });
-    ;
   },
 });
 
