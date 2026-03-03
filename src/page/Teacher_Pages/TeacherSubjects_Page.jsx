@@ -174,6 +174,27 @@ const TeacherSubjects_Page = () => {
     setClassSchedule(prev => prev.filter((_, i) => i !== index))
   }
 
+  // Format schedule for display
+  const formatSchedule = (schedules) => {
+    if (!schedules || schedules.length === 0) return 'No schedule';
+    
+    // Group by day
+    const grouped = schedules.reduce((acc, curr) => {
+      if (!acc[curr.day]) {
+        acc[curr.day] = [];
+      }
+      acc[curr.day].push(`${curr.startTime}-${curr.endTime}`);
+      return acc;
+    }, {});
+
+    // Format each day's schedules
+    return Object.entries(grouped).map(([day, times]) => (
+      <div key={day} className="text-xs">
+        <span className="font-medium">{day.substring(0,3)}:</span> {times.join(', ')}
+      </div>
+    ));
+  };
+
   const handleCreateSubject = async (e) => {
     e.preventDefault()
 
@@ -695,18 +716,6 @@ const TeacherSubjects_Page = () => {
   const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages))
   const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1))
 
-  // Format date
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffTime = Math.abs(now - date)
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-    if (diffDays === 1) return 'Yesterday'
-    if (diffDays < 7) return `${diffDays} days ago`
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-  }
-
   // Get status color
   const getStatusColor = (status) => {
     return status === 'Active'
@@ -852,11 +861,11 @@ const TeacherSubjects_Page = () => {
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Semester
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Students
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Class Schedule
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created
+                    Students
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -900,14 +909,14 @@ const TeacherSubjects_Page = () => {
                           {subject.semester}
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <div className="text-sm text-gray-600">
-                          {subject.registeredStudentsCount || 0}
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-gray-600 space-y-0.5">
+                          {formatSchedule(subject.classSchedule)}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="text-sm text-gray-600">
-                          {formatDate(subject.createdAt)}
+                          {subject.registeredStudentsCount || 0}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
