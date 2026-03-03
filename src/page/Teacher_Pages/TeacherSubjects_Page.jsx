@@ -241,20 +241,31 @@ const TeacherSubjects_Page = () => {
   const formatSchedule = (schedules) => {
     if (!schedules || schedules.length === 0) return 'No schedule';
 
+    // Function to convert 24-hour time to 12-hour format
+    const convertTo12Hour = (time) => {
+      const [hour, minute] = time.split(':');
+      const hourInt = parseInt(hour);
+      const ampm = hourInt >= 12 ? 'PM' : 'AM';
+      const hour12 = hourInt % 12 || 12;
+      return `${hour12}:${minute} ${ampm}`;
+    };
+
     // Group by day
     const grouped = schedules.reduce((acc, curr) => {
       if (!acc[curr.day]) {
         acc[curr.day] = [];
       }
-      // Ensure times are displayed with proper format
-      acc[curr.day].push(`${curr.startTime} - ${curr.endTime}`);
+      // Convert times to 12-hour format
+      const startTime12 = convertTo12Hour(curr.startTime);
+      const endTime12 = convertTo12Hour(curr.endTime);
+      acc[curr.day].push(`${startTime12} - ${endTime12}`);
       return acc;
     }, {});
 
-    // Format each day's schedules
+    // Format each day's schedules with full day names
     return Object.entries(grouped).map(([day, times]) => (
       <div key={day} className="text-xs">
-        <span className="font-medium">{day.substring(0, 3)}:</span> {times.join(', ')}
+        <span className="font-medium">{day}:</span> {times.join(', ')}
       </div>
     ));
   };
