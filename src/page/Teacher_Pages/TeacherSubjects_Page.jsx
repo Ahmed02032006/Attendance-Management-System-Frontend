@@ -214,11 +214,15 @@ const TeacherSubjects_Page = () => {
     }
 
     setClassSchedule(prev => [...prev, { ...currentSchedule }])
+
+    // Reset to default values and close time pickers by resetting to simple state
     setCurrentSchedule({
       day: 'Monday',
       startTime: '09:00',
       endTime: '10:30'
     })
+
+    toast.success('Schedule added successfully!')
     return true
   }
 
