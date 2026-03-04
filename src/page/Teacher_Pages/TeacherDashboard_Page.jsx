@@ -50,16 +50,6 @@ const TeacherDashboard_Page = () => {
     isLoading
   } = useSelector((state) => state.teacherDashboard)
 
-  // Stats state
-  const [stats, setStats] = useState({
-    totalSubjects: 0,
-    totalStudents: 0,
-    totalAttendance: 0,
-    averageAttendance: 0,
-    mostActiveSubject: null,
-    todayAttendance: 0
-  })
-
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [currentDate, setCurrentDate] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -295,13 +285,6 @@ const TeacherDashboard_Page = () => {
     }
   }, [isChatOpen, chatMessages]);
 
-  // Calculate statistics from dashboard data
-  useEffect(() => {
-    if (dashboardSubjects.length > 0 && Object.keys(dashboardAttendance).length > 0) {
-      calculateStats();
-    }
-  }, [dashboardSubjects, dashboardAttendance]);
-
   // Fetch data
   useEffect(() => {
     const fetchData = async () => {
@@ -339,78 +322,6 @@ const TeacherDashboard_Page = () => {
       setTimeout(() => inputRef.current.focus(), 150);
     }
   }, [isChatOpen]);
-
-  // Calculate dynamic statistics
-  const calculateStats = () => {
-    // Total subjects
-    const totalSubjects = dashboardSubjects.length;
-
-    // Total unique students across all subjects
-    const uniqueStudentsSet = new Set();
-    dashboardSubjects.forEach(subject => {
-      if (subject.students) {
-        // Assuming students count is available in subject data
-        // If not, we need to calculate from attendance records
-      }
-    });
-
-    // Calculate from attendance data
-    let totalAttendanceRecords = 0;
-    let totalAttendanceDays = 0;
-    let subjectAttendanceCount = {};
-    let today = new Date().toISOString().split('T')[0];
-
-    Object.entries(dashboardAttendance).forEach(([subjectId, attendanceByDate]) => {
-      const dates = Object.keys(attendanceByDate);
-      totalAttendanceDays += dates.length;
-
-      dates.forEach(date => {
-        const records = attendanceByDate[date] || [];
-        totalAttendanceRecords += records.length;
-
-        // Track attendance per subject for most active subject
-        if (!subjectAttendanceCount[subjectId]) {
-          subjectAttendanceCount[subjectId] = 0;
-        }
-        subjectAttendanceCount[subjectId] += records.length;
-      });
-    });
-
-    // Calculate today's attendance
-    let todayAttendance = 0;
-    Object.values(dashboardAttendance).forEach(attendanceByDate => {
-      if (attendanceByDate[today]) {
-        todayAttendance += attendanceByDate[today].length;
-      }
-    });
-
-    // Find most active subject
-    let mostActiveSubjectId = null;
-    let maxAttendance = 0;
-
-    Object.entries(subjectAttendanceCount).forEach(([subjectId, count]) => {
-      if (count > maxAttendance) {
-        maxAttendance = count;
-        mostActiveSubjectId = subjectId;
-      }
-    });
-
-    const mostActiveSubject = dashboardSubjects.find(s => s.id === mostActiveSubjectId);
-
-    // Calculate average attendance per day
-    const averageAttendance = totalAttendanceDays > 0 
-      ? Math.round(totalAttendanceRecords / totalAttendanceDays) 
-      : 0;
-
-    setStats({
-      totalSubjects,
-      totalStudents: dashboardSubjects.reduce((acc, subject) => acc + (subject.students || 0), 0),
-      totalAttendance: totalAttendanceRecords,
-      averageAttendance,
-      mostActiveSubject: mostActiveSubject?.title || 'N/A',
-      todayAttendance
-    });
-  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -615,6 +526,7 @@ const TeacherDashboard_Page = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+
         {/* Stats Cards Section */}
         <div className="mb-6">
           <h3 className="text-sm font-medium text-gray-500 mb-3">Quick Overview</h3>
@@ -622,7 +534,7 @@ const TeacherDashboard_Page = () => {
             <StatCard
               icon={FiBook}
               label="Total Courses"
-              value={stats.totalSubjects}
+              value={"1"}
               color="text-blue-600"
               bgColor="bg-blue-50"
               subtext={stats.totalSubjects === 1 ? 'course assigned' : 'courses assigned'}
@@ -630,7 +542,7 @@ const TeacherDashboard_Page = () => {
             <StatCard
               icon={FiUsers}
               label="Total Students"
-              value={stats.totalStudents}
+              value={"2"}
               color="text-green-600"
               bgColor="bg-green-50"
               subtext="enrolled students"
@@ -638,7 +550,7 @@ const TeacherDashboard_Page = () => {
             <StatCard
               icon={FiUserCheck}
               label="Attendance Records"
-              value={stats.totalAttendance}
+              value={"3"}
               color="text-purple-600"
               bgColor="bg-purple-50"
               subtext="total marks"
@@ -646,30 +558,10 @@ const TeacherDashboard_Page = () => {
             <StatCard
               icon={FiAward}
               label="Today's Attendance"
-              value={stats.todayAttendance}
+              value={"4"}
               color="text-orange-600"
               bgColor="bg-orange-50"
               subtext={stats.todayAttendance === 1 ? 'student present' : 'students present'}
-            />
-          </div>
-
-          {/* Secondary Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-            <StatCard
-              icon={FiUserPlus}
-              label="Average Daily Attendance"
-              value={stats.averageAttendance}
-              color="text-indigo-600"
-              bgColor="bg-indigo-50"
-              subtext="per day average"
-            />
-            <StatCard
-              icon={FiAward}
-              label="Most Active Course"
-              value={stats.mostActiveSubject}
-              color="text-pink-600"
-              bgColor="bg-pink-50"
-              subtext="highest attendance"
             />
           </div>
         </div>
