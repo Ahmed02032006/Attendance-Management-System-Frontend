@@ -4,18 +4,21 @@ import { toast } from 'react-toastify';
 import { createAttendance } from '../../store/Teacher-Slicer/Attendance-Slicer';
 import { useDispatch } from 'react-redux';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
+import axios from 'axios';
 
 const StudentAttendance_Page = () => {
   const [formData, setFormData] = useState({
     studentName: '',
     rollNo: '',
-    discipline: '',
     uniqueCode: '',
   });
+  const [discipline, setDiscipline] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [qrData, setQrData] = useState(null);
   const [currentTime, setCurrentTime] = useState('');
-  const [isAllowedDevice, setIsAllowedDevice] = useState(true); // Start as true, then check
+  const [isAllowedDevice, setIsAllowedDevice] = useState(true);
+  const [isFetchingStudent, setIsFetchingStudent] = useState(false);
+  const [studentFetchTimeout, setStudentFetchTimeout] = useState(null);
 
   const locationHook = useLocation();
   const navigate = useNavigate();
@@ -197,6 +200,77 @@ const StudentAttendance_Page = () => {
     }
   }, [locationHook, navigate]);
 
+  // Function to fetch student details by roll number
+  const fetchStudentByRollNo = async (rollNo) => {
+    if (!rollNo || rollNo.length < 3) return;
+
+    setIsFetchingStudent(true);
+    
+    try {
+      const response = await axios.get(
+        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/attendance/student/${rollNo}`
+      );
+
+      if (response.data.success) {
+        const studentData = response.data.data;
+        
+        // Auto-fill student name
+        setFormData(prev => ({
+          ...prev,
+          studentName: studentData.studentName || prev.studentName
+        }));
+        
+        // Auto-fill discipline
+        setDiscipline(studentData.discipline || '');
+        
+        toast.info(`Student details found for ${studentData.studentName}`);
+      }
+    } catch (error) {
+      if (error.response?.status === 404) {
+        // Student not found - clear fields
+        setFormData(prev => ({
+          ...prev,
+          studentName: ''
+        }));
+        setDiscipline('');
+      } else {
+        console.error('Error fetching student:', error);
+      }
+    } finally {
+      setIsFetchingStudent(false);
+    }
+  };
+
+  // Handle roll number change with debounce
+  const handleRollNoChange = (e) => {
+    const { value } = e.target;
+    const processedValue = value.toUpperCase();
+
+    setFormData(prev => ({
+      ...prev,
+      rollNo: processedValue,
+      // Clear name when roll number changes
+      studentName: ''
+    }));
+    
+    // Clear discipline when roll number changes
+    setDiscipline('');
+
+    // Clear previous timeout
+    if (studentFetchTimeout) {
+      clearTimeout(studentFetchTimeout);
+    }
+
+    // Set new timeout to fetch student details after user stops typing
+    if (processedValue.length >= 3) {
+      const timeout = setTimeout(() => {
+        fetchStudentByRollNo(processedValue);
+      }, 800); // 800ms debounce
+      
+      setStudentFetchTimeout(timeout);
+    }
+  };
+
   // Function to capitalize input text
   const capitalizeText = (text) => {
     return text.toUpperCase();
@@ -207,10 +281,7 @@ const StudentAttendance_Page = () => {
 
     let processedValue;
     
-    if (name === 'discipline') {
-      // For discipline, limit to 5 characters and capitalize
-      processedValue = value.slice(0, 5).toUpperCase();
-    } else if (name === 'studentName' || name === 'rollNo') {
+    if (name === 'studentName' || name === 'rollNo') {
       processedValue = capitalizeText(value);
     } else {
       processedValue = value;
@@ -292,7 +363,7 @@ const StudentAttendance_Page = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.studentName.trim() || !formData.rollNo.trim() || !formData.uniqueCode.trim() || !formData.discipline.trim()) {
+    if (!formData.studentName.trim() || !formData.rollNo.trim() || !formData.uniqueCode.trim()) {
       toast.error('Please fill all fields');
       return;
     }
@@ -329,11 +400,13 @@ const StudentAttendance_Page = () => {
       const currentTime = formatTime();
 
       const AttendanceData = {
-        ...formData,
-        uniqueCode: originalCode, // Send original code to backend
+        studentName: formData.studentName,
+        rollNo: formData.rollNo,
+        discipline: discipline, // Use the fetched discipline
+        uniqueCode: originalCode,
         subjectName: qrData.subjectName || qrData.subject || 'Unknown Subject',
-        subjectCode: qrData.subjectCode || 'N/A', // Include subject code if needed
-        subjectId: qrData.subject, // This is the subject ID
+        subjectCode: qrData.subjectCode || 'N/A',
+        subjectId: qrData.subject,
         time: currentTime,
         date: qrData.attendanceDate || new Date().toISOString().split('T')[0],
         ipAddress: deviceFingerprint,
@@ -346,12 +419,12 @@ const StudentAttendance_Page = () => {
             setFormData({
               studentName: '',
               rollNo: '',
-              discipline: '',
               uniqueCode: ''
             });
+            setDiscipline('');
             navigate("/scan-attendance");
           } else {
-            toast.error(res.payload.message)
+            toast.error(res.payload.message);
           }
         })
         .catch((error) => {
@@ -364,6 +437,15 @@ const StudentAttendance_Page = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (studentFetchTimeout) {
+        clearTimeout(studentFetchTimeout);
+      }
+    };
+  }, [studentFetchTimeout]);
 
   // Browser restriction error screen
   if (!isAllowedDevice) {
@@ -509,6 +591,35 @@ const StudentAttendance_Page = () => {
 
           {/* Attendance Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* Roll Number - with auto-fetch */}
+            <div>
+              <label htmlFor="rollNo" className="block text-sm font-medium text-gray-700 mb-2">
+                Roll Number *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="rollNo"
+                  name="rollNo"
+                  value={formData.rollNo}
+                  onChange={handleRollNoChange}
+                  placeholder="Enter your roll number"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10"
+                  required
+                  autoComplete="off"
+                  style={{ textTransform: 'uppercase' }}
+                />
+                {isFetchingStudent && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  </div>
+                )}
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Enter your roll number to auto-fill your details
+              </p>
+            </div>
+
             {/* Student Name */}
             <div>
               <label htmlFor="studentName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -528,50 +639,8 @@ const StudentAttendance_Page = () => {
               />
             </div>
 
-            {/* Roll Number */}
-            <div>
-              <label htmlFor="rollNo" className="block text-sm font-medium text-gray-700 mb-2">
-                Roll Number *
-              </label>
-              <input
-                type="text"
-                id="rollNo"
-                name="rollNo"
-                value={formData.rollNo}
-                onChange={handleInputChange}
-                placeholder="Enter your roll number"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
-                required
-                autoComplete="off"
-                style={{ textTransform: 'uppercase' }}
-              />
-            </div>
-
-            {/* Discipline - Limited to 5 characters */}
-            <div>
-              <label htmlFor="discipline" className="block text-sm font-medium text-gray-700 mb-2">
-                Discipline Code *
-              </label>
-              <input
-                type="text"
-                id="discipline"
-                name="discipline"
-                value={formData.discipline}
-                onChange={handleInputChange}
-                placeholder="e.g., BCS, BEE, BBA"
-                maxLength="5"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
-                required
-                autoComplete="off"
-                style={{ textTransform: 'uppercase' }}
-              />
-              <p className="mt-1 text-xs text-amber-600 flex items-center">
-                <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Only enter discipline code (max 5 characters)
-              </p>
-            </div>
+            {/* Discipline - Hidden but value is stored */}
+            <input type="hidden" name="discipline" value={discipline} />
 
             {/* Unique Code (Read-only) */}
             <div>
@@ -595,7 +664,7 @@ const StudentAttendance_Page = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 type="submit"
-                disabled={isSubmitting || !qrData}
+                disabled={isSubmitting || !qrData || !discipline}
                 className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {isSubmitting ? (
@@ -618,8 +687,8 @@ const StudentAttendance_Page = () => {
             <h3 className="text-sm font-medium text-gray-700 mb-2">Instructions:</h3>
             <ul className="text-[12px] text-gray-600 space-y-1">
               <li>• <strong>Browser:</strong> Google Chrome browser required</li>
-              <li>• Fill in your full name and roll number accurately</li>
-              <li>• Use discipline code only (e.g., BCS, BEE, BBA) - max 5 characters</li>
+              <li>• Enter your roll number first - your name will auto-fill if registered</li>
+              <li>• Fill in your full name if not auto-filled</li>
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
             </ul>

@@ -34,7 +34,7 @@ const TeacherAttendance_Page = () => {
     subjectsWithAttendance,
     isLoading
   } = useSelector((state) => state.teacherAttendance)
-  
+
   const { registeredStudents, studentsLoading } = useSelector((state) => state.teacherSubject)
 
   const [selectedSubject, setSelectedSubject] = useState('');
@@ -52,7 +52,7 @@ const TeacherAttendance_Page = () => {
     subject: '',
     uniqueCode: ''
   });
-  
+
   // Updated manual attendance form state
   const [manualAttendanceForm, setManualAttendanceForm] = useState({
     studentName: '',
@@ -63,11 +63,11 @@ const TeacherAttendance_Page = () => {
     time: '',
     ipAddress: ''
   });
-  
+
   // New state for roll number search
   const [rollNoSearchTerm, setRollNoSearchTerm] = useState('');
   const [showRollNoDropdown, setShowRollNoDropdown] = useState(false);
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
@@ -448,7 +448,7 @@ const TeacherAttendance_Page = () => {
   const handleRollNoSearchChange = (e) => {
     const value = e.target.value;
     setRollNoSearchTerm(value);
-    
+
     // If user types manually, clear auto-filled fields
     if (value !== manualAttendanceForm.rollNo) {
       setManualAttendanceForm(prev => ({
@@ -458,15 +458,15 @@ const TeacherAttendance_Page = () => {
         discipline: ''
       }));
     }
-    
+
     setShowRollNoDropdown(true);
   };
 
   // Filter registered students based on search term
   const filteredRegisteredStudents = () => {
     if (!registeredStudents?.registeredStudents) return [];
-    
-    return registeredStudents.registeredStudents.filter(student => 
+
+    return registeredStudents.registeredStudents.filter(student =>
       student.registrationNo.toLowerCase().includes(rollNoSearchTerm.toLowerCase()) ||
       student.studentName.toLowerCase().includes(rollNoSearchTerm.toLowerCase())
     );
@@ -559,9 +559,9 @@ const TeacherAttendance_Page = () => {
       time: formattedTime,
       ipAddress: generateRandomIP()
     });
-    
+
     setRollNoSearchTerm('');
-    
+
     // Fetch registered students for the selected subject
     try {
       await dispatch(getRegisteredStudents({
@@ -571,7 +571,7 @@ const TeacherAttendance_Page = () => {
     } catch (error) {
       console.error('Error fetching registered students:', error);
     }
-    
+
     setShowManualModal(true);
     setShowAttendanceDropdown(false);
   };
@@ -1281,7 +1281,7 @@ const TeacherAttendance_Page = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   autoComplete="off"
                 />
-                
+
                 {/* Dropdown for registered students */}
                 {showRollNoDropdown && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
@@ -1344,18 +1344,6 @@ const TeacherAttendance_Page = () => {
                   placeholder="Auto-filled from selection"
                 />
               </div>
-
-              {/* Display current date and time for reference */}
-              <div className="bg-blue-50 p-3 rounded-md">
-                <p className="text-xs text-blue-700 flex items-center">
-                  <FiCalendar className="h-3 w-3 mr-1" />
-                  Date: {new Date(manualAttendanceForm.date).toLocaleDateString()}
-                </p>
-                <p className="text-xs text-blue-700 flex items-center mt-1">
-                  <FiClock className="h-3 w-3 mr-1" />
-                  Time: {manualAttendanceForm.time}
-                </p>
-              </div>
             </div>
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button
@@ -1379,11 +1367,10 @@ const TeacherAttendance_Page = () => {
               <button
                 onClick={handleSubmitManualAttendance}
                 disabled={!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline}
-                className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                  manualAttendanceForm.studentName && manualAttendanceForm.rollNo && manualAttendanceForm.discipline
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${manualAttendanceForm.studentName && manualAttendanceForm.rollNo && manualAttendanceForm.discipline
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                  }`}
               >
                 Submit Attendance
               </button>
