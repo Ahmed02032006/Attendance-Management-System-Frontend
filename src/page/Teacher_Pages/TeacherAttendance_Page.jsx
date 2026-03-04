@@ -19,7 +19,6 @@ import {
   FiCalendar,
   FiBookOpen,
   FiChevronDown,
-  FiX,
 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
@@ -43,11 +42,9 @@ const TeacherAttendance_Page = () => {
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAttendanceDropdown, setShowAttendanceDropdown] = useState(false);
-  const [showStudentDropdown, setShowStudentDropdown] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [attendanceToDelete, setAttendanceToDelete] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [studentSearchTerm, setStudentSearchTerm] = useState('');
   const [attendanceForm, setAttendanceForm] = useState({
     subject: '',
     uniqueCode: ''
@@ -64,6 +61,9 @@ const TeacherAttendance_Page = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
+  const [registeredStudents, setRegisteredStudents] = useState([]);
+  const [rollNoSearchTerm, setRollNoSearchTerm] = useState('');
+  const [showRollNoDropdown, setShowRollNoDropdown] = useState(false);
 
   // QR Auto-refresh states
   const [qrExpiryTime, setQrExpiryTime] = useState(null);
@@ -101,6 +101,22 @@ const TeacherAttendance_Page = () => {
     }
   }, [subjectsWithAttendance, selectedSubject])
 
+  // Update registered students when selected subject changes
+  useEffect(() => {
+    if (selectedSubject) {
+      const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+      if (subject && subject.registeredStudents) {
+        // Format registered students from the subject data
+        const formattedStudents = subject.registeredStudents.map(student => ({
+          rollNo: student.registrationNo,
+          studentName: student.studentName,
+          discipline: student.discipline
+        }));
+        setRegisteredStudents(formattedStudents);
+      }
+    }
+  }, [selectedSubject, subjectsWithAttendance]);
+
   // QR Auto-refresh useEffect
   useEffect(() => {
     if (showQRModal) {
@@ -124,8 +140,8 @@ const TeacherAttendance_Page = () => {
       if (!event.target.closest('.attendance-dropdown')) {
         setShowAttendanceDropdown(false);
       }
-      if (!event.target.closest('.student-dropdown-container')) {
-        setShowStudentDropdown(false);
+      if (!event.target.closest('.rollno-dropdown')) {
+        setShowRollNoDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -178,25 +194,6 @@ const TeacherAttendance_Page = () => {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
-  };
-
-  // Get registered students for selected subject
-  const getRegisteredStudents = () => {
-    if (!selectedSubject) return [];
-    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
-    if (!subject || !subject.registeredStudents) return [];
-    return subject.registeredStudents;
-  };
-
-  // Filter registered students based on search term
-  const filteredRegisteredStudents = () => {
-    const students = getRegisteredStudents();
-    if (!studentSearchTerm.trim()) return students;
-    
-    return students.filter(student => 
-      student.registrationNo.toLowerCase().includes(studentSearchTerm.toLowerCase()) ||
-      student.studentName.toLowerCase().includes(studentSearchTerm.toLowerCase())
-    );
   };
 
   // Get current attendance records from Redux state
@@ -374,6 +371,12 @@ const TeacherAttendance_Page = () => {
     )
   );
 
+  // Filter registered students based on roll number search
+  const filteredRegisteredStudents = registeredStudents.filter(student =>
+    student.rollNo.toLowerCase().includes(rollNoSearchTerm.toLowerCase()) ||
+    student.studentName.toLowerCase().includes(rollNoSearchTerm.toLowerCase())
+  );
+
   // Export to Excel function (updated to include date)
   const exportToExcel = () => {
     if (filteredStudents.length === 0) {
@@ -392,7 +395,7 @@ const TeacherAttendance_Page = () => {
             `"${student.discipline}"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
-            `"${student.title || student.subject || 'N/A'}"` // Fix: Use title instead of subject
+            `"${student.title || student.subject || 'N/A'}"`
           ].join(',')
         )
       ].join('\n');
@@ -411,8 +414,6 @@ const TeacherAttendance_Page = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // toast.success('Data exported successfully!');
     } catch (error) {
       toast.error('Failed to export data');
     }
@@ -444,24 +445,24 @@ const TeacherAttendance_Page = () => {
     }));
   };
 
-  // Handle student selection from dropdown
-  const handleStudentSelect = (student) => {
-    setManualAttendanceForm(prev => ({
-      ...prev,
-      rollNo: student.registrationNo,
-      studentName: student.studentName,
-      discipline: student.discipline
-    }));
-    setStudentSearchTerm('');
-    setShowStudentDropdown(false);
-  };
-
   const handleSubjectSelect = (subjectId) => {
     setSelectedSubject(subjectId);
     setShowSubjectModal(false);
     setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
+  };
+
+  // Handle roll number selection from dropdown
+  const handleRollNoSelect = (student) => {
+    setManualAttendanceForm(prev => ({
+      ...prev,
+      rollNo: student.rollNo,
+      studentName: student.studentName,
+      discipline: student.discipline
+    }));
+    setRollNoSearchTerm(student.rollNo);
+    setShowRollNoDropdown(false);
   };
 
   // Function to generate random code
@@ -480,7 +481,7 @@ const TeacherAttendance_Page = () => {
 
     const selectedSubject = subjectsWithAttendance.find(s => s.id === attendanceForm.subject);
     const subjectName = selectedSubject?.title;
-    const subjectCode = selectedSubject?.code; // Get the subject code
+    const subjectCode = selectedSubject?.code;
 
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
@@ -489,9 +490,9 @@ const TeacherAttendance_Page = () => {
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
     url.searchParams.append('code', originalCode);
-    url.searchParams.append('subject', attendanceForm.subject); // subject ID
+    url.searchParams.append('subject', attendanceForm.subject);
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('subjectCode', subjectCode || 'N/A'); // Add subject code
+    url.searchParams.append('subjectCode', subjectCode || 'N/A');
     url.searchParams.append('timestamp', currentTime.getTime());
     url.searchParams.append('expiry', expiryTime.getTime());
 
@@ -543,7 +544,7 @@ const TeacherAttendance_Page = () => {
       time: formattedTime,
       ipAddress: generateRandomIP()
     });
-    setStudentSearchTerm('');
+    setRollNoSearchTerm('');
     setShowManualModal(true);
     setShowAttendanceDropdown(false);
   };
@@ -576,15 +577,6 @@ const TeacherAttendance_Page = () => {
         if (res.payload.success) {
           toast.success('Manual attendance marked successfully!');
           dispatch(getSubjectsWithAttendance(userId)).unwrap();
-          setManualAttendanceForm({
-            studentName: '',
-            rollNo: '',
-            discipline: '',
-            subjectId: '',
-            date: '',
-            time: '',
-            ipAddress: ''
-          });
         } else {
           toast.error(res.payload.message)
         }
@@ -594,6 +586,18 @@ const TeacherAttendance_Page = () => {
       });
 
     setShowManualModal(false);
+
+    // Reset form
+    setManualAttendanceForm({
+      studentName: '',
+      rollNo: '',
+      discipline: '',
+      subjectId: '',
+      date: '',
+      time: '',
+      ipAddress: ''
+    });
+    setRollNoSearchTerm('');
   };
 
   // Toggle QR zoom
@@ -1217,7 +1221,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Manual Attendance Modal - UPDATED with student dropdown */}
+      {/* Manual Attendance Modal - Updated with Roll No Dropdown */}
       {showManualModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -1226,69 +1230,54 @@ const TeacherAttendance_Page = () => {
             </div>
             <div className="p-6 space-y-4">
               {/* Roll No Field with Dropdown */}
-              <div className="student-dropdown-container relative">
+              <div className="relative rollno-dropdown">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Roll No *
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="rollNo"
-                    value={manualAttendanceForm.rollNo}
-                    onChange={handleManualInputChange}
-                    onFocus={() => setShowStudentDropdown(true)}
-                    placeholder="Search or select roll number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowStudentDropdown(!showStudentDropdown)}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                  >
-                    <FiChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showStudentDropdown ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-
-                {/* Student Dropdown */}
-                {showStudentDropdown && (
+                <input
+                  type="text"
+                  name="rollNo"
+                  value={manualAttendanceForm.rollNo}
+                  onChange={(e) => {
+                    setManualAttendanceForm(prev => ({
+                      ...prev,
+                      rollNo: e.target.value,
+                      studentName: '',
+                      discipline: ''
+                    }));
+                    setRollNoSearchTerm(e.target.value);
+                    setShowRollNoDropdown(true);
+                  }}
+                  onFocus={() => setShowRollNoDropdown(true)}
+                  placeholder="Search or select roll number"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                
+                {/* Dropdown for registered students */}
+                {showRollNoDropdown && registeredStudents.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                    {/* Search input inside dropdown */}
-                    <div className="sticky top-0 bg-white p-2 border-b border-gray-200">
-                      <div className="relative">
-                        <FiSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <input
-                          type="text"
-                          value={studentSearchTerm}
-                          onChange={(e) => setStudentSearchTerm(e.target.value)}
-                          placeholder="Search by roll no or name..."
-                          className="w-full pl-8 pr-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                          autoFocus
-                        />
-                      </div>
-                    </div>
-
-                    {/* Student list */}
-                    <div>
-                      {filteredRegisteredStudents().length > 0 ? (
-                        filteredRegisteredStudents().map((student, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleStudentSelect(student)}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0"
-                          >
-                            <div className="flex flex-col">
-                              <span className="text-sm font-medium text-gray-900">{student.registrationNo}</span>
-                              <span className="text-xs text-gray-600">{student.studentName} - {student.discipline}</span>
-                            </div>
-                          </button>
-                        ))
-                      ) : (
-                        <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                          {studentSearchTerm ? 'No matching students found' : 'No registered students'}
+                    {filteredRegisteredStudents.length > 0 ? (
+                      filteredRegisteredStudents.map((student, index) => (
+                        <div
+                          key={index}
+                          onClick={() => handleRollNoSelect(student)}
+                          className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        >
+                          <div className="text-sm font-medium text-gray-900">{student.rollNo}</div>
+                          <div className="text-xs text-gray-600">{student.studentName} - {student.discipline}</div>
                         </div>
-                      )}
-                    </div>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-gray-500">
+                        No matching students found
+                      </div>
+                    )}
                   </div>
+                )}
+                {registeredStudents.length === 0 && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    No registered students found for this course
+                  </p>
                 )}
               </div>
 
@@ -1302,7 +1291,7 @@ const TeacherAttendance_Page = () => {
                   name="studentName"
                   value={manualAttendanceForm.studentName}
                   disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
                 />
               </div>
 
@@ -1316,7 +1305,21 @@ const TeacherAttendance_Page = () => {
                   name="discipline"
                   value={manualAttendanceForm.discipline}
                   disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
+                />
+              </div>
+
+              {/* Time Field (Read-only) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Time
+                </label>
+                <input
+                  type="text"
+                  name="time"
+                  value={manualAttendanceForm.time}
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -1333,7 +1336,7 @@ const TeacherAttendance_Page = () => {
                     time: '',
                     ipAddress: ''
                   });
-                  setStudentSearchTerm('');
+                  setRollNoSearchTerm('');
                 }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
               >
