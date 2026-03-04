@@ -4,19 +4,7 @@ import axios from "axios";
 const initialState = {
   dashboardSubjects: [],
   dashboardAttendance: {},
-  teacherStats: {
-    totalCourses: 0,
-    totalStudents: 0,
-    totalAttendanceRecords: 0,
-    todayAttendance: 0,
-    averageAttendance: 0,
-    attendanceRate: 0,
-    mostActiveSubject: 'N/A',
-    attendanceBySubject: {},
-    attendanceTrend: []
-  },
   isLoading: false,
-  statsLoading: false,
 };
 
 // Get dashboard subjects for a user
@@ -59,26 +47,6 @@ export const getDashboardAttendance = createAsyncThunk(
   }
 );
 
-// Get teacher stats
-export const getTeacherStats = createAsyncThunk(
-  "dashboard/getStats",
-  async (userId, { rejectWithValue }) => {
-    try {
-      const response = await axios.get(
-        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/dashboard/stats/${userId}`
-      );
-
-      if (response.status !== 200) {
-        return rejectWithValue(response.data);
-      }
-
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
 const dashboardSlicer = createSlice({
   name: "dashboard",
   initialState: initialState,
@@ -86,17 +54,6 @@ const dashboardSlicer = createSlice({
     clearDashboard: (state) => {
       state.dashboardSubjects = [];
       state.dashboardAttendance = {};
-      state.teacherStats = {
-        totalCourses: 0,
-        totalStudents: 0,
-        totalAttendanceRecords: 0,
-        todayAttendance: 0,
-        averageAttendance: 0,
-        attendanceRate: 0,
-        mostActiveSubject: 'N/A',
-        attendanceBySubject: {},
-        attendanceTrend: []
-      };
     },
   },
   extraReducers: (builder) => {
@@ -125,39 +82,6 @@ const dashboardSlicer = createSlice({
       .addCase(getDashboardAttendance.rejected, (state, action) => {
         state.isLoading = false;
         state.dashboardAttendance = {};
-      })
-      
-      // Get Teacher Stats
-      .addCase(getTeacherStats.pending, (state) => {
-        state.statsLoading = true;
-      })
-      .addCase(getTeacherStats.fulfilled, (state, action) => {
-        state.statsLoading = false;
-        state.teacherStats = action.payload.data || {
-          totalCourses: 0,
-          totalStudents: 0,
-          totalAttendanceRecords: 0,
-          todayAttendance: 0,
-          averageAttendance: 0,
-          attendanceRate: 0,
-          mostActiveSubject: 'N/A',
-          attendanceBySubject: {},
-          attendanceTrend: []
-        };
-      })
-      .addCase(getTeacherStats.rejected, (state, action) => {
-        state.statsLoading = false;
-        state.teacherStats = {
-          totalCourses: 0,
-          totalStudents: 0,
-          totalAttendanceRecords: 0,
-          todayAttendance: 0,
-          averageAttendance: 0,
-          attendanceRate: 0,
-          mostActiveSubject: 'N/A',
-          attendanceBySubject: {},
-          attendanceTrend: []
-        };
       });
   },
 });

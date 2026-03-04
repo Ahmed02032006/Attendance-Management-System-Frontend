@@ -47,8 +47,6 @@ const TeacherDashboard_Page = () => {
   const {
     dashboardSubjects,
     dashboardAttendance,
-    teacherStats,
-    statsLoading,
     isLoading
   } = useSelector((state) => state.teacherDashboard)
 
@@ -502,7 +500,7 @@ const TeacherDashboard_Page = () => {
   );
 
   // Loading state
-  if (isLoading || !dataLoaded || statsLoading) {
+  if (isLoading || !dataLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
         <div className="text-center">
@@ -535,16 +533,16 @@ const TeacherDashboard_Page = () => {
             <StatCard
               icon={FiBook}
               label="Total Courses"
-              value={teacherStats.totalCourses}
+              value={"1"}
               color="text-blue-600"
               bgColor="bg-blue-50"
-              subtext={teacherStats.totalCourses === 1 ? 'course assigned' : 'courses assigned'}
-            // subtext={stats.totalSubjects === 1 ? 'course assigned' : 'courses assigned'}
+              subtext={'course assigned'}
+              // subtext={stats.totalSubjects === 1 ? 'course assigned' : 'courses assigned'}
             />
             <StatCard
               icon={FiUsers}
               label="Total Students"
-              value={teacherStats.totalStudents}
+              value={"2"}
               color="text-green-600"
               bgColor="bg-green-50"
               subtext="enrolled students"
@@ -552,7 +550,7 @@ const TeacherDashboard_Page = () => {
             <StatCard
               icon={FiUserCheck}
               label="Attendance Records"
-              value={teacherStats.totalAttendanceRecords}
+              value={"3"}
               color="text-purple-600"
               bgColor="bg-purple-50"
               subtext="total marks"
@@ -560,11 +558,11 @@ const TeacherDashboard_Page = () => {
             <StatCard
               icon={FiAward}
               label="Today's Attendance"
-              value={teacherStats.todayAttendance}
+              value={"4"}
               color="text-orange-600"
               bgColor="bg-orange-50"
-              subtext={teacherStats.todayAttendance === 1 ? 'student present' : 'students present'}
-            // subtext={stats.todayAttendance === 1 ? 'student present' : 'students present'}
+              subtext={'student present'}
+              // subtext={stats.todayAttendance === 1 ? 'student present' : 'students present'}
             />
           </div>
         </div>
