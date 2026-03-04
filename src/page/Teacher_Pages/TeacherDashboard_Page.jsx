@@ -528,44 +528,41 @@ const TeacherDashboard_Page = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
 
         {/* Stats Cards Section */}
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Quick Overview</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              icon={FiBook}
-              label="Total Courses"
-              value={"1"}
-              color="text-blue-600"
-              bgColor="bg-blue-50"
-              subtext={'course assigned'}
-              // subtext={stats.totalSubjects === 1 ? 'course assigned' : 'courses assigned'}
-            />
-            <StatCard
-              icon={FiUsers}
-              label="Total Students"
-              value={"2"}
-              color="text-green-600"
-              bgColor="bg-green-50"
-              subtext="enrolled students"
-            />
-            <StatCard
-              icon={FiUserCheck}
-              label="Attendance Records"
-              value={"3"}
-              color="text-purple-600"
-              bgColor="bg-purple-50"
-              subtext="total marks"
-            />
-            <StatCard
-              icon={FiAward}
-              label="Today's Attendance"
-              value={"4"}
-              color="text-orange-600"
-              bgColor="bg-orange-50"
-              subtext={'student present'}
-              // subtext={stats.todayAttendance === 1 ? 'student present' : 'students present'}
-            />
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            icon={FiBook}
+            label="Total Courses"
+            value={"1"}
+            color="text-blue-600"
+            bgColor="bg-blue-50"
+            subtext={'course assigned'}
+          // subtext={stats.totalSubjects === 1 ? 'course assigned' : 'courses assigned'}
+          />
+          <StatCard
+            icon={FiUsers}
+            label="Total Students"
+            value={"2"}
+            color="text-green-600"
+            bgColor="bg-green-50"
+            subtext="enrolled students"
+          />
+          <StatCard
+            icon={FiUserCheck}
+            label="Attendance Records"
+            value={"3"}
+            color="text-purple-600"
+            bgColor="bg-purple-50"
+            subtext="total marks"
+          />
+          <StatCard
+            icon={FiAward}
+            label="Today's Attendance"
+            value={"4"}
+            color="text-orange-600"
+            bgColor="bg-orange-50"
+            subtext={'student present'}
+          // subtext={stats.todayAttendance === 1 ? 'student present' : 'students present'}
+          />
         </div>
 
         {/* Main Grid */}
