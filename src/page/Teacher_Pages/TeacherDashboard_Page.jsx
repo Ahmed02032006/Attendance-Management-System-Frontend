@@ -537,7 +537,8 @@ const TeacherDashboard_Page = () => {
               value={"1"}
               color="text-blue-600"
               bgColor="bg-blue-50"
-              subtext={stats.totalSubjects === 1 ? 'course assigned' : 'courses assigned'}
+              subtext={'course assigned'}
+              // subtext={stats.totalSubjects === 1 ? 'course assigned' : 'courses assigned'}
             />
             <StatCard
               icon={FiUsers}
