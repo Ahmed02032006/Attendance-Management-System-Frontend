@@ -67,7 +67,7 @@ const TeacherAttendance_Page = () => {
   const [rollNoSearch, setRollNoSearch] = useState('');
   const [showStudentDropdown, setShowStudentDropdown] = useState(false);
   const [filteredRegisteredStudents, setFilteredRegisteredStudents] = useState([]);
-  const [isLoadingStudents, setIsLoadingStudents] = useState(false);
+  const [registeredStudentsList, setRegisteredStudentsList] = useState([]);
 
   // QR Auto-refresh states
   const [qrExpiryTime, setQrExpiryTime] = useState(null);
@@ -105,6 +105,34 @@ const TeacherAttendance_Page = () => {
     }
   }, [subjectsWithAttendance, selectedSubject])
 
+  // Update registered students list when subject changes
+  useEffect(() => {
+    if (selectedSubject) {
+      const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+      if (subject && subject.registeredStudents) {
+        setRegisteredStudentsList(subject.registeredStudents);
+      } else {
+        setRegisteredStudentsList([]);
+      }
+    }
+  }, [selectedSubject, subjectsWithAttendance]);
+
+  // Filter registered students when rollNoSearch changes
+  useEffect(() => {
+    if (registeredStudentsList.length > 0 && rollNoSearch.trim()) {
+      const filtered = registeredStudentsList.filter(student => {
+        const registrationNo = student.registrationNo?.toLowerCase() || '';
+        const searchTerm = rollNoSearch.toLowerCase();
+        return registrationNo.includes(searchTerm);
+      });
+      setFilteredRegisteredStudents(filtered);
+      setShowStudentDropdown(filtered.length > 0);
+    } else {
+      setFilteredRegisteredStudents([]);
+      setShowStudentDropdown(false);
+    }
+  }, [rollNoSearch, registeredStudentsList]);
+
   // QR Auto-refresh useEffect
   useEffect(() => {
     if (showQRModal) {
@@ -135,26 +163,6 @@ const TeacherAttendance_Page = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // Filter registered students when rollNoSearch changes
-  useEffect(() => {
-    if (selectedSubject && rollNoSearch.trim()) {
-      const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
-      if (subject && subject.registeredStudents) {
-        const filtered = subject.registeredStudents.filter(student =>
-          student.registrationNo.toLowerCase().includes(rollNoSearch.toLowerCase())
-        );
-        setFilteredRegisteredStudents(filtered);
-        setShowStudentDropdown(filtered.length > 0);
-      } else {
-        setFilteredRegisteredStudents([]);
-        setShowStudentDropdown(false);
-      }
-    } else {
-      setFilteredRegisteredStudents([]);
-      setShowStudentDropdown(false);
-    }
-  }, [rollNoSearch, selectedSubject, subjectsWithAttendance]);
 
   // Format date to YYYY-MM-DD
   const formatDate = (date) => {
@@ -374,12 +382,12 @@ const TeacherAttendance_Page = () => {
     currentAttendanceRecords.filter(student =>
       student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.rollNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.discipline.toLowerCase().includes(searchTerm.toLowerCase())
+      (student.subject && student.subject.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (student.discipline && student.discipline.toLowerCase().includes(searchTerm.toLowerCase()))
     )
   );
 
-  // Export to Excel function (updated to include date)
+  // Export to Excel function
   const exportToExcel = () => {
     if (filteredStudents.length === 0) {
       toast.error('No data to export');
@@ -394,10 +402,10 @@ const TeacherAttendance_Page = () => {
           [
             `"${student.studentName}"`,
             `"${student.rollNo}"`,
-            `"${student.discipline}"`,
+            `"${student.discipline || ''}"`,
             `"${formatShortDate(currentDate)}"`,
-            `"${student.time}"`,
-            `"${student.title || student.subject || 'N/A'}"` // Fix: Use title instead of subject
+            `"${student.time || ''}"`,
+            `"${student.title || student.subject || 'N/A'}"`
           ].join(',')
         )
       ].join('\n');
@@ -416,8 +424,6 @@ const TeacherAttendance_Page = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // toast.success('Data exported successfully!');
     } catch (error) {
       toast.error('Failed to export data');
     }
@@ -473,7 +479,7 @@ const TeacherAttendance_Page = () => {
 
     const selectedSubject = subjectsWithAttendance.find(s => s.id === attendanceForm.subject);
     const subjectName = selectedSubject?.title;
-    const subjectCode = selectedSubject?.code; // Get the subject code
+    const subjectCode = selectedSubject?.code;
 
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
@@ -482,9 +488,9 @@ const TeacherAttendance_Page = () => {
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
     url.searchParams.append('code', originalCode);
-    url.searchParams.append('subject', attendanceForm.subject); // subject ID
+    url.searchParams.append('subject', attendanceForm.subject);
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('subjectCode', subjectCode || 'N/A'); // Add subject code
+    url.searchParams.append('subjectCode', subjectCode || 'N/A');
     url.searchParams.append('timestamp', currentTime.getTime());
     url.searchParams.append('expiry', expiryTime.getTime());
 
@@ -579,15 +585,16 @@ const TeacherAttendance_Page = () => {
 
     dispatch(createAttendance(attendanceRecord))
       .then((res) => {
-        if (res.payload.success) {
+        if (res.payload && res.payload.success) {
           toast.success('Manual attendance marked successfully!');
           dispatch(getSubjectsWithAttendance(userId)).unwrap();
         } else {
-          toast.error(res.payload.message)
+          toast.error(res.payload?.message || 'Failed to mark attendance');
         }
       })
       .catch((error) => {
         console.error('Attendance submission error:', error);
+        toast.error('Failed to mark attendance');
       });
 
     setShowManualModal(false);
@@ -1247,9 +1254,10 @@ const TeacherAttendance_Page = () => {
                     type="text"
                     value={rollNoSearch}
                     onChange={(e) => {
-                      setRollNoSearch(e.target.value);
+                      const value = e.target.value;
+                      setRollNoSearch(value);
                       // Clear student details if user manually types
-                      if (manualAttendanceForm.rollNo !== e.target.value) {
+                      if (manualAttendanceForm.rollNo !== value) {
                         setManualAttendanceForm(prev => ({
                           ...prev,
                           rollNo: '',
@@ -1284,7 +1292,7 @@ const TeacherAttendance_Page = () => {
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
                     {filteredRegisteredStudents.map((student) => (
                       <button
-                        key={student.registrationNo}
+                        key={student.registrationNo || student._id}
                         onClick={() => handleStudentSelect(student)}
                         className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
                       >
@@ -1295,10 +1303,16 @@ const TeacherAttendance_Page = () => {
                   </div>
                 )}
 
-                {rollNoSearch && filteredRegisteredStudents.length === 0 && showStudentDropdown && (
+                {rollNoSearch && filteredRegisteredStudents.length === 0 && registeredStudentsList.length > 0 && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-3 text-center">
                     <p className="text-sm text-gray-500">No registered students found with this roll number</p>
                   </div>
+                )}
+
+                {registeredStudentsList.length === 0 && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    No registered students found for this course
+                  </p>
                 )}
               </div>
 
@@ -1312,6 +1326,7 @@ const TeacherAttendance_Page = () => {
                   name="studentName"
                   value={manualAttendanceForm.studentName}
                   disabled
+                  placeholder="Will auto-fill when roll number is selected"
                   className="w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed"
                 />
               </div>
@@ -1326,6 +1341,7 @@ const TeacherAttendance_Page = () => {
                   name="discipline"
                   value={manualAttendanceForm.discipline}
                   disabled
+                  placeholder="Will auto-fill when roll number is selected"
                   className="w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed"
                 />
               </div>
