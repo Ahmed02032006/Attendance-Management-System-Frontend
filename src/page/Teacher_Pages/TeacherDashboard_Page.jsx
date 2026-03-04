@@ -23,9 +23,9 @@ import { BiSupport } from "react-icons/bi";
 import {
   getDashboardSubjects,
   getDashboardAttendance,
+  getTeacherStats,
   clearDashboard
 } from '../../store/Teacher-Slicer/Dashboard-Slicer.js'
-import { getTeacherStats } from '../../store/Teacher-Slicer/Dashboard-Slicer.js'
 
 // Key for localStorage
 const CHAT_STORAGE_KEY = 'teacher_dashboard_chat_history';
@@ -46,17 +46,14 @@ const PAGE_NAME_MAPPING = {
 const TeacherDashboard_Page = () => {
   const dispatch = useDispatch()
   
-  // Get data from redux
+  // Get data from redux - FIXED: All from teacherDashboard
   const {
     dashboardSubjects,
     dashboardAttendance,
-    isLoading
-  } = useSelector((state) => state.teacherDashboard)
-  
-  const {
+    isLoading,
     teacherStats,
     statsLoading
-  } = useSelector((state) => state.teacherStats)
+  } = useSelector((state) => state.teacherDashboard)
 
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [currentDate, setCurrentDate] = useState('')
@@ -295,7 +292,6 @@ const TeacherDashboard_Page = () => {
     
     return () => {
       dispatch(clearDashboard());
-      dispatch(clearStats());
     };
   }, [dispatch, userId]);
 
