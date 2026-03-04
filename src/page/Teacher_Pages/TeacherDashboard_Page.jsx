@@ -47,6 +47,8 @@ const TeacherDashboard_Page = () => {
   const {
     dashboardSubjects,
     dashboardAttendance,
+    teacherStats,
+    statsLoading,
     isLoading
   } = useSelector((state) => state.teacherDashboard)
 
@@ -500,7 +502,7 @@ const TeacherDashboard_Page = () => {
   );
 
   // Loading state
-  if (isLoading || !dataLoaded) {
+  if (isLoading || !dataLoaded || statsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
         <div className="text-center">
@@ -533,16 +535,16 @@ const TeacherDashboard_Page = () => {
             <StatCard
               icon={FiBook}
               label="Total Courses"
-              value={"1"}
+              value={teacherStats.totalCourses}
               color="text-blue-600"
               bgColor="bg-blue-50"
-              subtext={'course assigned'}
-              // subtext={stats.totalSubjects === 1 ? 'course assigned' : 'courses assigned'}
+              subtext={teacherStats.totalCourses === 1 ? 'course assigned' : 'courses assigned'}
+            // subtext={stats.totalSubjects === 1 ? 'course assigned' : 'courses assigned'}
             />
             <StatCard
               icon={FiUsers}
               label="Total Students"
-              value={"2"}
+              value={teacherStats.totalStudents}
               color="text-green-600"
               bgColor="bg-green-50"
               subtext="enrolled students"
@@ -550,7 +552,7 @@ const TeacherDashboard_Page = () => {
             <StatCard
               icon={FiUserCheck}
               label="Attendance Records"
-              value={"3"}
+              value={teacherStats.totalAttendanceRecords}
               color="text-purple-600"
               bgColor="bg-purple-50"
               subtext="total marks"
@@ -558,11 +560,11 @@ const TeacherDashboard_Page = () => {
             <StatCard
               icon={FiAward}
               label="Today's Attendance"
-              value={"4"}
+              value={teacherStats.todayAttendance}
               color="text-orange-600"
               bgColor="bg-orange-50"
-              subtext={'student present'}
-              // subtext={stats.todayAttendance === 1 ? 'student present' : 'students present'}
+              subtext={teacherStats.todayAttendance === 1 ? 'student present' : 'students present'}
+            // subtext={stats.todayAttendance === 1 ? 'student present' : 'students present'}
             />
           </div>
         </div>
