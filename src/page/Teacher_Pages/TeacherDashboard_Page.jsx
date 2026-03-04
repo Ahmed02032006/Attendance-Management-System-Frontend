@@ -561,7 +561,8 @@ const TeacherDashboard_Page = () => {
               value={"4"}
               color="text-orange-600"
               bgColor="bg-orange-50"
-              subtext={stats.todayAttendance === 1 ? 'student present' : 'students present'}
+              subtext={'student present'}
+              // subtext={stats.todayAttendance === 1 ? 'student present' : 'students present'}
             />
           </div>
         </div>
