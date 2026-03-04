@@ -19,6 +19,7 @@ const StudentAttendance_Page = () => {
   const [isAllowedDevice, setIsAllowedDevice] = useState(true);
   const [isFetchingStudent, setIsFetchingStudent] = useState(false);
   const [studentFetchTimeout, setStudentFetchTimeout] = useState(null);
+  const [rollNoValid, setRollNoValid] = useState(false);
 
   const locationHook = useLocation();
   const navigate = useNavigate();
@@ -144,6 +145,7 @@ const StudentAttendance_Page = () => {
           ...parsedData,
           subjectName: subjectName,
           subjectCode: parsedData.subjectCode || parsedData.code || 'N/A',
+          subjectId: parsedData.subject, // Make sure subjectId is set
         });
 
         setFormData(prev => ({
@@ -181,6 +183,7 @@ const StudentAttendance_Page = () => {
         const qrDataFromUrl = {
           code: code,
           subject: subject,
+          subjectId: subject, // This is the subject ID
           subjectName: subjectName || subject || 'Unknown Subject',
           subjectCode: subjectCode || code || 'N/A',
           type: 'attendance',
@@ -200,41 +203,38 @@ const StudentAttendance_Page = () => {
     }
   }, [locationHook, navigate]);
 
-  // Function to fetch student details by roll number
-  const fetchStudentByRollNo = async (rollNo) => {
-    if (!rollNo || rollNo.length < 3) return;
+  // Function to fetch student discipline by roll number (only for registered students in this subject)
+  const fetchStudentDiscipline = async (rollNo) => {
+    if (!rollNo || rollNo.length < 3 || !qrData?.subjectId) return;
 
     setIsFetchingStudent(true);
+    setRollNoValid(false);
+    setDiscipline(''); // Clear discipline while fetching
     
     try {
       const response = await axios.get(
-        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/attendance/student/${rollNo}`
+        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/attendance/registered-student/${qrData.subjectId}/${rollNo}`
       );
 
       if (response.data.success) {
         const studentData = response.data.data;
         
-        // Auto-fill student name
-        setFormData(prev => ({
-          ...prev,
-          studentName: studentData.studentName || prev.studentName
-        }));
-        
-        // Auto-fill discipline
+        // Only set discipline if student is registered in this course
         setDiscipline(studentData.discipline || '');
+        setRollNoValid(true);
         
-        toast.info(`Student details found for ${studentData.studentName}`);
+        // No toast message - silent success
       }
     } catch (error) {
       if (error.response?.status === 404) {
-        // Student not found - clear fields
-        setFormData(prev => ({
-          ...prev,
-          studentName: ''
-        }));
+        // Student not registered in this course - clear discipline
         setDiscipline('');
+        setRollNoValid(false);
+        // No error toast - just silently handle
       } else {
         console.error('Error fetching student:', error);
+        setDiscipline('');
+        setRollNoValid(false);
       }
     } finally {
       setIsFetchingStudent(false);
@@ -248,23 +248,22 @@ const StudentAttendance_Page = () => {
 
     setFormData(prev => ({
       ...prev,
-      rollNo: processedValue,
-      // Clear name when roll number changes
-      studentName: ''
+      rollNo: processedValue
     }));
     
     // Clear discipline when roll number changes
     setDiscipline('');
+    setRollNoValid(false);
 
     // Clear previous timeout
     if (studentFetchTimeout) {
       clearTimeout(studentFetchTimeout);
     }
 
-    // Set new timeout to fetch student details after user stops typing
-    if (processedValue.length >= 3) {
+    // Set new timeout to fetch student discipline after user stops typing
+    if (processedValue.length >= 3 && qrData?.subjectId) {
       const timeout = setTimeout(() => {
-        fetchStudentByRollNo(processedValue);
+        fetchStudentDiscipline(processedValue);
       }, 800); // 800ms debounce
       
       setStudentFetchTimeout(timeout);
@@ -368,6 +367,11 @@ const StudentAttendance_Page = () => {
       return;
     }
 
+    if (!discipline) {
+      toast.error('Invalid roll number for this course');
+      return;
+    }
+
     if (!qrData) {
       toast.error('Invalid attendance session');
       return;
@@ -406,7 +410,7 @@ const StudentAttendance_Page = () => {
         uniqueCode: originalCode,
         subjectName: qrData.subjectName || qrData.subject || 'Unknown Subject',
         subjectCode: qrData.subjectCode || 'N/A',
-        subjectId: qrData.subject,
+        subjectId: qrData.subjectId || qrData.subject, // Use subjectId
         time: currentTime,
         date: qrData.attendanceDate || new Date().toISOString().split('T')[0],
         ipAddress: deviceFingerprint,
@@ -422,6 +426,7 @@ const StudentAttendance_Page = () => {
               uniqueCode: ''
             });
             setDiscipline('');
+            setRollNoValid(false);
             navigate("/scan-attendance");
           } else {
             toast.error(res.payload.message);
@@ -591,7 +596,7 @@ const StudentAttendance_Page = () => {
 
           {/* Attendance Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Roll Number - with auto-fetch */}
+            {/* Roll Number - with auto-fetch discipline */}
             <div>
               <label htmlFor="rollNo" className="block text-sm font-medium text-gray-700 mb-2">
                 Roll Number *
@@ -604,7 +609,13 @@ const StudentAttendance_Page = () => {
                   value={formData.rollNo}
                   onChange={handleRollNoChange}
                   placeholder="Enter your roll number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${
+                    rollNoValid 
+                      ? 'border-green-500 bg-green-50' 
+                      : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
+                        ? 'border-red-300 bg-red-50'
+                        : 'border-gray-300'
+                  }`}
                   required
                   autoComplete="off"
                   style={{ textTransform: 'uppercase' }}
@@ -614,10 +625,19 @@ const StudentAttendance_Page = () => {
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                   </div>
                 )}
+                {!isFetchingStudent && rollNoValid && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
               </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Enter your roll number to auto-fill your details
-              </p>
+              {formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === '' && (
+                <p className="mt-1 text-xs text-red-500">
+                  Invalid roll number for this course
+                </p>
+              )}
             </div>
 
             {/* Student Name */}
@@ -665,7 +685,9 @@ const StudentAttendance_Page = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || !qrData || !discipline}
-                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                className={`flex-1 text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${
+                  !discipline ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">
@@ -687,8 +709,8 @@ const StudentAttendance_Page = () => {
             <h3 className="text-sm font-medium text-gray-700 mb-2">Instructions:</h3>
             <ul className="text-[12px] text-gray-600 space-y-1">
               <li>• <strong>Browser:</strong> Google Chrome browser required</li>
-              <li>• Enter your roll number first - your name will auto-fill if registered</li>
-              <li>• Fill in your full name if not auto-filled</li>
+              <li>• Enter your roll number - it will be validated for this course</li>
+              <li>• Fill in your full name correctly</li>
               <li>• Double-check your details before submitting</li>
               <li>• Your attendance time will be recorded automatically</li>
             </ul>
