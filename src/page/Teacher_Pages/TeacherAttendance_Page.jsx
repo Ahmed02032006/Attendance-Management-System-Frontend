@@ -49,15 +49,25 @@ const TeacherAttendance_Page = () => {
     subject: '',
     uniqueCode: ''
   });
+  
+  // Enhanced manual attendance form state
   const [manualAttendanceForm, setManualAttendanceForm] = useState({
     studentName: '',
     rollNo: '',
     discipline: '',
-    subjectId: '',
+    subjectId: selectedSubject || '',
     date: '',
     time: '',
     ipAddress: ''
   });
+  
+  // New state for search feedback
+  const [searchStatus, setSearchStatus] = useState({
+    searching: false,
+    found: false,
+    message: ''
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
@@ -411,12 +421,118 @@ const TeacherAttendance_Page = () => {
     }));
   };
 
+  // Enhanced manual input change handler
   const handleManualInputChange = (e) => {
     const { name, value } = e.target;
-    setManualAttendanceForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // If rollNo field is being changed
+    if (name === 'rollNo') {
+      // Clear search status when user starts typing
+      setSearchStatus({
+        searching: false,
+        found: false,
+        message: ''
+      });
+      
+      // Clear student name and discipline when roll number changes
+      setManualAttendanceForm(prev => ({
+        ...prev,
+        rollNo: value,
+        studentName: '',
+        discipline: ''
+      }));
+    } else {
+      setManualAttendanceForm(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  // Search for student by roll number
+  const searchStudentByRollNo = (rollNo) => {
+    if (!selectedSubject || !rollNo || rollNo.trim() === '') {
+      setSearchStatus({
+        searching: false,
+        found: false,
+        message: ''
+      });
+      return;
+    }
+
+    setSearchStatus({
+      searching: true,
+      found: false,
+      message: 'Searching...'
+    });
+
+    // Find the current subject
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+    
+    if (!subject) {
+      setSearchStatus({
+        searching: false,
+        found: false,
+        message: 'Subject not found'
+      });
+      return;
+    }
+
+    // Get registered students from the subject
+    // Note: The subject object might not have registeredStudents directly
+    // We need to check where registered students are stored
+    const registeredStudents = subject.registeredStudents || [];
+    
+    if (registeredStudents.length === 0) {
+      setSearchStatus({
+        searching: false,
+        found: false,
+        message: 'No registered students found for this course'
+      });
+      return;
+    }
+
+    // Search for the student by roll number (case insensitive, trim spaces)
+    const searchRollNo = rollNo.trim();
+    const foundStudent = registeredStudents.find(student => 
+      student.registrationNo && student.registrationNo.trim().toLowerCase() === searchRollNo.toLowerCase()
+    );
+
+    if (foundStudent) {
+      // Auto-fill the form with student details
+      setManualAttendanceForm(prev => ({
+        ...prev,
+        studentName: foundStudent.studentName || '',
+        discipline: foundStudent.discipline || '',
+        rollNo: foundStudent.registrationNo || rollNo
+      }));
+
+      setSearchStatus({
+        searching: false,
+        found: true,
+        message: 'Student found!'
+      });
+
+      toast.success(`Student found: ${foundStudent.studentName}`);
+    } else {
+      setSearchStatus({
+        searching: false,
+        found: false,
+        message: 'Student not found in registered list'
+      });
+      
+      toast.warning('Student not found in registered list. You can still enter details manually.');
+    }
+  };
+
+  // Handle roll number search on blur or enter key
+  const handleRollNoSearch = (e) => {
+    if (e.type === 'blur' || (e.type === 'keydown' && e.key === 'Enter')) {
+      const rollNo = manualAttendanceForm.rollNo;
+      if (rollNo && rollNo.trim() !== '') {
+        searchStudentByRollNo(rollNo);
+      }
+    }
   };
 
   const handleSubjectSelect = (subjectId) => {
@@ -506,6 +622,14 @@ const TeacherAttendance_Page = () => {
       time: formattedTime,
       ipAddress: generateRandomIP()
     });
+    
+    // Reset search status
+    setSearchStatus({
+      searching: false,
+      found: false,
+      message: ''
+    });
+    
     setShowManualModal(true);
     setShowAttendanceDropdown(false);
   };
@@ -562,6 +686,13 @@ const TeacherAttendance_Page = () => {
       date: '',
       time: '',
       ipAddress: ''
+    });
+    
+    // Reset search status
+    setSearchStatus({
+      searching: false,
+      found: false,
+      message: ''
     });
   };
 
@@ -1186,54 +1317,118 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Manual Attendance Modal - Updated without time/date fields and with discipline */}
+      {/* Manual Attendance Modal - ENHANCED with search functionality */}
       {showManualModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">Manual Attendance</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Course: {subjectsWithAttendance.find(s => s.id === selectedSubject)?.title}
+              </p>
             </div>
             <div className="p-6 space-y-4">
+              {/* Roll No Field with Search */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Student Name *
+                  Roll No <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="rollNo"
+                    value={manualAttendanceForm.rollNo}
+                    onChange={handleManualInputChange}
+                    onBlur={handleRollNoSearch}
+                    onKeyDown={handleRollNoSearch}
+                    placeholder="Enter roll number and press Enter"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10 ${
+                      searchStatus.found 
+                        ? 'border-green-500 bg-green-50' 
+                        : searchStatus.message && searchStatus.message.includes('not found')
+                        ? 'border-yellow-500 bg-yellow-50'
+                        : 'border-gray-300'
+                    }`}
+                  />
+                  {/* Search indicator icon */}
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    {searchStatus.searching ? (
+                      <svg className="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : searchStatus.found ? (
+                      <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    ) : searchStatus.message && searchStatus.message.includes('not found') ? (
+                      <svg className="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                      </svg>
+                    ) : null}
+                  </div>
+                </div>
+                {/* Search status message */}
+                {searchStatus.message && (
+                  <p className={`text-xs mt-1 ${
+                    searchStatus.found 
+                      ? 'text-green-600' 
+                      : searchStatus.message.includes('not found')
+                      ? 'text-yellow-600'
+                      : 'text-blue-600'
+                  }`}>
+                    {searchStatus.message}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter roll number and press Enter or tab out to search from registered students
+                </p>
+              </div>
+
+              {/* Student Name Field - Disabled when found, enabled for manual entry */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Student Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   name="studentName"
                   value={manualAttendanceForm.studentName}
                   onChange={handleManualInputChange}
-                  placeholder="Enter student name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Student name will auto-fill"
+                  disabled={searchStatus.found}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    searchStatus.found ? 'bg-gray-100 text-gray-700' : ''
+                  }`}
                 />
+                {searchStatus.found && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Student name auto-filled from registered list
+                  </p>
+                )}
               </div>
 
+              {/* Discipline Field - Disabled when found, enabled for manual entry */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Roll No *
-                </label>
-                <input
-                  type="text"
-                  name="rollNo"
-                  value={manualAttendanceForm.rollNo}
-                  onChange={handleManualInputChange}
-                  placeholder="Enter roll number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Discipline *
+                  Discipline <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   name="discipline"
                   value={manualAttendanceForm.discipline}
                   onChange={handleManualInputChange}
-                  placeholder="Enter discipline"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Discipline will auto-fill"
+                  disabled={searchStatus.found}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    searchStatus.found ? 'bg-gray-100 text-gray-700' : ''
+                  }`}
                 />
+                {searchStatus.found && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Discipline auto-filled from registered list
+                  </p>
+                )}
               </div>
             </div>
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
@@ -1248,6 +1443,11 @@ const TeacherAttendance_Page = () => {
                     date: '',
                     time: '',
                     ipAddress: ''
+                  });
+                  setSearchStatus({
+                    searching: false,
+                    found: false,
+                    message: ''
                   });
                 }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
