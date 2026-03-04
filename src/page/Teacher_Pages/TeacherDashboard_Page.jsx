@@ -25,7 +25,7 @@ import {
   getDashboardAttendance,
   clearDashboard
 } from '../../store/Teacher-Slicer/Dashboard-Slicer.js'
-import { getTeacherStats, clearStats } from '../../store/Teacher-Slicer/Stats-Slicer.js'
+import { getTeacherStats, clearStats } from '../../store/Teacher-Slicer/Dashboard-Slicer.js'
 
 // Key for localStorage
 const CHAT_STORAGE_KEY = 'teacher_dashboard_chat_history';
