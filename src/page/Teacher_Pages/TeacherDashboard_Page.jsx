@@ -25,6 +25,7 @@ import {
   getDashboardAttendance,
   clearDashboard
 } from '../../store/Teacher-Slicer/Dashboard-Slicer.js'
+import { getTeacherStats, clearStats } from '../../store/Teacher-Slicer/Stats-Slicer.js'
 
 // Key for localStorage
 const CHAT_STORAGE_KEY = 'teacher_dashboard_chat_history';
@@ -44,11 +45,18 @@ const PAGE_NAME_MAPPING = {
 
 const TeacherDashboard_Page = () => {
   const dispatch = useDispatch()
+  
+  // Get data from redux
   const {
     dashboardSubjects,
     dashboardAttendance,
     isLoading
   } = useSelector((state) => state.teacherDashboard)
+  
+  const {
+    teacherStats,
+    statsLoading
+  } = useSelector((state) => state.teacherStats)
 
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [currentDate, setCurrentDate] = useState('')
@@ -81,27 +89,23 @@ const TeacherDashboard_Page = () => {
     ? 'http://localhost:5000/api/v1/ai/query'
     : 'https://attendance-management-system-backen.vercel.app/api/v1/ai/query';
 
-  // Function to split text into numbered list items (from prev code)
+  // Function to split text into numbered list items
   const splitNumberedList = (text) => {
-    // Regex to match numbered list items like "1. ", "2. ", etc.
     const numberedListRegex = /(\d+\.\s+)/g;
     const parts = text.split(numberedListRegex);
 
     if (parts.length <= 1) {
-      // No numbered list found
       return [text];
     }
 
     const result = [];
     for (let i = 0; i < parts.length; i++) {
       if (numberedListRegex.test(parts[i])) {
-        // This is a number prefix (e.g., "1. ")
         const numberPart = parts[i];
         const contentPart = parts[i + 1] || '';
         result.push(numberPart + contentPart);
-        i++; // Skip the next part since we've combined it
+        i++;
       } else if (parts[i].trim()) {
-        // Non-numbered content
         result.push(parts[i]);
       }
     }
@@ -109,15 +113,13 @@ const TeacherDashboard_Page = () => {
     return result;
   };
 
-  // Helper function to process a single line for URLs (from prev code)
+  // Helper function to process a single line for URLs
   const processLineForURLs = (line) => {
-    // Clean up markdown formatting
     let cleanedLine = line
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-      .replace(/`/g, '') // Remove backticks
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/`/g, '')
       .trim();
 
-    // Create a regex pattern to match all known URLs
     const urlPattern = new RegExp(
       Object.keys(PAGE_NAME_MAPPING)
         .map(url => url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
@@ -125,16 +127,13 @@ const TeacherDashboard_Page = () => {
       'g'
     );
 
-    // Split the line by URLs
     const parts = cleanedLine.split(urlPattern);
     const matches = cleanedLine.match(urlPattern) || [];
 
-    // If no URLs found, return the line as is
     if (matches.length === 0) {
       return cleanedLine;
     }
 
-    // Reconstruct with clickable links
     const elements = parts.reduce((acc, part, index) => {
       if (part) {
         acc.push(part);
@@ -160,18 +159,15 @@ const TeacherDashboard_Page = () => {
     return elements;
   };
 
-  // Updated Format AI response with full formatting (from prev code)
+  // Format AI response with full formatting
   const formatAIResponse = (text) => {
     if (!text) return text;
 
-    // First, handle numbered lists that might be concatenated
     const lines = text.split('\n');
     const formattedLines = [];
 
     for (let line of lines) {
-      // Check if line starts with # (heading)
       if (line.trim().startsWith('#')) {
-        // Remove the # and trim, then wrap in heading element
         const headingText = line.replace(/^#+\s*/, '').trim();
         if (headingText) {
           formattedLines.push(
@@ -181,14 +177,11 @@ const TeacherDashboard_Page = () => {
           );
         }
       } else {
-        // Check if this line contains numbered list items without proper line breaks
         if (line.match(/\d+\.\s+/)) {
-          // Split the line into individual numbered items
           const listItems = splitNumberedList(line);
 
           listItems.forEach((item, index) => {
             if (item.trim()) {
-              // Check if it's a numbered item
               if (item.match(/^\d+\.\s+/)) {
                 formattedLines.push(
                   <div key={`list-${formattedLines.length}-${index}`} className="flex items-start ml-2 my-1">
@@ -197,7 +190,6 @@ const TeacherDashboard_Page = () => {
                   </div>
                 );
               } else {
-                // Regular text (not a numbered item)
                 const processedLine = processLineForURLs(item);
                 formattedLines.push(
                   <div key={`line-${formattedLines.length}-${index}`} className="my-1">
@@ -208,7 +200,6 @@ const TeacherDashboard_Page = () => {
             }
           });
         } else {
-          // Regular line - check for bullet points
           const trimmedLine = line.trim();
           if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
             formattedLines.push(
@@ -218,7 +209,6 @@ const TeacherDashboard_Page = () => {
               </div>
             );
           } else {
-            // Regular text line
             const processedLine = processLineForURLs(line);
             formattedLines.push(
               <div key={`line-${formattedLines.length}`} className="my-1">
@@ -233,16 +223,14 @@ const TeacherDashboard_Page = () => {
     return formattedLines;
   };
 
-  // Function to render message content with formatting (from prev code)
+  // Function to render message content with formatting
   const renderMessageContent = (text, sender) => {
     if (sender === 'user') {
       return text;
     }
 
-    // For assistant messages, apply URL formatting
     const formattedContent = formatAIResponse(text);
 
-    // Check if we have React elements (from formatting)
     if (Array.isArray(formattedContent)) {
       return (
         <div className="space-y-0.5">
@@ -255,7 +243,6 @@ const TeacherDashboard_Page = () => {
       );
     }
 
-    // If it's just a string, return it
     return formattedContent;
   };
 
@@ -285,14 +272,15 @@ const TeacherDashboard_Page = () => {
     }
   }, [isChatOpen, chatMessages]);
 
-  // Fetch data
+  // Fetch all data
   useEffect(() => {
     const fetchData = async () => {
       try {
         setDataLoaded(false);
         await Promise.all([
           dispatch(getDashboardSubjects(userId)).unwrap(),
-          dispatch(getDashboardAttendance(userId)).unwrap()
+          dispatch(getDashboardAttendance(userId)).unwrap(),
+          dispatch(getTeacherStats(userId)).unwrap()
         ]);
         setDataLoaded(true);
       } catch (error) {
@@ -301,8 +289,14 @@ const TeacherDashboard_Page = () => {
       }
     };
 
-    fetchData();
-    return () => dispatch(clearDashboard());
+    if (userId) {
+      fetchData();
+    }
+    
+    return () => {
+      dispatch(clearDashboard());
+      dispatch(clearStats());
+    };
   }, [dispatch, userId]);
 
   // Set initial subject
@@ -484,13 +478,17 @@ const TeacherDashboard_Page = () => {
   };
 
   // Stats Card Component
-  const StatCard = ({ icon: Icon, label, value, color, bgColor, subtext }) => (
+  const StatCard = ({ icon: Icon, label, value, color, bgColor, subtext, loading }) => (
     <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-500 mb-1">{label}</p>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
-          {subtext && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
+          {loading ? (
+            <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
+          ) : (
+            <p className="text-2xl font-semibold text-gray-900">{value}</p>
+          )}
+          {subtext && !loading && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
         </div>
         <div className={`w-10 h-10 ${bgColor} rounded-lg flex items-center justify-center`}>
           <Icon className={`h-5 w-5 ${color}`} />
@@ -500,7 +498,7 @@ const TeacherDashboard_Page = () => {
   );
 
   // Loading state
-  if (isLoading || !dataLoaded) {
+  if (isLoading || !dataLoaded || statsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
         <div className="text-center">
@@ -527,49 +525,51 @@ const TeacherDashboard_Page = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
 
-        {/* Stats Cards Section */}
+        {/* Stats Cards Section with Real Data */}
         <div className="mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               icon={FiBook}
               label="Total Courses"
-              value={"1"}
+              value={teacherStats.totalCourses}
               color="text-blue-600"
               bgColor="bg-blue-50"
-              subtext={'course assigned'}
-              // subtext={stats.totalSubjects === 1 ? 'course assigned' : 'courses assigned'}
+              subtext={teacherStats.totalCourses === 1 ? 'course assigned' : 'courses assigned'}
+              loading={statsLoading}
             />
             <StatCard
               icon={FiUsers}
-              label="Total Students"
-              value={"2"}
+              label="Registered Students"
+              value={teacherStats.totalRegisteredStudents}
               color="text-green-600"
               bgColor="bg-green-50"
-              subtext="enrolled students"
+              subtext="unique students"
+              loading={statsLoading}
             />
             <StatCard
-              icon={FiUserCheck}
-              label="Attendance Records"
-              value={"3"}
+              icon={FiCalendar}
+              label="Attendance Days"
+              value={teacherStats.totalAttendanceDays}
               color="text-purple-600"
               bgColor="bg-purple-50"
-              subtext="total marks"
+              subtext={teacherStats.totalAttendanceDays === 1 ? 'day marked' : 'days marked'}
+              loading={statsLoading}
             />
             <StatCard
               icon={FiAward}
-              label="Today's Attendance"
-              value={"4"}
+              label="Attendance Rate"
+              value={`${teacherStats.attendancePercentage}%`}
               color="text-orange-600"
               bgColor="bg-orange-50"
-              subtext={'student present'}
-              // subtext={stats.todayAttendance === 1 ? 'student present' : 'students present'}
+              subtext="overall percentage"
+              loading={statsLoading}
             />
           </div>
         </div>
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Subjects Panel - Clean Card */}
+          {/* Subjects Panel */}
           <div className="lg:col-span-4">
             <div className="bg-white rounded-lg border border-gray-200">
               <div className="p-4 border-b border-gray-200">
@@ -621,11 +621,11 @@ const TeacherDashboard_Page = () => {
             </div>
           </div>
 
-          {/* Attendance Panel - Clean Card */}
+          {/* Attendance Panel */}
           <div className="lg:col-span-8">
             {selectedSubject ? (
               <>
-                {/* Date Navigation - Simple */}
+                {/* Date Navigation */}
                 {availableDates.length > 0 && (
                   <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
                     <div className="flex items-center justify-between">
@@ -658,7 +658,7 @@ const TeacherDashboard_Page = () => {
                   </div>
                 )}
 
-                {/* Attendance Table - Clean */}
+                {/* Attendance Table */}
                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                   <div className="p-4 border-b border-gray-200">
                     <div className="flex items-center justify-between">
@@ -710,7 +710,7 @@ const TeacherDashboard_Page = () => {
                         </table>
                       </div>
 
-                      {/* Simple Pagination */}
+                      {/* Pagination */}
                       {totalPages > 1 && (
                         <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
                           <span className="text-xs text-gray-500">
@@ -756,7 +756,7 @@ const TeacherDashboard_Page = () => {
         </div>
       </div>
 
-      {/* Simple Floating Chat Button */}
+      {/* Chat Button */}
       <button
         onClick={() => setIsChatOpen(!isChatOpen)}
         className="fixed bottom-6 right-6 z-40 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md flex items-center justify-center transition-all"
@@ -764,7 +764,7 @@ const TeacherDashboard_Page = () => {
         {isChatOpen ? <FiX className="h-5 w-5" /> : <BiSupport className="h-5 w-5" />}
       </button>
 
-      {/* Clean Chat Box */}
+      {/* Chat Box */}
       {isChatOpen && (
         <div className="fixed bottom-20 right-6 z-50 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
           {/* Chat Header */}
@@ -781,7 +781,7 @@ const TeacherDashboard_Page = () => {
             </button>
           </div>
 
-          {/* Chat Messages - Updated to use renderMessageContent */}
+          {/* Chat Messages */}
           <div className="h-72 overflow-y-auto p-3 bg-gray-50">
             <div className="space-y-3">
               {chatMessages.map((msg) => (
