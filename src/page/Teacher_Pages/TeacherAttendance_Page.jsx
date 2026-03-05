@@ -1161,159 +1161,66 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal - Modern & Decent Design */}
+      {/* Subject Selection Modal - Simple & Clean Design */}
 {showSubjectModal && subjectsWithAttendance.length > 0 && (
-  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-    <div className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl transform transition-all animate-slideUp">
-      
-      {/* Header with Gradient */}
-      <div className="px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-2xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              <FiGrid className="w-6 h-6 text-blue-600" />
-              Select Course & Schedule
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">
-              Choose a course and select the class schedule to manage attendance
-            </p>
-          </div>
-          <button
-            onClick={() => setShowSubjectModal(false)}
-            className="p-2 hover:bg-white/50 rounded-full transition-colors"
-          >
-            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg w-full max-w-md shadow-xl">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-gray-200">
+        <h3 className="text-base font-medium text-gray-900">Select Course</h3>
       </div>
 
-      {/* Course List - Scrollable Area */}
-      <div className="p-8 max-h-[500px] overflow-y-auto custom-scrollbar">
-        <div className="space-y-4">
-          {subjectsWithAttendance.map((subject, index) => (
-            <div 
-              key={subject.id}
-              className="group border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-lg transition-all duration-200 bg-white overflow-hidden animate-fadeInUp"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              {/* Course Header */}
-              <div className="p-5 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    {/* Subject Icon with Gradient */}
-                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                      <span className="text-white font-bold text-xl">
-                        {subject.title?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    
-                    {/* Subject Details */}
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
-                        {subject.title}
-                      </h4>
-                      <div className="flex flex-wrap items-center gap-3 mt-2">
-                        <span className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
-                          {subject.code}
-                        </span>
-                        <span className="inline-flex items-center px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-full">
-                          {subject.departmentOffering}
-                        </span>
-                        <span className="inline-flex items-center px-2.5 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
-                          {subject.creditHours} Credits
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Student Count Badge */}
-                  <div className="flex items-center gap-2">
-                    <div className="text-right">
-                      <p className="text-xs text-gray-500">Registered</p>
-                      <p className="text-lg font-bold text-gray-700">{subject.totalRegisteredStudents}</p>
-                    </div>
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                      <FiUser className="w-5 h-5 text-gray-600" />
-                    </div>
-                  </div>
+      {/* Subject List */}
+      <div className="p-4 max-h-96 overflow-y-auto">
+        <div className="space-y-3">
+          {subjectsWithAttendance.map((subject) => (
+            <div key={subject.id} className="border border-gray-200 rounded-lg overflow-hidden">
+              {/* Subject Info */}
+              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-900">{subject.title}</span>
+                  <span className="text-xs text-gray-500">{subject.totalRegisteredStudents} students</span>
                 </div>
+                <p className="text-xs text-gray-500 mt-0.5">{subject.code}</p>
               </div>
 
-              {/* Class Schedule Section */}
-              <div className="p-5">
-                {subject.classSchedule && subject.classSchedule.length > 0 ? (
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                      <FiClock className="w-4 h-4 text-blue-500" />
-                      Select Class Schedule
-                    </label>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {subject.classSchedule.map((schedule, idx) => (
-                        <button
-                          key={schedule._id || idx}
-                          onClick={() => handleSubjectSelect(subject.id, schedule)}
-                          className="relative group/schedule p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-200 text-left"
-                        >
-                          {/* Day Badge */}
-                          <div className="absolute top-2 right-2">
-                            <span className="text-[10px] font-medium text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
-                              {schedule.day}
-                            </span>
-                          </div>
-                          
-                          {/* Schedule Icon */}
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center mb-3">
-                            <FiClock className="w-5 h-5 text-white" />
-                          </div>
-                          
-                          {/* Schedule Details */}
-                          <div>
-                            <p className="text-sm font-semibold text-gray-800 mb-1">
-                              {schedule.startTime} - {schedule.endTime}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Click to select this schedule
-                            </p>
-                          </div>
-                          
-                          {/* Hover Effect Indicator */}
-                          <div className="absolute inset-0 border-2 border-blue-500 rounded-xl opacity-0 group-hover/schedule:opacity-100 transition-opacity pointer-events-none"></div>
-                        </button>
-                      ))}
-                    </div>
-                    
-                    {/* Schedule Info */}
-                    <p className="text-xs text-gray-500 flex items-center gap-1 mt-2">
-                      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Select a schedule to continue with this course
-                    </p>
-                  </div>
-                ) : (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-                    <FiClock className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-                    <p className="text-sm font-medium text-amber-800">No Class Schedule Available</p>
-                    <p className="text-xs text-amber-600 mt-1">Please add class schedule to this course first</p>
-                  </div>
-                )}
-              </div>
+              {/* Schedule Dropdown */}
+              {subject.classSchedule && subject.classSchedule.length > 0 ? (
+                <div className="p-3">
+                  <select
+                    onChange={(e) => {
+                      const selectedIndex = e.target.value;
+                      if (selectedIndex) {
+                        const schedule = subject.classSchedule[selectedIndex];
+                        handleSubjectSelect(subject.id, schedule);
+                      }
+                    }}
+                    defaultValue=""
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="" disabled>Select schedule</option>
+                    {subject.classSchedule.map((schedule, index) => (
+                      <option key={schedule._id || index} value={index}>
+                        {schedule.day} • {schedule.startTime} - {schedule.endTime}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="p-3 text-xs text-gray-500 italic">
+                  No schedule available
+                </div>
+              )}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Footer with Actions */}
-      <div className="px-8 py-5 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-between items-center">
-        <p className="text-sm text-gray-500">
-          {subjectsWithAttendance.length} course{subjectsWithAttendance.length !== 1 ? 's' : ''} available
-        </p>
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex justify-end">
         <button
           onClick={() => setShowSubjectModal(false)}
-          className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded transition-colors"
         >
           Cancel
         </button>
