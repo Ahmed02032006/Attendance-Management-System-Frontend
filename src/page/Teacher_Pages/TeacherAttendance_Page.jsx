@@ -790,7 +790,7 @@ const TeacherAttendance_Page = () => {
                   {subjectsWithAttendance.find(s => s.id === selectedSubject)?.title}
                 </p>
                 {selectedSchedule && (
-                  <p className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                  <p className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 mt-2 border border-blue-400 rounded-full">
                     {formatScheduleDisplay(selectedSchedule)}
                   </p>
                 )}
@@ -809,15 +809,6 @@ const TeacherAttendance_Page = () => {
                 </svg>
               </button>
             </div>
-
-            {/* Change Course Button */}
-            <button
-              onClick={() => setShowSubjectModal(true)}
-              className="mt-3 text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1"
-            >
-              <FiGrid className="w-4 h-4" />
-              <span>Change Course</span>
-            </button>
           </div>
         )}
 
@@ -1162,72 +1153,72 @@ const TeacherAttendance_Page = () => {
       </div>
 
       {/* Subject Selection Modal - Simple & Clean Design */}
-{showSubjectModal && subjectsWithAttendance.length > 0 && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-    <div className="bg-white rounded-lg w-full max-w-md shadow-xl">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200">
-        <h3 className="text-base font-medium text-gray-900">Select Course</h3>
-      </div>
-
-      {/* Subject List */}
-      <div className="p-4 max-h-96 overflow-y-auto">
-        <div className="space-y-3">
-          {subjectsWithAttendance.map((subject) => (
-            <div key={subject.id} className="border border-gray-200 rounded-lg overflow-hidden">
-              {/* Subject Info */}
-              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">{subject.title}</span>
-                  <span className="text-xs text-gray-500">{subject.totalRegisteredStudents} students</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-0.5">{subject.code}</p>
-              </div>
-
-              {/* Schedule Dropdown */}
-              {subject.classSchedule && subject.classSchedule.length > 0 ? (
-                <div className="p-3">
-                  <select
-                    onChange={(e) => {
-                      const selectedIndex = e.target.value;
-                      if (selectedIndex) {
-                        const schedule = subject.classSchedule[selectedIndex];
-                        handleSubjectSelect(subject.id, schedule);
-                      }
-                    }}
-                    defaultValue=""
-                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="" disabled>Select schedule</option>
-                    {subject.classSchedule.map((schedule, index) => (
-                      <option key={schedule._id || index} value={index}>
-                        {schedule.day} • {schedule.startTime} - {schedule.endTime}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ) : (
-                <div className="p-3 text-xs text-gray-500 italic">
-                  No schedule available
-                </div>
-              )}
+      {showSubjectModal && subjectsWithAttendance.length > 0 && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg w-full max-w-md shadow-xl">
+            {/* Header */}
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h3 className="text-base font-medium text-gray-900">Select Course</h3>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Footer */}
-      <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex justify-end">
-        <button
-          onClick={() => setShowSubjectModal(false)}
-          className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded transition-colors"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            {/* Subject List */}
+            <div className="p-4 max-h-96 overflow-y-auto">
+              <div className="space-y-3">
+                {subjectsWithAttendance.map((subject) => (
+                  <div key={subject.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                    {/* Subject Info */}
+                    <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-900">{subject.title}</span>
+                        <span className="text-xs text-gray-500">{subject.totalRegisteredStudents} students</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">{subject.code}</p>
+                    </div>
+
+                    {/* Schedule Dropdown */}
+                    {subject.classSchedule && subject.classSchedule.length > 0 ? (
+                      <div className="p-3">
+                        <select
+                          onChange={(e) => {
+                            const selectedIndex = e.target.value;
+                            if (selectedIndex) {
+                              const schedule = subject.classSchedule[selectedIndex];
+                              handleSubjectSelect(subject.id, schedule);
+                            }
+                          }}
+                          defaultValue=""
+                          className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="" disabled>Select schedule</option>
+                          {subject.classSchedule.map((schedule, index) => (
+                            <option key={schedule._id || index} value={index}>
+                              {schedule.day} • {schedule.startTime} - {schedule.endTime}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      <div className="p-3 text-xs text-gray-500 italic">
+                        No schedule available
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex justify-end">
+              <button
+                onClick={() => setShowSubjectModal(false)}
+                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create Attendance Modal - QR Based */}
       {showCreateModal && (
@@ -1412,8 +1403,8 @@ const TeacherAttendance_Page = () => {
                 onClick={handleSubmitManualAttendance}
                 disabled={!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline}
                 className={`px-4 py-2 rounded-md font-medium transition-colors ${manualAttendanceForm.studentName && manualAttendanceForm.rollNo && manualAttendanceForm.discipline
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 Submit Attendance
