@@ -132,7 +132,6 @@ const StudentAttendance_Page = () => {
 
         // Determine the correct subject name based on available fields
         let subjectName = 'Unknown Subject';
-
         if (parsedData.subjectName) {
           subjectName = parsedData.subjectName;
         } else if (parsedData.subject && typeof parsedData.subject === 'string' && !parsedData.subject.match(/^[0-9a-fA-F]{24}$/)) {
@@ -145,7 +144,9 @@ const StudentAttendance_Page = () => {
           ...parsedData,
           subjectName: subjectName,
           subjectCode: parsedData.subjectCode || parsedData.code || 'N/A',
-          subjectId: parsedData.subject, // Make sure subjectId is set
+          subjectId: parsedData.subject,
+          scheduleDay: parsedData.scheduleDay,
+          scheduleTime: parsedData.scheduleTime
         });
 
         setFormData(prev => ({
@@ -164,6 +165,8 @@ const StudentAttendance_Page = () => {
       const subject = urlParams.get('subject');
       const subjectName = urlParams.get('subjectName');
       const subjectCode = urlParams.get('subjectCode');
+      const scheduleDay = urlParams.get('scheduleDay');
+      const scheduleTime = urlParams.get('scheduleTime');
       const expiry = urlParams.get('expiry');
 
       if (code) {
@@ -183,9 +186,11 @@ const StudentAttendance_Page = () => {
         const qrDataFromUrl = {
           code: code,
           subject: subject,
-          subjectId: subject, // This is the subject ID
+          subjectId: subject,
           subjectName: subjectName || subject || 'Unknown Subject',
           subjectCode: subjectCode || code || 'N/A',
+          scheduleDay: scheduleDay,
+          scheduleTime: scheduleTime,
           type: 'attendance',
           expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null,
           timestamp: urlParams.get('timestamp') || new Date().toISOString()
@@ -210,7 +215,7 @@ const StudentAttendance_Page = () => {
     setIsFetchingStudent(true);
     setRollNoValid(false);
     setDiscipline(''); // Clear discipline while fetching
-    
+
     try {
       const response = await axios.get(
         `https://attendance-management-system-backen.vercel.app/api/v1/teacher/attendance/registered-student/${qrData.subjectId}/${rollNo}`
@@ -218,11 +223,11 @@ const StudentAttendance_Page = () => {
 
       if (response.data.success) {
         const studentData = response.data.data;
-        
+
         // Only set discipline if student is registered in this course
         setDiscipline(studentData.discipline || '');
         setRollNoValid(true);
-        
+
         // No toast message - silent success
       }
     } catch (error) {
@@ -250,7 +255,7 @@ const StudentAttendance_Page = () => {
       ...prev,
       rollNo: processedValue
     }));
-    
+
     // Clear discipline when roll number changes
     setDiscipline('');
     setRollNoValid(false);
@@ -265,7 +270,7 @@ const StudentAttendance_Page = () => {
       const timeout = setTimeout(() => {
         fetchStudentDiscipline(processedValue);
       }, 800); // 800ms debounce
-      
+
       setStudentFetchTimeout(timeout);
     }
   };
@@ -279,7 +284,7 @@ const StudentAttendance_Page = () => {
     const { name, value } = e.target;
 
     let processedValue;
-    
+
     if (name === 'studentName' || name === 'rollNo') {
       processedValue = capitalizeText(value);
     } else {
@@ -406,14 +411,16 @@ const StudentAttendance_Page = () => {
       const AttendanceData = {
         studentName: formData.studentName,
         rollNo: formData.rollNo,
-        discipline: discipline, // Use the fetched discipline
+        discipline: discipline,
         uniqueCode: originalCode,
         subjectName: qrData.subjectName || qrData.subject || 'Unknown Subject',
         subjectCode: qrData.subjectCode || 'N/A',
-        subjectId: qrData.subjectId || qrData.subject, // Use subjectId
+        subjectId: qrData.subjectId || qrData.subject,
         time: currentTime,
         date: qrData.attendanceDate || new Date().toISOString().split('T')[0],
         ipAddress: deviceFingerprint,
+        scheduleDay: qrData.scheduleDay,
+        scheduleTime: qrData.scheduleTime
       };
 
       dispatch(createAttendance(AttendanceData))
@@ -609,13 +616,12 @@ const StudentAttendance_Page = () => {
                   value={formData.rollNo}
                   onChange={handleRollNoChange}
                   placeholder="Enter your roll number"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${
-                    rollNoValid 
-                      ? 'border-green-500 bg-green-50' 
-                      : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${rollNoValid
+                    ? 'border-green-500 bg-green-50'
+                    : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300'
+                    }`}
                   required
                   autoComplete="off"
                   style={{ textTransform: 'uppercase' }}
@@ -685,9 +691,8 @@ const StudentAttendance_Page = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || !qrData || !discipline}
-                className={`flex-1 text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${
-                  !discipline ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+                className={`flex-1 text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${!discipline ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

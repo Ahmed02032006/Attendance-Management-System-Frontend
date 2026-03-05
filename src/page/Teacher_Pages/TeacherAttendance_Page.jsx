@@ -46,7 +46,7 @@ const TeacherAttendance_Page = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [availableSchedules, setAvailableSchedules] = useState([]);
-  
+
   // Modal states
   const [showSubjectModal, setShowSubjectModal] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -55,7 +55,7 @@ const TeacherAttendance_Page = () => {
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAttendanceDropdown, setShowAttendanceDropdown] = useState(false);
-  
+
   // Data states
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [attendanceToDelete, setAttendanceToDelete] = useState(null);
@@ -142,7 +142,7 @@ const TeacherAttendance_Page = () => {
     try {
       const formattedDate = formatDate(currentDate);
       const scheduleTime = `${selectedSchedule.startTime}-${selectedSchedule.endTime}`;
-      
+
       const response = await dispatch(getAttendanceBySchedule({
         subjectId: selectedSubject,
         date: formattedDate,
@@ -473,7 +473,7 @@ const TeacherAttendance_Page = () => {
     setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
-    
+
     // Reset attendance data
     setCurrentAttendanceData({
       students: [],
@@ -481,7 +481,7 @@ const TeacherAttendance_Page = () => {
       totalAbsent: 0,
       totalRegistered: 0
     });
-    
+
     toast.success(`Selected: ${schedule.day} ${formatScheduleTime(schedule)}`);
   };
 
@@ -515,6 +515,8 @@ const TeacherAttendance_Page = () => {
     const originalCode = attendanceForm.uniqueCode;
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
+
+    // Add all parameters
     url.searchParams.append('code', originalCode);
     url.searchParams.append('subject', attendanceForm.subject);
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
@@ -1466,8 +1468,8 @@ const TeacherAttendance_Page = () => {
                 onClick={handleSubmitManualAttendance}
                 disabled={!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline}
                 className={`px-4 py-2 rounded-md font-medium transition-colors ${manualAttendanceForm.studentName && manualAttendanceForm.rollNo && manualAttendanceForm.discipline
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 Submit Attendance
