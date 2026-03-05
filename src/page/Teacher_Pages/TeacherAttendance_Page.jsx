@@ -230,18 +230,20 @@ const TeacherAttendance_Page = () => {
   // Get current attendance records from Redux state for selected class schedule
   const getCurrentAttendanceRecords = () => {
     if (!selectedSubject || !selectedClassSchedule) return [];
+
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
-    if (!subject || !subject.attendance) return [];
-
-    const records = subject.attendance[currentDateString] || [];
-
-    // Filter records by class schedule ID if available
-    const filteredRecords = records.filter(record => 
-      !selectedClassSchedule._id || record.classScheduleId === selectedClassSchedule._id
-    );
+    if (!subject) return [];
 
     // Get registered students for this subject
     const registeredStudentsList = subject.registeredStudents || [];
+
+    // Get attendance records for current date
+    const dateRecords = subject.attendance?.[currentDateString] || [];
+
+    // Filter records by selected class schedule
+    const filteredRecords = dateRecords.filter(record =>
+      !selectedClassSchedule._id || record.classScheduleId === selectedClassSchedule._id
+    );
 
     // Create a map of present students from filtered records
     const presentStudentsMap = new Map();
@@ -249,21 +251,23 @@ const TeacherAttendance_Page = () => {
       presentStudentsMap.set(record.rollNo, record);
     });
 
-    // Combine registered students with attendance records
+    // Start with all registered students marked as absent
     const combinedRecords = registeredStudentsList.map(regStudent => {
       const presentRecord = presentStudentsMap.get(regStudent.registrationNo);
       if (presentRecord) {
+        // Student is present
         return {
-          ...presentRecord,
-          status: 'Present',
           id: presentRecord.id,
-          studentName: presentRecord.studentName,
-          rollNo: presentRecord.rollNo,
+          studentName: presentRecord.studentName || regStudent.studentName,
+          rollNo: presentRecord.rollNo || regStudent.registrationNo,
           discipline: presentRecord.discipline || regStudent.discipline,
           time: presentRecord.time,
-          title: subject.title
+          title: subject.title,
+          status: 'Present',
+          classScheduleId: presentRecord.classScheduleId
         };
       } else {
+        // Student is absent
         return {
           id: null,
           studentName: regStudent.studentName,
@@ -271,22 +275,44 @@ const TeacherAttendance_Page = () => {
           discipline: regStudent.discipline,
           time: null,
           title: subject.title,
-          status: 'Absent'
+          status: 'Absent',
+          classScheduleId: selectedClassSchedule._id
         };
       }
     });
 
     // Add any unregistered students who marked attendance
     filteredRecords.forEach(record => {
-      if (!registeredStudentsList.some(reg => reg.registrationNo === record.rollNo)) {
+      const isRegistered = registeredStudentsList.some(
+        reg => reg.registrationNo === record.rollNo
+      );
+
+      if (!isRegistered) {
         combinedRecords.push({
-          ...record,
-          status: 'Not Registered'
+          id: record.id,
+          studentName: record.studentName,
+          rollNo: record.rollNo,
+          discipline: record.discipline,
+          time: record.time,
+          title: subject.title,
+          status: 'Not Registered',
+          classScheduleId: record.classScheduleId
         });
       }
     });
 
-    return combinedRecords;
+    // Remove duplicates (in case a student appears both in registered and unregistered)
+    const uniqueRecords = [];
+    const seenRollNos = new Set();
+
+    combinedRecords.forEach(record => {
+      if (!seenRollNos.has(record.rollNo)) {
+        seenRollNos.add(record.rollNo);
+        uniqueRecords.push(record);
+      }
+    });
+
+    return uniqueRecords;
   };
 
   const currentAttendanceRecords = getCurrentAttendanceRecords();
@@ -477,7 +503,7 @@ const TeacherAttendance_Page = () => {
       const url = URL.createObjectURL(blob);
 
       const subjectName = subjectsWithAttendance.find(s => s.id === selectedSubject)?.title || 'attendance';
-      const scheduleInfo = selectedClassSchedule ? 
+      const scheduleInfo = selectedClassSchedule ?
         `_${selectedClassSchedule.day}_${selectedClassSchedule.startTime}` : '';
       const fileName = `attendance_${subjectName}${scheduleInfo}_${currentDateString}.csv`;
 
@@ -645,7 +671,12 @@ const TeacherAttendance_Page = () => {
 
     setShowCreateModal(false);
     setShowQRModal(true);
-    toast.success('QR code generated successfully!', { autoClose: 2000 });
+
+    // The QR generation happens in useEffect, but we need to ensure class schedule ID is included
+    // This will trigger the QR generation with the current form data
+    setTimeout(() => {
+      handleQRGeneration(true);
+    }, 100);
   };
 
   // Handle Manual Attendance - Updated to fetch registered students
@@ -666,7 +697,7 @@ const TeacherAttendance_Page = () => {
       date: formatDate(currentDate),
       time: formattedTime,
       ipAddress: generateRandomIP(),
-      classScheduleId: selectedClassSchedule?._id || '' // Add class schedule ID
+      classScheduleId: selectedClassSchedule?._id || ''
     });
 
     setRollNoSearchTerm('');
@@ -697,6 +728,18 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
+    // Check if attendance already marked for this student in this class schedule today
+    const existingRecord = currentAttendanceRecords.find(
+      record => record.rollNo === manualAttendanceForm.rollNo &&
+        record.status === 'Present' &&
+        record.classScheduleId === selectedClassSchedule._id
+    );
+
+    if (existingRecord) {
+      toast.error('Attendance already marked for this student in this class session');
+      return;
+    }
+
     // Get subject details
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
 
@@ -711,14 +754,18 @@ const TeacherAttendance_Page = () => {
       date: manualAttendanceForm.date,
       ipAddress: manualAttendanceForm.ipAddress,
       title: subject?.title || 'Unknown Subject',
-      classScheduleId: selectedClassSchedule._id // Add class schedule ID
+      classScheduleId: selectedClassSchedule._id
     };
 
     dispatch(createAttendance(attendanceRecord))
       .then((res) => {
-        if (res.payload.success) {
+        if (res.payload?.success) {
           toast.success('Manual attendance marked successfully!');
+
+          // Refresh the attendance data
           dispatch(getSubjectsWithAttendance(userId)).unwrap();
+
+          // Reset form
           setManualAttendanceForm({
             studentName: '',
             rollNo: '',
@@ -729,28 +776,16 @@ const TeacherAttendance_Page = () => {
             ipAddress: '',
             classScheduleId: ''
           });
+          setRollNoSearchTerm('');
+          setShowManualModal(false);
         } else {
-          toast.error(res.payload.message)
+          toast.error(res.payload?.message || 'Failed to mark attendance');
         }
       })
       .catch((error) => {
         console.error('Attendance submission error:', error);
+        toast.error(error.response?.data?.message || 'Failed to mark attendance');
       });
-
-    setShowManualModal(false);
-    setRollNoSearchTerm('');
-
-    // Reset form
-    setManualAttendanceForm({
-      studentName: '',
-      rollNo: '',
-      discipline: '',
-      subjectId: '',
-      date: '',
-      time: '',
-      ipAddress: '',
-      classScheduleId: ''
-    });
   };
 
   // Toggle QR zoom
@@ -893,7 +928,7 @@ const TeacherAttendance_Page = () => {
                 <h2 className="text-xl font-semibold text-gray-800">
                   {formatDisplayDate(currentDate)}
                 </h2>
-                
+
                 {/* Class Schedule Dropdown */}
                 <div className="flex items-center space-x-2">
                   <FiClock className="w-4 h-4 text-gray-500" />
@@ -924,11 +959,10 @@ const TeacherAttendance_Page = () => {
               <button
                 onClick={() => navigateDate('next')}
                 disabled={isFutureDate(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000))}
-                className={`p-3 rounded-full transition-colors ${
-                  isFutureDate(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000))
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
+                className={`p-3 rounded-full transition-colors ${isFutureDate(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000))
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  }`}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1134,22 +1168,20 @@ const TeacherAttendance_Page = () => {
                             <span className="text-sm text-gray-600">{student.status === 'Present' ? student.discipline : '--'}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs ${
-                              student.status === 'Present'
-                                ? 'bg-gray-100 text-gray-700'
-                                : 'bg-gray-50 text-gray-400'
-                            }`}>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs ${student.status === 'Present'
+                              ? 'bg-gray-100 text-gray-700'
+                              : 'bg-gray-50 text-gray-400'
+                              }`}>
                               {student.status === 'Present' ? student.time : '--'}
                             </span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              student.status === 'Present'
-                                ? 'bg-green-100 text-green-700'
-                                : student.status === 'Not Registered'
-                                  ? 'bg-yellow-100 text-yellow-700'
-                                  : 'bg-red-100 text-red-700'
-                            }`}>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${student.status === 'Present'
+                              ? 'bg-green-100 text-green-700'
+                              : student.status === 'Not Registered'
+                                ? 'bg-yellow-100 text-yellow-700'
+                                : 'bg-red-100 text-red-700'
+                              }`}>
                               {student.status || (student.time ? 'Present' : 'Absent')}
                             </span>
                           </td>
@@ -1381,11 +1413,10 @@ const TeacherAttendance_Page = () => {
                   setShowSubjectModal(false);
                 }}
                 disabled={!selectedSubject || !selectedClassSchedule}
-                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  selectedSubject && selectedClassSchedule
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${selectedSubject && selectedClassSchedule
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
               >
                 Continue
               </button>
@@ -1583,11 +1614,10 @@ const TeacherAttendance_Page = () => {
               <button
                 onClick={handleSubmitManualAttendance}
                 disabled={!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline}
-                className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                  manualAttendanceForm.studentName && manualAttendanceForm.rollNo && manualAttendanceForm.discipline
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${manualAttendanceForm.studentName && manualAttendanceForm.rollNo && manualAttendanceForm.discipline
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
               >
                 Submit Attendance
               </button>
@@ -1629,7 +1659,7 @@ const TeacherAttendance_Page = () => {
                   <p className="text-sm font-semibold text-gray-700">{formatScheduleTime(selectedClassSchedule)}</p>
                 </div>
               )}
-              
+
               <div
                 className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
                 id="qr-code-container"
@@ -1823,9 +1853,8 @@ const TeacherAttendance_Page = () => {
                                     {record.discipline || 'N/A'}
                                   </td>
                                   <td className="px-4 py-3 whitespace-nowrap text-center">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                      record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                    }`}>
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                      }`}>
                                       {record.time ? 'Present' : 'Absent'}
                                     </span>
                                   </td>
