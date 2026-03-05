@@ -89,27 +89,6 @@ export const deleteAttendance = createAsyncThunk(
     }
 );
 
-// Mark bulk attendance
-export const markBulkAttendance = createAsyncThunk(
-    "attendance/bulk",
-    async (attendanceRecords, { rejectWithValue }) => {
-        try {
-            const response = await axios.post(
-                "https://attendance-management-system-backen.vercel.app/api/v1/teacher/attendance/bulk",
-                { records: attendanceRecords }
-            );
-
-            if (response.status !== 201) {
-                return rejectWithValue(response.data);
-            }
-
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data || error.message);
-        }
-    }
-);
-
 const attendanceSlicer = createSlice({
     name: "attendance",
     initialState: initialState,
@@ -142,7 +121,7 @@ const attendanceSlicer = createSlice({
                 state.isLoading = false;
 
                 const newAttendance = action.payload.data;
-
+                
                 // Handle both cases: when subjectId is populated or just an ID
                 const subjectId = newAttendance.subjectId?._id || newAttendance.subjectId;
                 const dateKey = new Date(newAttendance.date).toISOString().split('T')[0];
@@ -174,7 +153,7 @@ const attendanceSlicer = createSlice({
                     };
 
                     subject.attendance[dateKey].push(attendanceRecord);
-
+                    
                     // Optional: Sort the attendance records by time
                     subject.attendance[dateKey].sort((a, b) => {
                         if (a.time < b.time) return -1;
@@ -247,18 +226,6 @@ const attendanceSlicer = createSlice({
             .addCase(deleteAttendance.rejected, (state, action) => {
                 state.isLoading = false;
                 console.error('Delete attendance failed:', action.payload);
-            })
-            // Mark Bulk Attendance
-            .addCase(markBulkAttendance.pending, (state) => {
-                state.isLoading = true;
-            })
-            .addCase(markBulkAttendance.fulfilled, (state, action) => {
-                state.isLoading = false;
-                // You can add logic to update state if needed
-            })
-            .addCase(markBulkAttendance.rejected, (state, action) => {
-                state.isLoading = false;
-                console.error('Bulk attendance failed:', action.payload);
             });
     },
 });
