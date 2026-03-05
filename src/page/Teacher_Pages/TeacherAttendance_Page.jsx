@@ -19,12 +19,15 @@ import {
   FiCalendar,
   FiBookOpen,
   FiChevronDown,
+  FiCheckSquare,
+  FiSquare,
 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
   deleteAttendance,
   clearAttendance,
-  createAttendance
+  createAttendance,
+  markBulkAttendance
 } from '../../store/Teacher-Slicer/Attendance-Slicer.js'
 import { getRegisteredStudents } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
@@ -38,6 +41,7 @@ const TeacherAttendance_Page = () => {
   const { registeredStudents, studentsLoading } = useSelector((state) => state.teacherSubject)
 
   const [selectedSubject, setSelectedSubject] = useState('');
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [showSubjectModal, setShowSubjectModal] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
@@ -50,8 +54,13 @@ const TeacherAttendance_Page = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [attendanceForm, setAttendanceForm] = useState({
     subject: '',
+    scheduleId: '',
     uniqueCode: ''
   });
+
+  // New state for bulk attendance
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
 
   // Updated manual attendance form state
   const [manualAttendanceForm, setManualAttendanceForm] = useState({
@@ -59,6 +68,7 @@ const TeacherAttendance_Page = () => {
     rollNo: '',
     discipline: '',
     subjectId: '',
+    scheduleId: '',
     date: '',
     time: '',
     ipAddress: ''
@@ -104,9 +114,19 @@ const TeacherAttendance_Page = () => {
   // Set initial selected subject when data is loaded
   useEffect(() => {
     if (subjectsWithAttendance.length > 0 && !selectedSubject) {
-      setSelectedSubject(subjectsWithAttendance[0].id)
+      setSelectedSubject(subjectsWithAttendance[0].id);
+      // Don't auto-select schedule, wait for user selection
     }
-  }, [subjectsWithAttendance, selectedSubject])
+  }, [subjectsWithAttendance, selectedSubject]);
+
+  // Reset selections when subject changes
+  useEffect(() => {
+    setSelectedSchedule(null);
+    setSelectedStudents([]);
+    setSelectAll(false);
+    setCurrentPage(1);
+    setSortConfig({ key: null, direction: 'asc' });
+  }, [selectedSubject]);
 
   // QR Auto-refresh useEffect
   useEffect(() => {
@@ -123,7 +143,7 @@ const TeacherAttendance_Page = () => {
         setQrRefreshInterval(null);
       }
     }
-  }, [showQRModal]);
+  }, [showQRModal, attendanceForm.subject, attendanceForm.scheduleId, attendanceForm.uniqueCode]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -163,6 +183,19 @@ const TeacherAttendance_Page = () => {
     });
   };
 
+  // Format time for display
+  const formatTimeSlot = (schedule) => {
+    if (!schedule) return '';
+    const convertTo12Hour = (time) => {
+      const [hour, minute] = time.split(':');
+      const hourInt = parseInt(hour);
+      const ampm = hourInt >= 12 ? 'PM' : 'AM';
+      const hour12 = hourInt % 12 || 12;
+      return `${hour12}:${minute} ${ampm}`;
+    };
+    return `${schedule.day} ${convertTo12Hour(schedule.startTime)} - ${convertTo12Hour(schedule.endTime)}`;
+  };
+
   // Get today's date for max date restriction
   const getTodayDate = () => {
     return new Date();
@@ -187,22 +220,77 @@ const TeacherAttendance_Page = () => {
     return result;
   };
 
-  // Get current attendance records from Redux state
+  // Get current subject object
+  const getCurrentSubject = () => {
+    if (!selectedSubject) return null;
+    return subjectsWithAttendance.find(s => s.id === selectedSubject);
+  };
+
+  // Get class schedules for current subject
+  const getSubjectSchedules = () => {
+    const subject = getCurrentSubject();
+    if (!subject || !subject.classSchedule) return [];
+    return subject.classSchedule;
+  };
+
+  // Get registered students for current subject
+  const getRegisteredStudentsForSubject = () => {
+    const subject = getCurrentSubject();
+    if (!subject || !subject.registeredStudents) return [];
+    return subject.registeredStudents;
+  };
+
+  // Get current attendance records filtered by selected schedule
   const getCurrentAttendanceRecords = () => {
-    if (!selectedSubject) return [];
-    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
-    if (!subject || !subject.attendance) return [];
+    const subject = getCurrentSubject();
+    if (!subject || !subject.attendance || !selectedSchedule) return [];
 
     const records = subject.attendance[currentDateString] || [];
+    
+    // Filter records by schedule ID if available
+    const filteredRecords = selectedSchedule 
+      ? records.filter(record => record.scheduleId === selectedSchedule._id)
+      : records;
 
-    // Ensure each record has a status field
-    return records.map(record => ({
+    return filteredRecords.map(record => ({
       ...record,
       status: record.status || (record.time ? 'Present' : 'Absent')
     }));
   };
 
-  const currentAttendanceRecords = getCurrentAttendanceRecords();
+  // Get students who are not marked for the current schedule and date
+  const getUnmarkedStudents = () => {
+    const registeredStudents = getRegisteredStudentsForSubject();
+    const markedRecords = getCurrentAttendanceRecords();
+    
+    const markedRollNos = new Set(markedRecords.map(r => r.rollNo));
+    
+    return registeredStudents
+      .filter(student => !markedRollNos.has(student.registrationNo))
+      .map(student => ({
+        id: null,
+        studentName: student.studentName,
+        rollNo: student.registrationNo,
+        discipline: student.discipline,
+        time: null,
+        title: getCurrentSubject()?.title,
+        status: 'Absent',
+        isRegistered: true
+      }));
+  };
+
+  // Combine marked and unmarked students
+  const getAllStudentsForDisplay = () => {
+    const marked = getCurrentAttendanceRecords();
+    const unmarked = getUnmarkedStudents();
+    
+    // Sort by roll number
+    return [...marked, ...unmarked].sort((a, b) => 
+      a.rollNo.localeCompare(b.rollNo, undefined, { numeric: true })
+    );
+  };
+
+  const currentDisplayStudents = getAllStudentsForDisplay();
 
   // Extract numeric part from roll number for sorting
   const extractNumericFromRollNo = (rollNo) => {
@@ -259,14 +347,12 @@ const TeacherAttendance_Page = () => {
           bValue = b.discipline?.toLowerCase() || '';
           break;
         case 'status':
-          // Define priority: Present > Not Registered > Absent
           const statusPriority = {
             'Present': 1,
-            'Not Registered': 2,
-            'Absent': 3
+            'Absent': 2
           };
-          aValue = statusPriority[a.status || (a.time ? 'Present' : 'Absent')] || 4;
-          bValue = statusPriority[b.status || (b.time ? 'Present' : 'Absent')] || 4;
+          aValue = statusPriority[a.status || (a.time ? 'Present' : 'Absent')] || 3;
+          bValue = statusPriority[b.status || (b.time ? 'Present' : 'Absent')] || 3;
           break;
         default:
           return 0;
@@ -354,15 +440,93 @@ const TeacherAttendance_Page = () => {
 
   // Filter students based on search term
   const filteredStudents = sortStudents(
-    currentAttendanceRecords.filter(student =>
-      student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.rollNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.discipline.toLowerCase().includes(searchTerm.toLowerCase())
+    currentDisplayStudents.filter(student =>
+      student.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.rollNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.discipline?.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  // Export to Excel function (updated to include date)
+  // Bulk selection handlers
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedStudents([]);
+    } else {
+      // Select only unmarked students
+      const unmarked = filteredStudents
+        .filter(s => s.status === 'Absent' && s.isRegistered)
+        .map(s => s.rollNo);
+      setSelectedStudents(unmarked);
+    }
+    setSelectAll(!selectAll);
+  };
+
+  const handleSelectStudent = (rollNo) => {
+    setSelectedStudents(prev => {
+      if (prev.includes(rollNo)) {
+        return prev.filter(r => r !== rollNo);
+      } else {
+        return [...prev, rollNo];
+      }
+    });
+    setSelectAll(false);
+  };
+
+  const handleBulkMarkAttendance = () => {
+    if (selectedStudents.length === 0) {
+      toast.error('No students selected');
+      return;
+    }
+
+    if (!selectedSchedule) {
+      toast.error('Please select a time slot');
+      return;
+    }
+
+    const currentTime = new Date();
+    const hours = currentTime.getHours();
+    const minutes = currentTime.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+    const formattedTime = `${formattedHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+
+    const subject = getCurrentSubject();
+    const registeredStudentsList = getRegisteredStudentsForSubject();
+
+    // Get student details for selected roll numbers
+    const attendanceRecords = selectedStudents.map(rollNo => {
+      const student = registeredStudentsList.find(s => s.registrationNo === rollNo);
+      return {
+        studentName: student.studentName,
+        rollNo: student.registrationNo,
+        discipline: student.discipline,
+        time: formattedTime,
+        subjectId: selectedSubject,
+        scheduleId: selectedSchedule._id,
+        date: currentDateString,
+        ipAddress: generateRandomIP(),
+        title: subject.title
+      };
+    });
+
+    dispatch(markBulkAttendance(attendanceRecords))
+      .then((res) => {
+        if (res.payload.success) {
+          toast.success(`${selectedStudents.length} students marked present!`);
+          setSelectedStudents([]);
+          setSelectAll(false);
+          dispatch(getSubjectsWithAttendance(userId)).unwrap();
+        } else {
+          toast.error(res.payload.message);
+        }
+      })
+      .catch((error) => {
+        console.error('Bulk attendance error:', error);
+        toast.error('Failed to mark attendance');
+      });
+  };
+
+  // Export to Excel function
   const exportToExcel = () => {
     if (filteredStudents.length === 0) {
       toast.error('No data to export');
@@ -370,7 +534,7 @@ const TeacherAttendance_Page = () => {
     }
 
     try {
-      const headers = ['Student Name', 'Roll No', 'Discipline', 'Date', 'Time', 'Subject'];
+      const headers = ['Student Name', 'Roll No', 'Discipline', 'Date', 'Time', 'Subject', 'Time Slot'];
       const csvContent = [
         headers.join(','),
         ...filteredStudents.map(student =>
@@ -379,8 +543,9 @@ const TeacherAttendance_Page = () => {
             `"${student.rollNo}"`,
             `"${student.discipline}"`,
             `"${formatShortDate(currentDate)}"`,
-            `"${student.time}"`,
-            `"${student.title || student.subject || 'N/A'}"` // Fix: Use title instead of subject
+            `"${student.time || '-'}"`,
+            `"${student.title || subject.title}"`,
+            `"${selectedSchedule ? formatTimeSlot(selectedSchedule) : '-'}"`
           ].join(',')
         )
       ].join('\n');
@@ -389,7 +554,7 @@ const TeacherAttendance_Page = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
 
-      const subjectName = subjectsWithAttendance.find(s => s.id === selectedSubject)?.title || 'attendance';
+      const subjectName = getCurrentSubject()?.title || 'attendance';
       const fileName = `attendance_${subjectName}_${currentDateString}.csv`;
 
       link.setAttribute('href', url);
@@ -399,8 +564,6 @@ const TeacherAttendance_Page = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // toast.success('Data exported successfully!');
     } catch (error) {
       toast.error('Failed to export data');
     }
@@ -449,7 +612,6 @@ const TeacherAttendance_Page = () => {
     const value = e.target.value;
     setRollNoSearchTerm(value);
 
-    // If user types manually, clear auto-filled fields
     if (value !== manualAttendanceForm.rollNo) {
       setManualAttendanceForm(prev => ({
         ...prev,
@@ -464,39 +626,49 @@ const TeacherAttendance_Page = () => {
 
   // Filter registered students based on search term
   const filteredRegisteredStudents = () => {
-    if (!registeredStudents?.registeredStudents) return [];
+    const subject = getCurrentSubject();
+    if (!subject || !subject.registeredStudents) return [];
 
-    return registeredStudents.registeredStudents.filter(student =>
+    return subject.registeredStudents.filter(student =>
       student.registrationNo.toLowerCase().includes(rollNoSearchTerm.toLowerCase()) ||
       student.studentName.toLowerCase().includes(rollNoSearchTerm.toLowerCase())
     );
   };
 
-  const handleSubjectSelect = (subjectId) => {
+  const handleSubjectSelect = (subjectId, scheduleId) => {
     setSelectedSubject(subjectId);
+    const subject = subjectsWithAttendance.find(s => s.id === subjectId);
+    const schedule = subject?.classSchedule?.find(s => s._id === scheduleId);
+    setSelectedSchedule(schedule);
     setShowSubjectModal(false);
-    setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
+    setAttendanceForm(prev => ({ 
+      ...prev, 
+      subject: subjectId,
+      scheduleId: scheduleId 
+    }));
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
+    setSelectedStudents([]);
+    setSelectAll(false);
   };
 
   // Function to generate random code
   const generateRandomCode = () => {
-    // Generate a 6-digit random number
     const randomNum = Math.floor(100000 + Math.random() * 900000);
     setAttendanceForm(prev => ({ ...prev, uniqueCode: randomNum.toString() }));
   };
 
   // Function to generate QR
   const handleQRGeneration = (isInitial = false) => {
-    if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
-      toast.error('Please fill all fields');
+    if (!attendanceForm.subject || !attendanceForm.uniqueCode || !attendanceForm.scheduleId) {
+      toast.error('Please fill all fields and select a time slot');
       return;
     }
 
     const selectedSubject = subjectsWithAttendance.find(s => s.id === attendanceForm.subject);
+    const selectedSchedule = selectedSubject?.classSchedule?.find(s => s._id === attendanceForm.scheduleId);
     const subjectName = selectedSubject?.title;
-    const subjectCode = selectedSubject?.code; // Get the subject code
+    const subjectCode = selectedSubject?.code;
 
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
@@ -505,9 +677,10 @@ const TeacherAttendance_Page = () => {
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
     url.searchParams.append('code', originalCode);
-    url.searchParams.append('subject', attendanceForm.subject); // subject ID
+    url.searchParams.append('subject', attendanceForm.subject);
+    url.searchParams.append('scheduleId', attendanceForm.scheduleId);
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('subjectCode', subjectCode || 'N/A'); // Add subject code
+    url.searchParams.append('subjectCode', subjectCode || 'N/A');
     url.searchParams.append('timestamp', currentTime.getTime());
     url.searchParams.append('expiry', expiryTime.getTime());
 
@@ -530,8 +703,8 @@ const TeacherAttendance_Page = () => {
   const isViewingToday = isToday(currentDate);
 
   const handleGenerateQR = async () => {
-    if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
-      toast.error('Please fill all fields');
+    if (!attendanceForm.subject || !attendanceForm.uniqueCode || !attendanceForm.scheduleId) {
+      toast.error('Please fill all fields and select a time slot');
       return;
     }
 
@@ -540,9 +713,8 @@ const TeacherAttendance_Page = () => {
     toast.success('QR code generated successfully!', { autoClose: 2000 });
   };
 
-  // Handle Manual Attendance - Updated to fetch registered students
+  // Handle Manual Attendance
   const handleManualAttendance = async () => {
-    // Set default values
     const currentTime = new Date();
     const hours = currentTime.getHours();
     const minutes = currentTime.getMinutes();
@@ -555,6 +727,7 @@ const TeacherAttendance_Page = () => {
       rollNo: '',
       discipline: '',
       subjectId: selectedSubject || '',
+      scheduleId: selectedSchedule?._id || '',
       date: formatDate(currentDate),
       time: formattedTime,
       ipAddress: generateRandomIP()
@@ -562,37 +735,30 @@ const TeacherAttendance_Page = () => {
 
     setRollNoSearchTerm('');
 
-    // Fetch registered students for the selected subject
-    try {
-      await dispatch(getRegisteredStudents({
-        subjectId: selectedSubject,
-        teacherId: userId
-      })).unwrap();
-    } catch (error) {
-      console.error('Error fetching registered students:', error);
-    }
-
     setShowManualModal(true);
     setShowAttendanceDropdown(false);
   };
 
   const handleSubmitManualAttendance = () => {
-    // Validate required fields
     if (!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline) {
       toast.error('Please fill in all required fields');
       return;
     }
 
-    // Get subject details
-    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+    if (!selectedSchedule) {
+      toast.error('Please select a time slot first');
+      return;
+    }
 
-    // Create attendance record
+    const subject = getCurrentSubject();
+
     const attendanceRecord = {
       studentName: manualAttendanceForm.studentName,
       rollNo: manualAttendanceForm.rollNo,
       discipline: manualAttendanceForm.discipline,
       time: manualAttendanceForm.time,
       subjectId: selectedSubject,
+      scheduleId: selectedSchedule._id,
       subjectName: subject?.title || 'Unknown Subject',
       date: manualAttendanceForm.date,
       ipAddress: manualAttendanceForm.ipAddress,
@@ -609,6 +775,7 @@ const TeacherAttendance_Page = () => {
             rollNo: '',
             discipline: '',
             subjectId: '',
+            scheduleId: '',
             date: '',
             time: '',
             ipAddress: ''
@@ -623,17 +790,6 @@ const TeacherAttendance_Page = () => {
 
     setShowManualModal(false);
     setRollNoSearchTerm('');
-
-    // Reset form
-    setManualAttendanceForm({
-      studentName: '',
-      rollNo: '',
-      discipline: '',
-      subjectId: '',
-      date: '',
-      time: '',
-      ipAddress: ''
-    });
   };
 
   // Toggle QR zoom
@@ -675,6 +831,8 @@ const TeacherAttendance_Page = () => {
     setCurrentDate(newDate);
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
+    setSelectedStudents([]);
+    setSelectAll(false);
   };
 
   // Date picker handler
@@ -687,13 +845,14 @@ const TeacherAttendance_Page = () => {
     setCurrentDate(newDate);
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
+    setSelectedStudents([]);
+    setSelectAll(false);
   };
 
   // Handle student name click
   const handleStudentClick = (student) => {
     setSelectedStudent(student);
     setShowStudentModal(true);
-    // Reset modal sorting to default
     setModalSortConfig({ key: 'date', direction: 'desc' });
   };
 
@@ -706,14 +865,14 @@ const TeacherAttendance_Page = () => {
   const getStudentPreviousAttendance = (student) => {
     if (!student || !selectedSubject) return [];
 
-    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+    const subject = getCurrentSubject();
     if (!subject || !subject.attendance) return [];
 
     const allAttendance = [];
 
     Object.entries(subject.attendance).forEach(([date, records]) => {
       const studentRecord = records.find(record =>
-        record.rollNo === student.rollNo && record.studentName === student.studentName
+        record.rollNo === student.rollNo
       );
 
       if (studentRecord) {
@@ -759,9 +918,9 @@ const TeacherAttendance_Page = () => {
       <HeaderComponent heading={"Teacher Attendance"} subHeading={"View and manage teacher attendance"} role='' />
 
       <div className="container max-w-full p-6">
-        {/* Date Navigation - Centered */}
-        {selectedSubject && (
-          <div className="flex justify-center items-center mb-8">
+        {/* Date Navigation and Schedule Selector */}
+        {selectedSubject && selectedSchedule && (
+          <div className="flex flex-col items-center mb-8">
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-white rounded-lg border border-gray-200 px-6 py-4">
               <button
                 onClick={() => navigateDate('prev')}
@@ -772,12 +931,12 @@ const TeacherAttendance_Page = () => {
                 </svg>
               </button>
 
-              <div className="text-center flex flex-col items-center space-y-2 sm:space-y-0 sm:space-x-4">
+              <div className="text-center flex flex-col items-center space-y-2">
                 <h2 className="text-xl font-semibold text-gray-800">
                   {formatDisplayDate(currentDate)}
                 </h2>
-                <p className="text-xs text-gray-600">
-                  {subjectsWithAttendance.find(s => s.id === selectedSubject)?.title}
+                <p className="text-sm font-medium text-blue-600">
+                  {getCurrentSubject()?.title} • {formatTimeSlot(selectedSchedule)}
                 </p>
               </div>
 
@@ -794,13 +953,34 @@ const TeacherAttendance_Page = () => {
                 </svg>
               </button>
             </div>
+
+            {/* Time Slot Selector */}
+            <div className="mt-4 w-full max-w-md">
+              <select
+                value={selectedSchedule?._id || ''}
+                onChange={(e) => {
+                  const schedule = getSubjectSchedules().find(s => s._id === e.target.value);
+                  setSelectedSchedule(schedule);
+                  setAttendanceForm(prev => ({ ...prev, scheduleId: e.target.value }));
+                  setSelectedStudents([]);
+                  setSelectAll(false);
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {getSubjectSchedules().map(schedule => (
+                  <option key={schedule._id} value={schedule._id}>
+                    {formatTimeSlot(schedule)}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
 
         {/* Attendance Table Section */}
-        {selectedSubject && (
+        {selectedSubject && selectedSchedule && (
           <div className="space-y-6">
-            {/* Search and Date Picker */}
+            {/* Search and Actions */}
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="relative max-w-md">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -815,8 +995,8 @@ const TeacherAttendance_Page = () => {
                 />
               </div>
 
-              <div className="flex items-center gap-3">
-                {/* Date Picker Input */}
+              <div className="flex items-center gap-3 flex-wrap">
+                {/* Date Picker */}
                 <input
                   type="date"
                   value={formatDate(currentDate)}
@@ -825,7 +1005,7 @@ const TeacherAttendance_Page = () => {
                   className="px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
 
-                {/* Export to Excel Button */}
+                {/* Export Button */}
                 <button
                   onClick={exportToExcel}
                   disabled={filteredStudents.length === 0}
@@ -834,7 +1014,7 @@ const TeacherAttendance_Page = () => {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <span>Export Excel</span>
+                  <span>Export</span>
                 </button>
 
                 {/* Refresh Button */}
@@ -855,6 +1035,17 @@ const TeacherAttendance_Page = () => {
                   <span>Refresh</span>
                 </button>
 
+                {/* Bulk Actions */}
+                {selectedStudents.length > 0 && (
+                  <button
+                    onClick={handleBulkMarkAttendance}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 font-medium transition-colors flex items-center space-x-2"
+                  >
+                    <FiCheckSquare className="w-4 h-4" />
+                    <span>Mark {selectedStudents.length} Present</span>
+                  </button>
+                )}
+
                 {/* Create Attendance Dropdown */}
                 <div className="relative attendance-dropdown">
                   <button
@@ -866,7 +1057,6 @@ const TeacherAttendance_Page = () => {
                     <FiChevronDown className={`w-4 h-4 transition-transform ${showAttendanceDropdown ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {/* Dropdown Menu */}
                   {showAttendanceDropdown && (
                     <div className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg border border-gray-200 z-50">
                       <button
@@ -884,7 +1074,7 @@ const TeacherAttendance_Page = () => {
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-900">QR Based Attendance</p>
-                            <p className="text-xs text-gray-500">Generate QR code for students</p>
+                            <p className="text-xs text-gray-500">Generate QR code for this time slot</p>
                           </div>
                         </div>
                       </button>
@@ -916,6 +1106,19 @@ const TeacherAttendance_Page = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                        <button
+                          onClick={handleSelectAll}
+                          className="focus:outline-none"
+                          title="Select all unmarked students"
+                        >
+                          {selectAll ? (
+                            <FiCheckSquare className="w-5 h-5 text-blue-600" />
+                          ) : (
+                            <FiSquare className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                          )}
+                        </button>
+                      </th>
                       <th
                         scope="col"
                         className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
@@ -977,7 +1180,21 @@ const TeacherAttendance_Page = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentStudents.length > 0 ? (
                       currentStudents.map((student) => (
-                        <tr key={student.id || student.rollNo} className="hover:bg-gray-50 transition-colors">
+                        <tr key={student.rollNo} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            {student.status === 'Absent' && student.isRegistered && (
+                              <button
+                                onClick={() => handleSelectStudent(student.rollNo)}
+                                className="focus:outline-none"
+                              >
+                                {selectedStudents.includes(student.rollNo) ? (
+                                  <FiCheckSquare className="w-5 h-5 text-blue-600" />
+                                ) : (
+                                  <FiSquare className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                                )}
+                              </button>
+                            )}
+                          </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <button
                               onClick={() => handleStudentClick(student)}
@@ -990,7 +1207,7 @@ const TeacherAttendance_Page = () => {
                             <span className="text-sm text-gray-600">{student.rollNo}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className="text-sm text-gray-600">{student.status === 'Present' ? student.discipline : '--'}</span>
+                            <span className="text-sm text-gray-600">{student.discipline || '--'}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs ${student.status === 'Present'
@@ -1003,11 +1220,9 @@ const TeacherAttendance_Page = () => {
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${student.status === 'Present'
                               ? 'bg-green-100 text-green-700'
-                              : student.status === 'Not Registered'
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-red-100 text-red-700'
+                              : 'bg-red-100 text-red-700'
                               }`}>
-                              {student.status || (student.time ? 'Present' : 'Absent')}
+                              {student.status}
                             </span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-right">
@@ -1025,8 +1240,8 @@ const TeacherAttendance_Page = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500">
-                          {searchTerm ? "No matching students found" : "No attendance records for this date"}
+                        <td colSpan="7" className="px-4 py-8 text-center text-sm text-gray-500">
+                          {searchTerm ? "No matching students found" : "No attendance records for this date and time slot"}
                         </td>
                       </tr>
                     )}
@@ -1074,22 +1289,47 @@ const TeacherAttendance_Page = () => {
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">No Course Selected</h3>
-            <p className="text-gray-600 mb-4">Please select a course to view attendance records</p>
+            <p className="text-gray-600 mb-4">Please select a course and time slot to view attendance records</p>
             <button
               onClick={() => setShowSubjectModal(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center mx-auto space-x-2"
             >
               <FiGrid className="w-4 h-4" />
-              <span>Select Course</span>
+              <span>Select Course & Time</span>
             </button>
           </div>
         )}
 
-        {/* No Data State - Clean Design */}
+        {/* No Schedule Selected State */}
+        {selectedSubject && !selectedSchedule && (
+          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+            <div className="text-gray-400 mb-4">
+              <FiClock className="mx-auto h-12 w-12" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-800 mb-2">Select a Time Slot</h3>
+            <p className="text-gray-500 text-sm mb-4">Please choose a class schedule to view attendance records</p>
+            <select
+              onChange={(e) => {
+                const schedule = getSubjectSchedules().find(s => s._id === e.target.value);
+                setSelectedSchedule(schedule);
+              }}
+              className="mx-auto px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64"
+              defaultValue=""
+            >
+              <option value="" disabled>Select a time slot</option>
+              {getSubjectSchedules().map(schedule => (
+                <option key={schedule._id} value={schedule._id}>
+                  {formatTimeSlot(schedule)}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* No Data State */}
         {subjectsWithAttendance.length === 0 && !isLoading && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <div className="flex flex-col items-center">
-              {/* Simple Icon */}
               <div className="mb-4">
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100">
                   <svg
@@ -1108,7 +1348,6 @@ const TeacherAttendance_Page = () => {
                 </div>
               </div>
 
-              {/* Text Content */}
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No Courses Found
               </h3>
@@ -1116,7 +1355,6 @@ const TeacherAttendance_Page = () => {
                 You don't have any courses with attendance data yet. Create your first course to get started.
               </p>
 
-              {/* Action Buttons */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => window.location.href = '/teacher/subject'}
@@ -1137,42 +1375,53 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal - Compact Card Grid Design */}
+      {/* Subject Selection Modal with Time Slot Dropdown */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-3xl shadow-xl">
-            {/* Header */}
+          <div className="bg-white rounded-xl w-full max-w-md shadow-xl">
             <div className="px-5 py-3 border-b border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900">Select Course</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Choose a course to continue</p>
+              <h3 className="text-base font-semibold text-gray-900">Select Course & Time Slot</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Choose a course and specific class time</p>
             </div>
 
-            {/* Subject Grid */}
-            <div className="p-5 max-h-[380px] overflow-y-auto">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div className="p-5 max-h-[400px] overflow-y-auto">
+              <div className="space-y-4">
                 {subjectsWithAttendance.map((subject) => (
-                  <button
-                    key={subject.id}
-                    onClick={() => handleSubjectSelect(subject.id)}
-                    className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all text-center group"
-                  >
-                    <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-200 transition-colors">
-                      <span className="text-blue-600 font-semibold text-sm">
-                        {subject.title?.charAt(0).toUpperCase()}
-                      </span>
+                  <div key={subject.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-3 font-medium text-gray-700 border-b border-gray-200">
+                      {subject.title} ({subject.code})
                     </div>
-                    <h4 className="font-medium text-gray-900 text-xs mb-1 line-clamp-2 min-h-8">
-                      {subject.title}
-                    </h4>
-                    <p className="text-[10px] text-gray-500">
-                      {Object.keys(subject.attendance || {}).length} days
-                    </p>
-                  </button>
+                    <div className="p-2">
+                      {subject.classSchedule?.map((schedule) => (
+                        <button
+                          key={schedule._id}
+                          onClick={() => handleSubjectSelect(subject.id, schedule._id)}
+                          className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors rounded-md flex items-center justify-between group"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200">
+                              <FiClock className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {schedule.day}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {schedule.startTime} - {schedule.endTime}
+                              </p>
+                            </div>
+                          </div>
+                          <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
 
-            {/* Footer */}
             <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end">
               <button
                 onClick={() => setShowSubjectModal(false)}
@@ -1195,21 +1444,26 @@ const TeacherAttendance_Page = () => {
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Subject
+                  Subject
                 </label>
-                <select
-                  name="subject"
-                  value={attendanceForm.subject}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select Subject</option>
-                  {subjectsWithAttendance.map((subject) => (
-                    <option key={subject.id} value={subject.id}>
-                      {subject.title}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="text"
+                  value={getCurrentSubject()?.title || ''}
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Time Slot
+                </label>
+                <input
+                  type="text"
+                  value={selectedSchedule ? formatTimeSlot(selectedSchedule) : ''}
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700"
+                />
               </div>
 
               <div>
@@ -1230,7 +1484,7 @@ const TeacherAttendance_Page = () => {
                     onClick={generateRandomCode}
                     className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-medium transition-colors whitespace-nowrap text-sm"
                   >
-                    Generate Code
+                    Generate
                   </button>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
@@ -1257,13 +1511,15 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Manual Attendance Modal - UPDATED with searchable roll number dropdown */}
+      {/* Manual Attendance Modal */}
       {showManualModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">Manual Attendance</h3>
-              <p className="text-xs text-gray-500 mt-1">Select a student from the list or type roll number</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {selectedSchedule ? formatTimeSlot(selectedSchedule) : ''}
+              </p>
             </div>
             <div className="p-6 space-y-4">
               {/* Roll Number Field with Dropdown */}
@@ -1282,7 +1538,6 @@ const TeacherAttendance_Page = () => {
                   autoComplete="off"
                 />
 
-                {/* Dropdown for registered students */}
                 {showRollNoDropdown && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     {studentsLoading ? (
@@ -1354,6 +1609,7 @@ const TeacherAttendance_Page = () => {
                     rollNo: '',
                     discipline: '',
                     subjectId: '',
+                    scheduleId: '',
                     date: '',
                     time: '',
                     ipAddress: ''
@@ -1372,7 +1628,7 @@ const TeacherAttendance_Page = () => {
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
-                Submit Attendance
+                Submit
               </button>
             </div>
           </div>
@@ -1407,7 +1663,6 @@ const TeacherAttendance_Page = () => {
             <div className="p-6 flex flex-col items-center">
               <div
                 className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
-                id="qr-code-container"
               >
                 {currentQrCode && (
                   <QRCodeSVG
@@ -1417,15 +1672,13 @@ const TeacherAttendance_Page = () => {
                     includeMargin={true}
                     bgColor="#FFFFFF"
                     fgColor="#000000"
-                    id="qr-code-svg"
-                    minVersion={1}
                   />
                 )}
               </div>
 
               <div className="text-center">
                 <p className="text-sm text-gray-600">
-                  Students can scan this QR code to mark their attendance
+                  Students can scan this QR code to mark their attendance for this time slot
                 </p>
               </div>
             </div>
@@ -1479,7 +1732,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Student Details Modal - UPDATED with sorting and date field */}
+      {/* Student Details Modal */}
       {showStudentModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
@@ -1571,7 +1824,7 @@ const TeacherAttendance_Page = () => {
                                   </div>
                                 </th>
                                 <th
-                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                   <div className="flex items-center space-x-1 justify-center">
                                     <span>Status</span>
