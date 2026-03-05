@@ -68,6 +68,8 @@ const TeacherAttendance_Page = () => {
   const [rollNoSearchTerm, setRollNoSearchTerm] = useState('');
   const [showRollNoDropdown, setShowRollNoDropdown] = useState(false);
 
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
@@ -104,9 +106,10 @@ const TeacherAttendance_Page = () => {
   // Set initial selected subject when data is loaded
   useEffect(() => {
     if (subjectsWithAttendance.length > 0 && !selectedSubject) {
-      setSelectedSubject(subjectsWithAttendance[0].id)
+      setSelectedSubject(subjectsWithAttendance[0].id);
+      setSelectedSchedule(null); // Reset schedule when subject changes
     }
-  }, [subjectsWithAttendance, selectedSubject])
+  }, [subjectsWithAttendance, selectedSubject]);
 
   // QR Auto-refresh useEffect
   useEffect(() => {
@@ -472,12 +475,21 @@ const TeacherAttendance_Page = () => {
     );
   };
 
-  const handleSubjectSelect = (subjectId) => {
+  const handleSubjectSelect = (subjectId, scheduleIndex = null) => {
     setSelectedSubject(subjectId);
+    setSelectedSchedule(scheduleIndex);
     setShowSubjectModal(false);
     setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
+
+    if (scheduleIndex !== null) {
+      const selectedSubject = subjectsWithAttendance.find(s => s.id === subjectId);
+      const schedule = selectedSubject?.classSchedule?.[scheduleIndex];
+      if (schedule) {
+        toast.success(`Selected: ${schedule.day} ${schedule.startTime}-${schedule.endTime}`);
+      }
+    }
   };
 
   // Function to generate random code
@@ -736,43 +748,6 @@ const TeacherAttendance_Page = () => {
     }
   };
 
-  // Add these new state variables
-  const [selectedSubjectForModal, setSelectedSubjectForModal] = useState('');
-  const [selectedSchedule, setSelectedSchedule] = useState(null);
-  const [showScheduleDropdown, setShowScheduleDropdown] = useState(false);
-
-  // Add this function to get class schedules for selected subject
-  const getSubjectSchedules = () => {
-    if (!selectedSubjectForModal) return [];
-    const subject = subjectsWithAttendance.find(s => s.id === selectedSubjectForModal);
-    return subject?.classSchedule || [];
-  };
-
-  // Update handleSubjectSelect to include schedule
-  const handleSubjectWithScheduleSelect = () => {
-    if (!selectedSubjectForModal || !selectedSchedule) {
-      toast.error('Please select both subject and class schedule');
-      return;
-    }
-
-    setSelectedSubject(selectedSubjectForModal);
-    // You can store the selected schedule if needed
-    // setSelectedClassSchedule(selectedSchedule);
-    setShowSubjectModal(false);
-    setAttendanceForm(prev => ({ ...prev, subject: selectedSubjectForModal }));
-    setCurrentPage(1);
-    setSortConfig({ key: null, direction: 'asc' });
-
-    // Reset modal selections
-    setSelectedSubjectForModal('');
-    setSelectedSchedule(null);
-  };
-
-  // Format schedule for display
-  const formatSchedule = (schedule) => {
-    return `${schedule.day} ${schedule.startTime} - ${schedule.endTime}`;
-  };
-
   // Loading state
   if (isLoading) {
     return (
@@ -813,21 +788,32 @@ const TeacherAttendance_Page = () => {
                 <h2 className="text-xl font-semibold text-gray-800">
                   {formatDisplayDate(currentDate)}
                 </h2>
-                {/* ============================= */}
-                {/* Selected Schedule Display */}
-                {selectedSubject && selectedSchedule && (
-                  <div className="flex justify-center items-center mb-4">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
-                      <div className="flex items-center space-x-2">
-                        <FiClock className="w-4 h-4 text-blue-600" />
-                        <span className="text-sm text-blue-800">
-                          Class Schedule: {formatSchedule(selectedSchedule)}
-                        </span>
-                      </div>
+                {/* Selected Schedule Info - Add this after the date navigation or in the header */}
+                {selectedSubject && selectedSchedule !== null && (
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2 flex items-center space-x-3">
+                      <FiClock className="text-green-600 w-4 h-4" />
+                      <span className="text-sm text-green-700">
+                        Selected Schedule: {
+                          (() => {
+                            const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+                            const schedule = subject?.classSchedule?.[selectedSchedule];
+                            return schedule ? `${schedule.day} ${schedule.startTime} - ${schedule.endTime}` : 'No schedule';
+                          })()
+                        }
+                      </span>
+                      <button
+                        onClick={() => setSelectedSchedule(null)}
+                        className="text-green-600 hover:text-green-800"
+                        title="Clear schedule selection"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 )}
-                {/* ============================= */}
                 <p className="text-xs text-gray-600">
                   {subjectsWithAttendance.find(s => s.id === selectedSubject)?.title}
                 </p>
@@ -1189,123 +1175,168 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal with Class Schedule Dropdown */}
+      {/* Subject Selection Modal - Two-step selection */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-md shadow-xl">
+          <div className="bg-white rounded-xl w-full max-w-3xl shadow-xl">
             {/* Header */}
             <div className="px-5 py-3 border-b border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900">Select Course & Schedule</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Choose a course and class timing</p>
+              <h3 className="text-base font-semibold text-gray-900">Select Course & Class Schedule</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Choose a course and then select the class time</p>
             </div>
 
-            {/* Content */}
-            <div className="p-5 space-y-4">
-              {/* Subject Dropdown */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="p-5 max-h-[480px] overflow-y-auto">
+              {/* Step 1: Subject Selection */}
+              <div className="mb-6">
+                <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                  <span className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs mr-2">1</span>
                   Select Course
-                </label>
-                <select
-                  value={selectedSubjectForModal}
-                  onChange={(e) => {
-                    setSelectedSubjectForModal(e.target.value);
-                    setSelectedSchedule(null); // Reset schedule when subject changes
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Choose a course</option>
+                </h4>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {subjectsWithAttendance.map((subject) => (
-                    <option key={subject.id} value={subject.id}>
-                      {subject.title} ({subject.code})
-                    </option>
+                    <button
+                      key={subject.id}
+                      onClick={() => {
+                        setSelectedSubject(subject.id);
+                        // Reset schedule selection when subject changes
+                        setSelectedSchedule(null);
+                      }}
+                      className={`p-3 rounded-lg border transition-all text-center group relative ${selectedSubject === subject.id
+                        ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                        : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/50'
+                        }`}
+                    >
+                      {selectedSubject === subject.id && (
+                        <div className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+                      )}
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2 transition-colors ${selectedSubject === subject.id
+                        ? 'bg-blue-200'
+                        : 'bg-blue-100 group-hover:bg-blue-200'
+                        }`}>
+                        <span className="text-blue-600 font-semibold text-sm">
+                          {subject.title?.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <h4 className="font-medium text-gray-900 text-xs mb-1 line-clamp-2 min-h-8">
+                        {subject.title}
+                      </h4>
+                      <p className="text-[10px] text-gray-500">
+                        {Object.keys(subject.attendance || {}).length} days
+                      </p>
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
 
-              {/* Class Schedule Dropdown - Shows only when subject is selected */}
-              {selectedSubjectForModal && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+              {/* Step 2: Class Schedule Selection - Only shown when a subject is selected */}
+              {selectedSubject && (
+                <div className="border-t border-gray-100 pt-6">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <span className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xs mr-2">2</span>
                     Select Class Schedule
-                  </label>
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
-                      className="w-full px-3 py-2 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white flex justify-between items-center"
-                    >
-                      <span className={selectedSchedule ? 'text-gray-900' : 'text-gray-500'}>
-                        {selectedSchedule ? formatSchedule(selectedSchedule) : 'Choose class timing'}
-                      </span>
-                      <FiChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showScheduleDropdown ? 'rotate-180' : ''}`} />
-                    </button>
+                  </h4>
 
-                    {/* Schedule Dropdown Menu */}
-                    {showScheduleDropdown && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                        {getSubjectSchedules().length > 0 ? (
-                          getSubjectSchedules().map((schedule, index) => (
-                            <button
-                              key={index}
-                              onClick={() => {
-                                setSelectedSchedule(schedule);
-                                setShowScheduleDropdown(false);
-                              }}
-                              className="w-full text-left px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                            >
-                              <div className="flex flex-col">
-                                <span className="text-sm font-medium text-gray-900">
-                                  {schedule.day}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {schedule.startTime} - {schedule.endTime}
-                                </span>
-                              </div>
-                            </button>
-                          ))
-                        ) : (
-                          <div className="p-3 text-center text-sm text-gray-500">
-                            No class schedules available for this course
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+                  {(() => {
+                    const selectedSubjectData = subjectsWithAttendance.find(s => s.id === selectedSubject);
+                    const schedules = selectedSubjectData?.classSchedule || [];
 
-              {/* Selected Schedule Display (Optional) */}
-              {selectedSchedule && (
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-xs font-medium text-blue-700 mb-1">Selected Schedule:</p>
-                  <p className="text-sm text-blue-900">
-                    {formatSchedule(selectedSchedule)}
-                  </p>
+                    if (schedules.length === 0) {
+                      return (
+                        <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                          <FiClock className="mx-auto h-8 w-8 text-gray-400" />
+                          <p className="mt-2 text-sm text-gray-600">No class schedule available for this course</p>
+                          <p className="text-xs text-gray-500 mt-1">You can still proceed without selecting a schedule</p>
+                          <button
+                            onClick={() => {
+                              setShowSubjectModal(false);
+                              setSelectedSchedule(null);
+                            }}
+                            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium text-sm"
+                          >
+                            Continue Without Schedule
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {schedules.map((schedule, index) => {
+                            const isSelected = selectedSchedule === index;
+
+                            return (
+                              <button
+                                key={schedule._id || index}
+                                onClick={() => setSelectedSchedule(index)}
+                                className={`p-4 rounded-lg border transition-all text-left ${isSelected
+                                  ? 'border-green-500 bg-green-50 ring-2 ring-green-200'
+                                  : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50'
+                                  }`}
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <p className={`font-medium text-sm mb-1 ${isSelected ? 'text-green-700' : 'text-gray-700'
+                                      }`}>
+                                      {schedule.day}
+                                    </p>
+                                    <div className="flex items-center space-x-2 text-xs text-gray-500">
+                                      <FiClock className="w-3 h-3" />
+                                      <span>{schedule.startTime} - {schedule.endTime}</span>
+                                    </div>
+                                  </div>
+                                  {isSelected && (
+                                    <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    </div>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                          <button
+                            onClick={() => {
+                              setShowSubjectModal(false);
+                              toast.success(`Course selected with ${selectedSchedule !== null ? 'schedule' : 'no schedule'}`);
+                            }}
+                            disabled={!selectedSubject}
+                            className={`px-6 py-2.5 rounded-md font-medium transition-colors ${selectedSubject
+                              ? 'bg-blue-600 text-white hover:bg-blue-700'
+                              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                              }`}
+                          >
+                            {selectedSchedule !== null ? 'Confirm Selection' : 'Continue Without Schedule'}
+                          </button>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end space-x-2">
+            <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-between items-center">
               <button
                 onClick={() => {
-                  setShowSubjectModal(false);
-                  setSelectedSubjectForModal('');
                   setSelectedSchedule(null);
+                  setSelectedSubject('');
                 }}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Clear Selection
+              </button>
+              <button
+                onClick={() => setShowSubjectModal(false)}
                 className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
               >
                 Cancel
-              </button>
-              <button
-                onClick={handleSubjectWithScheduleSelect}
-                disabled={!selectedSubjectForModal || !selectedSchedule}
-                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${selectedSubjectForModal && selectedSchedule
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-              >
-                Confirm Selection
               </button>
             </div>
           </div>
