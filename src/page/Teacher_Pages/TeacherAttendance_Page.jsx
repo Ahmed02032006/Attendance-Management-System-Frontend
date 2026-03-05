@@ -1161,170 +1161,261 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal - Enhanced UI with Modern Design */}
+      {/* Subject Selection Modal - Enhanced Design */}
 {showSubjectModal && subjectsWithAttendance.length > 0 && (
   <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-    <div className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl transform transition-all animate-slideUp">
-      {/* Header with Gradient */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 rounded-t-2xl">
+    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden border border-gray-100">
+      {/* Header with gradient */}
+      <div className="px-6 py-5 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              <FiGrid className="w-5 h-5" />
+            <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+              <FiGrid className="w-5 h-5 text-blue-600" />
               Select Course & Schedule
             </h3>
-            <p className="text-blue-100 text-sm mt-1">
-              Choose a course and class schedule to view attendance
+            <p className="text-sm text-gray-600 mt-1 ml-7">
+              Choose a course and its class schedule to continue
             </p>
           </div>
           <button
             onClick={() => setShowSubjectModal(false)}
-            className="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+            className="p-2 hover:bg-white/50 rounded-full transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Search and Filter Bar */}
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1">
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search courses by name or code..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <select className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-            <option value="">All Departments</option>
-            <option value="CET">CET</option>
-            <option value="SET">SET</option>
-          </select>
+      {/* Stats summary */}
+      <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center gap-4 text-sm">
+          <span className="text-gray-600">
+            <span className="font-semibold text-gray-900">{subjectsWithAttendance.length}</span> Courses Available
+          </span>
+          <span className="w-px h-4 bg-gray-300"></span>
+          <span className="text-gray-600">
+            <span className="font-semibold text-gray-900">
+              {subjectsWithAttendance.reduce((acc, sub) => acc + (sub.totalRegisteredStudents || 0), 0)}
+            </span> Total Students
+          </span>
         </div>
       </div>
 
-      {/* Subject Grid */}
-      <div className="p-6 max-h-[450px] overflow-y-auto custom-scrollbar">
-        <div className="grid grid-cols-1 gap-4">
+      {/* Subject Grid - Scrollable */}
+      <div className="p-6 max-h-[500px] overflow-y-auto custom-scrollbar">
+        <div className="grid grid-cols-1 gap-5">
           {subjectsWithAttendance.map((subject, index) => (
             <div
               key={subject.id}
-              className="group border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-lg transition-all duration-300 bg-white animate-fadeIn"
-              style={{ animationDelay: `${index * 100}ms` }}
+              className="group relative bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-lg transition-all duration-200 overflow-hidden animate-slideIn"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-start gap-4">
-                  {/* Subject Icon with Gradient */}
-                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                    <span className="text-white font-bold text-xl">
-                      {subject.title?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  
-                  {/* Subject Details */}
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-lg mb-1">{subject.title}</h4>
-                    <div className="flex flex-wrap items-center gap-3 text-sm">
-                      <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
-                        {subject.code}
-                      </span>
-                      <span className="text-gray-500 flex items-center gap-1">
-                        <FiBookOpen className="w-3.5 h-3.5" />
-                        {subject.departmentOffering}
-                      </span>
-                      <span className="text-gray-500 flex items-center gap-1">
-                        <FiUser className="w-3.5 h-3.5" />
-                        {subject.totalRegisteredStudents} Students
-                      </span>
+              {/* Status indicator */}
+              <div className={`absolute top-0 left-0 w-1 h-full ${subject.status === 'Active' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+              
+              <div className="p-5 pl-6">
+                {/* Course Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start gap-4">
+                    <div className="relative">
+                      <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-200">
+                        <span className="text-white font-bold text-xl">
+                          {subject.title?.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-400 border-2 border-white rounded-full"></div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">
+                        {subject.title}
+                      </h4>
+                      <div className="flex flex-wrap items-center gap-3 mt-1.5">
+                        <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l5 5a2 2 0 01.586 1.414V19a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                          </svg>
+                          {subject.code}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          {subject.departmentOffering}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                          </svg>
+                          {subject.totalRegisteredStudents || 0} Students
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* Session badge */}
+                  <div className="text-right">
+                    <span className="text-xs font-medium text-gray-500">Session</span>
+                    <p className="text-sm font-semibold text-gray-800">{subject.session || 'N/A'}</p>
+                    <p className="text-xs text-gray-500">Semester {subject.semester || 'N/A'}</p>
+                  </div>
                 </div>
-                
-                {/* Status Badge */}
-                <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium border border-green-100">
-                  Active
-                </span>
-              </div>
 
-              {/* Class Schedule Selection */}
-              {subject.classSchedule && subject.classSchedule.length > 0 ? (
+                {/* Class Schedule Section */}
                 <div className="mt-4 pt-4 border-t border-gray-100">
-                  <label className="block text-xs font-medium text-gray-500 mb-3 flex items-center gap-1">
-                    <FiClock className="w-3.5 h-3.5" />
-                    Select Class Schedule:
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {subject.classSchedule.map((schedule, idx) => (
-                      <button
-                        key={schedule._id || idx}
-                        onClick={() => handleSubjectSelect(subject.id, schedule)}
-                        className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all group/schedule"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover/schedule:bg-white">
-                            <span className="text-xs font-medium text-gray-600 group-hover/schedule:text-blue-600">
-                              {schedule.day.slice(0, 3)}
-                            </span>
-                          </div>
-                          <div className="text-left">
-                            <p className="text-sm font-medium text-gray-900">{schedule.day}</p>
-                            <p className="text-xs text-gray-500">
-                              {schedule.startTime} - {schedule.endTime}
-                            </p>
-                          </div>
-                        </div>
-                        <FiChevronRight className="w-4 h-4 text-gray-400 group-hover/schedule:text-blue-500 group-hover/schedule:translate-x-1 transition-all" />
-                      </button>
-                    ))}
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                      <FiClock className="w-4 h-4 text-blue-500" />
+                      Select Class Schedule
+                      <span className="text-xs text-red-500 ml-1">*</span>
+                    </label>
+                    {subject.classSchedule && subject.classSchedule.length > 0 && (
+                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                        {subject.classSchedule.length} schedule{subject.classSchedule.length > 1 ? 's' : ''}
+                      </span>
+                    )}
                   </div>
+
+                  {subject.classSchedule && subject.classSchedule.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {subject.classSchedule.map((schedule, idx) => (
+                        <button
+                          key={schedule._id || idx}
+                          onClick={() => handleSubjectSelect(subject.id, schedule)}
+                          className="group/schedule relative flex items-center p-3 border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-200 text-left"
+                        >
+                          {/* Day indicator */}
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 rounded-l-lg opacity-0 group-hover/schedule:opacity-100 transition-opacity"></div>
+                          
+                          <div className="flex-1 pl-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-semibold text-gray-800 group-hover/schedule:text-blue-600">
+                                {schedule.day}
+                              </span>
+                              <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                Available
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <span className="flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {schedule.startTime}
+                              </span>
+                              <span>—</span>
+                              <span className="flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {schedule.endTime}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {/* Select indicator */}
+                          <div className="ml-2 opacity-0 group-hover/schedule:opacity-100 transition-opacity">
+                            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+                      <svg className="w-8 h-8 text-amber-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <p className="text-sm text-amber-800 font-medium">No class schedule available</p>
+                      <p className="text-xs text-amber-600 mt-1">Please add schedule in course settings</p>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
-                    <FiClock className="w-5 h-5 text-amber-500 mx-auto mb-2" />
-                    <p className="text-sm text-amber-700 font-medium">No class schedule available</p>
-                    <p className="text-xs text-amber-600 mt-1">Please add schedule in course settings</p>
+
+                {/* Quick info footer */}
+                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1">
+                      <FiCalendar className="w-3 h-3" />
+                      {subject.creditHours || 'N/A'} Credit Hours
+                    </span>
                   </div>
+                  <span className="text-green-600 font-medium">Click any schedule to select</span>
                 </div>
-              )}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Footer with Stats */}
+      {/* Footer with actions */}
       <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-sm text-gray-600">
-              {subjectsWithAttendance.length} Courses Available
-            </span>
-          </div>
-          <div className="h-4 w-px bg-gray-300"></div>
-          <div className="flex items-center gap-2">
-            <FiUser className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-600">
-              {subjectsWithAttendance.reduce((acc, sub) => acc + (sub.totalRegisteredStudents || 0), 0)} Total Students
-            </span>
-          </div>
-        </div>
         <button
           onClick={() => setShowSubjectModal(false)}
-          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-lg transition-colors"
+          className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2"
         >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
           Cancel
         </button>
+        
+        <div className="text-xs text-gray-500">
+          <span className="font-medium text-gray-700">Tip:</span> Select a schedule to view attendance for that class
+        </div>
       </div>
     </div>
   </div>
 )}
+
+{/* Add these styles to your global CSS or in a style tag */}
+<style jsx>{`
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-slideIn {
+    opacity: 0;
+    animation: slideIn 0.4s ease-out forwards;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+`}</style>
 
       {/* Create Attendance Modal - QR Based */}
       {showCreateModal && (
