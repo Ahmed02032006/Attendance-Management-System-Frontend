@@ -516,7 +516,7 @@ const TeacherAttendance_Page = () => {
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
 
-    // Add all parameters
+    // Add all parameters - make sure schedule info is included
     url.searchParams.append('code', originalCode);
     url.searchParams.append('subject', attendanceForm.subject);
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
@@ -525,6 +525,14 @@ const TeacherAttendance_Page = () => {
     url.searchParams.append('scheduleTime', `${selectedSchedule.startTime}-${selectedSchedule.endTime}`);
     url.searchParams.append('timestamp', currentTime.getTime());
     url.searchParams.append('expiry', expiryTime.getTime());
+
+    // Log the QR data for debugging
+    console.log('QR Data being generated:', {
+      code: originalCode,
+      subject: attendanceForm.subject,
+      scheduleDay: selectedSchedule.day,
+      scheduleTime: `${selectedSchedule.startTime}-${selectedSchedule.endTime}`
+    });
 
     setCurrentQrCode(url.toString());
     setQrExpiryTime(expiryTime);

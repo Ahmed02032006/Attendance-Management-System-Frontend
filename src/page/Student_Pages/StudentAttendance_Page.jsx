@@ -117,10 +117,11 @@ const StudentAttendance_Page = () => {
     if (locationHook.state?.qrData) {
       try {
         const parsedData = JSON.parse(locationHook.state.qrData);
+        console.log('Parsed QR Data in Student Page:', parsedData);
 
         // Check if QR code is expired
-        if (parsedData.expiryTimestamp) {
-          const expiryTime = new Date(parsedData.expiryTimestamp);
+        if (parsedData.expiry) {
+          const expiryTime = new Date(parseInt(parsedData.expiry));
           const currentTime = new Date();
 
           if (currentTime > expiryTime) {
@@ -130,14 +131,17 @@ const StudentAttendance_Page = () => {
           }
         }
 
-        // Determine the correct subject name based on available fields
-        let subjectName = 'Unknown Subject';
-        if (parsedData.subjectName) {
-          subjectName = parsedData.subjectName;
-        } else if (parsedData.subject && typeof parsedData.subject === 'string' && !parsedData.subject.match(/^[0-9a-fA-F]{24}$/)) {
-          subjectName = parsedData.subject;
-        } else if (parsedData.departmentOffering) {
-          subjectName = parsedData.departmentOffering;
+        // Determine the correct subject name
+        let subjectName = parsedData.subjectName || parsedData.subject || 'Unknown Subject';
+
+        // Make sure schedule info is properly extracted
+        const scheduleDay = parsedData.scheduleDay;
+        const scheduleTime = parsedData.scheduleTime;
+
+        console.log('Schedule Info:', { scheduleDay, scheduleTime });
+
+        if (!scheduleDay || !scheduleTime) {
+          console.warn('Missing schedule information in QR data');
         }
 
         setQrData({
@@ -145,15 +149,18 @@ const StudentAttendance_Page = () => {
           subjectName: subjectName,
           subjectCode: parsedData.subjectCode || parsedData.code || 'N/A',
           subjectId: parsedData.subject,
-          scheduleDay: parsedData.scheduleDay,
-          scheduleTime: parsedData.scheduleTime
+          scheduleDay: scheduleDay,
+          scheduleTime: scheduleTime,
+          code: parsedData.code
         });
 
         setFormData(prev => ({
           ...prev,
           uniqueCode: parsedData.code,
         }));
+
       } catch (error) {
+        console.error('Error parsing QR data:', error);
         toast.error('Invalid QR code data');
         navigate('/');
       }
@@ -168,6 +175,13 @@ const StudentAttendance_Page = () => {
       const scheduleDay = urlParams.get('scheduleDay');
       const scheduleTime = urlParams.get('scheduleTime');
       const expiry = urlParams.get('expiry');
+
+      console.log('URL Params:', {
+        code,
+        subject,
+        scheduleDay,
+        scheduleTime
+      });
 
       if (code) {
         // Check expiry
@@ -192,9 +206,11 @@ const StudentAttendance_Page = () => {
           scheduleDay: scheduleDay,
           scheduleTime: scheduleTime,
           type: 'attendance',
-          expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null,
+          expiry: expiry,
           timestamp: urlParams.get('timestamp') || new Date().toISOString()
         };
+
+        console.log('QR Data from URL:', qrDataFromUrl);
 
         setQrData(qrDataFromUrl);
         setFormData(prev => ({
@@ -383,8 +399,8 @@ const StudentAttendance_Page = () => {
     }
 
     // Check if QR code is expired
-    if (qrData.expiryTimestamp) {
-      const expiryTime = new Date(qrData.expiryTimestamp);
+    if (qrData.expiry) {
+      const expiryTime = new Date(parseInt(qrData.expiry));
       const currentTime = new Date();
 
       if (currentTime > expiryTime) {
@@ -394,10 +410,8 @@ const StudentAttendance_Page = () => {
       }
     }
 
-    // Extract original code from dynamic code
+    // Extract original code
     const submittedCode = qrData.originalCode || qrData.code;
-
-    // If code contains timestamp (format: code_timestamp), extract original
     const codeParts = submittedCode.split('_');
     const originalCode = codeParts.length > 1 ? codeParts[0] : submittedCode;
 
@@ -406,7 +420,13 @@ const StudentAttendance_Page = () => {
     setIsSubmitting(true);
 
     try {
-      const currentTime = formatTime();
+      const currentTimeFormatted = formatTime();
+
+      // Log the data being sent
+      console.log('Submitting Attendance with schedule:', {
+        scheduleDay: qrData.scheduleDay,
+        scheduleTime: qrData.scheduleTime
+      });
 
       const AttendanceData = {
         studentName: formData.studentName,
@@ -416,17 +436,20 @@ const StudentAttendance_Page = () => {
         subjectName: qrData.subjectName || qrData.subject || 'Unknown Subject',
         subjectCode: qrData.subjectCode || 'N/A',
         subjectId: qrData.subjectId || qrData.subject,
-        time: currentTime,
-        date: qrData.attendanceDate || new Date().toISOString().split('T')[0],
+        time: currentTimeFormatted,
+        date: new Date().toISOString().split('T')[0],
         ipAddress: deviceFingerprint,
         scheduleDay: qrData.scheduleDay,
         scheduleTime: qrData.scheduleTime
       };
 
+      console.log('Attendance Data being sent:', AttendanceData);
+
       dispatch(createAttendance(AttendanceData))
         .then((res) => {
-          if (res.payload.success) {
-            toast.success(`Attendance submitted successfully at ${currentTime}!`);
+          console.log('Attendance response:', res);
+          if (res.payload?.success) {
+            toast.success(`Attendance submitted successfully at ${currentTimeFormatted}!`);
             setFormData({
               studentName: '',
               rollNo: '',
@@ -436,14 +459,16 @@ const StudentAttendance_Page = () => {
             setRollNoValid(false);
             navigate("/scan-attendance");
           } else {
-            toast.error(res.payload.message);
+            toast.error(res.payload?.message || 'Failed to submit attendance');
           }
         })
         .catch((error) => {
           console.error('Attendance submission error:', error);
+          toast.error(error?.message || 'Failed to submit attendance');
         });
 
     } catch (error) {
+      console.error('Attendance submission error:', error);
       toast.error('Failed to submit attendance. Please try again.');
     } finally {
       setIsSubmitting(false);
