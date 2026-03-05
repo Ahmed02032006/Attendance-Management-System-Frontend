@@ -21,7 +21,8 @@ import {
   FiChevronDown,
   FiCheckCircle,
   FiXCircle,
-  FiRefreshCw
+  FiRefreshCw,
+  FiUsers
 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
