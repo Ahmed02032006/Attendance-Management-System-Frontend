@@ -125,7 +125,6 @@ const attendanceSlicer = createSlice({
                 // Handle both cases: when subjectId is populated or just an ID
                 const subjectId = newAttendance.subjectId?._id || newAttendance.subjectId;
                 const dateKey = new Date(newAttendance.date).toISOString().split('T')[0];
-                const classScheduleId = newAttendance.classScheduleId;
 
                 const subjectIndex = state.subjectsWithAttendance.findIndex(
                     subject => subject.id === subjectId
@@ -141,12 +140,6 @@ const attendanceSlicer = createSlice({
                     // Get the subject title from either the populated subjectId or from the subject object
                     const subjectTitle = newAttendance.subjectId?.subjectTitle || subject.title;
 
-                    // Check if this attendance record already exists in the array
-                    const existingIndex = subject.attendance[dateKey].findIndex(
-                        record => record.rollNo === newAttendance.rollNo && 
-                                 record.classScheduleId === classScheduleId
-                    );
-
                     // Create the attendance record with proper structure
                     const attendanceRecord = {
                         id: newAttendance._id,
@@ -154,41 +147,19 @@ const attendanceSlicer = createSlice({
                         rollNo: newAttendance.rollNo,
                         discipline: newAttendance.discipline,
                         time: newAttendance.time,
-                        title: subjectTitle,
+                        title: subjectTitle, // Use the title from the response
                         subjectId: subjectId,
-                        subject: subjectTitle,
-                        classScheduleId: classScheduleId,
-                        status: 'Present'
+                        subject: subjectTitle // Also set the subject field for display
                     };
 
-                    if (existingIndex !== -1) {
-                        // Update existing record
-                        subject.attendance[dateKey][existingIndex] = attendanceRecord;
-                    } else {
-                        // Add new record
-                        subject.attendance[dateKey].push(attendanceRecord);
-                    }
+                    subject.attendance[dateKey].push(attendanceRecord);
                     
-                    // Sort the attendance records by time
+                    // Optional: Sort the attendance records by time
                     subject.attendance[dateKey].sort((a, b) => {
-                        if (a.time && b.time) {
-                            if (a.time < b.time) return -1;
-                            if (a.time > b.time) return 1;
-                        }
+                        if (a.time < b.time) return -1;
+                        if (a.time > b.time) return 1;
                         return 0;
                     });
-
-                    // Also update the registered students list if needed
-                    if (subject.registeredStudents) {
-                        const regStudentIndex = subject.registeredStudents.findIndex(
-                            s => s.registrationNo === newAttendance.rollNo
-                        );
-                        
-                        if (regStudentIndex === -1) {
-                            // This student is not registered, add them to registered students?
-                            // Or you might want to handle this differently
-                        }
-                    }
                 }
             })
             .addCase(createAttendance.rejected, (state, action) => {
@@ -206,7 +177,6 @@ const attendanceSlicer = createSlice({
                 const updatedAttendance = action.payload.data;
                 const attendanceId = updatedAttendance._id;
                 const dateKey = new Date(updatedAttendance.date).toISOString().split('T')[0];
-                const classScheduleId = updatedAttendance.classScheduleId;
 
                 for (const subject of state.subjectsWithAttendance) {
                     if (subject.attendance[dateKey]) {
@@ -221,7 +191,6 @@ const attendanceSlicer = createSlice({
                                 rollNo: updatedAttendance.rollNo,
                                 discipline: updatedAttendance.discipline,
                                 time: updatedAttendance.time,
-                                classScheduleId: classScheduleId
                             };
                             break;
                         }
@@ -248,8 +217,9 @@ const attendanceSlicer = createSlice({
                             record => record.id !== deletedId
                         );
 
-                        // If no records left for this date, you might want to keep the empty array
-                        // or delete it based on your preference
+                        if (subject.attendance[dateKey].length === 0) {
+                            delete subject.attendance[dateKey];
+                        }
                     }
                 }
             })
