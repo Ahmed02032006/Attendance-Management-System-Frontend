@@ -19,6 +19,7 @@ import {
   FiCalendar,
   FiBookOpen,
   FiChevronDown,
+  FiCalendar as FiCalendarIcon,
 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
@@ -48,12 +49,18 @@ const TeacherAttendance_Page = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [attendanceToDelete, setAttendanceToDelete] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
+  
+  // New state for class schedule selection
+  const [selectedClassSchedule, setSelectedClassSchedule] = useState(null);
+  const [availableSchedules, setAvailableSchedules] = useState([]);
+  
   const [attendanceForm, setAttendanceForm] = useState({
     subject: '',
-    uniqueCode: ''
+    uniqueCode: '',
+    classSchedule: null // Add class schedule to attendance form
   });
 
-  // Updated manual attendance form state
+  // Updated manual attendance form state with class schedule
   const [manualAttendanceForm, setManualAttendanceForm] = useState({
     studentName: '',
     rollNo: '',
@@ -61,7 +68,8 @@ const TeacherAttendance_Page = () => {
     subjectId: '',
     date: '',
     time: '',
-    ipAddress: ''
+    ipAddress: '',
+    classSchedule: null
   });
 
   // New state for roll number search
@@ -107,6 +115,35 @@ const TeacherAttendance_Page = () => {
       setSelectedSubject(subjectsWithAttendance[0].id)
     }
   }, [subjectsWithAttendance, selectedSubject])
+
+  // Update available schedules when subject or date changes
+  useEffect(() => {
+    if (selectedSubject && currentDate) {
+      const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+      if (subject && subject.classSchedule && subject.classSchedule.length > 0) {
+        // Get day name from current date
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const currentDay = dayNames[currentDate.getDay()];
+        
+        // Filter schedules for the current day
+        const daySchedules = subject.classSchedule.filter(
+          schedule => schedule.day === currentDay
+        );
+        
+        setAvailableSchedules(daySchedules);
+        
+        // Auto-select the first schedule if available and no schedule selected
+        if (daySchedules.length > 0 && !selectedClassSchedule) {
+          setSelectedClassSchedule(daySchedules[0]);
+        } else if (daySchedules.length === 0) {
+          setSelectedClassSchedule(null);
+        }
+      } else {
+        setAvailableSchedules([]);
+        setSelectedClassSchedule(null);
+      }
+    }
+  }, [selectedSubject, currentDate, subjectsWithAttendance]);
 
   // QR Auto-refresh useEffect
   useEffect(() => {
@@ -163,6 +200,16 @@ const TeacherAttendance_Page = () => {
     });
   };
 
+  // Format time for display (convert 24h to 12h)
+  const formatTimeForDisplay = (time) => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
   // Get today's date for max date restriction
   const getTodayDate = () => {
     return new Date();
@@ -187,19 +234,60 @@ const TeacherAttendance_Page = () => {
     return result;
   };
 
-  // Get current attendance records from Redux state
+  // Get current attendance records from Redux state with schedule filtering
   const getCurrentAttendanceRecords = () => {
     if (!selectedSubject) return [];
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
     if (!subject || !subject.attendance) return [];
 
+    // Get all records for the current date
     const records = subject.attendance[currentDateString] || [];
 
-    // Ensure each record has a status field
+    // If we have a selected class schedule, filter by time range
+    if (selectedClassSchedule) {
+      const scheduleStartTime = selectedClassSchedule.startTime;
+      const scheduleEndTime = selectedClassSchedule.endTime;
+      
+      return records
+        .filter(record => {
+          if (!record.time) return false; // Only present students have time
+          
+          // Convert record time to comparable format (HH:MM)
+          const recordTime = convertTo24Hour(record.time);
+          
+          // Check if record time falls within schedule time range
+          return recordTime >= scheduleStartTime && recordTime <= scheduleEndTime;
+        })
+        .map(record => ({
+          ...record,
+          status: record.status || (record.time ? 'Present' : 'Absent')
+        }));
+    }
+
+    // If no schedule selected, return all records
     return records.map(record => ({
       ...record,
       status: record.status || (record.time ? 'Present' : 'Absent')
     }));
+  };
+
+  // Helper function to convert 12h time to 24h format
+  const convertTo24Hour = (timeStr) => {
+    if (!timeStr) return '';
+    try {
+      let time = timeStr.trim().toUpperCase();
+      if (time.includes('AM') || time.includes('PM')) {
+        const [timePart, modifier] = time.split(' ');
+        let [hours, minutes] = timePart.split(':');
+        hours = parseInt(hours);
+        if (modifier === 'PM' && hours !== 12) hours += 12;
+        if (modifier === 'AM' && hours === 12) hours = 0;
+        return `${hours.toString().padStart(2, '0')}:${minutes}`;
+      }
+      return time;
+    } catch (error) {
+      return timeStr;
+    }
   };
 
   const currentAttendanceRecords = getCurrentAttendanceRecords();
@@ -358,11 +446,11 @@ const TeacherAttendance_Page = () => {
       student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.rollNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.discipline.toLowerCase().includes(searchTerm.toLowerCase())
+      student.discipline?.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  // Export to Excel function (updated to include date)
+  // Export to Excel function (updated to include class schedule)
   const exportToExcel = () => {
     if (filteredStudents.length === 0) {
       toast.error('No data to export');
@@ -370,17 +458,18 @@ const TeacherAttendance_Page = () => {
     }
 
     try {
-      const headers = ['Student Name', 'Roll No', 'Discipline', 'Date', 'Time', 'Subject'];
+      const headers = ['Student Name', 'Roll No', 'Discipline', 'Date', 'Time', 'Subject', 'Class Schedule'];
       const csvContent = [
         headers.join(','),
         ...filteredStudents.map(student =>
           [
             `"${student.studentName}"`,
             `"${student.rollNo}"`,
-            `"${student.discipline}"`,
+            `"${student.discipline || ''}"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
-            `"${student.title || student.subject || 'N/A'}"` // Fix: Use title instead of subject
+            `"${student.title || student.subject || 'N/A'}"`,
+            `"${selectedClassSchedule ? `${selectedClassSchedule.day} ${formatTimeForDisplay(selectedClassSchedule.startTime)}-${formatTimeForDisplay(selectedClassSchedule.endTime)}` : 'N/A'}"`
           ].join(',')
         )
       ].join('\n');
@@ -390,7 +479,8 @@ const TeacherAttendance_Page = () => {
       const url = URL.createObjectURL(blob);
 
       const subjectName = subjectsWithAttendance.find(s => s.id === selectedSubject)?.title || 'attendance';
-      const fileName = `attendance_${subjectName}_${currentDateString}.csv`;
+      const scheduleInfo = selectedClassSchedule ? `_${selectedClassSchedule.startTime.replace(':', '')}-${selectedClassSchedule.endTime.replace(':', '')}` : '';
+      const fileName = `attendance_${subjectName}_${currentDateString}${scheduleInfo}.csv`;
 
       link.setAttribute('href', url);
       link.setAttribute('download', fileName);
@@ -400,7 +490,6 @@ const TeacherAttendance_Page = () => {
       link.click();
       document.body.removeChild(link);
 
-      // toast.success('Data exported successfully!');
     } catch (error) {
       toast.error('Failed to export data');
     }
@@ -472,12 +561,14 @@ const TeacherAttendance_Page = () => {
     );
   };
 
+  // Updated handleSubjectSelect to close modal after selection
   const handleSubjectSelect = (subjectId) => {
     setSelectedSubject(subjectId);
     setShowSubjectModal(false);
     setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
+    setSelectedClassSchedule(null); // Reset schedule selection when subject changes
   };
 
   // Function to generate random code
@@ -487,16 +578,21 @@ const TeacherAttendance_Page = () => {
     setAttendanceForm(prev => ({ ...prev, uniqueCode: randomNum.toString() }));
   };
 
-  // Function to generate QR
+  // Function to generate QR with class schedule info
   const handleQRGeneration = (isInitial = false) => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
       return;
     }
 
+    if (!selectedClassSchedule) {
+      toast.error('Please select a class schedule');
+      return;
+    }
+
     const selectedSubject = subjectsWithAttendance.find(s => s.id === attendanceForm.subject);
     const subjectName = selectedSubject?.title;
-    const subjectCode = selectedSubject?.code; // Get the subject code
+    const subjectCode = selectedSubject?.code;
 
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
@@ -505,11 +601,16 @@ const TeacherAttendance_Page = () => {
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
     url.searchParams.append('code', originalCode);
-    url.searchParams.append('subject', attendanceForm.subject); // subject ID
+    url.searchParams.append('subject', attendanceForm.subject);
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('subjectCode', subjectCode || 'N/A'); // Add subject code
+    url.searchParams.append('subjectCode', subjectCode || 'N/A');
     url.searchParams.append('timestamp', currentTime.getTime());
     url.searchParams.append('expiry', expiryTime.getTime());
+    
+    // Add class schedule info to QR
+    url.searchParams.append('scheduleDay', selectedClassSchedule.day);
+    url.searchParams.append('scheduleStart', selectedClassSchedule.startTime);
+    url.searchParams.append('scheduleEnd', selectedClassSchedule.endTime);
 
     setCurrentQrCode(url.toString());
     setQrExpiryTime(expiryTime);
@@ -535,13 +636,23 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
+    if (!selectedClassSchedule) {
+      toast.error('Please select a class schedule');
+      return;
+    }
+
     setShowCreateModal(false);
     setShowQRModal(true);
     toast.success('QR code generated successfully!', { autoClose: 2000 });
   };
 
-  // Handle Manual Attendance - Updated to fetch registered students
+  // Handle Manual Attendance - Updated to include class schedule
   const handleManualAttendance = async () => {
+    if (!selectedClassSchedule) {
+      toast.error('Please select a class schedule');
+      return;
+    }
+
     // Set default values
     const currentTime = new Date();
     const hours = currentTime.getHours();
@@ -557,7 +668,8 @@ const TeacherAttendance_Page = () => {
       subjectId: selectedSubject || '',
       date: formatDate(currentDate),
       time: formattedTime,
-      ipAddress: generateRandomIP()
+      ipAddress: generateRandomIP(),
+      classSchedule: selectedClassSchedule
     });
 
     setRollNoSearchTerm('');
@@ -583,6 +695,11 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
+    if (!selectedClassSchedule) {
+      toast.error('Please select a class schedule');
+      return;
+    }
+
     // Get subject details
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
 
@@ -596,7 +713,8 @@ const TeacherAttendance_Page = () => {
       subjectName: subject?.title || 'Unknown Subject',
       date: manualAttendanceForm.date,
       ipAddress: manualAttendanceForm.ipAddress,
-      title: subject?.title || 'Unknown Subject'
+      title: subject?.title || 'Unknown Subject',
+      classSchedule: selectedClassSchedule // Include class schedule
     };
 
     dispatch(createAttendance(attendanceRecord))
@@ -611,7 +729,8 @@ const TeacherAttendance_Page = () => {
             subjectId: '',
             date: '',
             time: '',
-            ipAddress: ''
+            ipAddress: '',
+            classSchedule: null
           });
         } else {
           toast.error(res.payload.message)
@@ -632,7 +751,8 @@ const TeacherAttendance_Page = () => {
       subjectId: '',
       date: '',
       time: '',
-      ipAddress: ''
+      ipAddress: '',
+      classSchedule: null
     });
   };
 
@@ -675,6 +795,7 @@ const TeacherAttendance_Page = () => {
     setCurrentDate(newDate);
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
+    setSelectedClassSchedule(null); // Reset schedule when date changes
   };
 
   // Date picker handler
@@ -687,6 +808,7 @@ const TeacherAttendance_Page = () => {
     setCurrentDate(newDate);
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
+    setSelectedClassSchedule(null); // Reset schedule when date changes
   };
 
   // Handle student name click
@@ -759,9 +881,9 @@ const TeacherAttendance_Page = () => {
       <HeaderComponent heading={"Teacher Attendance"} subHeading={"View and manage teacher attendance"} role='' />
 
       <div className="container max-w-full p-6">
-        {/* Date Navigation - Centered */}
+        {/* Date Navigation and Class Schedule Dropdown - Updated */}
         {selectedSubject && (
-          <div className="flex justify-center items-center mb-8">
+          <div className="flex flex-col items-center mb-8">
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-white rounded-lg border border-gray-200 px-6 py-4">
               <button
                 onClick={() => navigateDate('prev')}
@@ -793,6 +915,53 @@ const TeacherAttendance_Page = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
+            </div>
+
+            {/* Class Schedule Dropdown */}
+            <div className="mt-4 w-full max-w-md">
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <FiClock className="inline mr-2" />
+                  Select Class Schedule
+                </label>
+                {availableSchedules.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-2">
+                    {availableSchedules.map((schedule, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedClassSchedule(schedule)}
+                        className={`p-3 rounded-lg border transition-all text-left ${
+                          selectedClassSchedule === schedule
+                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-800">
+                              {formatTimeForDisplay(schedule.startTime)} - {formatTimeForDisplay(schedule.endTime)}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {schedule.day}
+                            </p>
+                          </div>
+                          {selectedClassSchedule === schedule && (
+                            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 bg-gray-50 rounded-lg">
+                    <FiCalendarIcon className="mx-auto h-8 w-8 text-gray-400" />
+                    <p className="mt-2 text-sm text-gray-500">No classes scheduled for today</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date().toLocaleDateString('en-US', { weekday: 'long' })}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -858,16 +1027,21 @@ const TeacherAttendance_Page = () => {
                 {/* Create Attendance Dropdown */}
                 <div className="relative attendance-dropdown">
                   <button
-                    disabled={!isViewingToday}
+                    disabled={!isViewingToday || !selectedClassSchedule}
                     onClick={() => setShowAttendanceDropdown(!showAttendanceDropdown)}
-                    className="bg-blue-800 hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2"
+                    className={`font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2 ${
+                      !selectedClassSchedule
+                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                        : 'bg-blue-800 hover:bg-blue-900 text-white'
+                    }`}
+                    title={!selectedClassSchedule ? 'Select a class schedule first' : ''}
                   >
                     <span>Create Attendance</span>
                     <FiChevronDown className={`w-4 h-4 transition-transform ${showAttendanceDropdown ? 'rotate-180' : ''}`} />
                   </button>
 
                   {/* Dropdown Menu */}
-                  {showAttendanceDropdown && (
+                  {showAttendanceDropdown && selectedClassSchedule && (
                     <div className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg border border-gray-200 z-50">
                       <button
                         onClick={() => {
@@ -884,7 +1058,9 @@ const TeacherAttendance_Page = () => {
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-900">QR Based Attendance</p>
-                            <p className="text-xs text-gray-500">Generate QR code for students</p>
+                            <p className="text-xs text-gray-500">
+                              {formatTimeForDisplay(selectedClassSchedule.startTime)} - {formatTimeForDisplay(selectedClassSchedule.endTime)}
+                            </p>
                           </div>
                         </div>
                       </button>
@@ -900,7 +1076,9 @@ const TeacherAttendance_Page = () => {
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-900">Manual Attendance</p>
-                            <p className="text-xs text-gray-500">Enter attendance manually</p>
+                            <p className="text-xs text-gray-500">
+                              {formatTimeForDisplay(selectedClassSchedule.startTime)} - {formatTimeForDisplay(selectedClassSchedule.endTime)}
+                            </p>
                           </div>
                         </div>
                       </button>
@@ -1026,7 +1204,9 @@ const TeacherAttendance_Page = () => {
                     ) : (
                       <tr>
                         <td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500">
-                          {searchTerm ? "No matching students found" : "No attendance records for this date"}
+                          {searchTerm ? "No matching students found" : 
+                           selectedClassSchedule ? "No attendance records for this class schedule" : 
+                           "Select a class schedule to view attendance"}
                         </td>
                       </tr>
                     )}
@@ -1085,11 +1265,10 @@ const TeacherAttendance_Page = () => {
           </div>
         )}
 
-        {/* No Data State - Clean Design */}
+        {/* No Data State */}
         {subjectsWithAttendance.length === 0 && !isLoading && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <div className="flex flex-col items-center">
-              {/* Simple Icon */}
               <div className="mb-4">
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100">
                   <svg
@@ -1108,7 +1287,6 @@ const TeacherAttendance_Page = () => {
                 </div>
               </div>
 
-              {/* Text Content */}
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No Courses Found
               </h3>
@@ -1116,7 +1294,6 @@ const TeacherAttendance_Page = () => {
                 You don't have any courses with attendance data yet. Create your first course to get started.
               </p>
 
-              {/* Action Buttons */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => window.location.href = '/teacher/subject'}
@@ -1137,7 +1314,7 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal - Compact Card Grid Design */}
+      {/* Subject Selection Modal - Updated to close after selection */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl w-full max-w-3xl shadow-xl">
@@ -1165,7 +1342,7 @@ const TeacherAttendance_Page = () => {
                       {subject.title}
                     </h4>
                     <p className="text-[10px] text-gray-500">
-                      {Object.keys(subject.attendance || {}).length} days
+                      {subject.classSchedule?.length || 0} schedules
                     </p>
                   </button>
                 ))}
@@ -1191,6 +1368,11 @@ const TeacherAttendance_Page = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">Create QR Based Attendance</h3>
+              {selectedClassSchedule && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Schedule: {formatTimeForDisplay(selectedClassSchedule.startTime)} - {formatTimeForDisplay(selectedClassSchedule.endTime)}
+                </p>
+              )}
             </div>
             <div className="p-6 space-y-4">
               <div>
@@ -1247,8 +1429,12 @@ const TeacherAttendance_Page = () => {
               </button>
               <button
                 onClick={handleGenerateQR}
-                disabled={isLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading || !selectedClassSchedule}
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                  selectedClassSchedule
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
               >
                 {isLoading ? 'Creating...' : 'Generate QR'}
               </button>
@@ -1263,6 +1449,11 @@ const TeacherAttendance_Page = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">Manual Attendance</h3>
+              {selectedClassSchedule && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Schedule: {formatTimeForDisplay(selectedClassSchedule.startTime)} - {formatTimeForDisplay(selectedClassSchedule.endTime)}
+                </p>
+              )}
               <p className="text-xs text-gray-500 mt-1">Select a student from the list or type roll number</p>
             </div>
             <div className="p-6 space-y-4">
@@ -1356,7 +1547,8 @@ const TeacherAttendance_Page = () => {
                     subjectId: '',
                     date: '',
                     time: '',
-                    ipAddress: ''
+                    ipAddress: '',
+                    classSchedule: null
                   });
                   setRollNoSearchTerm('');
                 }}
@@ -1366,11 +1558,12 @@ const TeacherAttendance_Page = () => {
               </button>
               <button
                 onClick={handleSubmitManualAttendance}
-                disabled={!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline}
-                className={`px-4 py-2 rounded-md font-medium transition-colors ${manualAttendanceForm.studentName && manualAttendanceForm.rollNo && manualAttendanceForm.discipline
+                disabled={!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline || !selectedClassSchedule}
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                  manualAttendanceForm.studentName && manualAttendanceForm.rollNo && manualAttendanceForm.discipline && selectedClassSchedule
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                }`}
               >
                 Submit Attendance
               </button>
@@ -1405,6 +1598,14 @@ const TeacherAttendance_Page = () => {
               </div>
             </div>
             <div className="p-6 flex flex-col items-center">
+              {selectedClassSchedule && (
+                <div className="mb-4 text-center">
+                  <p className="text-sm font-medium text-gray-700">
+                    {formatTimeForDisplay(selectedClassSchedule.startTime)} - {formatTimeForDisplay(selectedClassSchedule.endTime)}
+                  </p>
+                  <p className="text-xs text-gray-500">{selectedClassSchedule.day}</p>
+                </div>
+              )}
               <div
                 className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
                 id="qr-code-container"
@@ -1425,7 +1626,7 @@ const TeacherAttendance_Page = () => {
 
               <div className="text-center">
                 <p className="text-sm text-gray-600">
-                  Students can scan this QR code to mark their attendance
+                  Students can scan this QR code to mark their attendance for this class
                 </p>
               </div>
             </div>
