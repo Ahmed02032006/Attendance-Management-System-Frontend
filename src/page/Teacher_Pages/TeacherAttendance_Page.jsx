@@ -736,6 +736,43 @@ const TeacherAttendance_Page = () => {
     }
   };
 
+  // Add these new state variables
+  const [selectedSubjectForModal, setSelectedSubjectForModal] = useState('');
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [showScheduleDropdown, setShowScheduleDropdown] = useState(false);
+
+  // Add this function to get class schedules for selected subject
+  const getSubjectSchedules = () => {
+    if (!selectedSubjectForModal) return [];
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubjectForModal);
+    return subject?.classSchedule || [];
+  };
+
+  // Update handleSubjectSelect to include schedule
+  const handleSubjectWithScheduleSelect = () => {
+    if (!selectedSubjectForModal || !selectedSchedule) {
+      toast.error('Please select both subject and class schedule');
+      return;
+    }
+
+    setSelectedSubject(selectedSubjectForModal);
+    // You can store the selected schedule if needed
+    // setSelectedClassSchedule(selectedSchedule);
+    setShowSubjectModal(false);
+    setAttendanceForm(prev => ({ ...prev, subject: selectedSubjectForModal }));
+    setCurrentPage(1);
+    setSortConfig({ key: null, direction: 'asc' });
+
+    // Reset modal selections
+    setSelectedSubjectForModal('');
+    setSelectedSchedule(null);
+  };
+
+  // Format schedule for display
+  const formatSchedule = (schedule) => {
+    return `${schedule.day} ${schedule.startTime} - ${schedule.endTime}`;
+  };
+
   // Loading state
   if (isLoading) {
     return (
@@ -776,6 +813,21 @@ const TeacherAttendance_Page = () => {
                 <h2 className="text-xl font-semibold text-gray-800">
                   {formatDisplayDate(currentDate)}
                 </h2>
+                {/* ============================= */}
+                {/* Selected Schedule Display */}
+                {selectedSubject && selectedSchedule && (
+                  <div className="flex justify-center items-center mb-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+                      <div className="flex items-center space-x-2">
+                        <FiClock className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm text-blue-800">
+                          Class Schedule: {formatSchedule(selectedSchedule)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {/* ============================= */}
                 <p className="text-xs text-gray-600">
                   {subjectsWithAttendance.find(s => s.id === selectedSubject)?.title}
                 </p>
@@ -1137,48 +1189,123 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal - Compact Card Grid Design */}
+      {/* Subject Selection Modal with Class Schedule Dropdown */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-3xl shadow-xl">
+          <div className="bg-white rounded-xl w-full max-w-md shadow-xl">
             {/* Header */}
             <div className="px-5 py-3 border-b border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900">Select Course</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Choose a course to continue</p>
+              <h3 className="text-base font-semibold text-gray-900">Select Course & Schedule</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Choose a course and class timing</p>
             </div>
 
-            {/* Subject Grid */}
-            <div className="p-5 max-h-[380px] overflow-y-auto">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {subjectsWithAttendance.map((subject) => (
-                  <button
-                    key={subject.id}
-                    onClick={() => handleSubjectSelect(subject.id)}
-                    className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all text-center group"
-                  >
-                    <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-200 transition-colors">
-                      <span className="text-blue-600 font-semibold text-sm">
-                        {subject.title?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <h4 className="font-medium text-gray-900 text-xs mb-1 line-clamp-2 min-h-8">
-                      {subject.title}
-                    </h4>
-                    <p className="text-[10px] text-gray-500">
-                      {Object.keys(subject.attendance || {}).length} days
-                    </p>
-                  </button>
-                ))}
+            {/* Content */}
+            <div className="p-5 space-y-4">
+              {/* Subject Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Course
+                </label>
+                <select
+                  value={selectedSubjectForModal}
+                  onChange={(e) => {
+                    setSelectedSubjectForModal(e.target.value);
+                    setSelectedSchedule(null); // Reset schedule when subject changes
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Choose a course</option>
+                  {subjectsWithAttendance.map((subject) => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.title} ({subject.code})
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              {/* Class Schedule Dropdown - Shows only when subject is selected */}
+              {selectedSubjectForModal && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Class Schedule
+                  </label>
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
+                      className="w-full px-3 py-2 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white flex justify-between items-center"
+                    >
+                      <span className={selectedSchedule ? 'text-gray-900' : 'text-gray-500'}>
+                        {selectedSchedule ? formatSchedule(selectedSchedule) : 'Choose class timing'}
+                      </span>
+                      <FiChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showScheduleDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Schedule Dropdown Menu */}
+                    {showScheduleDropdown && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        {getSubjectSchedules().length > 0 ? (
+                          getSubjectSchedules().map((schedule, index) => (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                setSelectedSchedule(schedule);
+                                setShowScheduleDropdown(false);
+                              }}
+                              className="w-full text-left px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            >
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {schedule.day}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {schedule.startTime} - {schedule.endTime}
+                                </span>
+                              </div>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="p-3 text-center text-sm text-gray-500">
+                            No class schedules available for this course
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Selected Schedule Display (Optional) */}
+              {selectedSchedule && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-xs font-medium text-blue-700 mb-1">Selected Schedule:</p>
+                  <p className="text-sm text-blue-900">
+                    {formatSchedule(selectedSchedule)}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end">
+            <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end space-x-2">
               <button
-                onClick={() => setShowSubjectModal(false)}
+                onClick={() => {
+                  setShowSubjectModal(false);
+                  setSelectedSubjectForModal('');
+                  setSelectedSchedule(null);
+                }}
                 className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded-md transition-colors"
               >
                 Cancel
+              </button>
+              <button
+                onClick={handleSubjectWithScheduleSelect}
+                disabled={!selectedSubjectForModal || !selectedSchedule}
+                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${selectedSubjectForModal && selectedSchedule
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+              >
+                Confirm Selection
               </button>
             </div>
           </div>
@@ -1368,8 +1495,8 @@ const TeacherAttendance_Page = () => {
                 onClick={handleSubmitManualAttendance}
                 disabled={!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline}
                 className={`px-4 py-2 rounded-md font-medium transition-colors ${manualAttendanceForm.studentName && manualAttendanceForm.rollNo && manualAttendanceForm.discipline
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 Submit Attendance
