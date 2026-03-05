@@ -89,34 +89,6 @@ export const deleteAttendance = createAsyncThunk(
     }
 );
 
-// Get attendance by schedule
-export const getAttendanceBySchedule = createAsyncThunk(
-    "attendance/getBySchedule",
-    async ({ subjectId, date, scheduleDay, scheduleTime }, { rejectWithValue }) => {
-        try {
-            const response = await axios.get(
-                `https://attendance-management-system-backen.vercel.app/api/v1/teacher/attendance/by-schedule`,
-                {
-                    params: {
-                        subjectId,
-                        date,
-                        scheduleDay,
-                        scheduleTime
-                    }
-                }
-            );
-
-            if (response.status !== 200) {
-                return rejectWithValue(response.data);
-            }
-
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data || error.message);
-        }
-    }
-);
-
 const attendanceSlicer = createSlice({
     name: "attendance",
     initialState: initialState,
@@ -149,7 +121,7 @@ const attendanceSlicer = createSlice({
                 state.isLoading = false;
 
                 const newAttendance = action.payload.data;
-
+                
                 // Handle both cases: when subjectId is populated or just an ID
                 const subjectId = newAttendance.subjectId?._id || newAttendance.subjectId;
                 const dateKey = new Date(newAttendance.date).toISOString().split('T')[0];
@@ -181,7 +153,7 @@ const attendanceSlicer = createSlice({
                     };
 
                     subject.attendance[dateKey].push(attendanceRecord);
-
+                    
                     // Optional: Sort the attendance records by time
                     subject.attendance[dateKey].sort((a, b) => {
                         if (a.time < b.time) return -1;

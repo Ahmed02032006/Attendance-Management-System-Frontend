@@ -117,11 +117,10 @@ const StudentAttendance_Page = () => {
     if (locationHook.state?.qrData) {
       try {
         const parsedData = JSON.parse(locationHook.state.qrData);
-        console.log('Parsed QR Data in Student Page:', parsedData);
 
         // Check if QR code is expired
-        if (parsedData.expiry) {
-          const expiryTime = new Date(parseInt(parsedData.expiry));
+        if (parsedData.expiryTimestamp) {
+          const expiryTime = new Date(parsedData.expiryTimestamp);
           const currentTime = new Date();
 
           if (currentTime > expiryTime) {
@@ -131,36 +130,29 @@ const StudentAttendance_Page = () => {
           }
         }
 
-        // Determine the correct subject name
-        let subjectName = parsedData.subjectName || parsedData.subject || 'Unknown Subject';
+        // Determine the correct subject name based on available fields
+        let subjectName = 'Unknown Subject';
 
-        // Make sure schedule info is properly extracted
-        const scheduleDay = parsedData.scheduleDay;
-        const scheduleTime = parsedData.scheduleTime;
-
-        console.log('Schedule Info:', { scheduleDay, scheduleTime });
-
-        if (!scheduleDay || !scheduleTime) {
-          console.warn('Missing schedule information in QR data');
+        if (parsedData.subjectName) {
+          subjectName = parsedData.subjectName;
+        } else if (parsedData.subject && typeof parsedData.subject === 'string' && !parsedData.subject.match(/^[0-9a-fA-F]{24}$/)) {
+          subjectName = parsedData.subject;
+        } else if (parsedData.departmentOffering) {
+          subjectName = parsedData.departmentOffering;
         }
 
         setQrData({
           ...parsedData,
           subjectName: subjectName,
           subjectCode: parsedData.subjectCode || parsedData.code || 'N/A',
-          subjectId: parsedData.subject,
-          scheduleDay: scheduleDay,
-          scheduleTime: scheduleTime,
-          code: parsedData.code
+          subjectId: parsedData.subject, // Make sure subjectId is set
         });
 
         setFormData(prev => ({
           ...prev,
           uniqueCode: parsedData.code,
         }));
-
       } catch (error) {
-        console.error('Error parsing QR data:', error);
         toast.error('Invalid QR code data');
         navigate('/');
       }
@@ -172,16 +164,7 @@ const StudentAttendance_Page = () => {
       const subject = urlParams.get('subject');
       const subjectName = urlParams.get('subjectName');
       const subjectCode = urlParams.get('subjectCode');
-      const scheduleDay = urlParams.get('scheduleDay');
-      const scheduleTime = urlParams.get('scheduleTime');
       const expiry = urlParams.get('expiry');
-
-      console.log('URL Params:', {
-        code,
-        subject,
-        scheduleDay,
-        scheduleTime
-      });
 
       if (code) {
         // Check expiry
@@ -200,17 +183,13 @@ const StudentAttendance_Page = () => {
         const qrDataFromUrl = {
           code: code,
           subject: subject,
-          subjectId: subject,
+          subjectId: subject, // This is the subject ID
           subjectName: subjectName || subject || 'Unknown Subject',
           subjectCode: subjectCode || code || 'N/A',
-          scheduleDay: scheduleDay,
-          scheduleTime: scheduleTime,
           type: 'attendance',
-          expiry: expiry,
+          expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null,
           timestamp: urlParams.get('timestamp') || new Date().toISOString()
         };
-
-        console.log('QR Data from URL:', qrDataFromUrl);
 
         setQrData(qrDataFromUrl);
         setFormData(prev => ({
@@ -231,7 +210,7 @@ const StudentAttendance_Page = () => {
     setIsFetchingStudent(true);
     setRollNoValid(false);
     setDiscipline(''); // Clear discipline while fetching
-
+    
     try {
       const response = await axios.get(
         `https://attendance-management-system-backen.vercel.app/api/v1/teacher/attendance/registered-student/${qrData.subjectId}/${rollNo}`
@@ -239,11 +218,11 @@ const StudentAttendance_Page = () => {
 
       if (response.data.success) {
         const studentData = response.data.data;
-
+        
         // Only set discipline if student is registered in this course
         setDiscipline(studentData.discipline || '');
         setRollNoValid(true);
-
+        
         // No toast message - silent success
       }
     } catch (error) {
@@ -271,7 +250,7 @@ const StudentAttendance_Page = () => {
       ...prev,
       rollNo: processedValue
     }));
-
+    
     // Clear discipline when roll number changes
     setDiscipline('');
     setRollNoValid(false);
@@ -286,7 +265,7 @@ const StudentAttendance_Page = () => {
       const timeout = setTimeout(() => {
         fetchStudentDiscipline(processedValue);
       }, 800); // 800ms debounce
-
+      
       setStudentFetchTimeout(timeout);
     }
   };
@@ -300,7 +279,7 @@ const StudentAttendance_Page = () => {
     const { name, value } = e.target;
 
     let processedValue;
-
+    
     if (name === 'studentName' || name === 'rollNo') {
       processedValue = capitalizeText(value);
     } else {
@@ -399,8 +378,8 @@ const StudentAttendance_Page = () => {
     }
 
     // Check if QR code is expired
-    if (qrData.expiry) {
-      const expiryTime = new Date(parseInt(qrData.expiry));
+    if (qrData.expiryTimestamp) {
+      const expiryTime = new Date(qrData.expiryTimestamp);
       const currentTime = new Date();
 
       if (currentTime > expiryTime) {
@@ -410,8 +389,10 @@ const StudentAttendance_Page = () => {
       }
     }
 
-    // Extract original code
+    // Extract original code from dynamic code
     const submittedCode = qrData.originalCode || qrData.code;
+
+    // If code contains timestamp (format: code_timestamp), extract original
     const codeParts = submittedCode.split('_');
     const originalCode = codeParts.length > 1 ? codeParts[0] : submittedCode;
 
@@ -420,36 +401,25 @@ const StudentAttendance_Page = () => {
     setIsSubmitting(true);
 
     try {
-      const currentTimeFormatted = formatTime();
-
-      // Log the data being sent
-      console.log('Submitting Attendance with schedule:', {
-        scheduleDay: qrData.scheduleDay,
-        scheduleTime: qrData.scheduleTime
-      });
+      const currentTime = formatTime();
 
       const AttendanceData = {
         studentName: formData.studentName,
         rollNo: formData.rollNo,
-        discipline: discipline,
+        discipline: discipline, // Use the fetched discipline
         uniqueCode: originalCode,
         subjectName: qrData.subjectName || qrData.subject || 'Unknown Subject',
         subjectCode: qrData.subjectCode || 'N/A',
-        subjectId: qrData.subjectId || qrData.subject,
-        time: currentTimeFormatted,
-        date: new Date().toISOString().split('T')[0],
+        subjectId: qrData.subjectId || qrData.subject, // Use subjectId
+        time: currentTime,
+        date: qrData.attendanceDate || new Date().toISOString().split('T')[0],
         ipAddress: deviceFingerprint,
-        scheduleDay: qrData.scheduleDay,
-        scheduleTime: qrData.scheduleTime
       };
-
-      console.log('Attendance Data being sent:', AttendanceData);
 
       dispatch(createAttendance(AttendanceData))
         .then((res) => {
-          console.log('Attendance response:', res);
-          if (res.payload?.success) {
-            toast.success(`Attendance submitted successfully at ${currentTimeFormatted}!`);
+          if (res.payload.success) {
+            toast.success(`Attendance submitted successfully at ${currentTime}!`);
             setFormData({
               studentName: '',
               rollNo: '',
@@ -459,16 +429,14 @@ const StudentAttendance_Page = () => {
             setRollNoValid(false);
             navigate("/scan-attendance");
           } else {
-            toast.error(res.payload?.message || 'Failed to submit attendance');
+            toast.error(res.payload.message);
           }
         })
         .catch((error) => {
           console.error('Attendance submission error:', error);
-          toast.error(error?.message || 'Failed to submit attendance');
         });
 
     } catch (error) {
-      console.error('Attendance submission error:', error);
       toast.error('Failed to submit attendance. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -641,12 +609,13 @@ const StudentAttendance_Page = () => {
                   value={formData.rollNo}
                   onChange={handleRollNoChange}
                   placeholder="Enter your roll number"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${rollNoValid
-                    ? 'border-green-500 bg-green-50'
-                    : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
-                      ? 'border-red-300 bg-red-50'
-                      : 'border-gray-300'
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${
+                    rollNoValid 
+                      ? 'border-green-500 bg-green-50' 
+                      : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
+                        ? 'border-red-300 bg-red-50'
+                        : 'border-gray-300'
+                  }`}
                   required
                   autoComplete="off"
                   style={{ textTransform: 'uppercase' }}
@@ -716,8 +685,9 @@ const StudentAttendance_Page = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || !qrData || !discipline}
-                className={`flex-1 text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${!discipline ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
+                className={`flex-1 text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${
+                  !discipline ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">
