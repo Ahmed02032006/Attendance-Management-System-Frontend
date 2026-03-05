@@ -790,7 +790,7 @@ const TeacherAttendance_Page = () => {
                   {subjectsWithAttendance.find(s => s.id === selectedSubject)?.title}
                 </p>
                 {selectedSchedule && (
-                  <p className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 mt-2 border border-blue-400 rounded-full">
+                  <p className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 mt-2 rounded-md border border-blue-400">
                     {formatScheduleDisplay(selectedSchedule)}
                   </p>
                 )}
