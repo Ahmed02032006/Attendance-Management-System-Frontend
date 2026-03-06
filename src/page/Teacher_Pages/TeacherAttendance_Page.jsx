@@ -50,12 +50,12 @@ const TeacherAttendance_Page = () => {
   const [attendanceToDelete, setAttendanceToDelete] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [availableDates, setAvailableDates] = useState([]);
-  const [currentDateIndex, setCurrentDateIndex] = useState(-1);
   const [attendanceForm, setAttendanceForm] = useState({
     subject: '',
     uniqueCode: ''
   });
 
+  // Updated manual attendance form state
   const [manualAttendanceForm, setManualAttendanceForm] = useState({
     studentName: '',
     rollNo: '',
@@ -66,6 +66,7 @@ const TeacherAttendance_Page = () => {
     ipAddress: ''
   });
 
+  // New state for roll number search
   const [rollNoSearchTerm, setRollNoSearchTerm] = useState('');
   const [showRollNoDropdown, setShowRollNoDropdown] = useState(false);
 
@@ -73,17 +74,21 @@ const TeacherAttendance_Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(6);
 
+  // QR Auto-refresh states
   const [qrExpiryTime, setQrExpiryTime] = useState(null);
   const [qrRefreshInterval, setQrRefreshInterval] = useState(null);
   const [currentQrCode, setCurrentQrCode] = useState('');
 
+  // QR Zoom state
   const [isQrZoomed, setIsQrZoomed] = useState(false);
 
+  // Sorting states for main table
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: 'asc'
   });
 
+  // Sorting states for previous attendance modal
   const [modalSortConfig, setModalSortConfig] = useState({
     key: 'date',
     direction: 'desc'
@@ -92,34 +97,28 @@ const TeacherAttendance_Page = () => {
   const { user } = useSelector((state) => state.auth)
   const userId = user?.id
 
+  // Fetch subjects with attendance on component mount
   useEffect(() => {
     dispatch(getSubjectsWithAttendance(userId)).unwrap();
     return () => dispatch(clearAttendance())
   }, [dispatch])
 
+  // Set initial selected subject when data is loaded
   useEffect(() => {
     if (subjectsWithAttendance.length > 0 && !selectedSubject) {
       setShowSubjectModal(true);
     }
   }, [subjectsWithAttendance, selectedSubject])
 
-  // Update available dates when schedule is selected
+  // Update available dates when subject or schedule changes
   useEffect(() => {
     if (selectedSubject && selectedSchedule) {
       const dates = getAvailableDatesForSchedule();
       setAvailableDates(dates);
       
-      // Set to latest date by default
-      if (dates.length > 0) {
-        // Sort dates in descending order (latest first)
-        const sortedDates = [...dates].sort((a, b) => new Date(b) - new Date(a));
-        setCurrentDate(new Date(sortedDates[0]));
-        setCurrentDateIndex(0);
-      } else {
-        // If no dates available, set to today
-        setCurrentDate(new Date());
-        setCurrentDateIndex(-1);
-      }
+      // Always set to today's date by default
+      const today = new Date();
+      setCurrentDate(today);
     }
   }, [selectedSubject, selectedSchedule, subjectsWithAttendance]);
 
@@ -178,7 +177,7 @@ const TeacherAttendance_Page = () => {
     });
   };
 
-  // Get today's date for max date restriction
+  // Get today's date
   const getTodayDate = () => {
     return new Date();
   };
@@ -189,7 +188,7 @@ const TeacherAttendance_Page = () => {
     return date > today;
   };
 
-  // Get all available dates for the current schedule
+  // Get all available dates for the selected schedule
   const getAvailableDatesForSchedule = () => {
     if (!selectedSubject || !selectedSchedule) return [];
 
@@ -197,42 +196,78 @@ const TeacherAttendance_Page = () => {
     if (!subject || !subject.attendance) return [];
 
     const dates = [];
-    
-    Object.keys(subject.attendance).forEach(date => {
-      if (subject.attendance[date] && 
-          subject.attendance[date][selectedSchedule._id] &&
-          subject.attendance[date][selectedSchedule._id].students &&
-          subject.attendance[date][selectedSchedule._id].students.length > 0) {
-        dates.push(date);
+    Object.keys(subject.attendance).forEach(dateStr => {
+      if (subject.attendance[dateStr][selectedSchedule._id]) {
+        dates.push(new Date(dateStr));
       }
     });
 
-    return dates;
+    // Sort dates in descending order (newest first)
+    return dates.sort((a, b) => b - a);
   };
 
-  // Check if there is data for a specific date
+  // Check if date has data for the selected schedule
   const hasDataForDate = (date) => {
+    if (!selectedSubject || !selectedSchedule) return false;
+
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+    if (!subject || !subject.attendance) return false;
+
     const dateStr = formatDate(date);
-    return availableDates.includes(dateStr);
+    return !!(subject.attendance[dateStr] && subject.attendance[dateStr][selectedSchedule._id]);
   };
 
-  // Navigate to previous date with data
+  // Check if previous date exists
+  const hasPreviousDate = () => {
+    if (availableDates.length === 0) return false;
+    
+    const currentDateStr = formatDate(currentDate);
+    const previousDates = availableDates.filter(date => 
+      formatDate(date) < currentDateStr
+    );
+    
+    return previousDates.length > 0;
+  };
+
+  // Check if next date exists
+  const hasNextDate = () => {
+    if (availableDates.length === 0) return false;
+    
+    const currentDateStr = formatDate(currentDate);
+    const nextDates = availableDates.filter(date => 
+      formatDate(date) > currentDateStr && !isFutureDate(date)
+    );
+    
+    return nextDates.length > 0;
+  };
+
+  // Navigate to previous available date
   const navigateToPreviousDate = () => {
-    if (currentDateIndex < availableDates.length - 1) {
-      const nextIndex = currentDateIndex + 1;
-      setCurrentDate(new Date(availableDates[nextIndex]));
-      setCurrentDateIndex(nextIndex);
+    if (!hasPreviousDate()) return;
+
+    const currentDateStr = formatDate(currentDate);
+    const previousDates = availableDates
+      .filter(date => formatDate(date) < currentDateStr)
+      .sort((a, b) => b - a); // Get the closest previous date
+
+    if (previousDates.length > 0) {
+      setCurrentDate(previousDates[0]);
       setCurrentPage(1);
       setSortConfig({ key: null, direction: 'asc' });
     }
   };
 
-  // Navigate to next date with data
+  // Navigate to next available date
   const navigateToNextDate = () => {
-    if (currentDateIndex > 0) {
-      const prevIndex = currentDateIndex - 1;
-      setCurrentDate(new Date(availableDates[prevIndex]));
-      setCurrentDateIndex(prevIndex);
+    if (!hasNextDate()) return;
+
+    const currentDateStr = formatDate(currentDate);
+    const nextDates = availableDates
+      .filter(date => formatDate(date) > currentDateStr && !isFutureDate(date))
+      .sort((a, b) => a - b); // Get the closest next date
+
+    if (nextDates.length > 0) {
+      setCurrentDate(nextDates[0]);
       setCurrentPage(1);
       setSortConfig({ key: null, direction: 'asc' });
     }
@@ -674,6 +709,7 @@ const TeacherAttendance_Page = () => {
 
         if (res.payload && res.payload.success === true) {
           toast.success('Manual attendance marked successfully!');
+
           dispatch(getSubjectsWithAttendance(userId)).unwrap()
             .then(() => {
               console.log('Attendance data refreshed');
@@ -830,18 +866,18 @@ const TeacherAttendance_Page = () => {
 
       <div className="container max-w-full p-6">
         {/* Selected Subject and Schedule Info - Centered */}
-        {selectedSubject && selectedSchedule && (
+        {selectedSubject && (
           <div className="flex flex-col items-center mb-8">
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-white rounded-lg border border-gray-200 px-6 py-4">
               <button
                 onClick={navigateToPreviousDate}
-                disabled={currentDateIndex >= availableDates.length - 1}
+                disabled={!hasPreviousDate()}
                 className={`p-3 rounded-full transition-colors ${
-                  currentDateIndex < availableDates.length - 1
-                    ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  hasPreviousDate() 
+                    ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' 
+                    : 'bg-gray-50 text-gray-300 cursor-not-allowed'
                 }`}
-                title={currentDateIndex < availableDates.length - 1 ? 'View previous attendance date' : 'No earlier attendance records'}
+                title={hasPreviousDate() ? "Previous available date" : "No previous data available"}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -860,35 +896,46 @@ const TeacherAttendance_Page = () => {
                     {formatScheduleDisplay(selectedSchedule)}
                   </p>
                 )}
-                {availableDates.length > 0 && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    {availableDates.length} attendance {availableDates.length === 1 ? 'record' : 'records'} available
+                {!hasDataForDate(currentDate) && (
+                  <p className="text-xs text-yellow-600 bg-yellow-50 px-3 py-1 mt-2 rounded-md border border-yellow-400">
+                    No attendance data for this date
                   </p>
                 )}
               </div>
 
               <button
                 onClick={navigateToNextDate}
-                disabled={currentDateIndex <= 0}
+                disabled={!hasNextDate()}
                 className={`p-3 rounded-full transition-colors ${
-                  currentDateIndex > 0
+                  hasNextDate()
                     ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-50 text-gray-300 cursor-not-allowed'
                 }`}
-                title={currentDateIndex > 0 ? 'View next attendance date' : 'No later attendance records'}
+                title={hasNextDate() ? "Next available date" : "No next data available"}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
+            
+            {/* Date indicator */}
+            <div className="mt-2 text-xs text-gray-500">
+              {availableDates.length > 0 ? (
+                <span>
+                  {availableDates.length} date{availableDates.length !== 1 ? 's' : ''} available for this schedule
+                </span>
+              ) : (
+                <span className="text-yellow-600">No attendance data available for this schedule</span>
+              )}
+            </div>
           </div>
         )}
 
         {/* Attendance Table Section */}
-        {selectedSubject && selectedSchedule && (
+        {selectedSubject && (
           <div className="space-y-6">
-            {/* Search and Actions */}
+            {/* Search and Action Buttons */}
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="relative max-w-md">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -939,7 +986,7 @@ const TeacherAttendance_Page = () => {
                   <button
                     disabled={!isViewingToday}
                     onClick={() => setShowAttendanceDropdown(!showAttendanceDropdown)}
-                    className="bg-blue-800 hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2"
+                    className="bg-blue-800 hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span>Create Attendance</span>
                     <FiChevronDown className={`w-4 h-4 transition-transform ${showAttendanceDropdown ? 'rotate-180' : ''}`} />
@@ -1366,7 +1413,6 @@ const TeacherAttendance_Page = () => {
               <p className="text-xs text-gray-500 mt-1">Select a student from the list or type roll number</p>
             </div>
             <div className="p-6 space-y-4">
-              {/* Roll Number Field with Dropdown */}
               <div className="relative rollno-dropdown">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Roll No *
@@ -1382,7 +1428,6 @@ const TeacherAttendance_Page = () => {
                   autoComplete="off"
                 />
 
-                {/* Dropdown for registered students */}
                 {showRollNoDropdown && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     {studentsLoading ? (
@@ -1415,7 +1460,6 @@ const TeacherAttendance_Page = () => {
                 )}
               </div>
 
-              {/* Student Name Field - Disabled */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Student Name *
@@ -1430,7 +1474,6 @@ const TeacherAttendance_Page = () => {
                 />
               </div>
 
-              {/* Discipline Field - Disabled */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Discipline *
@@ -1671,7 +1714,7 @@ const TeacherAttendance_Page = () => {
                                   </div>
                                 </th>
                                 <th
-                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                   <div className="flex items-center space-x-1 justify-center">
                                     <span>Status</span>
