@@ -1233,11 +1233,6 @@ const TeacherAttendance_Page = () => {
                     </option>
                   ))}
                 </select>
-                {selectedSubject && (
-                  <p className="mt-1 text-xs text-gray-500">
-                    {subjectsWithAttendance.find(s => s.id === selectedSubject)?.totalRegisteredStudents} students registered
-                  </p>
-                )}
               </div>
 
               {/* Schedule Dropdown - Only shown when subject is selected */}
@@ -1268,29 +1263,6 @@ const TeacherAttendance_Page = () => {
                         </option>
                       ))}
                   </select>
-
-                  {/* Schedule Preview */}
-                  {selectedSchedule && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <h4 className="text-xs font-medium text-blue-800 mb-2">Selected Schedule Details</h4>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="text-blue-600">Day:</span>
-                          <span className="ml-1 text-blue-800 font-medium">{selectedSchedule.day}</span>
-                        </div>
-                        <div>
-                          <span className="text-blue-600">Time:</span>
-                          <span className="ml-1 text-blue-800 font-medium">{selectedSchedule.startTime} - {selectedSchedule.endTime}</span>
-                        </div>
-                        {selectedSchedule.room && (
-                          <div>
-                            <span className="text-blue-600">Room:</span>
-                            <span className="ml-1 text-blue-800 font-medium">{selectedSchedule.room}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -1332,8 +1304,8 @@ const TeacherAttendance_Page = () => {
                 }}
                 disabled={!selectedSubject || !selectedSchedule}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${selectedSubject && selectedSchedule
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 View Attendance
