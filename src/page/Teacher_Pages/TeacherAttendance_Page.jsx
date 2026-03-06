@@ -19,14 +19,12 @@ import {
   FiCalendar,
   FiBookOpen,
   FiChevronDown,
-  FiEye,
 } from 'react-icons/fi'
 import {
   getSubjectsWithAttendance,
   deleteAttendance,
   clearAttendance,
   createAttendance
-  // getScheduleAttendance removed - not exported
 } from '../../store/Teacher-Slicer/Attendance-Slicer.js'
 import { getRegisteredStudents } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
@@ -35,13 +33,12 @@ const TeacherAttendance_Page = () => {
   const {
     subjectsWithAttendance,
     isLoading
-    // scheduleAttendance removed - not available
   } = useSelector((state) => state.teacherAttendance)
 
   const { registeredStudents, studentsLoading } = useSelector((state) => state.teacherSubject)
 
   const [selectedSubject, setSelectedSubject] = useState('');
-  const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [selectedSchedule, setSelectedSchedule] = useState(null); // New state for selected schedule
   const [showSubjectModal, setShowSubjectModal] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
@@ -49,7 +46,6 @@ const TeacherAttendance_Page = () => {
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAttendanceDropdown, setShowAttendanceDropdown] = useState(false);
-  const [showScheduleAttendanceModal, setShowScheduleAttendanceModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [attendanceToDelete, setAttendanceToDelete] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -58,6 +54,7 @@ const TeacherAttendance_Page = () => {
     uniqueCode: ''
   });
 
+  // Updated manual attendance form state
   const [manualAttendanceForm, setManualAttendanceForm] = useState({
     studentName: '',
     rollNo: '',
@@ -68,6 +65,7 @@ const TeacherAttendance_Page = () => {
     ipAddress: ''
   });
 
+  // New state for roll number search
   const [rollNoSearchTerm, setRollNoSearchTerm] = useState('');
   const [showRollNoDropdown, setShowRollNoDropdown] = useState(false);
 
@@ -95,12 +93,6 @@ const TeacherAttendance_Page = () => {
     direction: 'desc'
   });
 
-  // Sorting states for schedule attendance modal
-  const [scheduleModalSortConfig, setScheduleModalSortConfig] = useState({
-    key: 'date',
-    direction: 'desc'
-  });
-
   const { user } = useSelector((state) => state.auth)
   const userId = user?.id
 
@@ -108,19 +100,15 @@ const TeacherAttendance_Page = () => {
   useEffect(() => {
     dispatch(getSubjectsWithAttendance(userId)).unwrap();
     return () => dispatch(clearAttendance())
-  }, [dispatch, userId])
+  }, [dispatch])
 
   // Set initial selected subject when data is loaded
   useEffect(() => {
     if (subjectsWithAttendance.length > 0 && !selectedSubject) {
+      // Don't auto-select, let user select from modal
       setShowSubjectModal(true);
     }
   }, [subjectsWithAttendance, selectedSubject])
-
-  // Set current date to today on component mount
-  useEffect(() => {
-    setCurrentDate(new Date());
-  }, []);
 
   // QR Auto-refresh useEffect
   useEffect(() => {
@@ -188,15 +176,6 @@ const TeacherAttendance_Page = () => {
     return date > today;
   };
 
-  // Check if viewing today's date
-  const isToday = (date) => {
-    const today = new Date();
-    return date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear();
-  };
-
-  const isViewingToday = isToday(currentDate);
   const currentDateString = formatDate(currentDate);
 
   // Generate random IP address
@@ -281,6 +260,7 @@ const TeacherAttendance_Page = () => {
           bValue = b.discipline?.toLowerCase() || '';
           break;
         case 'status':
+          // Define priority: Present > Not Registered > Absent
           const statusPriority = {
             'Present': 1,
             'Not Registered': 2,
@@ -318,13 +298,13 @@ const TeacherAttendance_Page = () => {
   };
 
   // Sorting function for modal table
-  const sortModalRecords = (records, config) => {
-    if (!config.key) return records;
+  const sortModalRecords = (records) => {
+    if (!modalSortConfig.key) return records;
 
     return [...records].sort((a, b) => {
       let aValue, bValue;
 
-      switch (config.key) {
+      switch (modalSortConfig.key) {
         case 'date':
           aValue = new Date(a.date).getTime();
           bValue = new Date(b.date).getTime();
@@ -342,28 +322,20 @@ const TeacherAttendance_Page = () => {
           bValue = b.subject?.toLowerCase() || '';
           break;
         case 'discipline':
-          aValue = a.discipline?.toLowerCase() || '';
-          bValue = b.discipline?.toLowerCase() || '';
-          break;
-        case 'studentName':
-          aValue = a.studentName?.toLowerCase() || '';
-          bValue = b.studentName?.toLowerCase() || '';
-          break;
-        case 'rollNo':
-          aValue = extractNumericFromRollNo(a.rollNo);
-          bValue = extractNumericFromRollNo(b.rollNo);
+          aValue = a.subject?.toLowerCase() || '';
+          bValue = b.subject?.toLowerCase() || '';
           break;
         default:
           return 0;
       }
 
-      if (aValue < bValue) return config.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return config.direction === 'asc' ? 1 : -1;
+      if (aValue < bValue) return modalSortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return modalSortConfig.direction === 'asc' ? 1 : -1;
       return 0;
     });
   };
 
-  // Handle sort request for student modal
+  // Handle sort request for modal
   const handleModalSort = (key) => {
     setModalSortConfig(prevConfig => ({
       key,
@@ -371,30 +343,12 @@ const TeacherAttendance_Page = () => {
     }));
   };
 
-  // Handle sort request for schedule attendance modal
-  const handleScheduleModalSort = (key) => {
-    setScheduleModalSortConfig(prevConfig => ({
-      key,
-      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
-    }));
-  };
-
-  // Get sort icon for student modal
+  // Get sort icon for modal
   const getModalSortIcon = (key) => {
     if (modalSortConfig.key !== key) {
       return <FiArrowUp className="w-3 h-3 opacity-30" />;
     }
     return modalSortConfig.direction === 'asc' ?
-      <FiArrowUp className="w-3 h-3" /> :
-      <FiArrowDown className="w-3 h-3" />;
-  };
-
-  // Get sort icon for schedule modal
-  const getScheduleModalSortIcon = (key) => {
-    if (scheduleModalSortConfig.key !== key) {
-      return <FiArrowUp className="w-3 h-3 opacity-30" />;
-    }
-    return scheduleModalSortConfig.direction === 'asc' ?
       <FiArrowUp className="w-3 h-3" /> :
       <FiArrowDown className="w-3 h-3" />;
   };
@@ -409,7 +363,7 @@ const TeacherAttendance_Page = () => {
     )
   );
 
-  // Export to Excel function
+  // Export to Excel function (updated to include date)
   const exportToExcel = () => {
     if (filteredStudents.length === 0) {
       toast.error('No data to export');
@@ -427,7 +381,7 @@ const TeacherAttendance_Page = () => {
             `"${student.discipline}"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
-            `"${student.title || student.subject || 'N/A'}"`
+            `"${student.title || student.subject || 'N/A'}"` // Fix: Use title instead of subject
           ].join(',')
         )
       ].join('\n');
@@ -446,6 +400,8 @@ const TeacherAttendance_Page = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // toast.success('Data exported successfully!');
     } catch (error) {
       toast.error('Failed to export data');
     }
@@ -494,6 +450,7 @@ const TeacherAttendance_Page = () => {
     const value = e.target.value;
     setRollNoSearchTerm(value);
 
+    // If user types manually, clear auto-filled fields
     if (value !== manualAttendanceForm.rollNo) {
       setManualAttendanceForm(prev => ({
         ...prev,
@@ -516,7 +473,7 @@ const TeacherAttendance_Page = () => {
     );
   };
 
-  // Handle subject select
+  // Updated handleSubjectSelect to also reset schedule
   const handleSubjectSelect = (subjectId, schedule = null) => {
     setSelectedSubject(subjectId);
     setSelectedSchedule(schedule);
@@ -528,6 +485,7 @@ const TeacherAttendance_Page = () => {
 
   // Function to generate random code
   const generateRandomCode = () => {
+    // Generate a 6-digit random number
     const randomNum = Math.floor(100000 + Math.random() * 900000);
     setAttendanceForm(prev => ({ ...prev, uniqueCode: randomNum.toString() }));
   };
@@ -539,6 +497,7 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
+    // Validate that schedule is selected
     if (!selectedSchedule) {
       toast.error('Please select a class schedule first');
       return;
@@ -555,8 +514,8 @@ const TeacherAttendance_Page = () => {
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
     url.searchParams.append('code', originalCode);
-    url.searchParams.append('subject', attendanceForm.subject);
-    url.searchParams.append('scheduleId', selectedSchedule._id);
+    url.searchParams.append('subject', attendanceForm.subject); // subject ID
+    url.searchParams.append('scheduleId', selectedSchedule._id); // Add scheduleId
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
     url.searchParams.append('subjectCode', subjectCode || 'N/A');
     url.searchParams.append('timestamp', currentTime.getTime());
@@ -570,6 +529,16 @@ const TeacherAttendance_Page = () => {
     }
   };
 
+  // Check if viewing today's date
+  const isToday = (date) => {
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+  };
+
+  const isViewingToday = isToday(currentDate);
+
   const handleGenerateQR = async () => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
@@ -581,8 +550,9 @@ const TeacherAttendance_Page = () => {
     toast.success('QR code generated successfully!', { autoClose: 2000 });
   };
 
-  // Handle Manual Attendance
+  // Handle Manual Attendance - Updated to fetch registered students
   const handleManualAttendance = async () => {
+    // Set default values
     const currentTime = new Date();
     const hours = currentTime.getHours();
     const minutes = currentTime.getMinutes();
@@ -602,6 +572,7 @@ const TeacherAttendance_Page = () => {
 
     setRollNoSearchTerm('');
 
+    // Fetch registered students for the selected subject
     try {
       await dispatch(getRegisteredStudents({
         subjectId: selectedSubject,
@@ -616,18 +587,22 @@ const TeacherAttendance_Page = () => {
   };
 
   const handleSubmitManualAttendance = () => {
+    // Validate required fields
     if (!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline) {
       toast.error('Please fill in all required fields');
       return;
     }
 
+    // Validate that schedule is selected
     if (!selectedSchedule) {
       toast.error('Please select a class schedule first');
       return;
     }
 
+    // Get subject details
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
 
+    // Create attendance record with scheduleId
     const attendanceRecord = {
       studentName: manualAttendanceForm.studentName,
       rollNo: manualAttendanceForm.rollNo,
@@ -641,12 +616,26 @@ const TeacherAttendance_Page = () => {
       title: subject?.title || 'Unknown Subject'
     };
 
+    console.log('Manual attendance payload:', attendanceRecord);
+
     dispatch(createAttendance(attendanceRecord))
       .then((res) => {
+        console.log('Attendance response:', res);
+
+        // Check if the payload exists and has success property
         if (res.payload && res.payload.success === true) {
           toast.success('Manual attendance marked successfully!');
-          dispatch(getSubjectsWithAttendance(userId)).unwrap();
-          
+
+          // Refresh the attendance data
+          dispatch(getSubjectsWithAttendance(userId)).unwrap()
+            .then(() => {
+              console.log('Attendance data refreshed');
+            })
+            .catch((refreshError) => {
+              console.error('Error refreshing attendance:', refreshError);
+            });
+
+          // Reset form
           setManualAttendanceForm({
             studentName: '',
             rollNo: '',
@@ -657,11 +646,16 @@ const TeacherAttendance_Page = () => {
             ipAddress: ''
           });
         } else {
+          // Handle error case
           const errorMessage = res.payload?.message || 'Failed to mark attendance';
           toast.error(errorMessage);
+          console.error('Attendance error:', res.payload);
         }
       })
       .catch((error) => {
+        console.error('Attendance submission error:', error);
+
+        // Check if error has response data
         if (error.response && error.response.data) {
           toast.error(error.response.data.message || 'Failed to mark attendance');
         } else if (error.message) {
@@ -673,6 +667,17 @@ const TeacherAttendance_Page = () => {
       .finally(() => {
         setShowManualModal(false);
         setRollNoSearchTerm('');
+
+        // Reset form
+        setManualAttendanceForm({
+          studentName: '',
+          rollNo: '',
+          discipline: '',
+          subjectId: '',
+          date: '',
+          time: '',
+          ipAddress: ''
+        });
       });
   };
 
@@ -733,18 +738,8 @@ const TeacherAttendance_Page = () => {
   const handleStudentClick = (student) => {
     setSelectedStudent(student);
     setShowStudentModal(true);
+    // Reset modal sorting to default
     setModalSortConfig({ key: 'date', direction: 'desc' });
-  };
-
-  // Handle view schedule attendance - Using existing data
-  const handleViewScheduleAttendance = () => {
-    if (!selectedSubject || !selectedSchedule) {
-      toast.error('Please select a subject and schedule first');
-      return;
-    }
-
-    setShowScheduleAttendanceModal(true);
-    setScheduleModalSortConfig({ key: 'date', direction: 'desc' });
   };
 
   // Reset search and pagination when search term changes
@@ -767,7 +762,7 @@ const TeacherAttendance_Page = () => {
           record.rollNo === student.rollNo
         );
 
-        if (studentRecord && studentRecord.id) {
+        if (studentRecord && studentRecord.id) { // Only include present records
           const schedule = subject.classSchedule.find(s => s._id === scheduleId);
           allAttendance.push({
             ...studentRecord,
@@ -780,34 +775,7 @@ const TeacherAttendance_Page = () => {
       });
     });
 
-    return sortModalRecords(allAttendance, modalSortConfig);
-  };
-
-  // Get schedule attendance records - Using existing data
-  const getScheduleAttendanceRecords = () => {
-    if (!selectedSubject || !selectedSchedule) return [];
-    
-    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
-    if (!subject || !subject.attendance) return [];
-    
-    const allRecords = [];
-    
-    Object.entries(subject.attendance).forEach(([date, schedules]) => {
-      Object.entries(schedules).forEach(([scheduleId, scheduleData]) => {
-        // Only include records for the selected schedule
-        if (scheduleId === selectedSchedule._id) {
-          scheduleData.students.forEach(student => {
-            allRecords.push({
-              ...student,
-              date: date,
-              day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' })
-            });
-          });
-        }
-      });
-    });
-
-    return sortModalRecords(allRecords, scheduleModalSortConfig);
+    return sortModalRecords(allAttendance);
   };
 
   const handleRefresh = async () => {
@@ -847,7 +815,7 @@ const TeacherAttendance_Page = () => {
       <HeaderComponent heading={"Teacher Attendance"} subHeading={"View and manage teacher attendance"} role='' />
 
       <div className="container max-w-full p-6">
-        {/* Selected Subject and Schedule Info */}
+        {/* Selected Subject and Schedule Info - Centered */}
         {selectedSubject && (
           <div className="flex flex-col items-center mb-8">
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-white rounded-lg border border-gray-200 px-6 py-4">
@@ -860,7 +828,7 @@ const TeacherAttendance_Page = () => {
                 </svg>
               </button>
 
-              <div className="text-center flex flex-col items-center space-y-2">
+              <div className="text-center flex flex-col items-center space-y-2 sm:space-y-0 sm:space-x-4">
                 <h2 className="text-xl font-semibold text-gray-800">
                   {formatDisplayDate(currentDate)}
                 </h2>
@@ -893,7 +861,7 @@ const TeacherAttendance_Page = () => {
         {/* Attendance Table Section */}
         {selectedSubject && (
           <div className="space-y-6">
-            {/* Search and Actions */}
+            {/* Search and Date Picker */}
             <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="relative max-w-md">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -909,15 +877,6 @@ const TeacherAttendance_Page = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                {/* View Schedule Attendance Button */}
-                <button
-                  onClick={handleViewScheduleAttendance}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 font-medium transition-colors flex items-center space-x-2"
-                >
-                  <FiEye className="w-4 h-4" />
-                  <span>View Schedule History</span>
-                </button>
-
                 {/* Export to Excel Button */}
                 <button
                   onClick={exportToExcel}
@@ -933,7 +892,7 @@ const TeacherAttendance_Page = () => {
                 {/* Refresh Button */}
                 <button
                   onClick={() => handleRefresh()}
-                  disabled={isLoading}
+                  disabled={isLoading || !isViewingToday}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   title="Refresh attendance data"
                 >
@@ -953,14 +912,14 @@ const TeacherAttendance_Page = () => {
                   <button
                     disabled={!isViewingToday}
                     onClick={() => setShowAttendanceDropdown(!showAttendanceDropdown)}
-                    className={`${isViewingToday ? 'bg-blue-800 hover:bg-blue-900' : 'bg-gray-400 cursor-not-allowed'} text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2`}
+                    className="bg-blue-800 hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center space-x-2"
                   >
                     <span>Create Attendance</span>
                     <FiChevronDown className={`w-4 h-4 transition-transform ${showAttendanceDropdown ? 'rotate-180' : ''}`} />
                   </button>
 
                   {/* Dropdown Menu */}
-                  {showAttendanceDropdown && isViewingToday && (
+                  {showAttendanceDropdown && (
                     <div className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg border border-gray-200 z-50">
                       <button
                         onClick={() => {
@@ -1041,10 +1000,12 @@ const TeacherAttendance_Page = () => {
                           {getSortIcon('discipline')}
                         </div>
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleModalSort('schedule')}>
                         <div className="flex items-center space-x-1">
                           <FiClock className="w-3 h-3" />
                           <span>Schedule</span>
+                          {getModalSortIcon('schedule')}
                         </div>
                       </th>
                       <th
@@ -1187,10 +1148,11 @@ const TeacherAttendance_Page = () => {
           </div>
         )}
 
-        {/* No Data State */}
+        {/* No Data State - Clean Design */}
         {subjectsWithAttendance.length === 0 && !isLoading && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <div className="flex flex-col items-center">
+              {/* Simple Icon */}
               <div className="mb-4">
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100">
                   <svg
@@ -1209,6 +1171,7 @@ const TeacherAttendance_Page = () => {
                 </div>
               </div>
 
+              {/* Text Content */}
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No Courses Found
               </h3>
@@ -1216,6 +1179,7 @@ const TeacherAttendance_Page = () => {
                 You don't have any courses with attendance data yet. Create your first course to get started.
               </p>
 
+              {/* Action Buttons */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => window.location.href = '/teacher/subject'}
@@ -1236,16 +1200,19 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal */}
+      {/* Subject Selection Modal - Two Dropdown Design */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-md shadow-xl">
+            {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Select Course & Schedule</h3>
               <p className="text-sm text-gray-500 mt-1">Choose a subject and its class schedule</p>
             </div>
 
+            {/* Form Content */}
             <div className="p-6 space-y-4">
+              {/* Subject Dropdown */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select Subject <span className="text-red-500">*</span>
@@ -1255,7 +1222,7 @@ const TeacherAttendance_Page = () => {
                   onChange={(e) => {
                     const subjectId = e.target.value;
                     setSelectedSubject(subjectId);
-                    setSelectedSchedule(null);
+                    setSelectedSchedule(null); // Reset schedule when subject changes
                   }}
                   className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                 >
@@ -1268,6 +1235,7 @@ const TeacherAttendance_Page = () => {
                 </select>
               </div>
 
+              {/* Schedule Dropdown - Only shown when subject is selected */}
               {selectedSubject && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1298,6 +1266,7 @@ const TeacherAttendance_Page = () => {
                 </div>
               )}
 
+              {/* No Schedule Warning */}
               {selectedSubject &&
                 subjectsWithAttendance.find(s => s.id === selectedSubject)?.classSchedule?.length === 0 && (
                   <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
@@ -1313,6 +1282,7 @@ const TeacherAttendance_Page = () => {
                 )}
             </div>
 
+            {/* Footer with Action Buttons */}
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
               <button
                 onClick={() => {
@@ -1417,7 +1387,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Manual Attendance Modal */}
+      {/* Manual Attendance Modal - UPDATED with searchable roll number dropdown */}
       {showManualModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -1426,6 +1396,7 @@ const TeacherAttendance_Page = () => {
               <p className="text-xs text-gray-500 mt-1">Select a student from the list or type roll number</p>
             </div>
             <div className="p-6 space-y-4">
+              {/* Roll Number Field with Dropdown */}
               <div className="relative rollno-dropdown">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Roll No *
@@ -1441,6 +1412,7 @@ const TeacherAttendance_Page = () => {
                   autoComplete="off"
                 />
 
+                {/* Dropdown for registered students */}
                 {showRollNoDropdown && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     {studentsLoading ? (
@@ -1473,6 +1445,7 @@ const TeacherAttendance_Page = () => {
                 )}
               </div>
 
+              {/* Student Name Field - Disabled */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Student Name *
@@ -1487,6 +1460,7 @@ const TeacherAttendance_Page = () => {
                 />
               </div>
 
+              {/* Discipline Field - Disabled */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Discipline *
@@ -1635,7 +1609,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Student Details Modal */}
+      {/* Student Details Modal - UPDATED with sorting and date field */}
       {showStudentModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
@@ -1781,161 +1755,6 @@ const TeacherAttendance_Page = () => {
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
               <button
                 onClick={() => setShowStudentModal(false)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Schedule Attendance Modal - Using existing data */}
-      {showScheduleAttendanceModal && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Schedule Attendance History
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  {selectedSchedule && formatScheduleDisplay(selectedSchedule)} - All Attendance Records
-                </p>
-              </div>
-              <button
-                onClick={() => setShowScheduleAttendanceModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="p-6 max-h-[70vh] overflow-y-auto">
-              {getScheduleAttendanceRecords().length > 0 ? (
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th
-                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                            onClick={() => handleScheduleModalSort('date')}
-                          >
-                            <div className="flex items-center space-x-1">
-                              <FiCalendar className="w-3 h-3" />
-                              <span>Date</span>
-                              {getScheduleModalSortIcon('date')}
-                            </div>
-                          </th>
-                          <th
-                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                            onClick={() => handleScheduleModalSort('day')}
-                          >
-                            <div className="flex items-center space-x-1">
-                              <span>Day</span>
-                              {getScheduleModalSortIcon('day')}
-                            </div>
-                          </th>
-                          <th
-                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                            onClick={() => handleScheduleModalSort('studentName')}
-                          >
-                            <div className="flex items-center space-x-1">
-                              <FiUser className="w-3 h-3" />
-                              <span>Student Name</span>
-                              {getScheduleModalSortIcon('studentName')}
-                            </div>
-                          </th>
-                          <th
-                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                            onClick={() => handleScheduleModalSort('rollNo')}
-                          >
-                            <div className="flex items-center space-x-1">
-                              <span>Roll No.</span>
-                              {getScheduleModalSortIcon('rollNo')}
-                            </div>
-                          </th>
-                          <th
-                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                            onClick={() => handleScheduleModalSort('discipline')}
-                          >
-                            <div className="flex items-center space-x-1">
-                              <FiBookOpen className="w-3 h-3" />
-                              <span>Discipline</span>
-                              {getScheduleModalSortIcon('discipline')}
-                            </div>
-                          </th>
-                          <th
-                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                            onClick={() => handleScheduleModalSort('time')}
-                          >
-                            <div className="flex items-center space-x-1">
-                              <FiClock className="w-3 h-3" />
-                              <span>Time</span>
-                              {getScheduleModalSortIcon('time')}
-                            </div>
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {getScheduleAttendanceRecords().map((record, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                              {formatDisplayDate(new Date(record.date))}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                              {record.day}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              <button
-                                onClick={() => {
-                                  setSelectedStudent(record);
-                                  setShowStudentModal(true);
-                                }}
-                                className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
-                              >
-                                {record.studentName}
-                              </button>
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                              {record.rollNo}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                              {record.discipline}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                              {record.time}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                Present
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <p className="mt-4 text-gray-600">No attendance records found for this schedule</p>
-                </div>
-              )}
-            </div>
-
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => setShowScheduleAttendanceModal(false)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
               >
                 Close
