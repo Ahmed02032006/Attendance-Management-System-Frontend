@@ -1037,7 +1037,7 @@ const TeacherAttendance_Page = () => {
                             <span className="text-sm text-gray-600">{student.status === 'Present' ? student.discipline : '--'}</span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                            {record.schedule || 'N/A'}
+                            {selectedSchedule ? formatScheduleDisplay(selectedSchedule) : 'N/A'}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs ${student.status === 'Present'
@@ -1072,7 +1072,7 @@ const TeacherAttendance_Page = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500">
+                        <td colSpan="7" className="px-4 py-8 text-center text-sm text-gray-500">
                           {searchTerm ? "No matching students found" : "No attendance records for this date"}
                         </td>
                       </tr>
