@@ -25,8 +25,8 @@ import {
   getSubjectsWithAttendance,
   deleteAttendance,
   clearAttendance,
-  createAttendance,
-  getScheduleAttendance
+  createAttendance
+  // getScheduleAttendance removed - not exported
 } from '../../store/Teacher-Slicer/Attendance-Slicer.js'
 import { getRegisteredStudents } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
@@ -34,9 +34,8 @@ const TeacherAttendance_Page = () => {
   const dispatch = useDispatch()
   const {
     subjectsWithAttendance,
-    isLoading,
-    scheduleAttendance,
-    scheduleAttendanceLoading
+    isLoading
+    // scheduleAttendance removed - not available
   } = useSelector((state) => state.teacherAttendance)
 
   const { registeredStudents, studentsLoading } = useSelector((state) => state.teacherSubject)
@@ -109,7 +108,7 @@ const TeacherAttendance_Page = () => {
   useEffect(() => {
     dispatch(getSubjectsWithAttendance(userId)).unwrap();
     return () => dispatch(clearAttendance())
-  }, [dispatch])
+  }, [dispatch, userId])
 
   // Set initial selected subject when data is loaded
   useEffect(() => {
@@ -737,24 +736,15 @@ const TeacherAttendance_Page = () => {
     setModalSortConfig({ key: 'date', direction: 'desc' });
   };
 
-  // Handle view schedule attendance
+  // Handle view schedule attendance - Using existing data
   const handleViewScheduleAttendance = () => {
     if (!selectedSubject || !selectedSchedule) {
       toast.error('Please select a subject and schedule first');
       return;
     }
 
-    dispatch(getScheduleAttendance({
-      subjectId: selectedSubject,
-      scheduleId: selectedSchedule._id
-    })).unwrap()
-      .then(() => {
-        setShowScheduleAttendanceModal(true);
-        setScheduleModalSortConfig({ key: 'date', direction: 'desc' });
-      })
-      .catch((error) => {
-        toast.error('Failed to fetch schedule attendance');
-      });
+    setShowScheduleAttendanceModal(true);
+    setScheduleModalSortConfig({ key: 'date', direction: 'desc' });
   };
 
   // Reset search and pagination when search term changes
@@ -793,19 +783,27 @@ const TeacherAttendance_Page = () => {
     return sortModalRecords(allAttendance, modalSortConfig);
   };
 
-  // Get schedule attendance records
+  // Get schedule attendance records - Using existing data
   const getScheduleAttendanceRecords = () => {
-    if (!scheduleAttendance) return [];
+    if (!selectedSubject || !selectedSchedule) return [];
+    
+    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+    if (!subject || !subject.attendance) return [];
     
     const allRecords = [];
     
-    Object.entries(scheduleAttendance).forEach(([date, data]) => {
-      data.students.forEach(student => {
-        allRecords.push({
-          ...student,
-          date: date,
-          day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' })
-        });
+    Object.entries(subject.attendance).forEach(([date, schedules]) => {
+      Object.entries(schedules).forEach(([scheduleId, scheduleData]) => {
+        // Only include records for the selected schedule
+        if (scheduleId === selectedSchedule._id) {
+          scheduleData.students.forEach(student => {
+            allRecords.push({
+              ...student,
+              date: date,
+              day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' })
+            });
+          });
+        }
       });
     });
 
@@ -911,13 +909,13 @@ const TeacherAttendance_Page = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                {/* View Schedule Attendance Button - NEW */}
+                {/* View Schedule Attendance Button */}
                 <button
                   onClick={handleViewScheduleAttendance}
                   className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 font-medium transition-colors flex items-center space-x-2"
                 >
                   <FiEye className="w-4 h-4" />
-                  <span>View Schedule Attendance</span>
+                  <span>View Schedule History</span>
                 </button>
 
                 {/* Export to Excel Button */}
@@ -1792,7 +1790,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Schedule Attendance Modal - NEW */}
+      {/* Schedule Attendance Modal - Using existing data */}
       {showScheduleAttendanceModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
@@ -1816,12 +1814,7 @@ const TeacherAttendance_Page = () => {
             </div>
 
             <div className="p-6 max-h-[70vh] overflow-y-auto">
-              {scheduleAttendanceLoading ? (
-                <div className="text-center py-12">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <p className="mt-4 text-gray-600">Loading attendance records...</p>
-                </div>
-              ) : scheduleAttendance && Object.keys(scheduleAttendance).length > 0 ? (
+              {getScheduleAttendanceRecords().length > 0 ? (
                 <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
