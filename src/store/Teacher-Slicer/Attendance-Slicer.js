@@ -46,8 +46,7 @@ export const createAttendance = createAsyncThunk(
             return response.data;
         } catch (error) {
             console.error('Create attendance error:', error.response?.data || error.message);
-
-            // Return the error message from the backend if available
+            
             if (error.response && error.response.data) {
                 return rejectWithValue(error.response.data);
             }
@@ -129,9 +128,10 @@ const attendanceSlicer = createSlice({
                 state.isLoading = false;
 
                 const newAttendance = action.payload.data;
-
+                
                 // Handle both cases: when subjectId is populated or just an ID
                 const subjectId = newAttendance.subjectId?._id || newAttendance.subjectId;
+                const scheduleId = newAttendance.scheduleId; // Get scheduleId
                 const dateKey = new Date(newAttendance.date).toISOString().split('T')[0];
 
                 const subjectIndex = state.subjectsWithAttendance.findIndex(
@@ -141,33 +141,72 @@ const attendanceSlicer = createSlice({
                 if (subjectIndex !== -1) {
                     const subject = state.subjectsWithAttendance[subjectIndex];
 
-                    if (!subject.attendance[dateKey]) {
-                        subject.attendance[dateKey] = [];
+                    // Initialize attendance structure if it doesn't exist
+                    if (!subject.attendance) {
+                        subject.attendance = {};
                     }
 
-                    // Get the subject title from either the populated subjectId or from the subject object
+                    // Initialize date object if it doesn't exist
+                    if (!subject.attendance[dateKey]) {
+                        subject.attendance[dateKey] = {};
+                    }
+
+                    // Initialize schedule object if it doesn't exist
+                    if (!subject.attendance[dateKey][scheduleId]) {
+                        // Get the schedule from classSchedule
+                        const schedule = subject.classSchedule?.find(s => s._id === scheduleId) || null;
+                        
+                        // Initialize with all registered students marked as absent
+                        const registeredStudents = subject.registeredStudents || [];
+                        
+                        subject.attendance[dateKey][scheduleId] = {
+                            schedule: schedule,
+                            students: registeredStudents.map(student => ({
+                                id: null,
+                                studentName: student.studentName,
+                                rollNo: student.registrationNo,
+                                discipline: null,
+                                time: null,
+                                title: subject.title,
+                                status: 'Absent'
+                            }))
+                        };
+                    }
+
+                    // Get the subject title
                     const subjectTitle = newAttendance.subjectId?.subjectTitle || subject.title;
 
-                    // Create the attendance record with proper structure
+                    // Create the attendance record
                     const attendanceRecord = {
                         id: newAttendance._id,
                         studentName: newAttendance.studentName,
                         rollNo: newAttendance.rollNo,
                         discipline: newAttendance.discipline,
                         time: newAttendance.time,
-                        title: subjectTitle, // Use the title from the response
+                        title: subjectTitle,
                         subjectId: subjectId,
-                        subject: subjectTitle // Also set the subject field for display
+                        subject: subjectTitle,
+                        status: 'Present'
                     };
 
-                    subject.attendance[dateKey].push(attendanceRecord);
+                    // Find if student already exists in the students array
+                    const studentsArray = subject.attendance[dateKey][scheduleId].students;
+                    const existingStudentIndex = studentsArray.findIndex(
+                        s => s.rollNo === attendanceRecord.rollNo
+                    );
 
-                    // Optional: Sort the attendance records by time
-                    subject.attendance[dateKey].sort((a, b) => {
-                        if (a.time < b.time) return -1;
-                        if (a.time > b.time) return 1;
-                        return 0;
-                    });
+                    if (existingStudentIndex !== -1) {
+                        // Update existing student record
+                        studentsArray[existingStudentIndex] = attendanceRecord;
+                    } else {
+                        // Add new student record
+                        studentsArray.push(attendanceRecord);
+                    }
+
+                    // Sort students by roll number
+                    studentsArray.sort((a, b) => 
+                        a.rollNo.localeCompare(b.rollNo, undefined, { numeric: true })
+                    );
                 }
             })
             .addCase(createAttendance.rejected, (state, action) => {
@@ -184,24 +223,28 @@ const attendanceSlicer = createSlice({
 
                 const updatedAttendance = action.payload.data;
                 const attendanceId = updatedAttendance._id;
+                const subjectId = updatedAttendance.subjectId?._id || updatedAttendance.subjectId;
+                const scheduleId = updatedAttendance.scheduleId;
                 const dateKey = new Date(updatedAttendance.date).toISOString().split('T')[0];
 
                 for (const subject of state.subjectsWithAttendance) {
-                    if (subject.attendance[dateKey]) {
-                        const attendanceIndex = subject.attendance[dateKey].findIndex(
-                            record => record.id === attendanceId
-                        );
+                    if (subject.id === subjectId) {
+                        if (subject.attendance?.[dateKey]?.[scheduleId]?.students) {
+                            const studentIndex = subject.attendance[dateKey][scheduleId].students.findIndex(
+                                s => s.id === attendanceId
+                            );
 
-                        if (attendanceIndex !== -1) {
-                            subject.attendance[dateKey][attendanceIndex] = {
-                                ...subject.attendance[dateKey][attendanceIndex],
-                                studentName: updatedAttendance.studentName,
-                                rollNo: updatedAttendance.rollNo,
-                                discipline: updatedAttendance.discipline,
-                                time: updatedAttendance.time,
-                            };
-                            break;
+                            if (studentIndex !== -1) {
+                                subject.attendance[dateKey][scheduleId].students[studentIndex] = {
+                                    ...subject.attendance[dateKey][scheduleId].students[studentIndex],
+                                    studentName: updatedAttendance.studentName,
+                                    rollNo: updatedAttendance.rollNo,
+                                    discipline: updatedAttendance.discipline,
+                                    time: updatedAttendance.time,
+                                };
+                            }
                         }
+                        break;
                     }
                 }
             })
@@ -220,13 +263,25 @@ const attendanceSlicer = createSlice({
                 const deletedId = action.payload.deletedId;
 
                 for (const subject of state.subjectsWithAttendance) {
-                    for (const dateKey in subject.attendance) {
-                        subject.attendance[dateKey] = subject.attendance[dateKey].filter(
-                            record => record.id !== deletedId
-                        );
+                    if (subject.attendance) {
+                        for (const dateKey in subject.attendance) {
+                            for (const scheduleId in subject.attendance[dateKey]) {
+                                // Filter out the deleted attendance record
+                                subject.attendance[dateKey][scheduleId].students = 
+                                    subject.attendance[dateKey][scheduleId].students.filter(
+                                        s => s.id !== deletedId
+                                    );
 
-                        if (subject.attendance[dateKey].length === 0) {
-                            delete subject.attendance[dateKey];
+                                // If no students left in this schedule, remove the schedule
+                                if (subject.attendance[dateKey][scheduleId].students.length === 0) {
+                                    delete subject.attendance[dateKey][scheduleId];
+                                }
+                            }
+
+                            // If no schedules left for this date, remove the date
+                            if (Object.keys(subject.attendance[dateKey]).length === 0) {
+                                delete subject.attendance[dateKey];
+                            }
                         }
                     }
                 }
