@@ -877,15 +877,6 @@ const TeacherAttendance_Page = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                {/* Date Picker Input */}
-                <input
-                  type="date"
-                  value={formatDate(currentDate)}
-                  onChange={handleDateChange}
-                  max={formatDate(getTodayDate())}
-                  className="px-3 py-2 text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-
                 {/* Export to Excel Button */}
                 <button
                   onClick={exportToExcel}
