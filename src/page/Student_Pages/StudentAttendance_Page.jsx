@@ -145,7 +145,8 @@ const StudentAttendance_Page = () => {
           ...parsedData,
           subjectName: subjectName,
           subjectCode: parsedData.subjectCode || parsedData.code || 'N/A',
-          subjectId: parsedData.subject, // Make sure subjectId is set
+          subjectId: parsedData.subject,
+          scheduleId: parsedData.scheduleId, // Make sure scheduleId is set
         });
 
         setFormData(prev => ({
@@ -162,6 +163,7 @@ const StudentAttendance_Page = () => {
       const urlParams = new URLSearchParams(locationHook.search);
       const code = urlParams.get('code');
       const subject = urlParams.get('subject');
+      const scheduleId = urlParams.get('scheduleId'); // Get scheduleId from URL
       const subjectName = urlParams.get('subjectName');
       const subjectCode = urlParams.get('subjectCode');
       const expiry = urlParams.get('expiry');
@@ -183,7 +185,8 @@ const StudentAttendance_Page = () => {
         const qrDataFromUrl = {
           code: code,
           subject: subject,
-          subjectId: subject, // This is the subject ID
+          subjectId: subject,
+          scheduleId: scheduleId, // Add scheduleId
           subjectName: subjectName || subject || 'Unknown Subject',
           subjectCode: subjectCode || code || 'N/A',
           type: 'attendance',
@@ -212,9 +215,14 @@ const StudentAttendance_Page = () => {
     setDiscipline(''); // Clear discipline while fetching
 
     try {
-      const response = await axios.get(
-        `https://attendance-management-system-backen.vercel.app/api/v1/teacher/attendance/registered-student/${qrData.subjectId}/${rollNo}`
-      );
+      // Include scheduleId in the query if available
+      const url = `https://attendance-management-system-backen.vercel.app/api/v1/teacher/attendance/registered-student/${qrData.subjectId}/${rollNo}`;
+      const params = new URLSearchParams();
+      if (qrData.scheduleId) {
+        params.append('scheduleId', qrData.scheduleId);
+      }
+
+      const response = await axios.get(url + (params.toString() ? `?${params.toString()}` : ''));
 
       if (response.data.success) {
         const studentData = response.data.data;
@@ -611,10 +619,10 @@ const StudentAttendance_Page = () => {
                   onChange={handleRollNoChange}
                   placeholder="Enter your roll number"
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${rollNoValid
-                      ? 'border-green-500 bg-green-50'
-                      : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-gray-300'
+                    ? 'border-green-500 bg-green-50'
+                    : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300'
                     }`}
                   required
                   autoComplete="off"

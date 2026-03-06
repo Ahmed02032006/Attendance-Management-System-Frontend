@@ -497,9 +497,15 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
+    // Validate that schedule is selected
+    if (!selectedSchedule) {
+      toast.error('Please select a class schedule first');
+      return;
+    }
+
     const selectedSubject = subjectsWithAttendance.find(s => s.id === attendanceForm.subject);
     const subjectName = selectedSubject?.title;
-    const subjectCode = selectedSubject?.code; // Get the subject code
+    const subjectCode = selectedSubject?.code;
 
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
@@ -509,8 +515,9 @@ const TeacherAttendance_Page = () => {
     const url = new URL(baseUrl);
     url.searchParams.append('code', originalCode);
     url.searchParams.append('subject', attendanceForm.subject); // subject ID
+    url.searchParams.append('scheduleId', selectedSchedule._id); // Add scheduleId
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('subjectCode', subjectCode || 'N/A'); // Add subject code
+    url.searchParams.append('subjectCode', subjectCode || 'N/A');
     url.searchParams.append('timestamp', currentTime.getTime());
     url.searchParams.append('expiry', expiryTime.getTime());
 
@@ -586,25 +593,34 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
+    // Validate that schedule is selected
+    if (!selectedSchedule) {
+      toast.error('Please select a class schedule first');
+      return;
+    }
+
     // Get subject details
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
 
-    // Create attendance record
+    // Create attendance record with scheduleId
     const attendanceRecord = {
       studentName: manualAttendanceForm.studentName,
       rollNo: manualAttendanceForm.rollNo,
       discipline: manualAttendanceForm.discipline,
       time: manualAttendanceForm.time,
       subjectId: selectedSubject,
+      scheduleId: selectedSchedule._id, // Add scheduleId
       subjectName: subject?.title || 'Unknown Subject',
       date: manualAttendanceForm.date,
       ipAddress: manualAttendanceForm.ipAddress,
       title: subject?.title || 'Unknown Subject'
     };
 
+    console.log('Manual attendance payload:', attendanceRecord); // For debugging
+
     dispatch(createAttendance(attendanceRecord))
       .then((res) => {
-        if (res.payload.success) {
+        if (res.payload?.success) {
           toast.success('Manual attendance marked successfully!');
           dispatch(getSubjectsWithAttendance(userId)).unwrap();
           setManualAttendanceForm({
@@ -617,11 +633,12 @@ const TeacherAttendance_Page = () => {
             ipAddress: ''
           });
         } else {
-          toast.error(res.payload.message)
+          toast.error(res.payload?.message || 'Failed to mark attendance');
         }
       })
       .catch((error) => {
         console.error('Attendance submission error:', error);
+        toast.error('Failed to mark attendance');
       });
 
     setShowManualModal(false);
