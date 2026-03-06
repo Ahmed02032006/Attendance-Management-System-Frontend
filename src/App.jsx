@@ -37,7 +37,7 @@ const App = () => {
     <>
       <ToastContainer
         position="bottom-right"
-        autoClose={1000}
+        autoClose={10000}
         // hideProgressBar={true} 
         pauseOnHover={false}
         toastStyle={{ fontFamily: "Lexend" }}
