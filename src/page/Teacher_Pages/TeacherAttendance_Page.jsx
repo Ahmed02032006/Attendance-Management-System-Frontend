@@ -1200,68 +1200,143 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal - Simple & Clean Design */}
+      {/* Subject Selection Modal - Two Dropdown Design */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-md shadow-xl">
             {/* Header */}
-            <div className="px-4 py-3 border-b border-gray-200">
-              <h3 className="text-base font-medium text-gray-900">Select Course</h3>
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Select Course & Schedule</h3>
+              <p className="text-sm text-gray-500 mt-1">Choose a subject and its class schedule</p>
             </div>
 
-            {/* Subject List */}
-            <div className="p-4 max-h-96 overflow-y-auto">
-              <div className="space-y-3">
-                {subjectsWithAttendance.map((subject) => (
-                  <div key={subject.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                    {/* Subject Info */}
-                    <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-900">{subject.title}</span>
-                        <span className="text-xs text-gray-500">{subject.totalRegisteredStudents} students</span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-0.5">{subject.code}</p>
-                    </div>
-
-                    {/* Schedule Dropdown */}
-                    {subject.classSchedule && subject.classSchedule.length > 0 ? (
-                      <div className="p-3">
-                        <select
-                          onChange={(e) => {
-                            const selectedIndex = e.target.value;
-                            if (selectedIndex) {
-                              const schedule = subject.classSchedule[selectedIndex];
-                              handleSubjectSelect(subject.id, schedule);
-                            }
-                          }}
-                          defaultValue=""
-                          className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="" disabled>Select schedule</option>
-                          {subject.classSchedule.map((schedule, index) => (
-                            <option key={schedule._id || index} value={index}>
-                              {schedule.day} • {schedule.startTime} - {schedule.endTime}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    ) : (
-                      <div className="p-3 text-xs text-gray-500 italic">
-                        No schedule available
-                      </div>
-                    )}
-                  </div>
-                ))}
+            {/* Form Content */}
+            <div className="p-6 space-y-4">
+              {/* Subject Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Subject <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedSubject}
+                  onChange={(e) => {
+                    const subjectId = e.target.value;
+                    setSelectedSubject(subjectId);
+                    setSelectedSchedule(null); // Reset schedule when subject changes
+                  }}
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                >
+                  <option value="">Choose a subject</option>
+                  {subjectsWithAttendance.map((subject) => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.title} ({subject.code})
+                    </option>
+                  ))}
+                </select>
+                {selectedSubject && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    {subjectsWithAttendance.find(s => s.id === selectedSubject)?.totalRegisteredStudents} students registered
+                  </p>
+                )}
               </div>
+
+              {/* Schedule Dropdown - Only shown when subject is selected */}
+              {selectedSubject && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Schedule <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={selectedSchedule ? JSON.stringify(selectedSchedule) : ''}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const schedule = JSON.parse(e.target.value);
+                        setSelectedSchedule(schedule);
+                      } else {
+                        setSelectedSchedule(null);
+                      }
+                    }}
+                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  >
+                    <option value="">Choose a schedule</option>
+                    {subjectsWithAttendance
+                      .find(s => s.id === selectedSubject)
+                      ?.classSchedule?.map((schedule, index) => (
+                        <option key={schedule._id || index} value={JSON.stringify(schedule)}>
+                          {schedule.day} • {schedule.startTime} - {schedule.endTime}
+                          {schedule.room && ` • Room: ${schedule.room}`}
+                        </option>
+                      ))}
+                  </select>
+
+                  {/* Schedule Preview */}
+                  {selectedSchedule && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <h4 className="text-xs font-medium text-blue-800 mb-2">Selected Schedule Details</h4>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-blue-600">Day:</span>
+                          <span className="ml-1 text-blue-800 font-medium">{selectedSchedule.day}</span>
+                        </div>
+                        <div>
+                          <span className="text-blue-600">Time:</span>
+                          <span className="ml-1 text-blue-800 font-medium">{selectedSchedule.startTime} - {selectedSchedule.endTime}</span>
+                        </div>
+                        {selectedSchedule.room && (
+                          <div>
+                            <span className="text-blue-600">Room:</span>
+                            <span className="ml-1 text-blue-800 font-medium">{selectedSchedule.room}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* No Schedule Warning */}
+              {selectedSubject &&
+                subjectsWithAttendance.find(s => s.id === selectedSubject)?.classSchedule?.length === 0 && (
+                  <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <p className="text-xs text-yellow-700">
+                        This subject has no class schedules. Please add a schedule first.
+                      </p>
+                    </div>
+                  </div>
+                )}
             </div>
 
-            {/* Footer */}
-            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex justify-end">
+            {/* Footer with Action Buttons */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
               <button
-                onClick={() => setShowSubjectModal(false)}
-                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-200 rounded transition-colors"
+                onClick={() => {
+                  setShowSubjectModal(false);
+                  setSelectedSubject('');
+                  setSelectedSchedule(null);
+                }}
+                className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 font-medium hover:bg-gray-200 rounded-lg transition-colors"
               >
                 Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedSubject && selectedSchedule) {
+                    handleSubjectSelect(selectedSubject, selectedSchedule);
+                  } else {
+                    toast.error('Please select both subject and schedule');
+                  }
+                }}
+                disabled={!selectedSubject || !selectedSchedule}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${selectedSubject && selectedSchedule
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+              >
+                View Attendance
               </button>
             </div>
           </div>
