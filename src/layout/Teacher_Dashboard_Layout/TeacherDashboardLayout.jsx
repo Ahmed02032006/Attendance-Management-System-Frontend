@@ -86,13 +86,13 @@ const TeacherDashboardLayout = () => {
       icon: UserCheck,
       label: "Manage Attendance",
       path: "/teacher/attendance"
-    },
-    {
-      name: "AttendanceReport",
-      icon: FileBarChart,
-      label: "Attendance Report",
-      path: "/teacher/courseReport"
-    },
+    }
+    // {
+    //   name: "AttendanceReport",
+    //   icon: FileBarChart,
+    //   label: "Attendance Report",
+    //   path: "/teacher/courseReport"
+    // },
   ];
 
   useEffect(() => {
