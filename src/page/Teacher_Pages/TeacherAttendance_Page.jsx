@@ -830,14 +830,14 @@ const TeacherAttendance_Page = () => {
 
               <div className="text-center flex flex-col items-center space-y-2 sm:space-y-0 sm:space-x-4">
                 <h2 className="text-xl font-semibold text-gray-800">
-                  {formatDisplayDate(currentDate)}
+                  {formatScheduleDisplay(selectedSchedule)}
                 </h2>
                 <p className="text-xs text-gray-600">
                   {subjectsWithAttendance.find(s => s.id === selectedSubject)?.title}
                 </p>
                 {selectedSchedule && (
                   <p className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 mt-2 rounded-md border border-blue-400">
-                    {formatScheduleDisplay(selectedSchedule)}
+                    {formatDisplayDate(currentDate).split(', ').slice(1).join(', ')}
                   </p>
                 )}
               </div>
