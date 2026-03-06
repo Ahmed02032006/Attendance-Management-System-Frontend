@@ -118,9 +118,10 @@ const QRScanner_Page = () => {
         type: 'attendance',
         code: code,
         originalCode: code,
-        subject: urlParams.get('subject') || 'Unknown Subject', // This is the subject ID
+        subject: urlParams.get('subject') || 'Unknown Subject',
         subjectName: urlParams.get('subjectName') || 'Unknown Subject',
-        subjectCode: urlParams.get('subjectCode') || 'N/A', // Add this line to get subject code
+        subjectCode: urlParams.get('subjectCode') || 'N/A',
+        scheduleId: urlParams.get('scheduleId'), // Add this line
         departmentOffering: urlParams.get('departmentOffering') || 'Unknown Subject',
         attendanceTime: new Date().toLocaleTimeString('en-US', {
           hour: 'numeric',
