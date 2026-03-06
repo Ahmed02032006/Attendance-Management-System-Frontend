@@ -609,20 +609,33 @@ const TeacherAttendance_Page = () => {
       discipline: manualAttendanceForm.discipline,
       time: manualAttendanceForm.time,
       subjectId: selectedSubject,
-      scheduleId: selectedSchedule._id, // Add scheduleId
+      scheduleId: selectedSchedule._id,
       subjectName: subject?.title || 'Unknown Subject',
       date: manualAttendanceForm.date,
       ipAddress: manualAttendanceForm.ipAddress,
       title: subject?.title || 'Unknown Subject'
     };
 
-    console.log('Manual attendance payload:', attendanceRecord); // For debugging
+    console.log('Manual attendance payload:', attendanceRecord);
 
     dispatch(createAttendance(attendanceRecord))
       .then((res) => {
-        if (res.payload?.success) {
+        console.log('Attendance response:', res);
+
+        // Check if the payload exists and has success property
+        if (res.payload && res.payload.success === true) {
           toast.success('Manual attendance marked successfully!');
-          dispatch(getSubjectsWithAttendance(userId)).unwrap();
+
+          // Refresh the attendance data
+          dispatch(getSubjectsWithAttendance(userId)).unwrap()
+            .then(() => {
+              console.log('Attendance data refreshed');
+            })
+            .catch((refreshError) => {
+              console.error('Error refreshing attendance:', refreshError);
+            });
+
+          // Reset form
           setManualAttendanceForm({
             studentName: '',
             rollNo: '',
@@ -633,27 +646,39 @@ const TeacherAttendance_Page = () => {
             ipAddress: ''
           });
         } else {
-          toast.error(res.payload?.message || 'Failed to mark attendance');
+          // Handle error case
+          const errorMessage = res.payload?.message || 'Failed to mark attendance';
+          toast.error(errorMessage);
+          console.error('Attendance error:', res.payload);
         }
       })
       .catch((error) => {
         console.error('Attendance submission error:', error);
-        toast.error('Failed to mark attendance');
+
+        // Check if error has response data
+        if (error.response && error.response.data) {
+          toast.error(error.response.data.message || 'Failed to mark attendance');
+        } else if (error.message) {
+          toast.error(error.message);
+        } else {
+          toast.error('Failed to mark attendance');
+        }
+      })
+      .finally(() => {
+        setShowManualModal(false);
+        setRollNoSearchTerm('');
+
+        // Reset form
+        setManualAttendanceForm({
+          studentName: '',
+          rollNo: '',
+          discipline: '',
+          subjectId: '',
+          date: '',
+          time: '',
+          ipAddress: ''
+        });
       });
-
-    setShowManualModal(false);
-    setRollNoSearchTerm('');
-
-    // Reset form
-    setManualAttendanceForm({
-      studentName: '',
-      rollNo: '',
-      discipline: '',
-      subjectId: '',
-      date: '',
-      time: '',
-      ipAddress: ''
-    });
   };
 
   // Toggle QR zoom

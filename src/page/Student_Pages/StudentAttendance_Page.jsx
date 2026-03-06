@@ -419,34 +419,51 @@ const StudentAttendance_Page = () => {
         subjectName: qrData.subjectName || qrData.subject || 'Unknown Subject',
         subjectCode: qrData.subjectCode || 'N/A',
         subjectId: qrData.subjectId || qrData.subject,
-        scheduleId: qrData.scheduleId, // Add scheduleId from QR data
+        scheduleId: qrData.scheduleId,
         time: currentTime,
         date: qrData.attendanceDate || new Date().toISOString().split('T')[0],
         ipAddress: deviceFingerprint,
       };
 
-      dispatch(createAttendance(AttendanceData))
-        .then((res) => {
-          if (res.payload.success) {
-            toast.success(`Attendance submitted successfully at ${currentTime}!`);
-            setFormData({
-              studentName: '',
-              rollNo: '',
-              uniqueCode: ''
-            });
-            setDiscipline('');
-            setRollNoValid(false);
-            navigate("/scan-attendance");
-          } else {
-            toast.error(res.payload.message);
-          }
-        })
-        .catch((error) => {
-          console.error('Attendance submission error:', error);
-        });
+      console.log('Submitting attendance:', AttendanceData);
 
+      const result = await dispatch(createAttendance(AttendanceData)).unwrap();
+
+      console.log('Attendance result:', result);
+
+      if (result && result.success) {
+        toast.success(`Attendance submitted successfully at ${currentTime}!`);
+
+        // Reset form
+        setFormData({
+          studentName: '',
+          rollNo: '',
+          uniqueCode: ''
+        });
+        setDiscipline('');
+        setRollNoValid(false);
+
+        // Navigate back to scanner after a short delay
+        setTimeout(() => {
+          navigate("/scan-attendance");
+        }, 1500);
+      } else {
+        // Handle case where result exists but success is false
+        toast.error(result?.message || 'Failed to submit attendance');
+      }
     } catch (error) {
-      toast.error('Failed to submit attendance. Please try again.');
+      console.error('Attendance submission error:', error);
+
+      // Handle different error formats
+      if (error?.message) {
+        toast.error(error.message);
+      } else if (typeof error === 'string') {
+        toast.error(error);
+      } else if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Failed to submit attendance. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -37,13 +37,21 @@ export const createAttendance = createAsyncThunk(
                 formData
             );
 
+            console.log('Create attendance response:', response.data);
+
             if (response.status !== 201) {
                 return rejectWithValue(response.data);
             }
 
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || error.message);
+            console.error('Create attendance error:', error.response?.data || error.message);
+
+            // Return the error message from the backend if available
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message);
         }
     }
 );
@@ -121,7 +129,7 @@ const attendanceSlicer = createSlice({
                 state.isLoading = false;
 
                 const newAttendance = action.payload.data;
-                
+
                 // Handle both cases: when subjectId is populated or just an ID
                 const subjectId = newAttendance.subjectId?._id || newAttendance.subjectId;
                 const dateKey = new Date(newAttendance.date).toISOString().split('T')[0];
@@ -153,7 +161,7 @@ const attendanceSlicer = createSlice({
                     };
 
                     subject.attendance[dateKey].push(attendanceRecord);
-                    
+
                     // Optional: Sort the attendance records by time
                     subject.attendance[dateKey].sort((a, b) => {
                         if (a.time < b.time) return -1;
