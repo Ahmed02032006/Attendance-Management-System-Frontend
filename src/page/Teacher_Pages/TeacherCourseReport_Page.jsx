@@ -9,11 +9,9 @@ import {
   FiAlertCircle,
   FiBarChart2,
   FiEye,
-  FiCalendar,
   FiClock,
-  FiX,
-  FiArrowUp, 
-  FiArrowDown
+  FiCalendar,
+  FiX
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer.js'
@@ -35,14 +33,11 @@ const TeacherCourseReport_Page = () => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showReport, setShowReport] = useState(false)
   const [processedData, setProcessedData] = useState(null)
-
-  // Student detail modal states
-  const [showStudentDetailModal, setShowStudentDetailModal] = useState(false)
-  const [selectedStudentDetail, setSelectedStudentDetail] = useState(null)
-  const [modalSortConfig, setModalSortConfig] = useState({
-    key: 'date',
-    direction: 'desc'
-  })
+  
+  // Student details modal state
+  const [showStudentModal, setShowStudentModal] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState(null)
+  const [studentAttendanceDetails, setStudentAttendanceDetails] = useState([])
 
   // Fetch subjects when component mounts
   useEffect(() => {
@@ -65,137 +60,12 @@ const TeacherCourseReport_Page = () => {
     setFromDate(thirtyDaysAgo.toISOString().split('T')[0])
   }, [])
 
-  // Convert time string to sortable format
-  const timeToSortableValue = (timeStr) => {
-    if (!timeStr) return 0;
-    try {
-      let time = timeStr.trim().toUpperCase();
-      if (time.includes('AM') || time.includes('PM')) {
-        return new Date(`2000-01-01 ${time}`).getTime();
-      } else {
-        const [hours, minutes] = time.split(':').map(Number);
-        return (hours * 60 + minutes) * 60000;
-      }
-    } catch (error) {
-      return 0;
-    }
-  };
-
-  // Sorting function for modal table
-  const sortModalRecords = (records) => {
-    if (!modalSortConfig.key) return records;
-
-    return [...records].sort((a, b) => {
-      let aValue, bValue;
-
-      switch (modalSortConfig.key) {
-        case 'date':
-          aValue = new Date(a.date).getTime();
-          bValue = new Date(b.date).getTime();
-          break;
-        case 'day':
-          aValue = new Date(a.date).toLocaleDateString('en-US', { weekday: 'short' });
-          bValue = new Date(b.date).toLocaleDateString('en-US', { weekday: 'short' });
-          break;
-        case 'time':
-          aValue = timeToSortableValue(a.time);
-          bValue = timeToSortableValue(b.time);
-          break;
-        case 'schedule':
-          aValue = a.schedule?.toLowerCase() || '';
-          bValue = b.schedule?.toLowerCase() || '';
-          break;
-        case 'status':
-          aValue = a.status === 'Present' ? 1 : 2;
-          bValue = b.status === 'Present' ? 1 : 2;
-          break;
-        default:
-          return 0;
-      }
-
-      if (aValue < bValue) return modalSortConfig.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return modalSortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-  };
-
-  // Handle sort request for modal
-  const handleModalSort = (key) => {
-    setModalSortConfig(prevConfig => ({
-      key,
-      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
-    }));
-  };
-
-  // Get sort icon for modal
-  const getModalSortIcon = (key) => {
-    if (modalSortConfig.key !== key) {
-      return <FiArrowUp className="w-3 h-3 opacity-30" />;
-    }
-    return modalSortConfig.direction === 'asc' ?
-      <FiArrowUp className="w-3 h-3" /> :
-      <FiArrowDown className="w-3 h-3" />;
-  };
-
-  // Format date for display
-  const formatDisplayDate = (date) => {
-    if (!date) return '';
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
   // Process the API data into the format expected by the component
   const processReportData = (apiData) => {
     if (!apiData || !apiData.students) return null
 
-    // Get all unique dates from all students' attendance
-    const allDates = []
-    apiData.students.forEach(student => {
-      student.attendance.forEach(record => {
-        if (!allDates.includes(record.date)) {
-          allDates.push(record.date)
-        }
-      })
-    })
-    allDates.sort() // Sort dates chronologically
-
     // Process each student
     const processedStudents = apiData.students.map(student => {
-      // Create a map of attendance by date for quick lookup
-      const attendanceMap = new Map()
-      student.attendance.forEach(record => {
-        attendanceMap.set(record.date, record)
-      })
-
-      // Create attendance array for all dates
-      const attendance = allDates.map(date => {
-        const record = attendanceMap.get(date)
-        if (record) {
-          return {
-            date: record.date,
-            status: record.status,
-            time: record.time || null,
-            discipline: record.discipline || null,
-            attendanceId: record.attendanceId || null,
-            schedule: record.schedule || 'N/A' // Add schedule field
-          }
-        } else {
-          return {
-            date: date,
-            status: 'Absent',
-            time: null,
-            discipline: null,
-            attendanceId: null,
-            schedule: 'N/A'
-          }
-        }
-      })
-
       return {
         id: student.id || student.studentId,
         name: student.name,
@@ -203,13 +73,13 @@ const TeacherCourseReport_Page = () => {
         presentCount: student.presentCount || 0,
         absentCount: student.absentCount || 0,
         percentage: student.percentage || 0,
-        attendance: attendance
+        attendance: student.attendance || [] // Keep full attendance for details modal
       }
     })
 
     // Calculate summary statistics
     const totalStudents = processedStudents.length
-    const totalDays = allDates.length
+    const totalDays = apiData.summary?.totalDays || 0
     const averageAttendance = totalStudents > 0
       ? (processedStudents.reduce((sum, s) => sum + s.percentage, 0) / totalStudents).toFixed(1)
       : 0
@@ -238,8 +108,7 @@ const TeacherCourseReport_Page = () => {
         studentsAbove75,
         studentsBelow75,
         studentsBelow50,
-        studentsBelow25,
-        dates: allDates
+        studentsBelow25
       },
       students: processedStudents
     }
@@ -289,6 +158,25 @@ const TeacherCourseReport_Page = () => {
     })
   }
 
+  // Handle viewing student attendance details
+  const handleViewStudentDetails = (student) => {
+    setSelectedStudent(student)
+    
+    // Format attendance records for display
+    const attendanceDetails = student.attendance.map(record => ({
+      date: record.date,
+      status: record.status,
+      time: record.time || '--',
+      discipline: record.discipline || '--'
+    }))
+    
+    // Sort by date (most recent first)
+    attendanceDetails.sort((a, b) => new Date(b.date) - new Date(a.date))
+    
+    setStudentAttendanceDetails(attendanceDetails)
+    setShowStudentModal(true)
+  }
+
   const handleExportCSV = () => {
     if (!processedData?.students || processedData.students.length === 0) {
       toast.error('No data to export')
@@ -302,8 +190,8 @@ const TeacherCourseReport_Page = () => {
     csvContent += `"Period: ${dateRange.fromDate} to ${dateRange.toDate}"\n`
     csvContent += `"Total Students: ${summary.totalStudents}", "Total Days: ${summary.totalDays}"\n\n`
 
-    // Add headers - Simplified to just show summary stats per student
-    csvContent += "Student Name,Roll No.,Present Days,Absent Days,Percentage\n"
+    // Add headers (simplified - removed individual dates)
+    csvContent += "Student Name,Roll No.,Present Count,Absent Count,Percentage\n"
 
     // Add student data
     students.forEach(student => {
@@ -345,43 +233,15 @@ const TeacherCourseReport_Page = () => {
     })
   }
 
-  // Handle view student details
-  const handleViewStudentDetails = (student) => {
-    // Get detailed attendance records with schedule info
-    const detailedAttendance = student.attendance.map(record => {
-      // Extract schedule info - in a real scenario, you'd get this from the API
-      // For now, we'll create a mock schedule based on the day
-      const date = new Date(record.date);
-      const day = date.toLocaleDateString('en-US', { weekday: 'long' });
-
-      return {
-        date: record.date,
-        day: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        time: record.time || '--',
-        status: record.status,
-        schedule: record.schedule || getScheduleForDay(day) // Fallback
-      };
-    });
-
-    setSelectedStudentDetail({
-      ...student,
-      detailedAttendance: sortModalRecords(detailedAttendance)
-    });
-    setShowStudentDetailModal(true);
-  };
-
-  // Helper to get schedule for a day (fallback)
-  const getScheduleForDay = (day) => {
-    // This is a fallback - in production, you'd get this from the API
-    const schedules = {
-      'Monday': '09:00 - 10:30',
-      'Tuesday': '09:00 - 10:30',
-      'Wednesday': '09:00 - 10:30',
-      'Thursday': '09:00 - 10:30',
-      'Friday': '09:00 - 10:30'
-    };
-    return schedules[day] || 'Schedule not available';
-  };
+  // Format date for modal display
+  const formatModalDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
 
   if (subjectsLoading) {
     return (
@@ -517,7 +377,7 @@ const TeacherCourseReport_Page = () => {
           </div>
         )}
 
-        {/* Report Display - Updated with simplified table */}
+        {/* Report Display */}
         {showReport && processedData && processedData.students && processedData.students.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             {/* Report Header */}
@@ -544,70 +404,76 @@ const TeacherCourseReport_Page = () => {
               </div>
             </div>
 
-            {/* Report Table - Simplified */}
-            <div className="overflow-x-auto max-w-full relative" style={{ maxHeight: '500px' }}>
-              <div className="inline-block min-w-full align-middle">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50 sticky top-0 z-20">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50 z-30 min-w-[180px] border-r border-gray-200">
-                        Student Name
-                      </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-[180px] bg-gray-50 z-30 min-w-[120px] border-r border-gray-200">
-                        Roll No.
-                      </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[120px] bg-gray-50">
-                        Days Present
-                      </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[120px] bg-gray-50">
-                        Days Absent
-                      </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[100px] bg-gray-50">
-                        Percentage
-                      </th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase min-w-[80px] bg-gray-50">
-                        Actions
-                      </th>
+            {/* Report Table - Simplified without individual dates */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Student Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Roll No.
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Attendance Marked Days
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Present
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Absent
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      %
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {processedData.students.map((student) => (
+                    <tr key={student.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {student.name}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                        {student.rollNo}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <span className="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium bg-blue-100 text-blue-700">
+                          {student.presentCount} / {processedData.summary?.totalDays} days
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium text-green-600">
+                        {student.presentCount}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium text-red-600">
+                        {student.absentCount}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                          ${student.percentage >= 75 ? 'bg-green-100 text-green-700' :
+                            student.percentage >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'}`}
+                        >
+                          {student.percentage}%
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <button
+                          onClick={() => handleViewStudentDetails(student)}
+                          className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                          title="View Attendance Details"
+                        >
+                          <FiEye className="h-4 w-4" />
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {processedData.students.map((student) => (
-                      <tr key={student.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r border-gray-200">
-                          {student.name}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600 sticky left-[180px] bg-white z-10 border-r border-gray-200">
-                          {student.rollNo}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
-                          {student.presentCount}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-red-600">
-                          {student.absentCount}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                            ${student.percentage >= 75 ? 'bg-green-100 text-green-700' :
-                              student.percentage >= 50 ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-red-100 text-red-700'}`}
-                          >
-                            {student.percentage}%
-                          </span>
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center">
-                          <button
-                            onClick={() => handleViewStudentDetails(student)}
-                            className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
-                            title="View Detailed Attendance"
-                          >
-                            <FiEye className="h-4 w-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
             {/* Summary Footer */}
@@ -633,147 +499,6 @@ const TeacherCourseReport_Page = () => {
                   <span className="text-gray-500">Students &lt;25%</span>
                   <p className="font-medium text-red-600">{processedData.summary?.studentsBelow25}</p>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Student Detail Modal */}
-        {showStudentDetailModal && selectedStudentDetail && (
-          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-              {/* Modal Header */}
-              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    {selectedStudentDetail.name} - Detailed Attendance
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Roll No: {selectedStudentDetail.rollNo} •
-                    Present: {selectedStudentDetail.presentCount} •
-                    Absent: {selectedStudentDetail.absentCount} •
-                    Percentage: {selectedStudentDetail.percentage}%
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowStudentDetailModal(false)}
-                  className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <FiX className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Modal Body - Attendance Records Table */}
-              <div className="p-6 max-h-[60vh] overflow-y-auto">
-                <h4 className="text-md font-semibold text-gray-800 mb-4">All Attendance Records</h4>
-
-                {selectedStudentDetail.detailedAttendance.length > 0 ? (
-                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th
-                              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                              onClick={() => handleModalSort('date')}
-                            >
-                              <div className="flex items-center space-x-1">
-                                <FiCalendar className="w-3 h-3" />
-                                <span>Date</span>
-                                {getModalSortIcon('date')}
-                              </div>
-                            </th>
-                            <th
-                              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                              onClick={() => handleModalSort('day')}
-                            >
-                              <div className="flex items-center space-x-1">
-                                <span>Day</span>
-                                {getModalSortIcon('day')}
-                              </div>
-                            </th>
-                            <th
-                              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                              onClick={() => handleModalSort('schedule')}
-                            >
-                              <div className="flex items-center space-x-1">
-                                <FiClock className="w-3 h-3" />
-                                <span>Class Schedule</span>
-                                {getModalSortIcon('schedule')}
-                              </div>
-                            </th>
-                            <th
-                              className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                              onClick={() => handleModalSort('time')}
-                            >
-                              <div className="flex items-center space-x-1 justify-center">
-                                <FiClock className="w-3 h-3" />
-                                <span>Marked Time</span>
-                                {getModalSortIcon('time')}
-                              </div>
-                            </th>
-                            <th
-                              className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                              onClick={() => handleModalSort('status')}
-                            >
-                              <div className="flex items-center space-x-1 justify-center">
-                                <span>Status</span>
-                                {getModalSortIcon('status')}
-                              </div>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {selectedStudentDetail.detailedAttendance.map((record, index) => (
-                            <tr key={index} className="hover:bg-gray-50">
-                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                {formatDisplayDate(record.date)}
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                                {record.day}
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                                {record.schedule}
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
-                                {record.time && record.time !== '--' ? (
-                                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
-                                    {record.time}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">--</span>
-                                )}
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.status === 'Present'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-red-100 text-red-800'
-                                  }`}>
-                                  {record.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                    <FiCalendar className="mx-auto h-12 w-12 text-gray-400" />
-                    <p className="mt-2 text-sm text-gray-600">No attendance records found</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Modal Footer */}
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-                <button
-                  onClick={() => setShowStudentDetailModal(false)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
-                >
-                  Close
-                </button>
               </div>
             </div>
           </div>
@@ -814,6 +539,79 @@ const TeacherCourseReport_Page = () => {
           </div>
         )}
       </div>
+
+      {/* Student Attendance Details Modal */}
+      {showStudentModal && selectedStudent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {selectedStudent.name} - Attendance Details
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Roll No: {selectedStudent.rollNo} • Attendance: {selectedStudent.presentCount} Present, {selectedStudent.absentCount} Absent • {selectedStudent.percentage}%
+                </p>
+              </div>
+              <button
+                onClick={() => setShowStudentModal(false)}
+                className="p-1 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                <FiX className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Modal Body - Attendance Records */}
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
+              {studentAttendanceDetails.length > 0 ? (
+                <div className="space-y-3">
+                  {studentAttendanceDetails.map((record, index) => (
+                    <div
+                      key={index}
+                      className={`border rounded-lg p-4 ${record.status === 'Present' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-2 h-2 rounded-full ${record.status === 'Present' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                          <span className="font-medium text-gray-900">{formatModalDate(record.date)}</span>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${record.status === 'Present' ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700'}`}>
+                          {record.status}
+                        </span>
+                      </div>
+                      <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center text-gray-600">
+                          <FiClock className="h-4 w-4 mr-2 text-gray-400" />
+                          Time: {record.time}
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <FiCalendar className="h-4 w-4 mr-2 text-gray-400" />
+                          Discipline: {record.discipline}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No attendance records found for this student
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => setShowStudentModal(false)}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
