@@ -1221,8 +1221,8 @@ const TeacherAttendance_Page = () => {
           <div className="bg-white rounded-lg w-full max-w-2xl shadow-xl">
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Select Course & Schedule</h3>
-              <p className="text-sm text-gray-500 mt-1">Choose a subject and its class schedule</p>
+              <h3 className="text-lg font-semibold text-gray-800">Select Course & Schedule</h3>
+              <p className="text-xs text-gray-500 mt-1">Choose a subject and its class schedule</p>
             </div>
 
             {/* Form Content */}
@@ -1268,8 +1268,8 @@ const TeacherAttendance_Page = () => {
                     }}
                     disabled={!selectedSubject}
                     className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${!selectedSubject
-                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                        : 'bg-white border-gray-300'
+                      ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-white border-gray-300'
                       }`}
                   >
                     <option value="">Choose a schedule</option>
@@ -1299,8 +1299,8 @@ const TeacherAttendance_Page = () => {
                     }}
                     disabled={!selectedSubject || !selectedSchedule}
                     className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${selectedSubject && selectedSchedule
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                   >
                     View Attendance
