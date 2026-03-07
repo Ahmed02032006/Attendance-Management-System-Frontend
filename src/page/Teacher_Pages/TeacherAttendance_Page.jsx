@@ -758,20 +758,31 @@ const TeacherAttendance_Page = () => {
 
     Object.entries(subject.attendance).forEach(([date, schedules]) => {
       Object.entries(schedules).forEach(([scheduleId, scheduleData]) => {
+        // Find if student has a record for this date/schedule
         const studentRecord = scheduleData.students.find(record =>
           record.rollNo === student.rollNo
         );
 
-        if (studentRecord && studentRecord.id) { // Only include present records
-          const schedule = subject.classSchedule.find(s => s._id === scheduleId);
-          allAttendance.push({
-            ...studentRecord,
-            date: date,
-            day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
-            schedule: schedule ? `${schedule.day} ${schedule.startTime}-${schedule.endTime}` : 'Unknown Schedule',
-            scheduleId: scheduleId
-          });
-        }
+        // Get schedule details
+        const schedule = subject.classSchedule.find(s => s._id === scheduleId);
+        const scheduleDisplay = schedule ?
+          `${schedule.day} ${schedule.startTime}-${schedule.endTime}${schedule.room ? ` (${schedule.room})` : ''}` :
+          'Unknown Schedule';
+
+        // Always add a record - if studentRecord exists they're present, otherwise they're absent
+        allAttendance.push({
+          ...(studentRecord || {}), // Spread if exists, otherwise empty
+          date: date,
+          day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
+          time: studentRecord?.time || '--', // Show -- if absent
+          schedule: scheduleDisplay,
+          scheduleId: scheduleId,
+          title: subject?.title || 'Unknown Subject',
+          discipline: studentRecord?.discipline || student?.discipline || 'N/A',
+          studentName: student?.studentName,
+          rollNo: student?.rollNo,
+          status: studentRecord ? 'Present' : 'Absent' // Add status field
+        });
       });
     });
 
@@ -1612,13 +1623,13 @@ const TeacherAttendance_Page = () => {
       {/* Student Details Modal - UPDATED with sorting and date field */}
       {showStudentModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">
                 {selectedStudent?.studentName} - Attendance Details
               </h3>
               <p className="text-sm text-gray-600 mt-1">
-                Roll No: {selectedStudent?.rollNo}
+                Roll No: {selectedStudent?.rollNo} | Discipline: {selectedStudent?.discipline}
               </p>
             </div>
 
@@ -1643,7 +1654,7 @@ const TeacherAttendance_Page = () => {
                   </div>
 
                   <div>
-                    <h4 className="text-md font-semibold text-gray-800 mb-4">Previous Attendance Records</h4>
+                    <h4 className="text-md font-semibold text-gray-800 mb-4">All Attendance Records</h4>
 
                     {getStudentPreviousAttendance(selectedStudent).length > 0 ? (
                       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -1671,6 +1682,16 @@ const TeacherAttendance_Page = () => {
                                   </div>
                                 </th>
                                 <th
+                                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  onClick={() => handleModalSort('schedule')}
+                                >
+                                  <div className="flex items-center space-x-1">
+                                    <FiClock className="w-3 h-3" />
+                                    <span>Schedule</span>
+                                    {getModalSortIcon('schedule')}
+                                  </div>
+                                </th>
+                                <th
                                   className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                   onClick={() => handleModalSort('time')}
                                 >
@@ -1681,27 +1702,7 @@ const TeacherAttendance_Page = () => {
                                   </div>
                                 </th>
                                 <th
-                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                  onClick={() => handleModalSort('title')}
-                                >
-                                  <div className="flex items-center space-x-1 justify-center">
-                                    <FiBookOpen className="w-3 h-3" />
-                                    <span>Course</span>
-                                    {getModalSortIcon('title')}
-                                  </div>
-                                </th>
-                                <th
-                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                  onClick={() => handleModalSort('discipline')}
-                                >
-                                  <div className="flex items-center space-x-1 justify-center">
-                                    <FiBookOpen className="w-3 h-3" />
-                                    <span>Discipline</span>
-                                    {getModalSortIcon('discipline')}
-                                  </div>
-                                </th>
-                                <th
-                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                   <div className="flex items-center space-x-1 justify-center">
                                     <span>Status</span>
@@ -1711,26 +1712,31 @@ const TeacherAttendance_Page = () => {
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                               {getStudentPreviousAttendance(selectedStudent).map((record, index) => (
-                                <tr key={index} className="hover:bg-gray-50">
+                                <tr key={`${record.date}-${record.scheduleId}`} className="hover:bg-gray-50">
                                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                                     {formatDisplayDate(new Date(record.date))}
                                   </td>
                                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                                     {new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' })}
                                   </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
-                                    {record.time || 'N/A'}
+                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                                    {record.schedule}
                                   </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
-                                    {record.title}
-                                  </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center">
-                                    {record.discipline || 'N/A'}
+                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
+                                    {record.time && record.time !== '--' ? (
+                                      <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
+                                        {record.time}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-400">--</span>
+                                    )}
                                   </td>
                                   <td className="px-4 py-3 whitespace-nowrap text-center">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.time ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.status === 'Present'
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-red-100 text-red-800'
                                       }`}>
-                                      {record.time ? 'Present' : 'Absent'}
+                                      {record.status}
                                     </span>
                                   </td>
                                 </tr>
@@ -1744,7 +1750,7 @@ const TeacherAttendance_Page = () => {
                         <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <p className="mt-2 text-sm text-gray-600">No previous attendance records found</p>
+                        <p className="mt-2 text-sm text-gray-600">No attendance records found</p>
                       </div>
                     )}
                   </div>
