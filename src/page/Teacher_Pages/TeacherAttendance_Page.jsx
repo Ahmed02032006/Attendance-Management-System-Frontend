@@ -769,19 +769,21 @@ const TeacherAttendance_Page = () => {
           `${schedule.day} ${schedule.startTime}-${schedule.endTime}${schedule.room ? ` (${schedule.room})` : ''}` :
           'Unknown Schedule';
 
-        // Always add a record - if studentRecord exists they're present, otherwise they're absent
+        // Determine status based on whether studentRecord exists
+        const isPresent = !!studentRecord;
+
         allAttendance.push({
           ...(studentRecord || {}), // Spread if exists, otherwise empty
           date: date,
           day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
-          time: studentRecord?.time || '--', // Show -- if absent
+          time: isPresent ? studentRecord.time : '--', // Show -- if absent
           schedule: scheduleDisplay,
           scheduleId: scheduleId,
           title: subject?.title || 'Unknown Subject',
           discipline: studentRecord?.discipline || student?.discipline || 'N/A',
           studentName: student?.studentName,
           rollNo: student?.rollNo,
-          status: studentRecord ? 'Present' : 'Absent' // Add status field
+          status: isPresent ? 'Present' : 'Absent' // Set status based on presence
         });
       });
     });
@@ -1733,8 +1735,8 @@ const TeacherAttendance_Page = () => {
                                   </td>
                                   <td className="px-4 py-3 whitespace-nowrap text-center">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.status === 'Present'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
+                                      ? 'bg-green-100 text-green-800'
+                                      : 'bg-red-100 text-red-800'
                                       }`}>
                                       {record.status}
                                     </span>
