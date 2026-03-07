@@ -460,7 +460,7 @@ const TeacherCourseReport_Page = () => {
                   className="px-3 py-1.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center"
                 >
                   <FiDownload className="h-3 w-3 mr-1" />
-                  Export CSV
+                  Export To Excel
                 </button>
               </div>
             </div>
