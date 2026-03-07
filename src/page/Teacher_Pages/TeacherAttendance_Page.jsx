@@ -1218,7 +1218,7 @@ const TeacherAttendance_Page = () => {
       {/* Subject Selection Modal - Two Dropdown Design */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-2xl shadow-xl">
+          <div className="bg-white rounded-lg w-full max-w-3xl shadow-xl">
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">Select Course & Schedule</h3>
