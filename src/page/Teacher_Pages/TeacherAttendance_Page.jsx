@@ -1017,7 +1017,7 @@ const TeacherAttendance_Page = () => {
                         onClick={() => handleModalSort('schedule')}>
                         <div className="flex items-center space-x-1">
                           <FiClock className="w-3 h-3" />
-                          <span>Schedule</span>
+                          <span>Class Schedule</span>
                           {getModalSortIcon('schedule')}
                         </div>
                       </th>
@@ -1689,7 +1689,7 @@ const TeacherAttendance_Page = () => {
                                 >
                                   <div className="flex items-center space-x-1">
                                     <FiClock className="w-3 h-3" />
-                                    <span>Schedule</span>
+                                    <span>Class Schedule</span>
                                     {getModalSortIcon('schedule')}
                                   </div>
                                 </th>
