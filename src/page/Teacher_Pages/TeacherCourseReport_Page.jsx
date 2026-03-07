@@ -411,7 +411,7 @@ const TeacherCourseReport_Page = () => {
             {/* Report Table with Scrollbar */}
             <div className="overflow-x-auto">
               <div 
-                className="overflow-y-auto border border-gray-200 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+                className="overflow-y-auto border border-gray-200 hide-scrollbar"
                 style={{ maxHeight: '300px' }}
               >
                 <table className="min-w-full divide-y divide-gray-200">
