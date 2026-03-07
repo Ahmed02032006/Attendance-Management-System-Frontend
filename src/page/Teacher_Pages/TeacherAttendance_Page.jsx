@@ -1218,33 +1218,18 @@ const TeacherAttendance_Page = () => {
       {/* Subject Selection Modal - Two Dropdown Design */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-2xl shadow-xl relative">
-            {/* Cancel Button - Top Left */}
-            <button
-              onClick={() => {
-                setShowSubjectModal(false);
-                setSelectedSubject('');
-                setSelectedSchedule(null);
-              }}
-              className="absolute top-4 left-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Close"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            {/* Header - Adjusted padding for cancel button */}
-            <div className="px-6 py-4 border-b border-gray-200 text-center">
+          <div className="bg-white rounded-lg w-full max-w-2xl shadow-xl">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Select Course & Schedule</h3>
               <p className="text-sm text-gray-500 mt-1">Choose a subject and its class schedule</p>
             </div>
 
             {/* Form Content */}
             <div className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 {/* Subject Dropdown */}
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Subject <span className="text-red-500">*</span>
                   </label>
@@ -1266,8 +1251,8 @@ const TeacherAttendance_Page = () => {
                   </select>
                 </div>
 
-                {/* Schedule Dropdown */}
-                <div className="flex-1">
+                {/* Schedule Dropdown - Always visible but disabled until subject selected */}
+                <div className="flex-1 w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Schedule <span className="text-red-500">*</span>
                   </label>
@@ -1282,14 +1267,12 @@ const TeacherAttendance_Page = () => {
                       }
                     }}
                     disabled={!selectedSubject}
-                    className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white ${!selectedSubject
-                        ? 'bg-gray-100 cursor-not-allowed border-gray-200 text-gray-500'
-                        : 'border-gray-300'
+                    className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${!selectedSubject
+                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-white border-gray-300'
                       }`}
                   >
-                    <option value="">
-                      {!selectedSubject ? 'First select a subject' : 'Choose a schedule'}
-                    </option>
+                    <option value="">Choose a schedule</option>
                     {selectedSubject && subjectsWithAttendance
                       .find(s => s.id === selectedSubject)
                       ?.classSchedule?.map((schedule, index) => (
@@ -1299,6 +1282,29 @@ const TeacherAttendance_Page = () => {
                         </option>
                       ))}
                   </select>
+                </div>
+
+                {/* View Attendance Button */}
+                <div className="flex-shrink-0 mt-2 sm:mt-0">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 opacity-0 sm:invisible">
+                    Action
+                  </label>
+                  <button
+                    onClick={() => {
+                      if (selectedSubject && selectedSchedule) {
+                        handleSubjectSelect(selectedSubject, selectedSchedule);
+                      } else {
+                        toast.error('Please select both subject and schedule');
+                      }
+                    }}
+                    disabled={!selectedSubject || !selectedSchedule}
+                    className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${selectedSubject && selectedSchedule
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                  >
+                    View Attendance
+                  </button>
                 </div>
               </div>
 
@@ -1318,23 +1324,17 @@ const TeacherAttendance_Page = () => {
                 )}
             </div>
 
-            {/* Footer with View Attendance Button */}
+            {/* Footer with Cancel Button Only */}
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end">
               <button
                 onClick={() => {
-                  if (selectedSubject && selectedSchedule) {
-                    handleSubjectSelect(selectedSubject, selectedSchedule);
-                  } else {
-                    toast.error('Please select both subject and schedule');
-                  }
+                  setShowSubjectModal(false);
+                  setSelectedSubject('');
+                  setSelectedSchedule(null);
                 }}
-                disabled={!selectedSubject || !selectedSchedule}
-                className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-colors ${selectedSubject && selectedSchedule
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 font-medium hover:bg-gray-200 rounded-lg transition-colors"
               >
-                View Attendance
+                Cancel
               </button>
             </div>
           </div>
