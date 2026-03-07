@@ -769,22 +769,33 @@ const TeacherAttendance_Page = () => {
           `${schedule.day} ${schedule.startTime}-${schedule.endTime}${schedule.room ? ` (${schedule.room})` : ''}` :
           'Unknown Schedule';
 
-        // Determine status based on whether studentRecord exists
-        const isPresent = !!studentRecord;
-
-        allAttendance.push({
-          ...(studentRecord || {}), // Spread if exists, otherwise empty
+        // Create a clean record object
+        const record = {
           date: date,
           day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
-          time: isPresent ? studentRecord.time : '--', // Show -- if absent
           schedule: scheduleDisplay,
           scheduleId: scheduleId,
           title: subject?.title || 'Unknown Subject',
-          discipline: studentRecord?.discipline || student?.discipline || 'N/A',
           studentName: student?.studentName,
           rollNo: student?.rollNo,
-          status: isPresent ? 'Present' : 'Absent' // Set status based on presence
-        });
+        };
+
+        if (studentRecord) {
+          // Student is present - use their record data
+          record.time = studentRecord.time;
+          record.discipline = studentRecord.discipline || student?.discipline || 'N/A';
+          record.status = 'Present';
+          // Include any other fields from studentRecord if needed
+          record.id = studentRecord.id;
+          record.ipAddress = studentRecord.ipAddress;
+        } else {
+          // Student is absent
+          record.time = '--';
+          record.discipline = student?.discipline || 'N/A';
+          record.status = 'Absent';
+        }
+
+        allAttendance.push(record);
       });
     });
 
