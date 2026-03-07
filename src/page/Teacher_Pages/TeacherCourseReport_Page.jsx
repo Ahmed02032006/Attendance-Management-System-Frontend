@@ -8,14 +8,147 @@ import {
   FiUsers,
   FiAlertCircle,
   FiBarChart2,
-  FiEye,
-  FiClock,
-  FiCalendar,
-  FiX
+  FiEye
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer.js'
 import { getSubjectsByUser } from '../../store/Teacher-Slicer/Subject-Slicer.js'
+
+// Student Attendance Modal Component
+const StudentAttendanceModal = ({ isOpen, onClose, student, subjectDetails, dateRange }) => {
+  if (!isOpen || !student) return null;
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const formatTime = (timeString) => {
+    if (!timeString) return 'N/A';
+    try {
+      return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch {
+      return timeString;
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        {/* Modal Header */}
+        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Student Attendance Details</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                {student.name} (Roll No: {student.rollNo})
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {subjectDetails?.title} ({subjectDetails?.code}) • {formatDate(dateRange?.fromDate)} to {formatDate(dateRange?.toDate)}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Modal Body - Attendance Records */}
+        <div className="px-6 py-4 overflow-y-auto max-h-[60vh]">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+            <div className="bg-blue-50 rounded-lg p-3 text-center">
+              <p className="text-xs text-blue-600 font-medium">Total Days</p>
+              <p className="text-xl font-bold text-blue-700">{student.attendance?.length || 0}</p>
+            </div>
+            <div className="bg-green-50 rounded-lg p-3 text-center">
+              <p className="text-xs text-green-600 font-medium">Present</p>
+              <p className="text-xl font-bold text-green-700">{student.presentCount || 0}</p>
+            </div>
+            <div className="bg-red-50 rounded-lg p-3 text-center">
+              <p className="text-xs text-red-600 font-medium">Absent</p>
+              <p className="text-xl font-bold text-red-700">{student.absentCount || 0}</p>
+            </div>
+            <div className="bg-purple-50 rounded-lg p-3 text-center">
+              <p className="text-xs text-purple-600 font-medium">Attendance %</p>
+              <p className="text-xl font-bold text-purple-700">{student.percentage || 0}%</p>
+            </div>
+          </div>
+
+          {/* Attendance Table */}
+          <h4 className="text-sm font-medium text-gray-700 mb-3">Attendance Records by Date</h4>
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discipline</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {student.attendance && student.attendance.length > 0 ? (
+                  student.attendance.map((record, index) => (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                        {formatDate(record.date)}
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                          ${record.status === 'Present' 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-red-100 text-red-700'}`}
+                        >
+                          {record.status === 'Present' ? 'Present' : 'Absent'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
+                        {record.status === 'Present' ? formatTime(record.time) : '-'}
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
+                        {record.discipline || '-'}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">
+                      No attendance records found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const TeacherCourseReport_Page = () => {
   const dispatch = useDispatch()
@@ -34,10 +167,9 @@ const TeacherCourseReport_Page = () => {
   const [showReport, setShowReport] = useState(false)
   const [processedData, setProcessedData] = useState(null)
   
-  // Student details modal state
-  const [showStudentModal, setShowStudentModal] = useState(false)
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
-  const [studentAttendanceDetails, setStudentAttendanceDetails] = useState([])
 
   // Fetch subjects when component mounts
   useEffect(() => {
@@ -64,8 +196,47 @@ const TeacherCourseReport_Page = () => {
   const processReportData = (apiData) => {
     if (!apiData || !apiData.students) return null
 
+    // Get all unique dates from all students' attendance
+    const allDates = []
+    apiData.students.forEach(student => {
+      student.attendance.forEach(record => {
+        if (!allDates.includes(record.date)) {
+          allDates.push(record.date)
+        }
+      })
+    })
+    allDates.sort() // Sort dates chronologically
+
     // Process each student
     const processedStudents = apiData.students.map(student => {
+      // Create a map of attendance by date for quick lookup
+      const attendanceMap = new Map()
+      student.attendance.forEach(record => {
+        attendanceMap.set(record.date, record)
+      })
+
+      // Create attendance array for all dates
+      const attendance = allDates.map(date => {
+        const record = attendanceMap.get(date)
+        if (record) {
+          return {
+            date: record.date,
+            status: record.status,
+            time: record.time || null,
+            discipline: record.discipline || null,
+            attendanceId: record.attendanceId || null
+          }
+        } else {
+          return {
+            date: date,
+            status: 'Absent',
+            time: null,
+            discipline: null,
+            attendanceId: null
+          }
+        }
+      })
+
       return {
         id: student.id || student.studentId,
         name: student.name,
@@ -73,13 +244,13 @@ const TeacherCourseReport_Page = () => {
         presentCount: student.presentCount || 0,
         absentCount: student.absentCount || 0,
         percentage: student.percentage || 0,
-        attendance: student.attendance || [] // Keep full attendance for details modal
+        attendance: attendance
       }
     })
 
     // Calculate summary statistics
     const totalStudents = processedStudents.length
-    const totalDays = apiData.summary?.totalDays || 0
+    const totalDays = allDates.length
     const averageAttendance = totalStudents > 0
       ? (processedStudents.reduce((sum, s) => sum + s.percentage, 0) / totalStudents).toFixed(1)
       : 0
@@ -108,7 +279,8 @@ const TeacherCourseReport_Page = () => {
         studentsAbove75,
         studentsBelow75,
         studentsBelow50,
-        studentsBelow25
+        studentsBelow25,
+        dates: allDates
       },
       students: processedStudents
     }
@@ -158,25 +330,6 @@ const TeacherCourseReport_Page = () => {
     })
   }
 
-  // Handle viewing student attendance details
-  const handleViewStudentDetails = (student) => {
-    setSelectedStudent(student)
-    
-    // Format attendance records for display
-    const attendanceDetails = student.attendance.map(record => ({
-      date: record.date,
-      status: record.status,
-      time: record.time || '--',
-      discipline: record.discipline || '--'
-    }))
-    
-    // Sort by date (most recent first)
-    attendanceDetails.sort((a, b) => new Date(b.date) - new Date(a.date))
-    
-    setStudentAttendanceDetails(attendanceDetails)
-    setShowStudentModal(true)
-  }
-
   const handleExportCSV = () => {
     if (!processedData?.students || processedData.students.length === 0) {
       toast.error('No data to export')
@@ -190,8 +343,8 @@ const TeacherCourseReport_Page = () => {
     csvContent += `"Period: ${dateRange.fromDate} to ${dateRange.toDate}"\n`
     csvContent += `"Total Students: ${summary.totalStudents}", "Total Days: ${summary.totalDays}"\n\n`
 
-    // Add headers (simplified - removed individual dates)
-    csvContent += "Student Name,Roll No.,Present Count,Absent Count,Percentage\n"
+    // Add headers (without individual date columns)
+    csvContent += "Student Name,Roll No.,Present Count,Absent Count,Percentage,Marked Attendance Days\n"
 
     // Add student data
     students.forEach(student => {
@@ -200,7 +353,8 @@ const TeacherCourseReport_Page = () => {
         student.rollNo,
         student.presentCount,
         student.absentCount,
-        student.percentage + '%'
+        student.percentage + '%',
+        student.attendance.length
       ]
       csvContent += row.join(",") + "\n"
     })
@@ -223,6 +377,12 @@ const TeacherCourseReport_Page = () => {
     toast.success('Report exported successfully')
   }
 
+  // Handle view student details
+  const handleViewStudent = (student) => {
+    setSelectedStudent(student)
+    setIsModalOpen(true)
+  }
+
   // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return ''
@@ -230,16 +390,6 @@ const TeacherCourseReport_Page = () => {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
-    })
-  }
-
-  // Format date for modal display
-  const formatModalDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
     })
   }
 
@@ -266,6 +416,18 @@ const TeacherCourseReport_Page = () => {
         heading="Attendance Report"
         subHeading="Generate attendance reports for specific date ranges"
         role='admin'
+      />
+
+      {/* Student Attendance Modal */}
+      <StudentAttendanceModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedStudent(null)
+        }}
+        student={selectedStudent}
+        subjectDetails={processedData?.subjectDetails}
+        dateRange={processedData?.dateRange}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -404,7 +566,7 @@ const TeacherCourseReport_Page = () => {
               </div>
             </div>
 
-            {/* Report Table - Simplified without individual dates */}
+            {/* Report Table - Updated Columns */}
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -416,9 +578,6 @@ const TeacherCourseReport_Page = () => {
                       Roll No.
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Attendance Marked Days
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Present
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -426,6 +585,9 @@ const TeacherCourseReport_Page = () => {
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       %
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Marked Days
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -440,11 +602,6 @@ const TeacherCourseReport_Page = () => {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                         {student.rollNo}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <span className="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium bg-blue-100 text-blue-700">
-                          {student.presentCount} / {processedData.summary?.totalDays} days
-                        </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium text-green-600">
                         {student.presentCount}
@@ -461,13 +618,16 @@ const TeacherCourseReport_Page = () => {
                           {student.percentage}%
                         </span>
                       </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">
+                        {student.attendance?.length || 0}
+                      </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <button
-                          onClick={() => handleViewStudentDetails(student)}
-                          className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                          onClick={() => handleViewStudent(student)}
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
                           title="View Attendance Details"
                         >
-                          <FiEye className="h-4 w-4" />
+                          <FiEye className="h-5 w-5" />
                         </button>
                       </td>
                     </tr>
@@ -539,79 +699,6 @@ const TeacherCourseReport_Page = () => {
           </div>
         )}
       </div>
-
-      {/* Student Attendance Details Modal */}
-      {showStudentModal && selectedStudent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
-            {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {selectedStudent.name} - Attendance Details
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Roll No: {selectedStudent.rollNo} • Attendance: {selectedStudent.presentCount} Present, {selectedStudent.absentCount} Absent • {selectedStudent.percentage}%
-                </p>
-              </div>
-              <button
-                onClick={() => setShowStudentModal(false)}
-                className="p-1 hover:bg-gray-200 rounded-md transition-colors"
-              >
-                <FiX className="h-5 w-5 text-gray-500" />
-              </button>
-            </div>
-
-            {/* Modal Body - Attendance Records */}
-            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
-              {studentAttendanceDetails.length > 0 ? (
-                <div className="space-y-3">
-                  {studentAttendanceDetails.map((record, index) => (
-                    <div
-                      key={index}
-                      className={`border rounded-lg p-4 ${record.status === 'Present' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-2 h-2 rounded-full ${record.status === 'Present' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                          <span className="font-medium text-gray-900">{formatModalDate(record.date)}</span>
-                        </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${record.status === 'Present' ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700'}`}>
-                          {record.status}
-                        </span>
-                      </div>
-                      <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
-                        <div className="flex items-center text-gray-600">
-                          <FiClock className="h-4 w-4 mr-2 text-gray-400" />
-                          Time: {record.time}
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <FiCalendar className="h-4 w-4 mr-2 text-gray-400" />
-                          Discipline: {record.discipline}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  No attendance records found for this student
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-              <button
-                onClick={() => setShowStudentModal(false)}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
