@@ -412,7 +412,7 @@ const TeacherCourseReport_Page = () => {
             <div className="overflow-x-auto">
               <div 
                 className="overflow-y-auto border border-gray-200 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
-                style={{ maxHeight: '400px' }}
+                style={{ maxHeight: '300px' }}
               >
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
