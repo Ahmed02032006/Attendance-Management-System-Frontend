@@ -31,10 +31,6 @@ const TeacherCourseReport_Page = () => {
   const [showReport, setShowReport] = useState(false)
   const [processedData, setProcessedData] = useState(null)
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1)
-  const [studentsPerPage] = useState(5)
-
   // Fetch subjects when component mounts
   useEffect(() => {
     if (user?.id) {
@@ -55,11 +51,6 @@ const TeacherCourseReport_Page = () => {
     setToDate(today.toISOString().split('T')[0])
     setFromDate(thirtyDaysAgo.toISOString().split('T')[0])
   }, [])
-
-  // Reset pagination when new report is generated
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [processedData])
 
   // Process the API data into the format expected by the component
   const processReportData = (apiData) => {
@@ -256,17 +247,6 @@ const TeacherCourseReport_Page = () => {
     })
   }
 
-  // Pagination logic
-  const indexOfLastStudent = currentPage * studentsPerPage
-  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage
-  const currentStudents = processedData?.students?.slice(indexOfFirstStudent, indexOfLastStudent) || []
-  const totalPages = Math.ceil((processedData?.students?.length || 0) / studentsPerPage)
-
-  // Change page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber)
-  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages))
-  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1))
-
   if (subjectsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
@@ -428,11 +408,14 @@ const TeacherCourseReport_Page = () => {
               </div>
             </div>
 
-            {/* Report Table - Updated Columns with Fixed Height and Scroll */}
+            {/* Report Table with Scrollbar */}
             <div className="overflow-x-auto">
-              <div className="max-h-[400px] overflow-y-auto border border-gray-200">
+              <div 
+                className="overflow-y-auto border border-gray-200 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+                style={{ maxHeight: '400px' }}
+              >
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50 sticky top-0 z-10">
+                  <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
                         Student Name
@@ -455,8 +438,8 @@ const TeacherCourseReport_Page = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {currentStudents.map((student) => (
-                      <tr key={student.id} className="hover:bg-gray-50">
+                    {processedData.students.map((student, index) => (
+                      <tr key={student.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                           {student.name}
                         </td>
@@ -483,75 +466,15 @@ const TeacherCourseReport_Page = () => {
                         </td>
                       </tr>
                     ))}
-                    
-                    {/* Fill empty rows if needed */}
-                    {currentStudents.length < studentsPerPage && (
-                      Array.from({ length: studentsPerPage - currentStudents.length }).map((_, index) => (
-                        <tr key={`empty-${index}`} className="bg-gray-50">
-                          <td colSpan="6" className="px-4 py-3 text-center text-sm text-gray-400">
-                            &nbsp;
-                          </td>
-                        </tr>
-                      ))
-                    )}
                   </tbody>
                 </table>
               </div>
             </div>
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{indexOfFirstStudent + 1}</span> to{' '}
-                    <span className="font-medium">
-                      {Math.min(indexOfLastStudent, processedData.students.length)}
-                    </span>{' '}
-                    of <span className="font-medium">{processedData.students.length}</span> students
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={prevPage}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-1 text-sm font-medium rounded-md ${
-                        currentPage === 1
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                      }`}
-                    >
-                      Previous
-                    </button>
-                    <div className="flex space-x-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-                        <button
-                          key={number}
-                          onClick={() => paginate(number)}
-                          className={`px-3 py-1 text-sm font-medium rounded-md ${
-                            currentPage === number
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                          }`}
-                        >
-                          {number}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      onClick={nextPage}
-                      disabled={currentPage === totalPages}
-                      className={`px-3 py-1 text-sm font-medium rounded-md ${
-                        currentPage === totalPages
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                      }`}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Student Count Info */}
+            <div className="px-4 py-2 border-t border-gray-200 bg-gray-50 text-sm text-gray-600">
+              Showing all {processedData.students.length} students • Scroll to view more
+            </div>
 
             {/* Summary Footer */}
             <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
