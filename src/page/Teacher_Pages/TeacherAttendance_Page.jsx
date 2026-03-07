@@ -1736,11 +1736,11 @@ const TeacherAttendance_Page = () => {
                                   <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
                                     {record.time && record.time !== '--' ? (
                                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800`}>
-                                        {record.status}
+                                        Present
                                       </span>
                                     ) : (
                                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800`}>
-                                        {record.status}
+                                        Absent
                                       </span>
                                     )}
                                   </td>
