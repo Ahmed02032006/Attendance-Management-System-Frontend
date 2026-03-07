@@ -14,41 +14,6 @@ import { toast } from 'react-toastify'
 import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer.js'
 import { getSubjectsByUser } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
-// Student Attendance Modal Component
-const StudentAttendanceModal = ({ isOpen, onClose, student, subjectDetails, dateRange }) => {
-  if (!isOpen || !student) return null;
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const formatTime = (timeString) => {
-    if (!timeString) return 'N/A';
-    try {
-      return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
-    } catch {
-      return timeString;
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-        <h1>Modal</h1>
-      </div>
-    </div>
-  );
-};
-
 const TeacherCourseReport_Page = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
@@ -65,10 +30,6 @@ const TeacherCourseReport_Page = () => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showReport, setShowReport] = useState(false)
   const [processedData, setProcessedData] = useState(null)
-
-  // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedStudent, setSelectedStudent] = useState(null)
 
   // Fetch subjects when component mounts
   useEffect(() => {
@@ -276,12 +237,6 @@ const TeacherCourseReport_Page = () => {
     toast.success('Report exported successfully')
   }
 
-  // Handle view student details
-  const handleViewStudent = (student) => {
-    setSelectedStudent(student)
-    setIsModalOpen(true)
-  }
-
   // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return ''
@@ -315,18 +270,6 @@ const TeacherCourseReport_Page = () => {
         heading="Attendance Report"
         subHeading="Generate attendance reports for specific date ranges"
         role='admin'
-      />
-
-      {/* Student Attendance Modal */}
-      <StudentAttendanceModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          setSelectedStudent(null)
-        }}
-        student={selectedStudent}
-        subjectDetails={processedData?.subjectDetails}
-        dateRange={processedData?.dateRange}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -488,9 +431,6 @@ const TeacherCourseReport_Page = () => {
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       %
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -519,15 +459,6 @@ const TeacherCourseReport_Page = () => {
                         >
                           {student.percentage}%
                         </span>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <button
-                          onClick={() => handleViewStudent(student)}
-                          className="text-blue-600 hover:text-blue-800 transition-colors"
-                          title="View Attendance Details"
-                        >
-                          <FiEye className="h-5 w-5" />
-                        </button>
                       </td>
                     </tr>
                   ))}
