@@ -1218,7 +1218,7 @@ const TeacherAttendance_Page = () => {
       {/* Subject Selection Modal - Two Dropdown Design */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-md shadow-xl">
+          <div className="bg-white rounded-lg w-full max-w-2xl shadow-xl">
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Select Course & Schedule</h3>
@@ -1226,33 +1226,33 @@ const TeacherAttendance_Page = () => {
             </div>
 
             {/* Form Content */}
-            <div className="p-6 space-y-4">
-              {/* Subject Dropdown */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Subject <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={selectedSubject}
-                  onChange={(e) => {
-                    const subjectId = e.target.value;
-                    setSelectedSubject(subjectId);
-                    setSelectedSchedule(null); // Reset schedule when subject changes
-                  }}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                >
-                  <option value="">Choose a subject</option>
-                  {subjectsWithAttendance.map((subject) => (
-                    <option key={subject.id} value={subject.id}>
-                      {subject.title} ({subject.code})
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="p-6">
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* Subject Dropdown */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Subject <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={selectedSubject}
+                    onChange={(e) => {
+                      const subjectId = e.target.value;
+                      setSelectedSubject(subjectId);
+                      setSelectedSchedule(null); // Reset schedule when subject changes
+                    }}
+                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  >
+                    <option value="">Choose a subject</option>
+                    {subjectsWithAttendance.map((subject) => (
+                      <option key={subject.id} value={subject.id}>
+                        {subject.title} ({subject.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              {/* Schedule Dropdown - Only shown when subject is selected */}
-              {selectedSubject && (
-                <div>
+                {/* Schedule Dropdown */}
+                <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Schedule <span className="text-red-500">*</span>
                   </label>
@@ -1266,10 +1266,16 @@ const TeacherAttendance_Page = () => {
                         setSelectedSchedule(null);
                       }
                     }}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    disabled={!selectedSubject}
+                    className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white ${!selectedSubject
+                        ? 'bg-gray-100 cursor-not-allowed border-gray-200 text-gray-500'
+                        : 'border-gray-300'
+                      }`}
                   >
-                    <option value="">Choose a schedule</option>
-                    {subjectsWithAttendance
+                    <option value="">
+                      {!selectedSubject ? 'First select a subject' : 'Choose a schedule'}
+                    </option>
+                    {selectedSubject && subjectsWithAttendance
                       .find(s => s.id === selectedSubject)
                       ?.classSchedule?.map((schedule, index) => (
                         <option key={schedule._id || index} value={JSON.stringify(schedule)}>
@@ -1279,12 +1285,12 @@ const TeacherAttendance_Page = () => {
                       ))}
                   </select>
                 </div>
-              )}
+              </div>
 
               {/* No Schedule Warning */}
               {selectedSubject &&
                 subjectsWithAttendance.find(s => s.id === selectedSubject)?.classSchedule?.length === 0 && (
-                  <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -1319,8 +1325,8 @@ const TeacherAttendance_Page = () => {
                 }}
                 disabled={!selectedSubject || !selectedSchedule}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${selectedSubject && selectedSchedule
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 View Attendance
