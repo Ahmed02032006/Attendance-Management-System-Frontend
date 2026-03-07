@@ -471,11 +471,6 @@ const TeacherCourseReport_Page = () => {
               </div>
             </div>
 
-            {/* Student Count Info */}
-            <div className="px-4 py-2 border-t border-gray-200 bg-gray-50 text-sm text-gray-600">
-              Showing all {processedData.students.length} students • Scroll to view more
-            </div>
-
             {/* Summary Footer */}
             <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
               <div className="grid grid-cols-5 gap-2 text-sm">
