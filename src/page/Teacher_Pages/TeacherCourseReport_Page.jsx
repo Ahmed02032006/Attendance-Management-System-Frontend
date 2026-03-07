@@ -457,22 +457,22 @@ const TeacherCourseReport_Page = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentStudents.map((student) => (
                       <tr key={student.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
                           {student.name}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
                           {student.rollNo}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">
+                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm text-gray-600">
                           {student.attendance?.length || 0}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium text-green-600">
+                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
                           {student.presentCount}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium text-red-600">
+                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-red-600">
                           {student.absentCount}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <td className="px-4 py-2 whitespace-nowrap text-center">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                             ${student.percentage >= 75 ? 'bg-green-100 text-green-700' :
                               student.percentage >= 50 ? 'bg-yellow-100 text-yellow-700' :
