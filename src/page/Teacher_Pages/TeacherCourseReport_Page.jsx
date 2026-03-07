@@ -483,12 +483,12 @@ const TeacherCourseReport_Page = () => {
                         </td>
                       </tr>
                     ))}
-                    
+
                     {/* Fill empty rows if needed */}
                     {currentStudents.length < studentsPerPage && (
                       Array.from({ length: studentsPerPage - currentStudents.length }).map((_, index) => (
                         <tr key={`empty-${index}`} className="bg-gray-50">
-                          <td colSpan="6" className="px-4 py-3 text-center text-sm text-gray-400">
+                          <td colSpan="6" className="px-4 py-2 text-center text-sm text-gray-400">
                             &nbsp;
                           </td>
                         </tr>
@@ -514,11 +514,10 @@ const TeacherCourseReport_Page = () => {
                     <button
                       onClick={prevPage}
                       disabled={currentPage === 1}
-                      className={`px-3 py-1 text-sm font-medium rounded-md ${
-                        currentPage === 1
+                      className={`px-3 py-1 text-sm font-medium rounded-md ${currentPage === 1
                           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                           : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                      }`}
+                        }`}
                     >
                       Previous
                     </button>
@@ -527,11 +526,10 @@ const TeacherCourseReport_Page = () => {
                         <button
                           key={number}
                           onClick={() => paginate(number)}
-                          className={`px-3 py-1 text-sm font-medium rounded-md ${
-                            currentPage === number
+                          className={`px-3 py-1 text-sm font-medium rounded-md ${currentPage === number
                               ? 'bg-blue-600 text-white'
                               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                          }`}
+                            }`}
                         >
                           {number}
                         </button>
@@ -540,11 +538,10 @@ const TeacherCourseReport_Page = () => {
                     <button
                       onClick={nextPage}
                       disabled={currentPage === totalPages}
-                      className={`px-3 py-1 text-sm font-medium rounded-md ${
-                        currentPage === totalPages
+                      className={`px-3 py-1 text-sm font-medium rounded-md ${currentPage === totalPages
                           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                           : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                      }`}
+                        }`}
                     >
                       Next
                     </button>
