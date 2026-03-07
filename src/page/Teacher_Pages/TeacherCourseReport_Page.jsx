@@ -11,8 +11,7 @@ import {
   FiEye,
   FiCalendar,
   FiClock,
-  FiX,
-  FiBookOpen
+  FiX
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer.js'
@@ -34,22 +33,16 @@ const TeacherCourseReport_Page = () => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showReport, setShowReport] = useState(false)
   const [processedData, setProcessedData] = useState(null)
-  
+
   // Modal states
   const [showStudentModal, setShowStudentModal] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [studentAttendanceDetails, setStudentAttendanceDetails] = useState([])
-  
-  // Store class schedules for the selected subject
-  const [classSchedules, setClassSchedules] = useState([])
 
   // Fetch subjects when component mounts
   useEffect(() => {
     if (user?.id) {
       dispatch(getSubjectsByUser(user.id)).unwrap()
-        .then((subjectsData) => {
-          console.log('Subjects data:', subjectsData)
-        })
         .catch(error => {
           console.error('Failed to fetch subjects:', error)
           toast.error('Failed to load courses')
@@ -81,12 +74,6 @@ const TeacherCourseReport_Page = () => {
       })
     })
     allDates.sort() // Sort dates chronologically
-
-    // Find the selected subject to get class schedules
-    const selectedSubjectData = subjects.find(s => s.id === selectedCourse)
-    if (selectedSubjectData?.classSchedule) {
-      setClassSchedules(selectedSubjectData.classSchedule)
-    }
 
     // Process each student
     const processedStudents = apiData.students.map(student => {
@@ -145,7 +132,6 @@ const TeacherCourseReport_Page = () => {
 
     return {
       subjectDetails: apiData.subjectDetails || {
-        id: selectedCourse,
         title: apiData.subjectTitle || 'Subject',
         code: apiData.subjectCode || '',
         department: apiData.department || '',
@@ -261,54 +247,10 @@ const TeacherCourseReport_Page = () => {
     toast.success('Report exported successfully')
   }
 
-  // Get schedule details by ID
-  const getScheduleDetails = (scheduleId) => {
-    if (!scheduleId || !classSchedules || classSchedules.length === 0) return 'Unknown Schedule'
-    
-    const schedule = classSchedules.find(s => s._id === scheduleId || s._id?.$oid === scheduleId)
-    if (schedule) {
-      return `${schedule.day} • ${schedule.startTime} - ${schedule.endTime}`
-    }
-    return 'Unknown Schedule'
-  }
-
   // Handle view student details
-  const handleViewStudent = async (student) => {
+  const handleViewStudent = (student) => {
     setSelectedStudent(student)
-    
-    try {
-      // Fetch the subject details again to get latest class schedules if needed
-      const selectedSubjectData = subjects.find(s => s.id === selectedCourse)
-      if (selectedSubjectData?.classSchedule) {
-        setClassSchedules(selectedSubjectData.classSchedule)
-      }
-
-      // Process attendance details for modal with schedule information
-      // We need to fetch the full attendance records for this student
-      // Since the report data might not include scheduleId, we'll need to make an additional API call
-      // or modify the report endpoint to include schedule information
-      
-      // For now, we'll use the fullAttendance from the student object
-      // But we need to enhance the attendance records with schedule info
-      
-      // This is a placeholder - you'll need to enhance your report endpoint
-      // to include scheduleId and schedule details in each attendance record
-      
-      const attendanceDetails = student.fullAttendance.map(record => ({
-        date: record.date,
-        time: record.time || '--',
-        status: record.status,
-        discipline: record.discipline || student.discipline || 'N/A',
-        scheduleId: record.scheduleId || null,
-        schedule: record.scheduleId ? getScheduleDetails(record.scheduleId) : 'Unknown Schedule'
-      }))
-      
-      setStudentAttendanceDetails(attendanceDetails)
-      setShowStudentModal(true)
-    } catch (error) {
-      console.error('Error loading student details:', error)
-      toast.error('Failed to load student attendance details')
-    }
+    setShowStudentModal(true)
   }
 
   // Format date for display
@@ -665,20 +607,19 @@ const TeacherCourseReport_Page = () => {
                   </div>
                   <div>
                     <p className="font-medium text-gray-700">Attendance Percentage</p>
-                    <p className={`text-lg font-semibold ${
-                      selectedStudent.percentage >= 75 ? 'text-green-600' :
+                    <p className={`text-lg font-semibold ${selectedStudent.percentage >= 75 ? 'text-green-600' :
                       selectedStudent.percentage >= 50 ? 'text-yellow-600' :
-                      'text-red-600'
-                    }`}>
+                        'text-red-600'
+                      }`}>
                       {selectedStudent.percentage}%
                     </p>
                   </div>
                 </div>
               </div>
 
-              <h4 className="text-md font-semibold text-gray-800 mb-4">Daily Attendance Records with Schedule</h4>
-              
-              {studentAttendanceDetails.length > 0 ? (
+              <h4 className="text-md font-semibold text-gray-800 mb-4">Daily Attendance Records</h4>
+
+              {selectedStudent.attendance && selectedStudent.attendance.length > 0 ? (
                 <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -692,14 +633,14 @@ const TeacherCourseReport_Page = () => {
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                             <div className="flex items-center space-x-1">
-                              <FiBookOpen className="w-3 h-3" />
+                              <FiClock className="w-3 h-3" />
                               <span>Class Schedule</span>
                             </div>
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                             <div className="flex items-center space-x-1">
                               <FiClock className="w-3 h-3" />
-                              <span>Time</span>
+                              <span>Marked Time</span>
                             </div>
                           </th>
                           <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
@@ -708,16 +649,22 @@ const TeacherCourseReport_Page = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {studentAttendanceDetails.map((record, index) => (
+                        {selectedStudent.attendance.map((record, index) => (
                           <tr key={index} className="hover:bg-gray-50">
                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                               {formatModalDate(record.date)}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                              {record.schedule}
+                              {record.status === 'Present' ? (
+                                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-700 border border-blue-200">
+                                  {record.scheduleDay || 'N/A'}: {record.scheduleTime || 'N/A'}
+                                </span>
+                              ) : (
+                                <span className="text-gray-400">--</span>
+                              )}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                              {record.time !== '--' ? (
+                              {record.status === 'Present' ? (
                                 <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700">
                                   {record.time}
                                 </span>
@@ -727,8 +674,8 @@ const TeacherCourseReport_Page = () => {
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-center">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                ${record.status === 'Present' 
-                                  ? 'bg-green-100 text-green-800' 
+                          ${record.status === 'Present'
+                                  ? 'bg-green-100 text-green-800'
                                   : 'bg-red-100 text-red-800'
                                 }`}
                               >
