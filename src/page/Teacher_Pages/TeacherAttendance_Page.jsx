@@ -769,33 +769,22 @@ const TeacherAttendance_Page = () => {
           `${schedule.day} ${schedule.startTime}-${schedule.endTime}${schedule.room ? ` (${schedule.room})` : ''}` :
           'Unknown Schedule';
 
-        // Create a clean record object
-        const record = {
+        // Determine status based on whether studentRecord exists
+        const isPresent = !!studentRecord;
+
+        allAttendance.push({
+          ...(studentRecord || {}), // Spread if exists, otherwise empty
           date: date,
           day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
+          time: isPresent ? studentRecord.time : '--', // Show -- if absent
           schedule: scheduleDisplay,
           scheduleId: scheduleId,
           title: subject?.title || 'Unknown Subject',
+          discipline: studentRecord?.discipline || student?.discipline || 'N/A',
           studentName: student?.studentName,
           rollNo: student?.rollNo,
-        };
-
-        if (studentRecord) {
-          // Student is present - use their record data
-          record.time = studentRecord.time;
-          record.discipline = studentRecord.discipline || student?.discipline || 'N/A';
-          record.status = 'Present';
-          // Include any other fields from studentRecord if needed
-          record.id = studentRecord.id;
-          record.ipAddress = studentRecord.ipAddress;
-        } else {
-          // Student is absent
-          record.time = '--';
-          record.discipline = student?.discipline || 'N/A';
-          record.status = 'Absent';
-        }
-
-        allAttendance.push(record);
+          status: isPresent ? 'Present' : 'Absent' // Set status based on presence
+        });
       });
     });
 
@@ -1744,14 +1733,25 @@ const TeacherAttendance_Page = () => {
                                       <span className="text-gray-400">--</span>
                                     )}
                                   </td>
-                                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                                  <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
+                                    {record.time && record.time !== '--' ? (
+                                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800`}>
+                                        {record.status}
+                                      </span>
+                                    ) : (
+                                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800`}>
+                                        {record.status}
+                                      </span>
+                                    )}
+                                  </td>
+                                  {/* <td className="px-4 py-3 whitespace-nowrap text-center">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.status === 'Present'
                                       ? 'bg-green-100 text-green-800'
                                       : 'bg-red-100 text-red-800'
                                       }`}>
                                       {record.status}
                                     </span>
-                                  </td>
+                                  </td> */}
                                 </tr>
                               ))}
                             </tbody>
