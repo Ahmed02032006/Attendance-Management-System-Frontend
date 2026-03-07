@@ -1145,21 +1145,32 @@ const TeacherAttendance_Page = () => {
 
         {/* No Subject Selected State */}
         {!selectedSubject && !showSubjectModal && subjectsWithAttendance.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <div className="flex flex-col items-center">
+              {/* Simple Icon */}
+              <div className="mb-4">
+                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100">
+                  <FiGrid className="h-8 w-8 text-gray-400" />
+                </div>
+              </div>
+
+              {/* Text Content */}
+              <h3 className="text-base font-medium text-gray-900 mb-2">
+                No Course Selected
+              </h3>
+              <p className="text-sm text-gray-500 mb-5 max-w-sm">
+                Select a course to view and manage attendance records
+              </p>
+
+              {/* Action Button */}
+              <button
+                onClick={() => setShowSubjectModal(true)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors flex items-center gap-2"
+              >
+                <FiGrid className="w-4 h-4" />
+                <span>Select Course</span>
+              </button>
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Course Selected</h3>
-            <p className="text-gray-600 mb-4">Please select a course to view attendance records</p>
-            <button
-              onClick={() => setShowSubjectModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center mx-auto space-x-2"
-            >
-              <FiGrid className="w-4 h-4" />
-              <span>Select Course</span>
-            </button>
           </div>
         )}
 
