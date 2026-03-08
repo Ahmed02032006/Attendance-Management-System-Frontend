@@ -760,7 +760,7 @@ const TeacherCourseReport_Page = () => {
 
         {/* Loading Modal */}
         {studentDetailsLoading && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-8 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-700">Loading student details...</p>
