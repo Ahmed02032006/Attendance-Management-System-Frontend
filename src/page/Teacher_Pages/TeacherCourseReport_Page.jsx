@@ -15,10 +15,10 @@ import {
   FiMapPin
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-import { 
-  getSubjectAttendanceReport, 
+import {
+  getSubjectAttendanceReport,
   getStudentAttendanceDetails,
-  clearStudentDetails 
+  clearStudentDetails
 } from '../../store/Teacher-Slicer/Report-Slicer.js'
 import { getSubjectsByUser } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 
@@ -29,12 +29,12 @@ const TeacherCourseReport_Page = () => {
 
   // Safe navigation with fallback
   const attendanceReportState = useSelector((state) => state.teacherReport) || {}
-  const { 
-    reportData, 
-    isLoading, 
-    studentAttendanceDetails, 
+  const {
+    reportData,
+    isLoading,
+    studentAttendanceDetails,
     studentDetailsLoading,
-    error 
+    error
   } = attendanceReportState
 
   // Form states
@@ -227,14 +227,12 @@ const TeacherCourseReport_Page = () => {
 
   const handleViewStudentDetails = (student) => {
     setSelectedStudent(student)
-    
+
     // Fetch detailed attendance for this student
     dispatch(getStudentAttendanceDetails({
       rollNo: student.rollNo,
       subjectId: selectedCourse,
       teacherId: user?.id
-      // fromDate,
-      // toDate
     })).then((result) => {
       if (result.payload?.success) {
         setShowStudentModal(true)
@@ -309,8 +307,8 @@ const TeacherCourseReport_Page = () => {
 
   // Get status badge class
   const getStatusBadgeClass = (status) => {
-    return status === 'Present' 
-      ? 'bg-green-100 text-green-700' 
+    return status === 'Present'
+      ? 'bg-green-100 text-green-700'
       : 'bg-red-100 text-red-700'
   }
 
@@ -660,7 +658,7 @@ const TeacherCourseReport_Page = () => {
                     Student Attendance Details
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    {studentAttendanceDetails.studentInfo?.name} ({studentAttendanceDetails.studentInfo?.rollNo})
+                    Student Name - Student Roll no.
                   </p>
                 </div>
                 <button
@@ -673,63 +671,6 @@ const TeacherCourseReport_Page = () => {
 
               {/* Modal Content */}
               <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-                {/* Student and Subject Info */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-blue-800 mb-2">Student Information</h4>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Name:</span> {studentAttendanceDetails.studentInfo?.name}</p>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Roll No:</span> {studentAttendanceDetails.studentInfo?.rollNo}</p>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Discipline:</span> {studentAttendanceDetails.studentInfo?.discipline}</p>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-green-800 mb-2">Subject Information</h4>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Title:</span> {studentAttendanceDetails.subjectInfo?.title}</p>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Code:</span> {studentAttendanceDetails.subjectInfo?.code}</p>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Session:</span> {studentAttendanceDetails.subjectInfo?.session}</p>
-                  </div>
-                </div>
-
-                {/* Summary Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-blue-600">{studentAttendanceDetails.summary?.totalPresent}</p>
-                    <p className="text-xs text-gray-500">Total Present</p>
-                  </div>
-                  <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-red-600">{studentAttendanceDetails.summary?.totalAbsent}</p>
-                    <p className="text-xs text-gray-500">Total Absent</p>
-                  </div>
-                  <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-gray-900">{studentAttendanceDetails.summary?.totalPossible}</p>
-                    <p className="text-xs text-gray-500">Total Classes</p>
-                  </div>
-                  <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-                    <p className={`text-2xl font-bold ${
-                      studentAttendanceDetails.summary?.attendancePercentage >= 75 
-                        ? 'text-green-600' 
-                        : studentAttendanceDetails.summary?.attendancePercentage >= 50 
-                          ? 'text-yellow-600' 
-                          : 'text-red-600'
-                    }`}>
-                      {studentAttendanceDetails.summary?.attendancePercentage}%
-                    </p>
-                    <p className="text-xs text-gray-500">Percentage</p>
-                  </div>
-                </div>
-
-                {/* Class Schedules Info */}
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Class Schedules</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {studentAttendanceDetails.subjectInfo?.classSchedules?.map((schedule, index) => (
-                      <div key={index} className="bg-gray-100 px-3 py-2 rounded-lg text-xs">
-                        <span className="font-medium">{schedule.day}</span>
-                        <span className="text-gray-500 ml-2">{schedule.startTime} - {schedule.endTime}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Attendance Table */}
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">Detailed Attendance Record</h4>
@@ -739,10 +680,9 @@ const TeacherCourseReport_Page = () => {
                         <tr>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Day</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class Schedule</th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marked At</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -765,9 +705,6 @@ const TeacherCourseReport_Page = () => {
                               </td>
                               <td className="px-4 py-2 text-sm text-gray-600">
                                 {schedule.time || 'N/A'}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-600">
-                                {schedule.ipAddress || 'N/A'}
                               </td>
                             </tr>
                           ))
