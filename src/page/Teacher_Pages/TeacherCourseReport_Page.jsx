@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import HeaderComponent from '../../components/HeaderComponent'
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import HeaderComponent from '../../components/HeaderComponent';
+import StudentAttendanceModal from '../../page/Teacher_Pages/StudentAttendanceModal.jsx';
 import {
   FiFileText,
   FiDownload,
@@ -9,84 +10,88 @@ import {
   FiAlertCircle,
   FiBarChart2,
   FiEye
-} from 'react-icons/fi'
-import { toast } from 'react-toastify'
-import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer.js'
-import { getSubjectsByUser } from '../../store/Teacher-Slicer/Subject-Slicer.js'
+} from 'react-icons/fi';
+import { toast } from 'react-toastify';
+import { getSubjectAttendanceReport } from '../../store/Teacher-Slicer/Report-Slicer.js';
+import { getSubjectsByUser } from '../../store/Teacher-Slicer/Subject-Slicer.js';
 
 const TeacherCourseReport_Page = () => {
-  const dispatch = useDispatch()
-  const { user } = useSelector((state) => state.auth)
-  const { subjects, isLoading: subjectsLoading } = useSelector((state) => state.teacherSubject || { subjects: [], isLoading: false })
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const { subjects, isLoading: subjectsLoading } = useSelector((state) => state.teacherSubject || { subjects: [], isLoading: false });
 
   // Safe navigation with fallback
-  const attendanceReportState = useSelector((state) => state.attendanceReport) || {}
-  const { reportData, isLoading, error } = attendanceReportState
+  const attendanceReportState = useSelector((state) => state.teacherReport) || {};
+  const { reportData, isLoading, error } = attendanceReportState;
 
   // Form states
-  const [selectedCourse, setSelectedCourse] = useState('')
-  const [fromDate, setFromDate] = useState('')
-  const [toDate, setToDate] = useState('')
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [showReport, setShowReport] = useState(false)
-  const [processedData, setProcessedData] = useState(null)
+  const [selectedCourse, setSelectedCourse] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [processedData, setProcessedData] = useState(null);
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1)
-  const [studentsPerPage] = useState(5)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [studentsPerPage] = useState(5);
 
   // Fetch subjects when component mounts
   useEffect(() => {
     if (user?.id) {
       dispatch(getSubjectsByUser(user.id)).unwrap()
         .catch(error => {
-          console.error('Failed to fetch subjects:', error)
-          toast.error('Failed to load courses')
-        })
+          console.error('Failed to fetch subjects:', error);
+          toast.error('Failed to load courses');
+        });
     }
-  }, [dispatch, user?.id])
+  }, [dispatch, user?.id]);
 
   // Set default dates on component mount (last 30 days)
   useEffect(() => {
-    const today = new Date()
-    const thirtyDaysAgo = new Date()
-    thirtyDaysAgo.setDate(today.getDate() - 30)
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
 
-    setToDate(today.toISOString().split('T')[0])
-    setFromDate(thirtyDaysAgo.toISOString().split('T')[0])
-  }, [])
+    setToDate(today.toISOString().split('T')[0]);
+    setFromDate(thirtyDaysAgo.toISOString().split('T')[0]);
+  }, []);
 
   // Reset pagination when new report is generated
   useEffect(() => {
-    setCurrentPage(1)
-  }, [processedData])
+    setCurrentPage(1);
+  }, [processedData]);
 
   // Process the API data into the format expected by the component
   const processReportData = (apiData) => {
-    if (!apiData || !apiData.students) return null
+    if (!apiData || !apiData.students) return null;
 
     // Get all unique dates from all students' attendance
-    const allDates = []
+    const allDates = [];
     apiData.students.forEach(student => {
       student.attendance.forEach(record => {
         if (!allDates.includes(record.date)) {
-          allDates.push(record.date)
+          allDates.push(record.date);
         }
-      })
-    })
-    allDates.sort() // Sort dates chronologically
+      });
+    });
+    allDates.sort(); // Sort dates chronologically
 
     // Process each student
     const processedStudents = apiData.students.map(student => {
       // Create a map of attendance by date for quick lookup
-      const attendanceMap = new Map()
+      const attendanceMap = new Map();
       student.attendance.forEach(record => {
-        attendanceMap.set(record.date, record)
-      })
+        attendanceMap.set(record.date, record);
+      });
 
       // Create attendance array for all dates
       const attendance = allDates.map(date => {
-        const record = attendanceMap.get(date)
+        const record = attendanceMap.get(date);
         if (record) {
           return {
             date: record.date,
@@ -94,7 +99,7 @@ const TeacherCourseReport_Page = () => {
             time: record.time || null,
             discipline: record.discipline || null,
             attendanceId: record.attendanceId || null
-          }
+          };
         } else {
           return {
             date: date,
@@ -102,9 +107,9 @@ const TeacherCourseReport_Page = () => {
             time: null,
             discipline: null,
             attendanceId: null
-          }
+          };
         }
-      })
+      });
 
       return {
         id: student.id || student.studentId,
@@ -114,20 +119,20 @@ const TeacherCourseReport_Page = () => {
         absentCount: student.absentCount || 0,
         percentage: student.percentage || 0,
         attendance: attendance
-      }
-    })
+      };
+    });
 
     // Calculate summary statistics
-    const totalStudents = processedStudents.length
-    const totalDays = allDates.length
+    const totalStudents = processedStudents.length;
+    const totalDays = allDates.length;
     const averageAttendance = totalStudents > 0
       ? (processedStudents.reduce((sum, s) => sum + s.percentage, 0) / totalStudents).toFixed(1)
-      : 0
+      : 0;
 
-    const studentsAbove75 = processedStudents.filter(s => s.percentage >= 75).length
-    const studentsBelow75 = processedStudents.filter(s => s.percentage < 75 && s.percentage >= 50).length
-    const studentsBelow50 = processedStudents.filter(s => s.percentage < 50 && s.percentage >= 25).length
-    const studentsBelow25 = processedStudents.filter(s => s.percentage < 25).length
+    const studentsAbove75 = processedStudents.filter(s => s.percentage >= 75).length;
+    const studentsBelow75 = processedStudents.filter(s => s.percentage < 75 && s.percentage >= 50).length;
+    const studentsBelow50 = processedStudents.filter(s => s.percentage < 50 && s.percentage >= 25).length;
+    const studentsBelow25 = processedStudents.filter(s => s.percentage < 25).length;
 
     return {
       subjectDetails: apiData.subjectDetails || {
@@ -152,29 +157,29 @@ const TeacherCourseReport_Page = () => {
         dates: allDates
       },
       students: processedStudents
-    }
-  }
+    };
+  };
 
   const handleGenerateReport = () => {
     // Validate inputs
     if (!selectedCourse) {
-      toast.error('Please select a course')
-      return
+      toast.error('Please select a course');
+      return;
     }
     if (!fromDate) {
-      toast.error('Please select from date')
-      return
+      toast.error('Please select from date');
+      return;
     }
     if (!toDate) {
-      toast.error('Please select to date')
-      return
+      toast.error('Please select to date');
+      return;
     }
     if (new Date(fromDate) > new Date(toDate)) {
-      toast.error('From date cannot be greater than to date')
-      return
+      toast.error('From date cannot be greater than to date');
+      return;
     }
 
-    setIsGenerating(true)
+    setIsGenerating(true);
 
     // Dispatch action to fetch real report data
     dispatch(getSubjectAttendanceReport({
@@ -183,37 +188,37 @@ const TeacherCourseReport_Page = () => {
       fromDate,
       toDate
     })).then((result) => {
-      setIsGenerating(false)
-      console.log('API Response:', result)
-      console.log('Payload data:', result.payload)
+      setIsGenerating(false);
+      console.log('API Response:', result);
+      console.log('Payload data:', result.payload);
 
       if (result.payload?.success) {
         // Process the data for display
-        const processed = processReportData(result.payload.data)
-        setProcessedData(processed)
-        setShowReport(true)
-        toast.success('Report generated successfully')
+        const processed = processReportData(result.payload.data);
+        setProcessedData(processed);
+        setShowReport(true);
+        toast.success('Report generated successfully');
       } else {
-        toast.error(result.payload?.message || 'Failed to generate report')
+        toast.error(result.payload?.message || 'Failed to generate report');
       }
-    })
-  }
+    });
+  };
 
   const handleExportCSV = () => {
     if (!processedData?.students || processedData.students.length === 0) {
-      toast.error('No data to export')
-      return
+      toast.error('No data to export');
+      return;
     }
 
-    const { students, subjectDetails, dateRange, summary } = processedData
+    const { students, subjectDetails, dateRange, summary } = processedData;
 
     // Create CSV content
-    let csvContent = `"Attendance Report - ${subjectDetails.title} (${subjectDetails.code})"\n`
-    csvContent += `"Period: ${dateRange.fromDate} to ${dateRange.toDate}"\n`
-    csvContent += `"Total Students: ${summary.totalStudents}", "Total Days: ${summary.totalDays}"\n\n`
+    let csvContent = `"Attendance Report - ${subjectDetails.title} (${subjectDetails.code})"\n`;
+    csvContent += `"Period: ${dateRange.fromDate} to ${dateRange.toDate}"\n`;
+    csvContent += `"Total Students: ${summary.totalStudents}", "Total Days: ${summary.totalDays}"\n\n`;
 
     // Add headers (without individual date columns)
-    csvContent += "Student Name,Roll No.,Present Count,Absent Count,Percentage,Marked Attendance Days\n"
+    csvContent += "Student Name,Roll No.,Present Count,Absent Count,Percentage,Marked Attendance Days\n";
 
     // Add student data
     students.forEach(student => {
@@ -224,48 +229,53 @@ const TeacherCourseReport_Page = () => {
         student.absentCount,
         student.percentage + '%',
         student.attendance.length
-      ]
-      csvContent += row.join(",") + "\n"
-    })
+      ];
+      csvContent += row.join(",") + "\n";
+    });
 
     // Add summary
-    csvContent += "\nSummary\n"
-    csvContent += `Average Attendance,${summary.averageAttendance}%\n`
-    csvContent += `Students ≥75%,${summary.studentsAbove75}\n`
-    csvContent += `Students <75%,${summary.studentsBelow75}\n`
-    csvContent += `Students <50%,${summary.studentsBelow50}\n`
-    csvContent += `Students <25%,${summary.studentsBelow25}\n`
+    csvContent += "\nSummary\n";
+    csvContent += `Average Attendance,${summary.averageAttendance}%\n`;
+    csvContent += `Students ≥75%,${summary.studentsAbove75}\n`;
+    csvContent += `Students <75%,${summary.studentsBelow75}\n`;
+    csvContent += `Students <50%,${summary.studentsBelow50}\n`;
+    csvContent += `Students <25%,${summary.studentsBelow25}\n`;
 
     // Download CSV
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `attendance_report_${subjectDetails.code}_${dateRange.fromDate}_to_${dateRange.toDate}.csv`
-    a.click()
-    toast.success('Report exported successfully')
-  }
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance_report_${subjectDetails.code}_${dateRange.fromDate}_to_${dateRange.toDate}.csv`;
+    a.click();
+    toast.success('Report exported successfully');
+  };
+
+  const handleViewStudentDetails = (student) => {
+    setSelectedStudent(student);
+    setIsModalOpen(true);
+  };
 
   // Format date for display
   const formatDate = (dateString) => {
-    if (!dateString) return ''
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
-    })
-  }
+    });
+  };
 
   // Pagination logic
-  const indexOfLastStudent = currentPage * studentsPerPage
-  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage
-  const currentStudents = processedData?.students?.slice(indexOfFirstStudent, indexOfLastStudent) || []
-  const totalPages = Math.ceil((processedData?.students?.length || 0) / studentsPerPage)
+  const indexOfLastStudent = currentPage * studentsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  const currentStudents = processedData?.students?.slice(indexOfFirstStudent, indexOfLastStudent) || [];
+  const totalPages = Math.ceil((processedData?.students?.length || 0) / studentsPerPage);
 
   // Change page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber)
-  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages))
-  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1))
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
 
   if (subjectsLoading) {
     return (
@@ -306,9 +316,9 @@ const TeacherCourseReport_Page = () => {
               <select
                 value={selectedCourse}
                 onChange={(e) => {
-                  setSelectedCourse(e.target.value)
-                  setShowReport(false)
-                  setProcessedData(null)
+                  setSelectedCourse(e.target.value);
+                  setShowReport(false);
+                  setProcessedData(null);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 disabled={subjectsLoading}
@@ -342,9 +352,9 @@ const TeacherCourseReport_Page = () => {
                 type="date"
                 value={fromDate}
                 onChange={(e) => {
-                  setFromDate(e.target.value)
-                  setShowReport(false)
-                  setProcessedData(null)
+                  setFromDate(e.target.value);
+                  setShowReport(false);
+                  setProcessedData(null);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
@@ -359,9 +369,9 @@ const TeacherCourseReport_Page = () => {
                 type="date"
                 value={toDate}
                 onChange={(e) => {
-                  setToDate(e.target.value)
-                  setShowReport(false)
-                  setProcessedData(null)
+                  setToDate(e.target.value);
+                  setShowReport(false);
+                  setProcessedData(null);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
@@ -452,6 +462,9 @@ const TeacherCourseReport_Page = () => {
                       <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
                         %
                       </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -481,6 +494,15 @@ const TeacherCourseReport_Page = () => {
                             {student.percentage}%
                           </span>
                         </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-center">
+                          <button
+                            onClick={() => handleViewStudentDetails(student)}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="View detailed attendance"
+                          >
+                            <FiEye className="h-4 w-4" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
 
@@ -488,7 +510,7 @@ const TeacherCourseReport_Page = () => {
                     {currentStudents.length < studentsPerPage && (
                       Array.from({ length: studentsPerPage - currentStudents.length }).map((_, index) => (
                         <tr key={`empty-${index}`} className="bg-gray-50">
-                          <td colSpan="6" className="px-4 py-2 text-center text-sm text-gray-400">
+                          <td colSpan="7" className="px-4 py-2 text-center text-sm text-gray-400">
                             &nbsp;
                           </td>
                         </tr>
@@ -613,8 +635,20 @@ const TeacherCourseReport_Page = () => {
           </div>
         )}
       </div>
-    </div>
-  )
-}
 
-export default TeacherCourseReport_Page
+      {/* Student Attendance Modal */}
+      <StudentAttendanceModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedStudent(null);
+        }}
+        student={selectedStudent}
+        subjectId={selectedCourse}
+        teacherId={user?.id}
+      />
+    </div>
+  );
+};
+
+export default TeacherCourseReport_Page;
