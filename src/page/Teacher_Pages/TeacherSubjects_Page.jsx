@@ -858,27 +858,6 @@ const TeacherSubjects_Page = () => {
       : 'bg-gray-100 text-gray-700'
   }
 
-  // Calculate unique students across all subjects
-  const calculateUniqueStudents = () => {
-    const uniqueStudentSet = new Set();
-
-    subjects.forEach(subject => {
-      // If you have the actual student data
-      if (subject.registeredStudents && Array.isArray(subject.registeredStudents)) {
-        subject.registeredStudents.forEach(student => {
-          uniqueStudentSet.add(student.registrationNo || student.id);
-        });
-      }
-      // If you only have the count and need to estimate (fallback)
-      else if (subject.registeredStudentsCount) {
-        // This is just for UI consistency - you'd need the actual data for accuracy
-        // Better to fetch actual student data if needed
-      }
-    });
-
-    return uniqueStudentSet.size || subjects.reduce((acc, s) => acc + (s.registeredStudentsCount || 0), 0);
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
@@ -950,9 +929,9 @@ const TeacherSubjects_Page = () => {
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Unique Students</p>
+                <p className="text-sm text-gray-500">Total Students</p>
                 <p className="text-2xl font-semibold text-gray-900 mt-1">
-                  {calculateUniqueStudents()}
+                  {subjects.reduce((acc, s) => acc + (s.registeredStudentsCount || 0), 0)}
                 </p>
               </div>
               <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
