@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import {
@@ -48,8 +48,11 @@ const TeacherCourseReport_Page = () => {
   // Modal states
   const [showStudentModal, setShowStudentModal] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
+  
+  // Reference for infinite scroll in modal
+  const tableContainerRef = useRef(null)
 
-  // Pagination state
+  // Pagination state for main table
   const [currentPage, setCurrentPage] = useState(1)
   const [studentsPerPage] = useState(5)
 
@@ -312,7 +315,7 @@ const TeacherCourseReport_Page = () => {
       : 'bg-red-100 text-red-700'
   }
 
-  // Pagination logic
+  // Pagination logic for main table
   const indexOfLastStudent = currentPage * studentsPerPage
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage
   const currentStudents = processedData?.students?.slice(indexOfFirstStudent, indexOfLastStudent) || []
@@ -658,7 +661,7 @@ const TeacherCourseReport_Page = () => {
                     Student Attendance Details
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    Student Name - Student Roll no.
+                    {selectedStudent?.name} - {selectedStudent?.rollNo}
                   </p>
                 </div>
                 <button
@@ -669,49 +672,97 @@ const TeacherCourseReport_Page = () => {
                 </button>
               </div>
 
-              {/* Modal Content */}
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-                {/* Attendance Table */}
+              {/* Modal Content with Summary Cards */}
+              <div className="p-6">
+                {/* Summary Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-blue-600">{studentAttendanceDetails.summary?.totalPresent || 0}</p>
+                    <p className="text-xs text-gray-500">Total Present</p>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-red-600">{studentAttendanceDetails.summary?.totalAbsent || 0}</p>
+                    <p className="text-xs text-gray-500">Total Absent</p>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-gray-900">{studentAttendanceDetails.summary?.totalPossible || 0}</p>
+                    <p className="text-xs text-gray-500">Total Classes</p>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                    <p className={`text-2xl font-bold ${
+                      (studentAttendanceDetails.summary?.attendancePercentage || 0) >= 75 
+                        ? 'text-green-600' 
+                        : (studentAttendanceDetails.summary?.attendancePercentage || 0) >= 50 
+                          ? 'text-yellow-600' 
+                          : 'text-red-600'
+                    }`}>
+                      {studentAttendanceDetails.summary?.attendancePercentage || 0}%
+                    </p>
+                    <p className="text-xs text-gray-500">Percentage</p>
+                  </div>
+                </div>
+
+                {/* Attendance Table with Scroll (10 rows visible, more on scroll) */}
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">Detailed Attendance Record</h4>
-                  <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                  <div 
+                    ref={tableContainerRef}
+                    className="overflow-y-auto border border-gray-200 rounded-lg"
+                    style={{ maxHeight: '400px' }}
+                  >
                     <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-gray-50 sticky top-0 z-10">
                         <tr>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Day</th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class Schedule</th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marked At</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {studentAttendanceDetails.attendanceByDate?.map((dateEntry) => (
                           dateEntry.schedules?.map((schedule, idx) => (
                             <tr key={`${dateEntry.date}-${idx}`} className="hover:bg-gray-50">
-                              <td className="px-4 py-2 text-sm text-gray-900">
+                              <td className="px-4 py-2 text-sm text-gray-900 whitespace-nowrap">
                                 {formatDate(dateEntry.date)}
                               </td>
-                              <td className="px-4 py-2 text-sm text-gray-600">
+                              <td className="px-4 py-2 text-sm text-gray-600 whitespace-nowrap">
                                 {schedule.day}
                               </td>
-                              <td className="px-4 py-2 text-sm text-gray-600">
+                              <td className="px-4 py-2 text-sm text-gray-600 whitespace-nowrap">
                                 {schedule.startTime} - {schedule.endTime}
                               </td>
-                              <td className="px-4 py-2">
+                              <td className="px-4 py-2 whitespace-nowrap">
                                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(schedule.status)}`}>
                                   {schedule.status}
                                 </span>
                               </td>
-                              <td className="px-4 py-2 text-sm text-gray-600">
+                              <td className="px-4 py-2 text-sm text-gray-600 whitespace-nowrap">
                                 {schedule.time || 'N/A'}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-600 whitespace-nowrap">
+                                {schedule.ipAddress || 'N/A'}
                               </td>
                             </tr>
                           ))
                         ))}
+                        
+                        {/* Show message if no attendance records */}
+                        {(!studentAttendanceDetails.attendanceByDate || studentAttendanceDetails.attendanceByDate.length === 0) && (
+                          <tr>
+                            <td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500">
+                              No attendance records found for this student
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>
+                  <p className="text-xs text-gray-500 mt-2 text-right">
+                    Showing {studentAttendanceDetails.attendanceByDate?.reduce((acc, date) => acc + (date.schedules?.length || 0), 0) || 0} records • Scroll for more
+                  </p>
                 </div>
               </div>
 
