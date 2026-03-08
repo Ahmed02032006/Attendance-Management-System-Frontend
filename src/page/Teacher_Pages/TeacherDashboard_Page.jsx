@@ -725,7 +725,9 @@ const TeacherDashboard_Page = () => {
                           <p className={`text-sm font-medium ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
                             {subject.registeredStudents || 0}
                           </p>
-                          <p className="text-xs text-gray-400">registered students</p>
+                          <p className="text-xs text-gray-400">
+                            {(subject.registeredStudents || 0) === 1 ? 'registered student' : 'registered students'}
+                          </p>
                         </div>
                       </div>
                     );
@@ -806,7 +808,7 @@ const TeacherDashboard_Page = () => {
                         </h3>
                       </div>
                       <span className="text-xs text-gray-500">
-                        {currentAttendanceRecords.length} students present
+                        {currentAttendanceRecords.length} {currentAttendanceRecords.length === 1 ? 'student present' : 'students present'}
                       </span>
                     </div>
                   </div>
