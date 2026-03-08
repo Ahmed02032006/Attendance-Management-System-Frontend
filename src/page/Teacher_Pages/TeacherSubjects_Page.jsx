@@ -931,7 +931,21 @@ const TeacherSubjects_Page = () => {
               <div>
                 <p className="text-sm text-gray-500">Total Students</p>
                 <p className="text-2xl font-semibold text-gray-900 mt-1">
-                  {subjects.reduce((acc, s) => acc + (s.registeredStudentsCount || 0), 0)}
+                  {(() => {
+                    const uniqueStudents = new Set();
+
+                    subjects.forEach(subject => {
+                      if (subject.registeredStudents && Array.isArray(subject.registeredStudents)) {
+                        subject.registeredStudents.forEach(student => {
+                          if (student.registrationNo) {
+                            uniqueStudents.add(student.registrationNo);
+                          }
+                        });
+                      }
+                    });
+
+                    return uniqueStudents.size > 0 ? uniqueStudents.size : subjects.reduce((acc, s) => acc + (s.registeredStudentsCount || 0), 0);
+                  })()}
                 </p>
               </div>
               <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
