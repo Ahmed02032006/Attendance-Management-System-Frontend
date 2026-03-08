@@ -672,23 +672,6 @@ const TeacherCourseReport_Page = () => {
 
               {/* Modal Content */}
               <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-                {/* Student and Subject Info Cards */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-blue-800 mb-2">Student Information</h4>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Name:</span> {studentAttendanceDetails.studentInfo?.name}</p>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Roll No:</span> {studentAttendanceDetails.studentInfo?.rollNo}</p>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Discipline:</span> {studentAttendanceDetails.studentInfo?.discipline}</p>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-green-800 mb-2">Subject Information</h4>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Title:</span> {studentAttendanceDetails.subjectInfo?.title}</p>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Code:</span> {studentAttendanceDetails.subjectInfo?.code}</p>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Department:</span> {studentAttendanceDetails.subjectInfo?.department}</p>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Semester:</span> {studentAttendanceDetails.subjectInfo?.semester}</p>
-                    <p className="text-sm text-gray-600"><span className="font-medium">Session:</span> {studentAttendanceDetails.subjectInfo?.session}</p>
-                  </div>
-                </div>
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
