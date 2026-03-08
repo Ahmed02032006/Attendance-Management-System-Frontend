@@ -658,8 +658,7 @@ const TeacherCourseReport_Page = () => {
                     Student Attendance Details
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    {/* Display real student name and roll no from the API response */}
-                    {studentAttendanceDetails.studentInfo?.name} - {studentAttendanceDetails.studentInfo?.rollNo}
+                    {selectedStudent?.name} - {selectedStudent?.rollNo}
                   </p>
                 </div>
                 <button
@@ -688,13 +687,12 @@ const TeacherCourseReport_Page = () => {
                     <p className="text-xs text-gray-500">Total Classes</p>
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-                    <p className={`text-2xl font-bold ${
-                      studentAttendanceDetails.summary?.attendancePercentage >= 75 
-                        ? 'text-green-600' 
-                        : studentAttendanceDetails.summary?.attendancePercentage >= 50 
-                          ? 'text-yellow-600' 
+                    <p className={`text-2xl font-bold ${studentAttendanceDetails.summary?.attendancePercentage >= 75
+                        ? 'text-green-600'
+                        : studentAttendanceDetails.summary?.attendancePercentage >= 50
+                          ? 'text-yellow-600'
                           : 'text-red-600'
-                    }`}>
+                      }`}>
                       {studentAttendanceDetails.summary?.attendancePercentage}%
                     </p>
                     <p className="text-xs text-gray-500">Percentage</p>
@@ -714,7 +712,6 @@ const TeacherCourseReport_Page = () => {
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class Schedule</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marked At</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -737,9 +734,6 @@ const TeacherCourseReport_Page = () => {
                                 </td>
                                 <td className="px-4 py-2 text-sm text-gray-600">
                                   {schedule.time || 'N/A'}
-                                </td>
-                                <td className="px-4 py-2 text-sm text-gray-600">
-                                  {schedule.ipAddress || 'N/A'}
                                 </td>
                               </tr>
                             ))
