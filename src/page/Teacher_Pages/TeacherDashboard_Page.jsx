@@ -45,7 +45,7 @@ const PAGE_NAME_MAPPING = {
 
 const TeacherDashboard_Page = () => {
   const dispatch = useDispatch()
-  
+
   // Get data from redux
   const {
     dashboardSubjects,
@@ -290,7 +290,7 @@ const TeacherDashboard_Page = () => {
     if (userId) {
       fetchData();
     }
-    
+
     return () => {
       dispatch(clearDashboard());
     };
@@ -300,15 +300,15 @@ const TeacherDashboard_Page = () => {
   useEffect(() => {
     if (dashboardSubjects.length > 0 && !selectedSubject && dataLoaded) {
       setSelectedSubject(dashboardSubjects[0].id);
-      
+
       // Get the subject's attendance data
       const subjectAttendance = dashboardAttendance[dashboardSubjects[0].id];
-      
+
       if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
         // Get the most recent date
         const dates = Object.keys(subjectAttendance).sort().reverse();
         setCurrentDate(dates[0]);
-        
+
         // Get the first schedule for that date (if any)
         const firstDateData = subjectAttendance[dates[0]];
         if (firstDateData && Object.keys(firstDateData).length > 0) {
@@ -360,17 +360,40 @@ const TeacherDashboard_Page = () => {
     if (!selectedSubject || !currentDate) return [];
     const subjectData = dashboardAttendance[selectedSubject];
     if (!subjectData || !subjectData[currentDate]) return [];
-    
+
     return Object.keys(subjectData[currentDate]).map(scheduleId => {
       const scheduleData = subjectData[currentDate][scheduleId];
+
+      // Get schedule info - either from the data or try to find it from the subject
+      let scheduleTime = 'Unknown Time';
+      let scheduleDay = 'Unknown Day';
+
+      if (scheduleData.schedule) {
+        // If schedule info is available in the attendance data
+        scheduleTime = `${scheduleData.schedule.startTime || '?'} - ${scheduleData.schedule.endTime || '?'}`;
+        scheduleDay = scheduleData.schedule.day || 'Unknown Day';
+      } else {
+        // Try to find schedule info from the selected subject's class schedules
+        const subject = dashboardSubjects.find(s => s.id === selectedSubject);
+        if (subject && subject.classSchedule) {
+          const scheduleInfo = subject.classSchedule.find(s => s._id === scheduleId);
+          if (scheduleInfo) {
+            scheduleTime = `${scheduleInfo.startTime} - ${scheduleInfo.endTime}`;
+            scheduleDay = scheduleInfo.day;
+          }
+        }
+      }
+
+      // Count present students
+      const presentCount = scheduleData.students?.filter(s => s.status === 'Present').length || 0;
+      const totalStudents = scheduleData.students?.length || 0;
+
       return {
         id: scheduleId,
-        time: scheduleData.schedule ? 
-          `${scheduleData.schedule.startTime} - ${scheduleData.schedule.endTime}` : 
-          'Unknown Time',
-        day: scheduleData.schedule?.day || 'Unknown Day',
-        studentCount: scheduleData.students?.filter(s => s.status === 'Present').length || 0,
-        totalStudents: scheduleData.students?.length || 0
+        time: scheduleTime,
+        day: scheduleDay,
+        studentCount: presentCount,
+        totalStudents: totalStudents
       };
     });
   };
@@ -378,12 +401,12 @@ const TeacherDashboard_Page = () => {
   // Get current attendance records based on selected subject, date, and schedule
   const getCurrentAttendanceRecords = () => {
     if (!selectedSubject || !currentDate || !selectedSchedule) return [];
-    
+
     const subjectData = dashboardAttendance[selectedSubject];
     if (!subjectData || !subjectData[currentDate] || !subjectData[currentDate][selectedSchedule]) {
       return [];
     }
-    
+
     return subjectData[currentDate][selectedSchedule].students || [];
   };
 
@@ -436,12 +459,12 @@ const TeacherDashboard_Page = () => {
   const handleSubjectSelect = (subjectId) => {
     setSelectedSubject(subjectId);
     setCurrentPage(1);
-    
+
     const subjectAttendance = dashboardAttendance[subjectId];
     if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
       const dates = Object.keys(subjectAttendance).sort().reverse();
       setCurrentDate(dates[0]);
-      
+
       // Set first schedule for the date
       const firstDateData = subjectAttendance[dates[0]];
       if (firstDateData && Object.keys(firstDateData).length > 0) {
@@ -469,7 +492,7 @@ const TeacherDashboard_Page = () => {
 
   // Get status badge color
   const getStatusBadge = (status) => {
-    switch(status) {
+    switch (status) {
       case 'Present':
         return 'bg-green-100 text-green-800';
       case 'Absent':
