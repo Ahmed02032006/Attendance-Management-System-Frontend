@@ -705,12 +705,12 @@ const TeacherDashboard_Page = () => {
                         key={subject.id}
                         onClick={() => handleSubjectSelect(subject.id)}
                         className={`
-                          flex items-center p-3 rounded-lg mb-1 cursor-pointer transition-all
-                          ${isSelected
+                flex items-center p-3 rounded-lg mb-1 cursor-pointer transition-all
+                ${isSelected
                             ? 'bg-blue-50 border border-blue-100'
                             : 'hover:bg-gray-50 border border-transparent'
                           }
-                        `}
+              `}
                       >
                         <div className={`w-8 h-8 rounded-md ${getSubjectColor(index)} flex items-center justify-center text-white text-xs font-medium shrink-0`}>
                           {subject.title?.charAt(0).toUpperCase()}
@@ -723,9 +723,9 @@ const TeacherDashboard_Page = () => {
                         </div>
                         <div className="text-right ml-2">
                           <p className={`text-sm font-medium ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
-                            {subject.students || 0}
+                            {subject.registeredStudents || 0}
                           </p>
-                          <p className="text-xs text-gray-400">students</p>
+                          <p className="text-xs text-gray-400">registered</p>
                         </div>
                       </div>
                     );
@@ -780,7 +780,7 @@ const TeacherDashboard_Page = () => {
                           >
                             {availableSchedules.map((schedule) => (
                               <option key={schedule.id} value={schedule.id}>
-                                {schedule.formattedTime} ({schedule.studentCount}/{schedule.totalStudents})
+                                {schedule.formattedTime}
                               </option>
                             ))}
                           </select>
