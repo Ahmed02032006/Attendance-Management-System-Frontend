@@ -1443,17 +1443,24 @@ const TeacherSubjects_Page = () => {
 
                   {/* Schedule List */}
                   {classSchedule.length > 0 && (
-                    <div className="space-y-1.5 mt-2">
+                    <div className="mt-3 space-y-2">
                       {classSchedule.map((schedule, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md text-sm">
-                          <span>
-                            <span className="font-medium w-8 inline-block">{schedule.day.substring(0, 3)}</span>
-                            <span className="text-gray-600">{schedule.startTime} - {schedule.endTime}</span>
-                          </span>
+                        <div
+                          key={index}
+                          className="flex items-center justify-between py-2 px-3 border border-gray-100 rounded-md hover:border-gray-200 transition-colors group"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                              {schedule.day.substring(0, 3)}
+                            </span>
+                            <span className="text-sm text-gray-700">
+                              {schedule.startTime} – {schedule.endTime}
+                            </span>
+                          </div>
                           <button
                             type="button"
                             onClick={() => removeSchedule(index)}
-                            className="text-gray-400 hover:text-red-500"
+                            className="text-gray-300 group-hover:text-red-400 transition-colors"
                             title="Remove schedule"
                           >
                             <FiX className="h-4 w-4" />
