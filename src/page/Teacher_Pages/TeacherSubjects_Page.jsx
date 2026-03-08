@@ -1239,7 +1239,7 @@ const TeacherSubjects_Page = () => {
                       {classSchedule.map((schedule, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between py-2 px-3 border border-gray-100 rounded-md hover:border-gray-200 transition-colors group"
+                          className="flex items-center justify-between py-2 px-3 border rounded-md border-gray-200 transition-colors group"
                         >
                           <div className="flex items-center space-x-3">
                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
@@ -1252,7 +1252,7 @@ const TeacherSubjects_Page = () => {
                           <button
                             type="button"
                             onClick={() => removeSchedule(index)}
-                            className="text-gray-300 group-hover:text-red-400 transition-colors"
+                            className="text-red-400 transition-colors"
                             title="Remove schedule"
                           >
                             <FiX className="h-4 w-4" />
@@ -1454,7 +1454,7 @@ const TeacherSubjects_Page = () => {
                       {classSchedule.map((schedule, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between py-2 px-3 border border-gray-100 rounded-md hover:border-gray-200 transition-colors group"
+                          className="flex items-center justify-between py-2 px-3 border rounded-md border-gray-200 transition-colors group"
                         >
                           <div className="flex items-center space-x-3">
                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
@@ -1467,7 +1467,7 @@ const TeacherSubjects_Page = () => {
                           <button
                             type="button"
                             onClick={() => removeSchedule(index)}
-                            className="text-gray-300 group-hover:text-red-400 transition-colors"
+                            className="text-red-400 transition-colors"
                             title="Remove schedule"
                           >
                             <FiX className="h-4 w-4" />
