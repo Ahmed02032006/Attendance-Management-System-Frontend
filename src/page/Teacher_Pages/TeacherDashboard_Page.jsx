@@ -46,7 +46,7 @@ const PAGE_NAME_MAPPING = {
 const TeacherDashboard_Page = () => {
   const dispatch = useDispatch()
   
-  // Get data from redux - FIXED: All from teacherDashboard
+  // Get data from redux
   const {
     dashboardSubjects,
     dashboardAttendance,
@@ -56,6 +56,7 @@ const TeacherDashboard_Page = () => {
   } = useSelector((state) => state.teacherDashboard)
 
   const [selectedSubject, setSelectedSubject] = useState(null)
+  const [selectedSchedule, setSelectedSchedule] = useState(null) // New state for selected schedule
   const [currentDate, setCurrentDate] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage] = useState(5)
@@ -299,12 +300,42 @@ const TeacherDashboard_Page = () => {
   useEffect(() => {
     if (dashboardSubjects.length > 0 && !selectedSubject && dataLoaded) {
       setSelectedSubject(dashboardSubjects[0].id);
+      
+      // Get the subject's attendance data
       const subjectAttendance = dashboardAttendance[dashboardSubjects[0].id];
+      
       if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
-        setCurrentDate(Object.keys(subjectAttendance).sort().reverse()[0]);
+        // Get the most recent date
+        const dates = Object.keys(subjectAttendance).sort().reverse();
+        setCurrentDate(dates[0]);
+        
+        // Get the first schedule for that date (if any)
+        const firstDateData = subjectAttendance[dates[0]];
+        if (firstDateData && Object.keys(firstDateData).length > 0) {
+          const scheduleIds = Object.keys(firstDateData);
+          setSelectedSchedule(scheduleIds[0]);
+        }
       }
     }
   }, [dashboardSubjects, selectedSubject, dashboardAttendance, dataLoaded]);
+
+  // Update selected schedule when date changes
+  useEffect(() => {
+    if (selectedSubject && currentDate) {
+      const subjectAttendance = dashboardAttendance[selectedSubject];
+      if (subjectAttendance && subjectAttendance[currentDate]) {
+        const scheduleIds = Object.keys(subjectAttendance[currentDate]);
+        if (scheduleIds.length > 0) {
+          // If current schedule is not available for this date, select the first one
+          if (!selectedSchedule || !subjectAttendance[currentDate][selectedSchedule]) {
+            setSelectedSchedule(scheduleIds[0]);
+          }
+        } else {
+          setSelectedSchedule(null);
+        }
+      }
+    }
+  }, [selectedSubject, currentDate, dashboardAttendance, selectedSchedule]);
 
   // Auto-focus input
   useEffect(() => {
@@ -317,23 +348,48 @@ const TeacherDashboard_Page = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   };
 
-  // Get available dates
+  // Get available dates for selected subject
   const getAvailableDates = () => {
     if (!selectedSubject) return [];
     const subjectData = dashboardAttendance[selectedSubject];
     return subjectData ? Object.keys(subjectData).sort().reverse() : [];
   };
 
-  const availableDates = getAvailableDates();
-  const currentDateIndex = availableDates.indexOf(currentDate);
-
-  // Get attendance records
-  const getCurrentAttendanceRecords = () => {
-    if (!selectedSubject) return [];
+  // Get available schedules for selected date
+  const getAvailableSchedules = () => {
+    if (!selectedSubject || !currentDate) return [];
     const subjectData = dashboardAttendance[selectedSubject];
-    return subjectData && subjectData[currentDate] ? subjectData[currentDate] : [];
+    if (!subjectData || !subjectData[currentDate]) return [];
+    
+    return Object.keys(subjectData[currentDate]).map(scheduleId => {
+      const scheduleData = subjectData[currentDate][scheduleId];
+      return {
+        id: scheduleId,
+        time: scheduleData.schedule ? 
+          `${scheduleData.schedule.startTime} - ${scheduleData.schedule.endTime}` : 
+          'Unknown Time',
+        day: scheduleData.schedule?.day || 'Unknown Day',
+        studentCount: scheduleData.students?.filter(s => s.status === 'Present').length || 0,
+        totalStudents: scheduleData.students?.length || 0
+      };
+    });
   };
 
+  // Get current attendance records based on selected subject, date, and schedule
+  const getCurrentAttendanceRecords = () => {
+    if (!selectedSubject || !currentDate || !selectedSchedule) return [];
+    
+    const subjectData = dashboardAttendance[selectedSubject];
+    if (!subjectData || !subjectData[currentDate] || !subjectData[currentDate][selectedSchedule]) {
+      return [];
+    }
+    
+    return subjectData[currentDate][selectedSchedule].students || [];
+  };
+
+  const availableDates = getAvailableDates();
+  const availableSchedules = getAvailableSchedules();
+  const currentDateIndex = availableDates.indexOf(currentDate);
   const currentAttendanceRecords = getCurrentAttendanceRecords();
   const selectedSubjectData = dashboardSubjects.find(subject => subject.id === selectedSubject);
 
@@ -380,18 +436,49 @@ const TeacherDashboard_Page = () => {
   const handleSubjectSelect = (subjectId) => {
     setSelectedSubject(subjectId);
     setCurrentPage(1);
+    
     const subjectAttendance = dashboardAttendance[subjectId];
     if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
-      setCurrentDate(Object.keys(subjectAttendance).sort().reverse()[0]);
+      const dates = Object.keys(subjectAttendance).sort().reverse();
+      setCurrentDate(dates[0]);
+      
+      // Set first schedule for the date
+      const firstDateData = subjectAttendance[dates[0]];
+      if (firstDateData && Object.keys(firstDateData).length > 0) {
+        setSelectedSchedule(Object.keys(firstDateData)[0]);
+      } else {
+        setSelectedSchedule(null);
+      }
     } else {
       setCurrentDate('');
+      setSelectedSchedule(null);
     }
+  };
+
+  // Handle schedule selection
+  const handleScheduleSelect = (scheduleId) => {
+    setSelectedSchedule(scheduleId);
+    setCurrentPage(1);
   };
 
   // Subject color
   const getSubjectColor = (index) => {
     const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-red-500', 'bg-indigo-500'];
     return colors[index % colors.length];
+  };
+
+  // Get status badge color
+  const getStatusBadge = (status) => {
+    switch(status) {
+      case 'Present':
+        return 'bg-green-100 text-green-800';
+      case 'Absent':
+        return 'bg-red-100 text-red-800';
+      case 'Not Registered':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   // AI API call
@@ -407,7 +494,7 @@ const TeacherDashboard_Page = () => {
           query: userQuery,
           userId: userId,
           context: {
-            currentSubject: selectedSubjectData?.name,
+            currentSubject: selectedSubjectData?.title,
             totalSubjects: dashboardSubjects.length
           }
         })
@@ -638,9 +725,6 @@ const TeacherDashboard_Page = () => {
                         <span className="text-sm font-medium text-gray-900">
                           {formatDate(currentDate)}
                         </span>
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                          {currentAttendanceRecords.length} present
-                        </span>
                       </div>
 
                       <button
@@ -650,6 +734,36 @@ const TeacherDashboard_Page = () => {
                       >
                         <FiChevronRight className="h-4 w-4" />
                       </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Schedule Selection */}
+                {availableSchedules.length > 0 && (
+                  <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+                    <p className="text-xs text-gray-500 mb-2">Class Schedules</p>
+                    <div className="flex flex-wrap gap-2">
+                      {availableSchedules.map((schedule) => (
+                        <button
+                          key={schedule.id}
+                          onClick={() => handleScheduleSelect(schedule.id)}
+                          className={`
+                            px-3 py-2 rounded-md text-sm transition-all
+                            ${selectedSchedule === schedule.id
+                              ? 'bg-blue-50 border border-blue-200 text-blue-700'
+                              : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
+                            }
+                          `}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <FiClock className="h-3 w-3" />
+                            <span>{schedule.time}</span>
+                            <span className="text-xs px-1.5 py-0.5 rounded-full bg-white">
+                              {schedule.studentCount}/{schedule.totalStudents}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -681,8 +795,8 @@ const TeacherDashboard_Page = () => {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200">
-                            {currentRecords.map((record) => (
-                              <tr key={record.id} className="hover:bg-gray-50">
+                            {currentRecords.map((record, index) => (
+                              <tr key={record.id || index} className="hover:bg-gray-50">
                                 <td className="px-4 py-3 whitespace-nowrap">
                                   <span className="text-sm text-gray-900">{record.studentName}</span>
                                 </td>
@@ -690,14 +804,18 @@ const TeacherDashboard_Page = () => {
                                   {record.rollNo}
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">
-                                  <div className="flex items-center justify-center">
-                                    <FiClock className="h-3 w-3 mr-1 text-gray-400" />
-                                    {record.time}
-                                  </div>
+                                  {record.time ? (
+                                    <div className="flex items-center justify-center">
+                                      <FiClock className="h-3 w-3 mr-1 text-gray-400" />
+                                      {record.time}
+                                    </div>
+                                  ) : (
+                                    '—'
+                                  )}
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-center">
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    Present
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(record.status)}`}>
+                                    {record.status || 'Present'}
                                   </span>
                                 </td>
                               </tr>
@@ -737,7 +855,7 @@ const TeacherDashboard_Page = () => {
                   ) : (
                     <div className="p-8 text-center">
                       <FiEye className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">No attendance records found</p>
+                      <p className="text-sm text-gray-500">No attendance records found for this schedule</p>
                     </div>
                   )}
                 </div>

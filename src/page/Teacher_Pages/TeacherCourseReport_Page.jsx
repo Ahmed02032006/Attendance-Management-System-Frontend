@@ -515,8 +515,8 @@ const TeacherCourseReport_Page = () => {
                       onClick={prevPage}
                       disabled={currentPage === 1}
                       className={`px-3 py-1 text-sm font-medium rounded-md ${currentPage === 1
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                         }`}
                     >
                       Previous
@@ -527,8 +527,8 @@ const TeacherCourseReport_Page = () => {
                           key={number}
                           onClick={() => paginate(number)}
                           className={`px-3 py-1 text-sm font-medium rounded-md ${currentPage === number
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                             }`}
                         >
                           {number}
@@ -539,8 +539,8 @@ const TeacherCourseReport_Page = () => {
                       onClick={nextPage}
                       disabled={currentPage === totalPages}
                       className={`px-3 py-1 text-sm font-medium rounded-md ${currentPage === totalPages
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                         }`}
                     >
                       Next
