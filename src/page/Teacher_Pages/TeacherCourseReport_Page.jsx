@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
 import {
@@ -48,11 +48,8 @@ const TeacherCourseReport_Page = () => {
   // Modal states
   const [showStudentModal, setShowStudentModal] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
-  
-  // Reference for infinite scroll in modal
-  const tableContainerRef = useRef(null)
 
-  // Pagination state for main table
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [studentsPerPage] = useState(5)
 
@@ -315,7 +312,7 @@ const TeacherCourseReport_Page = () => {
       : 'bg-red-100 text-red-700'
   }
 
-  // Pagination logic for main table
+  // Pagination logic
   const indexOfLastStudent = currentPage * studentsPerPage
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage
   const currentStudents = processedData?.students?.slice(indexOfFirstStudent, indexOfLastStudent) || []
@@ -661,7 +658,8 @@ const TeacherCourseReport_Page = () => {
                     Student Attendance Details
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    {selectedStudent?.name} - {selectedStudent?.rollNo}
+                    {/* Display real student name and roll no from the API response */}
+                    {studentAttendanceDetails.studentInfo?.name} - {studentAttendanceDetails.studentInfo?.rollNo}
                   </p>
                 </div>
                 <button
@@ -672,97 +670,101 @@ const TeacherCourseReport_Page = () => {
                 </button>
               </div>
 
-              {/* Modal Content with Summary Cards */}
-              <div className="p-6">
+              {/* Modal Content */}
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                {/* Student and Subject Info Cards */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2">Student Information</h4>
+                    <p className="text-sm text-gray-600"><span className="font-medium">Name:</span> {studentAttendanceDetails.studentInfo?.name}</p>
+                    <p className="text-sm text-gray-600"><span className="font-medium">Roll No:</span> {studentAttendanceDetails.studentInfo?.rollNo}</p>
+                    <p className="text-sm text-gray-600"><span className="font-medium">Discipline:</span> {studentAttendanceDetails.studentInfo?.discipline}</p>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-green-800 mb-2">Subject Information</h4>
+                    <p className="text-sm text-gray-600"><span className="font-medium">Title:</span> {studentAttendanceDetails.subjectInfo?.title}</p>
+                    <p className="text-sm text-gray-600"><span className="font-medium">Code:</span> {studentAttendanceDetails.subjectInfo?.code}</p>
+                    <p className="text-sm text-gray-600"><span className="font-medium">Department:</span> {studentAttendanceDetails.subjectInfo?.department}</p>
+                    <p className="text-sm text-gray-600"><span className="font-medium">Semester:</span> {studentAttendanceDetails.subjectInfo?.semester}</p>
+                    <p className="text-sm text-gray-600"><span className="font-medium">Session:</span> {studentAttendanceDetails.subjectInfo?.session}</p>
+                  </div>
+                </div>
+
                 {/* Summary Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-blue-600">{studentAttendanceDetails.summary?.totalPresent || 0}</p>
+                    <p className="text-2xl font-bold text-blue-600">{studentAttendanceDetails.summary?.totalPresent}</p>
                     <p className="text-xs text-gray-500">Total Present</p>
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-red-600">{studentAttendanceDetails.summary?.totalAbsent || 0}</p>
+                    <p className="text-2xl font-bold text-red-600">{studentAttendanceDetails.summary?.totalAbsent}</p>
                     <p className="text-xs text-gray-500">Total Absent</p>
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-gray-900">{studentAttendanceDetails.summary?.totalPossible || 0}</p>
+                    <p className="text-2xl font-bold text-gray-900">{studentAttendanceDetails.summary?.totalPossible}</p>
                     <p className="text-xs text-gray-500">Total Classes</p>
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
                     <p className={`text-2xl font-bold ${
-                      (studentAttendanceDetails.summary?.attendancePercentage || 0) >= 75 
+                      studentAttendanceDetails.summary?.attendancePercentage >= 75 
                         ? 'text-green-600' 
-                        : (studentAttendanceDetails.summary?.attendancePercentage || 0) >= 50 
+                        : studentAttendanceDetails.summary?.attendancePercentage >= 50 
                           ? 'text-yellow-600' 
                           : 'text-red-600'
                     }`}>
-                      {studentAttendanceDetails.summary?.attendancePercentage || 0}%
+                      {studentAttendanceDetails.summary?.attendancePercentage}%
                     </p>
                     <p className="text-xs text-gray-500">Percentage</p>
                   </div>
                 </div>
 
-                {/* Attendance Table with Scroll (10 rows visible, more on scroll) */}
+                {/* Attendance Table with Scroll */}
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">Detailed Attendance Record</h4>
-                  <div 
-                    ref={tableContainerRef}
-                    className="overflow-y-auto border border-gray-200 rounded-lg"
-                    style={{ maxHeight: '400px' }}
-                  >
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50 sticky top-0 z-10">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Day</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class Schedule</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marked At</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {studentAttendanceDetails.attendanceByDate?.map((dateEntry) => (
-                          dateEntry.schedules?.map((schedule, idx) => (
-                            <tr key={`${dateEntry.date}-${idx}`} className="hover:bg-gray-50">
-                              <td className="px-4 py-2 text-sm text-gray-900 whitespace-nowrap">
-                                {formatDate(dateEntry.date)}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-600 whitespace-nowrap">
-                                {schedule.day}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-600 whitespace-nowrap">
-                                {schedule.startTime} - {schedule.endTime}
-                              </td>
-                              <td className="px-4 py-2 whitespace-nowrap">
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(schedule.status)}`}>
-                                  {schedule.status}
-                                </span>
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-600 whitespace-nowrap">
-                                {schedule.time || 'N/A'}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-600 whitespace-nowrap">
-                                {schedule.ipAddress || 'N/A'}
-                              </td>
-                            </tr>
-                          ))
-                        ))}
-                        
-                        {/* Show message if no attendance records */}
-                        {(!studentAttendanceDetails.attendanceByDate || studentAttendanceDetails.attendanceByDate.length === 0) && (
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="max-h-[300px] overflow-y-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50 sticky top-0 z-10">
                           <tr>
-                            <td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500">
-                              No attendance records found for this student
-                            </td>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Day</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class Schedule</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marked At</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
                           </tr>
-                        )}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {studentAttendanceDetails.attendanceByDate?.map((dateEntry) => (
+                            dateEntry.schedules?.map((schedule, idx) => (
+                              <tr key={`${dateEntry.date}-${idx}`} className="hover:bg-gray-50">
+                                <td className="px-4 py-2 text-sm text-gray-900">
+                                  {formatDate(dateEntry.date)}
+                                </td>
+                                <td className="px-4 py-2 text-sm text-gray-600">
+                                  {schedule.day}
+                                </td>
+                                <td className="px-4 py-2 text-sm text-gray-600">
+                                  {schedule.startTime} - {schedule.endTime}
+                                </td>
+                                <td className="px-4 py-2">
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(schedule.status)}`}>
+                                    {schedule.status}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-2 text-sm text-gray-600">
+                                  {schedule.time || 'N/A'}
+                                </td>
+                                <td className="px-4 py-2 text-sm text-gray-600">
+                                  {schedule.ipAddress || 'N/A'}
+                                </td>
+                              </tr>
+                            ))
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2 text-right">
-                    Showing {studentAttendanceDetails.attendanceByDate?.reduce((acc, date) => acc + (date.schedules?.length || 0), 0) || 0} records • Scroll for more
-                  </p>
                 </div>
               </div>
 
