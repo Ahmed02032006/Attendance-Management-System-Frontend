@@ -16,7 +16,8 @@ import {
   FiUsers,
   FiUserCheck,
   FiUserPlus,
-  FiAward
+  FiAward,
+  FiChevronDown
 } from 'react-icons/fi'
 import { BiSupport } from "react-icons/bi";
 
@@ -56,7 +57,7 @@ const TeacherDashboard_Page = () => {
   } = useSelector((state) => state.teacherDashboard)
 
   const [selectedSubject, setSelectedSubject] = useState(null)
-  const [selectedSchedule, setSelectedSchedule] = useState(null) // New state for selected schedule
+  const [selectedSchedule, setSelectedSchedule] = useState(null)
   const [currentDate, setCurrentDate] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage] = useState(5)
@@ -367,11 +368,13 @@ const TeacherDashboard_Page = () => {
       // Get schedule info - either from the data or try to find it from the subject
       let scheduleTime = 'Unknown Time';
       let scheduleDay = 'Unknown Day';
+      let formattedTime = 'Unknown Schedule';
 
       if (scheduleData.schedule) {
         // If schedule info is available in the attendance data
         scheduleTime = `${scheduleData.schedule.startTime || '?'} - ${scheduleData.schedule.endTime || '?'}`;
         scheduleDay = scheduleData.schedule.day || 'Unknown Day';
+        formattedTime = `${scheduleDay}, ${scheduleTime}`;
       } else {
         // Try to find schedule info from the selected subject's class schedules
         const subject = dashboardSubjects.find(s => s.id === selectedSubject);
@@ -380,6 +383,7 @@ const TeacherDashboard_Page = () => {
           if (scheduleInfo) {
             scheduleTime = `${scheduleInfo.startTime} - ${scheduleInfo.endTime}`;
             scheduleDay = scheduleInfo.day;
+            formattedTime = `${scheduleDay}, ${scheduleTime}`;
           }
         }
       }
@@ -392,6 +396,7 @@ const TeacherDashboard_Page = () => {
         id: scheduleId,
         time: scheduleTime,
         day: scheduleDay,
+        formattedTime: formattedTime,
         studentCount: presentCount,
         totalStudents: totalStudents
       };
@@ -415,6 +420,9 @@ const TeacherDashboard_Page = () => {
   const currentDateIndex = availableDates.indexOf(currentDate);
   const currentAttendanceRecords = getCurrentAttendanceRecords();
   const selectedSubjectData = dashboardSubjects.find(subject => subject.id === selectedSubject);
+
+  // Get current selected schedule details
+  const currentSchedule = availableSchedules.find(s => s.id === selectedSchedule);
 
   // Pagination
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -479,8 +487,8 @@ const TeacherDashboard_Page = () => {
   };
 
   // Handle schedule selection
-  const handleScheduleSelect = (scheduleId) => {
-    setSelectedSchedule(scheduleId);
+  const handleScheduleSelect = (e) => {
+    setSelectedSchedule(e.target.value);
     setCurrentPage(1);
   };
 
@@ -731,62 +739,53 @@ const TeacherDashboard_Page = () => {
           <div className="lg:col-span-8">
             {selectedSubject ? (
               <>
-                {/* Date Navigation */}
+                {/* Date Navigation with Schedule Dropdown */}
                 {availableDates.length > 0 && (
                   <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-                    <div className="flex items-center justify-between">
-                      <button
-                        onClick={() => navigateDate('prev')}
-                        disabled={currentDateIndex >= availableDates.length - 1}
-                        className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        <FiChevronLeft className="h-4 w-4" />
-                      </button>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      {/* Date Navigation */}
+                      <div className="flex items-center justify-between sm:justify-start sm:space-x-2">
+                        <button
+                          onClick={() => navigateDate('prev')}
+                          disabled={currentDateIndex >= availableDates.length - 1}
+                          className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <FiChevronLeft className="h-4 w-4" />
+                        </button>
 
-                      <div className="flex items-center space-x-2">
-                        <FiCalendar className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm font-medium text-gray-900">
-                          {formatDate(currentDate)}
-                        </span>
+                        <div className="flex items-center space-x-2">
+                          <FiCalendar className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm font-medium text-gray-900">
+                            {formatDate(currentDate)}
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() => navigateDate('next')}
+                          disabled={currentDateIndex <= 0}
+                          className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <FiChevronRight className="h-4 w-4" />
+                        </button>
                       </div>
 
-                      <button
-                        onClick={() => navigateDate('next')}
-                        disabled={currentDateIndex <= 0}
-                        className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        <FiChevronRight className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Schedule Selection */}
-                {availableSchedules.length > 0 && (
-                  <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-                    <p className="text-xs text-gray-500 mb-2">Class Schedules</p>
-                    <div className="flex flex-wrap gap-2">
-                      {availableSchedules.map((schedule) => (
-                        <button
-                          key={schedule.id}
-                          onClick={() => handleScheduleSelect(schedule.id)}
-                          className={`
-                            px-3 py-2 rounded-md text-sm transition-all
-                            ${selectedSchedule === schedule.id
-                              ? 'bg-blue-50 border border-blue-200 text-blue-700'
-                              : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
-                            }
-                          `}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <FiClock className="h-3 w-3" />
-                            <span>{schedule.time}</span>
-                            <span className="text-xs px-1.5 py-0.5 rounded-full bg-white">
-                              {schedule.studentCount}/{schedule.totalStudents}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
+                      {/* Schedule Dropdown */}
+                      {availableSchedules.length > 0 && (
+                        <div className="flex items-center space-x-2">
+                          <FiClock className="h-4 w-4 text-gray-400" />
+                          <select
+                            value={selectedSchedule || ''}
+                            onChange={handleScheduleSelect}
+                            className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                          >
+                            {availableSchedules.map((schedule) => (
+                              <option key={schedule.id} value={schedule.id}>
+                                {schedule.formattedTime} ({schedule.studentCount}/{schedule.totalStudents})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -797,7 +796,14 @@ const TeacherDashboard_Page = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <FiEye className="h-4 w-4 text-gray-400" />
-                        <h3 className="font-medium text-gray-900">Attendance Records</h3>
+                        <h3 className="font-medium text-gray-900">
+                          Attendance Records
+                          {currentSchedule && (
+                            <span className="ml-2 text-xs font-normal text-gray-500">
+                              ({currentSchedule.formattedTime})
+                            </span>
+                          )}
+                        </h3>
                       </div>
                       <span className="text-xs text-gray-500">
                         {currentAttendanceRecords.length} students
