@@ -203,9 +203,9 @@ const TeacherSubjects_Page = () => {
 
   // Function to check if schedule already exists for the same day and time
   const isScheduleDuplicate = (day, startTime, endTime) => {
-    return classSchedule.some(schedule => 
-      schedule.day === day && 
-      schedule.startTime === startTime && 
+    return classSchedule.some(schedule =>
+      schedule.day === day &&
+      schedule.startTime === startTime &&
       schedule.endTime === endTime
     );
   };
@@ -218,7 +218,7 @@ const TeacherSubjects_Page = () => {
 
     return classSchedule.some(schedule => {
       if (schedule.day !== day) return false;
-      
+
       const existingStart = parseInt(schedule.startTime.split(':')[0]) * 60 + parseInt(schedule.startTime.split(':')[1]);
       const existingEnd = parseInt(schedule.endTime.split(':')[0]) * 60 + parseInt(schedule.endTime.split(':')[1]);
 
@@ -1172,91 +1172,216 @@ const TeacherSubjects_Page = () => {
                   />
                 </div>
 
-                {/* Class Schedule Section */}
-                <div className="border border-gray-200 rounded-lg p-4 bg-white">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-medium text-gray-700 flex items-center">
-                      <FiClock className="h-4 w-4 mr-1.5 text-gray-500" />
-                      Class Schedule <span className="text-red-500 ml-1">*</span>
-                    </label>
+                {/* Class Schedule Section - Enhanced UI */}
+                <div className="border border-gray-200 rounded-xl p-5 bg-gradient-to-br from-white to-gray-50/30 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <FiClock className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-gray-800">
+                          Class Schedule <span className="text-red-500 ml-1">*</span>
+                        </label>
+                        <p className="text-xs text-gray-500 mt-0.5">Add your course timing slots</p>
+                      </div>
+                    </div>
                     {classSchedule.length > 0 && (
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md">
-                        {classSchedule.length} added
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className="bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-full border border-blue-200 shadow-xs">
+                          {classSchedule.length} {classSchedule.length === 1 ? 'slot' : 'slots'} added
+                        </span>
+                      </div>
                     )}
                   </div>
 
-                  {/* Input Row */}
-                  <div className="flex gap-2 mb-3">
-                    <select
-                      name="day"
-                      value={currentSchedule.day}
-                      onChange={handleScheduleChange}
-                      className="w-28 px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                    >
-                      <option value="Monday">Mon</option>
-                      <option value="Tuesday">Tue</option>
-                      <option value="Wednesday">Wed</option>
-                      <option value="Thursday">Thu</option>
-                      <option value="Friday">Fri</option>
-                      <option value="Saturday">Sat</option>
-                      <option value="Sunday">Sun</option>
-                    </select>
+                  {/* Schedule Input Card */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-xs">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                      {/* Day Selection */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                          Day
+                        </label>
+                        <div className="relative">
+                          <select
+                            name="day"
+                            value={currentSchedule.day}
+                            onChange={handleScheduleChange}
+                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+                          >
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                          </select>
+                          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <FiChevronDown className="h-4 w-4 text-gray-400" />
+                          </div>
+                        </div>
+                      </div>
 
-                    <input
-                      type="time"
-                      name="startTime"
-                      value={currentSchedule.startTime}
-                      onChange={handleScheduleChange}
-                      className="flex-1 px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      step="1800"
-                    />
+                      {/* Start Time */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                          Start Time
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="time"
+                            name="startTime"
+                            value={currentSchedule.startTime}
+                            onChange={handleScheduleChange}
+                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            step="1800"
+                          />
+                          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <FiClock className="h-4 w-4 text-gray-400" />
+                          </div>
+                        </div>
+                      </div>
 
-                    <span className="text-gray-400 self-center">—</span>
+                      {/* End Time */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                          End Time
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="time"
+                            name="endTime"
+                            value={currentSchedule.endTime}
+                            onChange={handleScheduleChange}
+                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            step="1800"
+                          />
+                          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <FiClock className="h-4 w-4 text-gray-400" />
+                          </div>
+                        </div>
+                      </div>
 
-                    <input
-                      type="time"
-                      name="endTime"
-                      value={currentSchedule.endTime}
-                      onChange={handleScheduleChange}
-                      className="flex-1 px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      step="1800"
-                    />
+                      {/* Add Button */}
+                      <div>
+                        <button
+                          type="button"
+                          onClick={addSchedule}
+                          className="w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                        >
+                          <FiPlus className="h-4 w-4" />
+                          Add Slot
+                        </button>
+                      </div>
+                    </div>
 
-                    <button
-                      type="button"
-                      onClick={addSchedule}
-                      className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 flex items-center"
-                      title="Add schedule"
-                    >
-                      <FiPlus className="h-4 w-4" />
-                    </button>
+                    {/* Time Format Hint */}
+                    <div className="flex items-center gap-4 mt-3 text-[10px] text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                        24-hour format
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
+                        No overlapping allowed
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Schedule List */}
-                  {classSchedule.length > 0 && (
-                    <div className="space-y-1.5 mt-2">
-                      {classSchedule.map((schedule, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md text-sm">
-                          <span>
-                            <span className="font-medium w-8 inline-block">{schedule.day.substring(0, 3)}</span>
-                            <span className="text-gray-600">{schedule.startTime} - {schedule.endTime}</span>
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => removeSchedule(index)}
-                            className="text-gray-400 hover:text-red-500"
-                            title="Remove schedule"
-                          >
-                            <FiX className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  {/* Schedule List - Enhanced Display */}
+                  {classSchedule.length > 0 ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Added Schedules
+                        </h4>
+                        <span className="text-[10px] text-gray-400">Click × to remove</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {classSchedule.map((schedule, index) => {
+                          // Format time to 12-hour for better display
+                          const formatTime12 = (time) => {
+                            const [hour, minute] = time.split(':');
+                            const h = parseInt(hour);
+                            const ampm = h >= 12 ? 'PM' : 'AM';
+                            const h12 = h % 12 || 12;
+                            return `${h12}:${minute} ${ampm}`;
+                          };
 
-                  {classSchedule.length === 0 && (
-                    <p className="text-xs text-gray-400 text-center py-2">No schedules added</p>
+                          return (
+                            <div
+                              key={index}
+                              className="group relative bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:shadow-md transition-all duration-200"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start space-x-3">
+                                  {/* Day Icon */}
+                                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+                                    <span className="text-xs font-bold text-blue-700">
+                                      {schedule.day.substring(0, 3)}
+                                    </span>
+                                  </div>
+
+                                  {/* Time Info */}
+                                  <div>
+                                    <div className="flex items-center space-x-2">
+                                      <span className="text-xs font-medium text-gray-700">
+                                        {formatTime12(schedule.startTime)}
+                                      </span>
+                                      <span className="text-gray-300">→</span>
+                                      <span className="text-xs font-medium text-gray-700">
+                                        {formatTime12(schedule.endTime)}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                        {schedule.day}
+                                      </span>
+                                      <span className="text-[10px] text-gray-400">
+                                        {Math.round(
+                                          (new Date(`2000-01-01T${schedule.endTime}`) -
+                                            new Date(`2000-01-01T${schedule.startTime}`)) / 60000
+                                        )} mins
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Remove Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => removeSchedule(index)}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 rounded-md"
+                                  title="Remove schedule"
+                                >
+                                  <FiX className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                                </button>
+                              </div>
+
+                              {/* Duration Bar */}
+                              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 p-8 text-center">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <FiClock className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-700">No schedules added yet</p>
+                      <p className="text-xs text-gray-400 mt-1 max-w-[250px] mx-auto">
+                        Add your first class schedule using the form above
+                      </p>
+                      <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-gray-300">
+                        <span>Monday 09:00</span>
+                        <span>→</span>
+                        <span>Friday 14:30</span>
+                      </div>
+                    </div>
                   )}
                 </div>
 
