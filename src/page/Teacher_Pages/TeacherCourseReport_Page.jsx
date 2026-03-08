@@ -232,9 +232,9 @@ const TeacherCourseReport_Page = () => {
     dispatch(getStudentAttendanceDetails({
       rollNo: student.rollNo,
       subjectId: selectedCourse,
-      teacherId: user?.id,
-      fromDate,
-      toDate
+      teacherId: user?.id
+      // fromDate,
+      // toDate
     })).then((result) => {
       if (result.payload?.success) {
         setShowStudentModal(true)
