@@ -28,7 +28,7 @@ import {
   FiDownloadCloud,
   FiUploadCloud,
   FiTable,
-  FiArrowUp,
+  FiChevronDown,
   FiArrowDown
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
