@@ -1771,27 +1771,27 @@ const TeacherSubjects_Page = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Course Title</span>
-                      <span className="text-sm text-gray-900 font-medium">{selectedSubject.title}</span>
+                      <span className="text-xs text-gray-900">{selectedSubject.title}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Course Code</span>
-                      <span className="text-sm text-gray-900 font-mono">{selectedSubject.code}</span>
+                      <span className="text-xs text-gray-900">{selectedSubject.code}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Discipline</span>
-                      <span className="text-sm text-gray-900">{selectedSubject.departmentOffering}</span>
+                      <span className="text-xs text-gray-900">{selectedSubject.departmentOffering}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Semester</span>
-                      <span className="text-sm text-gray-900">{selectedSubject.semester}</span>
+                      <span className="text-xs text-gray-900">{selectedSubject.semester}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Credit Hours</span>
-                      <span className="text-sm text-gray-900">{selectedSubject.creditHours}</span>
+                      <span className="text-xs text-gray-900">{selectedSubject.creditHours}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Session</span>
-                      <span className="text-sm text-gray-900">{selectedSubject.session}</span>
+                      <span className="text-xs text-gray-900">{selectedSubject.session}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Status</span>
@@ -1801,7 +1801,7 @@ const TeacherSubjects_Page = () => {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Total Students</span>
-                      <span className="text-sm text-gray-900">{selectedSubject.registeredStudentsCount || 0}</span>
+                      <span className="text-xs text-gray-900">{selectedSubject.registeredStudentsCount || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -1812,7 +1812,7 @@ const TeacherSubjects_Page = () => {
                 <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
                   <h4 className="text-xs font-medium text-gray-600">Class Schedule</h4>
                 </div>
-                <div className="p-4">
+                <div className="p-2">
                   {selectedSubject.classSchedule && selectedSubject.classSchedule.length > 0 ? (
                     <div className="space-y-2">
                       {formatScheduleDetailed(selectedSubject.classSchedule)}
