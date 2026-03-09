@@ -1694,7 +1694,7 @@ const TeacherSubjects_Page = () => {
       {/* Merged Student Management Modal */}
       {showStudentManagementModal && selectedSubject && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200 bg-white">
               <div className="flex items-center justify-between">
