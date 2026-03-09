@@ -1097,18 +1097,18 @@ const TeacherSubjects_Page = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center justify-center space-x-2">
                           <button
-                            onClick={() => handleViewDetails(subject)}
-                            className="p-1.5 text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-                            title="View Details"
-                          >
-                            <FiEye className="h-4 w-4" />
-                          </button>
-                          <button
                             onClick={() => handleStudentManagement(subject)}
                             className="p-1.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
                             title="Manage Students"
                           >
                             <FiUsers className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleViewDetails(subject)}
+                            className="p-1.5 text-yellow-600 hover:text-yellow-700 hover:bg-gray-100 rounded-md transition-colors"
+                            title="View Details"
+                          >
+                            <FiEye className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => openEditModal(subject)}
