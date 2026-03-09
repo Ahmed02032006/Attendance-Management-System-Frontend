@@ -38,7 +38,7 @@ const TeacherAttendance_Page = () => {
   const { registeredStudents, studentsLoading } = useSelector((state) => state.teacherSubject)
 
   const [selectedSubject, setSelectedSubject] = useState('');
-  const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [selectedSchedule, setSelectedSchedule] = useState(null); // New state for selected schedule
   const [showSubjectModal, setShowSubjectModal] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
@@ -53,9 +53,6 @@ const TeacherAttendance_Page = () => {
     subject: '',
     uniqueCode: ''
   });
-
-  // New state for schedule dropdown in table
-  const [showScheduleDropdown, setShowScheduleDropdown] = useState(false);
 
   // Updated manual attendance form state
   const [manualAttendanceForm, setManualAttendanceForm] = useState({
@@ -108,6 +105,7 @@ const TeacherAttendance_Page = () => {
   // Set initial selected subject when data is loaded
   useEffect(() => {
     if (subjectsWithAttendance.length > 0 && !selectedSubject) {
+      // Don't auto-select, let user select from modal
       setShowSubjectModal(true);
     }
   }, [subjectsWithAttendance, selectedSubject])
@@ -137,9 +135,6 @@ const TeacherAttendance_Page = () => {
       }
       if (!event.target.closest('.rollno-dropdown')) {
         setShowRollNoDropdown(false);
-      }
-      if (!event.target.closest('.schedule-dropdown')) {
-        setShowScheduleDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -267,6 +262,7 @@ const TeacherAttendance_Page = () => {
           bValue = b.discipline?.toLowerCase() || '';
           break;
         case 'status':
+          // Define priority: Present > Not Registered > Absent
           const statusPriority = {
             'Present': 1,
             'Not Registered': 2,
@@ -387,7 +383,7 @@ const TeacherAttendance_Page = () => {
             `"${student.discipline}"`,
             `"${formatShortDate(currentDate)}"`,
             `"${student.time}"`,
-            `"${student.title || student.subject || 'N/A'}"`
+            `"${student.title || student.subject || 'N/A'}"` // Fix: Use title instead of subject
           ].join(',')
         )
       ].join('\n');
@@ -406,6 +402,8 @@ const TeacherAttendance_Page = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // toast.success('Data exported successfully!');
     } catch (error) {
       toast.error('Failed to export data');
     }
@@ -454,6 +452,7 @@ const TeacherAttendance_Page = () => {
     const value = e.target.value;
     setRollNoSearchTerm(value);
 
+    // If user types manually, clear auto-filled fields
     if (value !== manualAttendanceForm.rollNo) {
       setManualAttendanceForm(prev => ({
         ...prev,
@@ -486,19 +485,9 @@ const TeacherAttendance_Page = () => {
     setSortConfig({ key: null, direction: 'asc' });
   };
 
-  // Function to handle schedule selection from dropdown
-  const handleScheduleSelect = (schedule) => {
-    setSelectedSchedule(schedule);
-    setShowScheduleDropdown(false);
-    setCurrentPage(1);
-    setSortConfig({ key: null, direction: 'asc' });
-    
-    // Optional: Show success message
-    toast.success(`Switched to ${schedule.day} schedule`, { autoClose: 2000 });
-  };
-
   // Function to generate random code
   const generateRandomCode = () => {
+    // Generate a 6-digit random number
     const randomNum = Math.floor(100000 + Math.random() * 900000);
     setAttendanceForm(prev => ({ ...prev, uniqueCode: randomNum.toString() }));
   };
@@ -510,6 +499,7 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
+    // Validate that schedule is selected
     if (!selectedSchedule) {
       toast.error('Please select a class schedule first');
       return;
@@ -526,8 +516,8 @@ const TeacherAttendance_Page = () => {
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
     url.searchParams.append('code', originalCode);
-    url.searchParams.append('subject', attendanceForm.subject);
-    url.searchParams.append('scheduleId', selectedSchedule._id);
+    url.searchParams.append('subject', attendanceForm.subject); // subject ID
+    url.searchParams.append('scheduleId', selectedSchedule._id); // Add scheduleId
     url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
     url.searchParams.append('subjectCode', subjectCode || 'N/A');
     url.searchParams.append('timestamp', currentTime.getTime());
@@ -564,6 +554,7 @@ const TeacherAttendance_Page = () => {
 
   // Handle Manual Attendance - Updated to fetch registered students
   const handleManualAttendance = async () => {
+    // Set default values
     const currentTime = new Date();
     const hours = currentTime.getHours();
     const minutes = currentTime.getMinutes();
@@ -583,6 +574,7 @@ const TeacherAttendance_Page = () => {
 
     setRollNoSearchTerm('');
 
+    // Fetch registered students for the selected subject
     try {
       await dispatch(getRegisteredStudents({
         subjectId: selectedSubject,
@@ -597,18 +589,22 @@ const TeacherAttendance_Page = () => {
   };
 
   const handleSubmitManualAttendance = () => {
+    // Validate required fields
     if (!manualAttendanceForm.studentName || !manualAttendanceForm.rollNo || !manualAttendanceForm.discipline) {
       toast.error('Please fill in all required fields');
       return;
     }
 
+    // Validate that schedule is selected
     if (!selectedSchedule) {
       toast.error('Please select a class schedule first');
       return;
     }
 
+    // Get subject details
     const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
 
+    // Create attendance record with scheduleId
     const attendanceRecord = {
       studentName: manualAttendanceForm.studentName,
       rollNo: manualAttendanceForm.rollNo,
@@ -628,9 +624,11 @@ const TeacherAttendance_Page = () => {
       .then((res) => {
         console.log('Attendance response:', res);
 
+        // Check if the payload exists and has success property
         if (res.payload && res.payload.success === true) {
           toast.success('Manual attendance marked successfully!');
 
+          // Refresh the attendance data
           dispatch(getSubjectsWithAttendance(userId)).unwrap()
             .then(() => {
               console.log('Attendance data refreshed');
@@ -639,6 +637,7 @@ const TeacherAttendance_Page = () => {
               console.error('Error refreshing attendance:', refreshError);
             });
 
+          // Reset form
           setManualAttendanceForm({
             studentName: '',
             rollNo: '',
@@ -649,6 +648,7 @@ const TeacherAttendance_Page = () => {
             ipAddress: ''
           });
         } else {
+          // Handle error case
           const errorMessage = res.payload?.message || 'Failed to mark attendance';
           toast.error(errorMessage);
           console.error('Attendance error:', res.payload);
@@ -657,6 +657,7 @@ const TeacherAttendance_Page = () => {
       .catch((error) => {
         console.error('Attendance submission error:', error);
 
+        // Check if error has response data
         if (error.response && error.response.data) {
           toast.error(error.response.data.message || 'Failed to mark attendance');
         } else if (error.message) {
@@ -669,6 +670,7 @@ const TeacherAttendance_Page = () => {
         setShowManualModal(false);
         setRollNoSearchTerm('');
 
+        // Reset form
         setManualAttendanceForm({
           studentName: '',
           rollNo: '',
@@ -738,6 +740,7 @@ const TeacherAttendance_Page = () => {
   const handleStudentClick = (student) => {
     setSelectedStudent(student);
     setShowStudentModal(true);
+    // Reset modal sorting to default
     setModalSortConfig({ key: 'date', direction: 'desc' });
   };
 
@@ -757,29 +760,32 @@ const TeacherAttendance_Page = () => {
 
     Object.entries(subject.attendance).forEach(([date, schedules]) => {
       Object.entries(schedules).forEach(([scheduleId, scheduleData]) => {
+        // Find if student has a record for this date/schedule
         const studentRecord = scheduleData.students.find(record =>
           record.rollNo === student.rollNo
         );
 
+        // Get schedule details
         const schedule = subject.classSchedule.find(s => s._id === scheduleId);
         const scheduleDisplay = schedule ?
           `${schedule.day} ${schedule.startTime}-${schedule.endTime}${schedule.room ? ` (${schedule.room})` : ''}` :
           'Unknown Schedule';
 
+        // Determine status based on whether studentRecord exists
         const isPresent = !!studentRecord;
 
         allAttendance.push({
-          ...(studentRecord || {}),
+          ...(studentRecord || {}), // Spread if exists, otherwise empty
           date: date,
           day: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
-          time: isPresent ? studentRecord.time : '--',
+          time: isPresent ? studentRecord.time : '--', // Show -- if absent
           schedule: scheduleDisplay,
           scheduleId: scheduleId,
           title: subject?.title || 'Unknown Subject',
           discipline: studentRecord?.discipline || student?.discipline || 'N/A',
           studentName: student?.studentName,
           rollNo: student?.rollNo,
-          status: isPresent ? 'Present' : 'Absent'
+          status: isPresent ? 'Present' : 'Absent' // Set status based on presence
         });
       });
     });
@@ -799,13 +805,6 @@ const TeacherAttendance_Page = () => {
   const formatScheduleDisplay = (schedule) => {
     if (!schedule) return '';
     return `${schedule.day}, ${schedule.startTime} - ${schedule.endTime}`;
-  };
-
-  // Get all schedules for the selected subject
-  const getAllSchedules = () => {
-    if (!selectedSubject) return [];
-    const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
-    return subject?.classSchedule || [];
   };
 
   // Loading state
@@ -1016,55 +1015,12 @@ const TeacherAttendance_Page = () => {
                           {getSortIcon('discipline')}
                         </div>
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleModalSort('schedule')}>
                         <div className="flex items-center space-x-1">
                           <FiClock className="w-3 h-3" />
                           <span>Class Schedule</span>
-                          {/* Dropdown Icon for Schedule Selection */}
-                          <div className="relative schedule-dropdown ml-1">
-                            <button
-                              onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
-                              className="p-1 hover:bg-gray-200 rounded-full transition-colors focus:outline-none"
-                              title="Change schedule"
-                            >
-                              <FiChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showScheduleDropdown ? 'rotate-180' : ''}`} />
-                            </button>
-                            
-                            {/* Schedule Dropdown Menu */}
-                            {showScheduleDropdown && (
-                              <div className="absolute left-0 mt-1 w-64 bg-white rounded-md shadow-lg border border-gray-200 z-50 max-h-60 overflow-y-auto">
-                                <div className="py-1">
-                                  <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 border-b border-gray-200">
-                                    Select Schedule
-                                  </div>
-                                  {getAllSchedules().map((schedule, index) => (
-                                    <button
-                                      key={schedule._id || index}
-                                      onClick={() => handleScheduleSelect(schedule)}
-                                      className={`w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors text-sm border-b border-gray-100 last:border-b-0 ${
-                                        selectedSchedule?._id === schedule._id 
-                                          ? 'bg-blue-50 text-blue-700 font-medium' 
-                                          : 'text-gray-700'
-                                      }`}
-                                    >
-                                      <div className="flex flex-col">
-                                        <span className="font-medium">{schedule.day}</span>
-                                        <span className="text-xs text-gray-500">
-                                          {schedule.startTime} - {schedule.endTime}
-                                          {schedule.room && ` • ${schedule.room}`}
-                                        </span>
-                                      </div>
-                                    </button>
-                                  ))}
-                                  {getAllSchedules().length === 0 && (
-                                    <div className="px-3 py-4 text-sm text-gray-500 text-center">
-                                      No schedules available
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                          {getModalSortIcon('schedule')}
                         </div>
                       </th>
                       <th
@@ -1191,12 +1147,14 @@ const TeacherAttendance_Page = () => {
         {!selectedSubject && !showSubjectModal && subjectsWithAttendance.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <div className="flex flex-col items-center">
+              {/* Simple Icon */}
               <div className="mb-4">
                 <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100">
                   <FiGrid className="h-8 w-8 text-gray-400" />
                 </div>
               </div>
 
+              {/* Text Content */}
               <h3 className="text-base font-medium text-gray-900 mb-2">
                 No Course Selected
               </h3>
@@ -1204,6 +1162,7 @@ const TeacherAttendance_Page = () => {
                 Select a course to view and manage attendance records
               </p>
 
+              {/* Action Button */}
               <button
                 onClick={() => setShowSubjectModal(true)}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors flex items-center gap-2"
@@ -1215,10 +1174,11 @@ const TeacherAttendance_Page = () => {
           </div>
         )}
 
-        {/* No Data State */}
+        {/* No Data State - Clean Design */}
         {subjectsWithAttendance.length === 0 && !isLoading && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <div className="flex flex-col items-center">
+              {/* Simple Icon */}
               <div className="mb-4">
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100">
                   <svg
@@ -1237,6 +1197,7 @@ const TeacherAttendance_Page = () => {
                 </div>
               </div>
 
+              {/* Text Content */}
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No Courses Found
               </h3>
@@ -1244,6 +1205,7 @@ const TeacherAttendance_Page = () => {
                 You don't have any courses with attendance data yet. Create your first course to get started.
               </p>
 
+              {/* Action Buttons */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => window.location.href = '/teacher/subject'}
@@ -1264,17 +1226,20 @@ const TeacherAttendance_Page = () => {
         )}
       </div>
 
-      {/* Subject Selection Modal */}
+      {/* Subject Selection Modal - Two Dropdown Design */}
       {showSubjectModal && subjectsWithAttendance.length > 0 && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-3xl shadow-xl">
+            {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">Select Course & Schedule</h3>
               <p className="text-xs text-gray-500 mt-1">Choose a subject and its class schedule</p>
             </div>
 
+            {/* Form Content */}
             <div className="p-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                {/* Subject Dropdown */}
                 <div className="flex-1 w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Subject <span className="text-red-500">*</span>
@@ -1284,7 +1249,7 @@ const TeacherAttendance_Page = () => {
                     onChange={(e) => {
                       const subjectId = e.target.value;
                       setSelectedSubject(subjectId);
-                      setSelectedSchedule(null);
+                      setSelectedSchedule(null); // Reset schedule when subject changes
                     }}
                     className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                   >
@@ -1297,6 +1262,7 @@ const TeacherAttendance_Page = () => {
                   </select>
                 </div>
 
+                {/* Schedule Dropdown - Always visible but disabled until subject selected */}
                 <div className="flex-1 w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Schedule <span className="text-red-500">*</span>
@@ -1329,6 +1295,7 @@ const TeacherAttendance_Page = () => {
                   </select>
                 </div>
 
+                {/* View Attendance Button */}
                 <div className="flex-shrink-0 mt-2 sm:mt-0">
                   <label className="block text-sm font-medium text-gray-700 mb-2 opacity-0 sm:invisible">
                     Action
@@ -1352,6 +1319,7 @@ const TeacherAttendance_Page = () => {
                 </div>
               </div>
 
+              {/* No Schedule Warning */}
               {selectedSubject &&
                 subjectsWithAttendance.find(s => s.id === selectedSubject)?.classSchedule?.length === 0 && (
                   <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
@@ -1367,6 +1335,7 @@ const TeacherAttendance_Page = () => {
                 )}
             </div>
 
+            {/* Footer with Cancel Button Only */}
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end">
               <button
                 onClick={() => {
@@ -1455,7 +1424,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Manual Attendance Modal */}
+      {/* Manual Attendance Modal - UPDATED with searchable roll number dropdown */}
       {showManualModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -1464,6 +1433,7 @@ const TeacherAttendance_Page = () => {
               <p className="text-xs text-gray-500 mt-1">Select a student from the list or type roll number</p>
             </div>
             <div className="p-6 space-y-4">
+              {/* Roll Number Field with Dropdown */}
               <div className="relative rollno-dropdown">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Roll No *
@@ -1479,6 +1449,7 @@ const TeacherAttendance_Page = () => {
                   autoComplete="off"
                 />
 
+                {/* Dropdown for registered students */}
                 {showRollNoDropdown && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     {studentsLoading ? (
@@ -1511,6 +1482,7 @@ const TeacherAttendance_Page = () => {
                 )}
               </div>
 
+              {/* Student Name Field - Disabled */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Student Name *
@@ -1525,6 +1497,7 @@ const TeacherAttendance_Page = () => {
                 />
               </div>
 
+              {/* Discipline Field - Disabled */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Discipline *
