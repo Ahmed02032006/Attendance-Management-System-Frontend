@@ -29,7 +29,8 @@ import {
   FiUploadCloud,
   FiTable,
   FiArrowUp,
-  FiArrowDown
+  FiArrowDown,
+  FiEye
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import * as XLSX from 'xlsx'
@@ -56,6 +57,7 @@ const TeacherSubjects_Page = () => {
   const [showResetModal, setShowResetModal] = useState(false)
   const [showStudentManagementModal, setShowStudentManagementModal] = useState(false)
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
@@ -161,7 +163,7 @@ const TeacherSubjects_Page = () => {
       const newHour = currentHour === 23 ? 0 : currentHour + 1
       return {
         ...prev,
-        [field]: newHour.toString().padStart(2, '0')
+        [field]: newHour.toString().padStart(2, '00')
       }
     })
   }
@@ -172,7 +174,7 @@ const TeacherSubjects_Page = () => {
       const newHour = currentHour === 0 ? 23 : currentHour - 1
       return {
         ...prev,
-        [field]: newHour.toString().padStart(2, '0')
+        [field]: newHour.toString().padStart(2, '00')
       }
     })
   }
@@ -180,7 +182,7 @@ const TeacherSubjects_Page = () => {
   const incrementMinute = (field) => {
     setCurrentSchedule(prev => {
       const currentMinute = parseInt(prev[field])
-      const currentIndex = minutes.indexOf(currentMinute.toString().padStart(2, '0'))
+      const currentIndex = minutes.indexOf(currentMinute.toString().padStart(2, '00'))
       const nextIndex = (currentIndex + 1) % minutes.length
       return {
         ...prev,
@@ -192,7 +194,7 @@ const TeacherSubjects_Page = () => {
   const decrementMinute = (field) => {
     setCurrentSchedule(prev => {
       const currentMinute = parseInt(prev[field])
-      const currentIndex = minutes.indexOf(currentMinute.toString().padStart(2, '0'))
+      const currentIndex = minutes.indexOf(currentMinute.toString().padStart(2, '00'))
       const prevIndex = (currentIndex - 1 + minutes.length) % minutes.length
       return {
         ...prev,
@@ -304,6 +306,33 @@ const TeacherSubjects_Page = () => {
     return Object.entries(grouped).map(([day, times]) => (
       <div key={day} className="text-xs">
         <span className="font-medium">{day}:</span> {times.join(', ')}
+      </div>
+    ));
+  };
+
+  // Format schedule for detailed view
+  const formatScheduleDetailed = (schedules) => {
+    if (!schedules || schedules.length === 0) return 'No schedule set';
+
+    // Function to convert 24-hour time to 12-hour format
+    const convertTo12Hour = (time) => {
+      const [hour, minute] = time.split(':');
+      const hourInt = parseInt(hour);
+      const ampm = hourInt >= 12 ? 'PM' : 'AM';
+      const hour12 = hourInt % 12 || 12;
+      return `${hour12}:${minute} ${ampm}`;
+    };
+
+    // Sort days in order
+    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const sortedSchedules = [...schedules].sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
+
+    return sortedSchedules.map((schedule, index) => (
+      <div key={index} className="flex items-center py-2 border-b border-gray-100 last:border-0">
+        <span className="w-24 text-sm font-medium text-gray-700">{schedule.day}</span>
+        <span className="text-sm text-gray-600">
+          {convertTo12Hour(schedule.startTime)} – {convertTo12Hour(schedule.endTime)}
+        </span>
       </div>
     ));
   };
@@ -791,6 +820,12 @@ const TeacherSubjects_Page = () => {
     }
   };
 
+  // Handle view subject details
+  const handleViewDetails = (subject) => {
+    setSelectedSubject(subject);
+    setShowDetailsModal(true);
+  };
+
   const openCreateModal = () => {
     resetForm()
     setClassSchedule([])
@@ -1061,6 +1096,13 @@ const TeacherSubjects_Page = () => {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center justify-center space-x-2">
+                          <button
+                            onClick={() => handleViewDetails(subject)}
+                            className="p-1.5 text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                            title="View Details"
+                          >
+                            <FiEye className="h-4 w-4" />
+                          </button>
                           <button
                             onClick={() => handleStudentManagement(subject)}
                             className="p-1.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
@@ -1691,9 +1733,141 @@ const TeacherSubjects_Page = () => {
         </div>
       )}
 
+      {/* Subject Details Modal */}
+      {showDetailsModal && selectedSubject && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className={`w-10 h-10 ${selectedSubject.color || 'bg-blue-500'} rounded-lg flex items-center justify-center text-white font-semibold text-lg`}>
+                  {selectedSubject.title?.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Course Details</h3>
+                  <p className="text-sm text-gray-500">{selectedSubject.code} • {selectedSubject.session}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              {/* Basic Information */}
+              <div className="mb-6">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+                  <FiInfo className="h-4 w-4 mr-1.5" />
+                  Basic Information
+                </h4>
+                <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Course Title</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedSubject.title}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Course Code</p>
+                    <p className="text-sm font-medium text-gray-900 font-mono">{selectedSubject.code}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Discipline</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedSubject.departmentOffering}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Semester</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedSubject.semester}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Credit Hours</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedSubject.creditHours}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Session</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedSubject.session}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Status</p>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedSubject.status)}`}>
+                      {selectedSubject.status}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Total Students</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedSubject.registeredStudentsCount || 0}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Class Schedule */}
+              <div className="mb-6">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+                  <FiClock className="h-4 w-4 mr-1.5" />
+                  Class Schedule
+                </h4>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  {selectedSubject.classSchedule && selectedSubject.classSchedule.length > 0 ? (
+                    <div className="space-y-1">
+                      {formatScheduleDetailed(selectedSubject.classSchedule)}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">No schedule set</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Statistics */}
+              <div className="mb-6">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+                  <FiLayers className="h-4 w-4 mr-1.5" />
+                  Statistics
+                </h4>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-blue-50 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold text-blue-600">{selectedSubject.registeredStudentsCount || 0}</p>
+                    <p className="text-xs text-gray-600 mt-1">Registered Students</p>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold text-green-600">{selectedSubject.classSchedule?.length || 0}</p>
+                    <p className="text-xs text-gray-600 mt-1">Class Sessions</p>
+                  </div>
+                  <div className="bg-purple-50 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold text-purple-600">{selectedSubject.creditHours}</p>
+                    <p className="text-xs text-gray-600 mt-1">Credit Hours</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-3 flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  openEditModal(selectedSubject);
+                }}
+                className="px-4 py-2 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors flex items-center"
+              >
+                <FiEdit className="h-3.5 w-3.5 mr-1.5" />
+                Edit Course
+              </button>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="px-4 py-2 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Merged Student Management Modal */}
       {showStudentManagementModal && selectedSubject && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50 rounded-lg">
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200 bg-white">
