@@ -1075,13 +1075,13 @@ const TeacherSubjects_Page = () => {
                           >
                             <FiEdit className="h-4 w-4" />
                           </button>
-                          <button
+                          {/* <button
                             onClick={() => openResetModal(subject)}
                             className="p-1.5 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors"
                             title="Reset Attendance"
                           >
                             <FiRefreshCcw className="h-4 w-4" />
-                          </button>
+                          </button> */}
                           <button
                             onClick={() => openDeleteModal(subject)}
                             className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
@@ -2091,9 +2091,9 @@ const TeacherSubjects_Page = () => {
                             <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2">
                               <span className="text-green-600 text-[10px] font-bold">✓</span>
                             </div>
-                            <span className="text-xs text-gray-600">Column: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-blue-600 text-[10px] font-medium">Registration No</span></span>
+                            <span className="text-xs text-gray-600">Column: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-blue-600 text-[10px] font-medium">Registration No , Student Name & Discipline</span></span>
                           </div>
-                          <div className="flex items-center">
+                          {/* <div className="flex items-center">
                             <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2">
                               <span className="text-green-600 text-[10px] font-bold">✓</span>
                             </div>
@@ -2104,7 +2104,7 @@ const TeacherSubjects_Page = () => {
                               <span className="text-green-600 text-[10px] font-bold">✓</span>
                             </div>
                             <span className="text-xs text-gray-600">Column: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-blue-600 text-[10px] font-medium">Discipline</span></span>
-                          </div>
+                          </div> */}
                           <div className="flex items-center">
                             <div className="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center mr-2">
                               <span className="text-yellow-600 text-[10px] font-bold">!</span>
