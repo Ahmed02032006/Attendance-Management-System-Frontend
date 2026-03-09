@@ -1795,7 +1795,7 @@ const TeacherSubjects_Page = () => {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Status</span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedSubject.status)}`}>
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedSubject.status)}`}>
                         {selectedSubject.status}
                       </span>
                     </div>
@@ -1812,7 +1812,7 @@ const TeacherSubjects_Page = () => {
                 <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
                   <h4 className="text-xs font-medium text-gray-600">Class Schedule</h4>
                 </div>
-                <div className="p-2">
+                <div className="px-1 py-1">
                   {selectedSubject.classSchedule && selectedSubject.classSchedule.length > 0 ? (
                     <div className="space-y-2">
                       {formatScheduleDetailed(selectedSubject.classSchedule)}
