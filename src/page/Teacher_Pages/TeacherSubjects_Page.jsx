@@ -310,7 +310,7 @@ const TeacherSubjects_Page = () => {
     ));
   };
 
-  // Format schedule for detailed view
+  // Format schedule for detailed view - matching your table style
   const formatScheduleDetailed = (schedules) => {
     if (!schedules || schedules.length === 0) return null;
 
@@ -329,9 +329,9 @@ const TeacherSubjects_Page = () => {
 
     return sortedSchedules.map((schedule, index) => (
       <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-        <span className="text-sm font-medium text-gray-700 w-24">{schedule.day}</span>
-        <span className="text-sm text-gray-600">
-          {convertTo12Hour(schedule.startTime)} - {convertTo12Hour(schedule.endTime)}
+        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider w-20">{schedule.day}</span>
+        <span className="text-sm text-gray-700">
+          {convertTo12Hour(schedule.startTime)} – {convertTo12Hour(schedule.endTime)}
         </span>
       </div>
     ));
@@ -1735,118 +1735,150 @@ const TeacherSubjects_Page = () => {
 
       {/* Subject Details Modal */}
       {showDetailsModal && selectedSubject && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
 
-            {/* Simple Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className={`w-10 h-10 ${selectedSubject.color || 'bg-blue-500'} rounded-lg flex items-center justify-center text-white font-semibold text-lg`}>
-                  {selectedSubject.title?.charAt(0).toUpperCase()}
+            {/* Header - matches your page header style */}
+            <div className="border-b border-gray-200 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-10 h-10 ${selectedSubject.color || 'bg-blue-500'} rounded-lg flex items-center justify-center text-white font-semibold text-base`}>
+                    {selectedSubject.title?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-medium text-gray-900">{selectedSubject.title}</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">{selectedSubject.code} • {selectedSubject.session}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">{selectedSubject.title}</h3>
-                  <p className="text-sm text-gray-500">{selectedSubject.code} • {selectedSubject.session}</p>
-                </div>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <FiX className="h-4 w-4" />
+                </button>
               </div>
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100"
-              >
-                <FiX className="h-5 w-5" />
-              </button>
             </div>
 
             {/* Content */}
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
 
-              {/* Basic Information */}
-              <div className="mb-6">
-                <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-                  Basic Information
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Course Code</p>
-                    <p className="text-sm font-medium text-gray-900 mt-1">{selectedSubject.code}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Discipline</p>
-                    <p className="text-sm font-medium text-gray-900 mt-1">{selectedSubject.departmentOffering}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Semester</p>
-                    <p className="text-sm font-medium text-gray-900 mt-1">{selectedSubject.semester}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Credit Hours</p>
-                    <p className="text-sm font-medium text-gray-900 mt-1">{selectedSubject.creditHours}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Status</p>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${getStatusColor(selectedSubject.status)}`}>
-                      {selectedSubject.status}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Total Students</p>
-                    <p className="text-sm font-medium text-gray-900 mt-1">{selectedSubject.registeredStudentsCount || 0}</p>
+              {/* Quick Stats - matches your stats cards style */}
+              <div className="grid grid-cols-4 gap-3 mb-6">
+                <div className="bg-gray-50 rounded-lg border border-gray-200 p-3">
+                  <p className="text-xs text-gray-500">Semester</p>
+                  <p className="text-sm font-semibold text-gray-900 mt-1">{selectedSubject.semester}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg border border-gray-200 p-3">
+                  <p className="text-xs text-gray-500">Credits</p>
+                  <p className="text-sm font-semibold text-gray-900 mt-1">{selectedSubject.creditHours}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg border border-gray-200 p-3">
+                  <p className="text-xs text-gray-500">Students</p>
+                  <p className="text-sm font-semibold text-gray-900 mt-1">{selectedSubject.registeredStudentsCount || 0}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg border border-gray-200 p-3">
+                  <p className="text-xs text-gray-500">Status</p>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${getStatusColor(selectedSubject.status)}`}>
+                    {selectedSubject.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Course Details Card - matches your table styling */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden mb-6">
+                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                  <h4 className="text-xs font-medium text-gray-600 uppercase tracking-wider">Course Information</h4>
+                </div>
+                <div className="p-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500">Course Title</p>
+                      <p className="text-sm text-gray-900 mt-1">{selectedSubject.title}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Course Code</p>
+                      <p className="text-sm text-gray-900 mt-1 font-mono">{selectedSubject.code}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Discipline</p>
+                      <p className="text-sm text-gray-900 mt-1">{selectedSubject.departmentOffering}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Semester</p>
+                      <p className="text-sm text-gray-900 mt-1">{selectedSubject.semester}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Credit Hours</p>
+                      <p className="text-sm text-gray-900 mt-1">{selectedSubject.creditHours}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Session</p>
+                      <p className="text-sm text-gray-900 mt-1">{selectedSubject.session}</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Class Schedule */}
-              <div className="mb-6">
-                <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-                  Class Schedule
-                </h4>
-                <div className="bg-gray-50 rounded-lg p-4">
+              {/* Class Schedule Card */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden mb-6">
+                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                  <h4 className="text-xs font-medium text-gray-600 uppercase tracking-wider">Class Schedule</h4>
+                </div>
+                <div className="p-4">
                   {selectedSubject.classSchedule && selectedSubject.classSchedule.length > 0 ? (
                     <div className="space-y-2">
                       {formatScheduleDetailed(selectedSubject.classSchedule)}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500 text-center py-2">No schedule set</p>
+                    <p className="text-sm text-gray-500 text-center py-4">No schedule added</p>
                   )}
                 </div>
               </div>
 
-              {/* Statistics */}
-              <div>
-                <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-                  Overview
-                </h4>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-xs text-gray-500">Students</p>
-                    <p className="text-xl font-semibold text-gray-900 mt-1">{selectedSubject.registeredStudentsCount || 0}</p>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-xs text-gray-500">Sessions</p>
-                    <p className="text-xl font-semibold text-gray-900 mt-1">{selectedSubject.classSchedule?.length || 0}</p>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-xs text-gray-500">Credits</p>
-                    <p className="text-xl font-semibold text-gray-900 mt-1">{selectedSubject.creditHours}</p>
+              {/* Additional Stats Card */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                  <h4 className="text-xs font-medium text-gray-600 uppercase tracking-wider">Additional Information</h4>
+                </div>
+                <div className="p-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-50 rounded-md flex items-center justify-center">
+                        <FiUsers className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Total Students</p>
+                        <p className="text-sm font-semibold text-gray-900">{selectedSubject.registeredStudentsCount || 0}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-green-50 rounded-md flex items-center justify-center">
+                        <FiClock className="h-4 w-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Weekly Sessions</p>
+                        <p className="text-sm font-semibold text-gray-900">{selectedSubject.classSchedule?.length || 0}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Simple Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            {/* Footer - matches your modal footer style */}
+            <div className="border-t border-gray-200 px-6 py-3 bg-gray-50 flex justify-end space-x-3">
               <button
                 onClick={() => {
                   setShowDetailsModal(false);
                   openEditModal(selectedSubject);
                 }}
-                className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                className="px-4 py-2 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
               >
-                Edit
+                Edit Course
               </button>
               <button
                 onClick={() => setShowDetailsModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                className="px-4 py-2 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-md transition-colors"
               >
                 Close
               </button>
@@ -1854,23 +1886,6 @@ const TeacherSubjects_Page = () => {
           </div>
         </div>
       )}
-
-      {/* Add this CSS animation at the end of your file or in your global CSS */}
-      <style jsx>{`
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-  .animate-fadeIn {
-    animation: fadeIn 0.2s ease-out;
-  }
-`}</style>
 
       {/* Merged Student Management Modal */}
       {showStudentManagementModal && selectedSubject && (
