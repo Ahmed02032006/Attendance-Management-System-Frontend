@@ -483,6 +483,12 @@ const TeacherAttendance_Page = () => {
     setAttendanceForm(prev => ({ ...prev, subject: subjectId }));
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
+
+    // If a schedule is provided, fetch attendance for that schedule
+    if (schedule) {
+      // Optionally refresh attendance data for the new schedule
+      dispatch(getSubjectsWithAttendance(userId)).unwrap();
+    }
   };
 
   // Function to generate random code
@@ -850,10 +856,17 @@ const TeacherAttendance_Page = () => {
                 <p className="text-xs text-gray-600">
                   {formatDisplayDate(currentDate)}
                 </p>
+                {/* Make schedule box clickable */}
                 {selectedSchedule && (
-                  <p className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 mt-2 rounded-md border border-blue-400">
-                    {formatScheduleDisplay(selectedSchedule)}
-                  </p>
+                  <button
+                    onClick={() => setShowSubjectModal(true)}
+                    className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 mt-2 rounded-md border border-blue-400 hover:bg-blue-100 transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <span>{formatScheduleDisplay(selectedSchedule)}</span>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
                 )}
               </div>
 
