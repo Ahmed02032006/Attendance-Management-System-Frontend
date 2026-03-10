@@ -89,6 +89,7 @@ const TeacherSubjects_Page = () => {
     discipline: ''
   })
   const [isAddingStudent, setIsAddingStudent] = useState(false)
+  const [editingScheduleIndex, setEditingScheduleIndex] = useState(null);
 
   // For editing student
   const [editingStudent, setEditingStudent] = useState(null)
@@ -893,6 +894,7 @@ const TeacherSubjects_Page = () => {
       : 'bg-gray-100 text-gray-700'
   }
 
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
@@ -1407,7 +1409,10 @@ const TeacherSubjects_Page = () => {
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 sticky top-0 bg-white">
               <h3 className="text-base font-medium text-gray-900">Edit Course</h3>
               <button
-                onClick={() => setShowEditModal(false)}
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingScheduleIndex(null); // Reset editing state
+                }}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded"
               >
                 <FiX className="h-4 w-4" />
@@ -1443,7 +1448,7 @@ const TeacherSubjects_Page = () => {
                     )}
                   </div>
 
-                  {/* Input Row for Adding New Schedule */}
+                  {/* Input Row for Adding/Editing Schedule */}
                   <div className="flex gap-2 mb-3">
                     <select
                       name="day"
@@ -1482,21 +1487,43 @@ const TeacherSubjects_Page = () => {
 
                     <button
                       type="button"
-                      onClick={addSchedule}
+                      onClick={() => {
+                        if (editingScheduleIndex !== null) {
+                          // Update existing schedule
+                          const updatedSchedules = [...classSchedule];
+                          updatedSchedules[editingScheduleIndex] = {
+                            day: currentSchedule.day,
+                            startTime: currentSchedule.startTime,
+                            endTime: currentSchedule.endTime
+                          };
+                          setClassSchedule(updatedSchedules);
+                          setEditingScheduleIndex(null);
+                        } else {
+                          // Add new schedule
+                          addSchedule();
+                        }
+                      }}
                       className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 flex items-center"
-                      title="Add schedule"
+                      title={editingScheduleIndex !== null ? "Update schedule" : "Add schedule"}
                     >
-                      <FiPlus className="h-4 w-4" />
+                      {editingScheduleIndex !== null ? (
+                        <FiEdit className="h-4 w-4" />
+                      ) : (
+                        <FiPlus className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
 
-                  {/* Schedule List with Edit Functionality */}
+                  {/* Schedule List with Edit Only */}
                   {classSchedule.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {classSchedule.map((schedule, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between py-2 px-3 border rounded-md border-gray-200 hover:bg-gray-50 transition-colors group"
+                          className={`flex items-center justify-between py-2 px-3 border rounded-md transition-colors group ${editingScheduleIndex === index
+                            ? 'border-blue-400 bg-blue-50'
+                            : 'border-gray-200 hover:bg-gray-50'
+                            }`}
                         >
                           <div className="flex items-center space-x-3">
                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
@@ -1516,21 +1543,15 @@ const TeacherSubjects_Page = () => {
                                   startTime: schedule.startTime,
                                   endTime: schedule.endTime
                                 });
-                                // Remove the old schedule
-                                removeSchedule(index);
+                                setEditingScheduleIndex(index);
                               }}
-                              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-1 rounded-md transition-colors"
+                              className={`p-1 rounded-md transition-colors ${editingScheduleIndex === index
+                                ? 'text-blue-600 bg-blue-100'
+                                : 'text-blue-500 hover:text-blue-700 hover:bg-blue-50'
+                                }`}
                               title="Edit schedule"
                             >
                               <FiEdit className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => removeSchedule(index)}
-                              className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1 rounded-md transition-colors"
-                              title="Remove schedule"
-                            >
-                              <FiX className="h-4 w-4" />
                             </button>
                           </div>
                         </div>
@@ -1626,7 +1647,10 @@ const TeacherSubjects_Page = () => {
               <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2 sticky bottom-0 bg-white">
                 <button
                   type="button"
-                  onClick={() => setShowEditModal(false)}
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingScheduleIndex(null);
+                  }}
                   className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
                 >
                   Cancel
