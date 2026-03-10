@@ -1429,7 +1429,7 @@ const TeacherSubjects_Page = () => {
                   />
                 </div>
 
-                {/* Class Schedule Section */}
+                {/* Class Schedule Section with Edit Functionality */}
                 <div className="border border-gray-200 rounded-lg p-4 bg-white">
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-sm font-medium text-gray-700 flex items-center">
@@ -1443,7 +1443,7 @@ const TeacherSubjects_Page = () => {
                     )}
                   </div>
 
-                  {/* Input Row */}
+                  {/* Input Row for Adding New Schedule */}
                   <div className="flex gap-2 mb-3">
                     <select
                       name="day"
@@ -1490,13 +1490,13 @@ const TeacherSubjects_Page = () => {
                     </button>
                   </div>
 
-                  {/* Schedule List */}
+                  {/* Schedule List with Edit Functionality */}
                   {classSchedule.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {classSchedule.map((schedule, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between py-2 px-3 border rounded-md border-gray-200 bg-gray-50"
+                          className="flex items-center justify-between py-2 px-3 border rounded-md border-gray-200 hover:bg-gray-50 transition-colors group"
                         >
                           <div className="flex items-center space-x-3">
                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
@@ -1506,8 +1506,32 @@ const TeacherSubjects_Page = () => {
                               {schedule.startTime} – {schedule.endTime}
                             </span>
                           </div>
-                          <div className="text-gray-400">
-                            <FiClock className="h-4 w-4" />
+                          <div className="flex items-center space-x-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                // Set current schedule to the selected one for editing
+                                setCurrentSchedule({
+                                  day: schedule.day,
+                                  startTime: schedule.startTime,
+                                  endTime: schedule.endTime
+                                });
+                                // Remove the old schedule
+                                removeSchedule(index);
+                              }}
+                              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-1 rounded-md transition-colors"
+                              title="Edit schedule"
+                            >
+                              <FiEdit className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeSchedule(index)}
+                              className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1 rounded-md transition-colors"
+                              title="Remove schedule"
+                            >
+                              <FiX className="h-4 w-4" />
+                            </button>
                           </div>
                         </div>
                       ))}
