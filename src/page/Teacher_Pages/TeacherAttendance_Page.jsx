@@ -484,11 +484,9 @@ const TeacherAttendance_Page = () => {
     setCurrentPage(1);
     setSortConfig({ key: null, direction: 'asc' });
 
-    // If a schedule is provided, fetch attendance for that schedule
-    if (schedule) {
-      // Optionally refresh attendance data for the new schedule
-      dispatch(getSubjectsWithAttendance(userId)).unwrap();
-    }
+    // if (schedule) {
+    //   dispatch(getSubjectsWithAttendance(userId)).unwrap();
+    // }
   };
 
   // Function to generate random code
