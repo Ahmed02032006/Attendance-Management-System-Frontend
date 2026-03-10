@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import HeaderComponent from '../../components/HeaderComponent'
+import HeaderComponent from '../../components/HeaderComponent.jsx'
 import {
   FiPlus,
   FiTrash2,

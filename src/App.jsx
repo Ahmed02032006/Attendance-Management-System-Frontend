@@ -10,7 +10,7 @@ import { ToastContainer } from 'react-toastify';
 import CheckAuth from './common/check-auth';
 import TeacherDashboardLayout from './layout/Teacher_Dashboard_Layout/TeacherDashboardLayout';
 import TeacherDashboard_Page from './page/Teacher_Pages/TeacherDashboard_Page';
-import TeacherSubjects_Page from './page/Teacher_Pages/TeacherSubjects_Page';
+import TeacherCourses_Page from './page/Teacher_Pages/TeacherCourses_Page';
 import TeacherAttendance_Page from './page/Teacher_Pages/TeacherAttendance_Page';
 import StudentAttendance_Page from './page/Student_Pages/StudentAttendance_Page';
 import QRScanner_Page from './page/Student_Pages/QR_Scanner';
@@ -19,7 +19,7 @@ import AdminDashboardLayout from './layout/Admin_Dashboard_Layout/AdminDashboard
 import AdminDashboard_Page from './page/Admin_Pages/AdminDashboard_Page';
 import AdminComplaints_Page from './page/Admin_Pages/AdminComplaints_Page';
 import AdminIntegration_Page from './page/Admin_Pages/AdminIntegration_Page';
-import TeacherCourseReport_Page from './page/Teacher_Pages/TeacherCourseReport_Page';
+import TeacherReport_Page from './page/Teacher_Pages/TeacherReport_Page';
 
 const App = () => {
 
@@ -63,9 +63,9 @@ const App = () => {
         </CheckAuth>}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<TeacherDashboard_Page />} />
-          <Route path="subject" element={<TeacherSubjects_Page />} />
+          <Route path="subject" element={<TeacherCourses_Page />} />
           <Route path="attendance" element={<TeacherAttendance_Page />} />
-          <Route path="courseReport" element={<TeacherCourseReport_Page />} />
+          <Route path="courseReport" element={<TeacherReport_Page />} />
         </Route>
 
         {/* =====>] Admin Routes [<===== */}
