@@ -1294,7 +1294,7 @@ const TeacherSubjects_Page = () => {
                           <button
                             type="button"
                             onClick={() => removeSchedule(index)}
-                            className="text-red-400 transition-colors"
+                            className="text-red-400 hover:text-red-600 transition-colors"
                             title="Remove schedule"
                           >
                             <FiX className="h-4 w-4" />
@@ -1496,7 +1496,7 @@ const TeacherSubjects_Page = () => {
                       {classSchedule.map((schedule, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between py-2 px-3 border rounded-md border-gray-200 transition-colors group"
+                          className="flex items-center justify-between py-2 px-3 border rounded-md border-gray-200 bg-gray-50"
                         >
                           <div className="flex items-center space-x-3">
                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
@@ -1506,14 +1506,9 @@ const TeacherSubjects_Page = () => {
                               {schedule.startTime} – {schedule.endTime}
                             </span>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => removeSchedule(index)}
-                            className="text-red-400 transition-colors"
-                            title="Remove schedule"
-                          >
-                            <FiX className="h-4 w-4" />
-                          </button>
+                          <div className="text-gray-400">
+                            <FiClock className="h-4 w-4" />
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1736,8 +1731,7 @@ const TeacherSubjects_Page = () => {
       {/* Subject Details Modal */}
       {showDetailsModal && selectedSubject && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden">
-
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
             {/* Header */}
             <div className="border-b border-gray-200 px-5 py-4">
               <div className="flex items-center justify-between">
@@ -1759,67 +1753,68 @@ const TeacherSubjects_Page = () => {
               </div>
             </div>
 
-            {/* Content */}
+            {/* Content - Two Column Layout */}
             <div className="p-5 overflow-y-auto max-h-[calc(90vh-120px)]">
-
-              {/* Course Info Card */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden mb-5">
-                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                  <h4 className="text-xs font-medium text-gray-600">Course Information</h4>
-                </div>
-                <div className="p-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">Course Title</span>
-                      <span className="text-xs text-gray-900">{selectedSubject.title}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">Course Code</span>
-                      <span className="text-xs text-gray-900">{selectedSubject.code}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">Discipline</span>
-                      <span className="text-xs text-gray-900">{selectedSubject.departmentOffering}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">Semester</span>
-                      <span className="text-xs text-gray-900">{selectedSubject.semester}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">Credit Hours</span>
-                      <span className="text-xs text-gray-900">{selectedSubject.creditHours}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">Session</span>
-                      <span className="text-xs text-gray-900">{selectedSubject.session}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">Status</span>
-                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs ${getStatusColor(selectedSubject.status)}`}>
-                        {selectedSubject.status}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">Total Students</span>
-                      <span className="text-xs text-gray-900">{selectedSubject.registeredStudentsCount || 0}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Course Info Card */}
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                    <h4 className="text-xs font-medium text-gray-600">Course Information</h4>
+                  </div>
+                  <div className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">Course Title</span>
+                        <span className="text-xs text-gray-900">{selectedSubject.title}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">Course Code</span>
+                        <span className="text-xs text-gray-900">{selectedSubject.code}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">Discipline</span>
+                        <span className="text-xs text-gray-900">{selectedSubject.departmentOffering}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">Semester</span>
+                        <span className="text-xs text-gray-900">{selectedSubject.semester}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">Credit Hours</span>
+                        <span className="text-xs text-gray-900">{selectedSubject.creditHours}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">Session</span>
+                        <span className="text-xs text-gray-900">{selectedSubject.session}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">Status</span>
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs ${getStatusColor(selectedSubject.status)}`}>
+                          {selectedSubject.status}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">Total Students</span>
+                        <span className="text-xs text-gray-900">{selectedSubject.registeredStudentsCount || 0}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Class Schedule Card */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                  <h4 className="text-xs font-medium text-gray-600">Class Schedule</h4>
-                </div>
-                <div className="px-3 py-0">
-                  {selectedSubject.classSchedule && selectedSubject.classSchedule.length > 0 ? (
-                    <div className="space-y-2 text-xs">
-                      {formatScheduleDetailed(selectedSubject.classSchedule)}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500 text-center py-3">No schedule added</p>
-                  )}
+                {/* Class Schedule Card */}
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                    <h4 className="text-xs font-medium text-gray-600">Class Schedule</h4>
+                  </div>
+                  <div className="p-4">
+                    {selectedSubject.classSchedule && selectedSubject.classSchedule.length > 0 ? (
+                      <div className="space-y-2">
+                        {formatScheduleDetailed(selectedSubject.classSchedule)}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 text-center py-3">No schedule added</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
