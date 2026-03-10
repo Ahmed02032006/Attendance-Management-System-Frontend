@@ -426,6 +426,27 @@ const TeacherSubjects_Page = () => {
     }
   }
 
+  // Add this function to check for time overlap while excluding a specific index
+  const checkTimeOverlap = (schedules, excludeIndex) => {
+    for (let i = 0; i < schedules.length; i++) {
+      if (i === excludeIndex) continue;
+
+      const schedule = schedules[i];
+      if (schedule.day !== currentSchedule.day) continue;
+
+      const startMinutes = parseInt(currentSchedule.startTime.split(':')[0]) * 60 + parseInt(currentSchedule.startTime.split(':')[1]);
+      const endMinutes = parseInt(currentSchedule.endTime.split(':')[0]) * 60 + parseInt(currentSchedule.endTime.split(':')[1]);
+      const existingStart = parseInt(schedule.startTime.split(':')[0]) * 60 + parseInt(schedule.startTime.split(':')[1]);
+      const existingEnd = parseInt(schedule.endTime.split(':')[0]) * 60 + parseInt(schedule.endTime.split(':')[1]);
+
+      // Check for any overlap
+      if (startMinutes < existingEnd && endMinutes > existingStart) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   // Download dummy Excel file
   const downloadDummyExcel = () => {
     const dummyData = [
@@ -1411,7 +1432,12 @@ const TeacherSubjects_Page = () => {
               <button
                 onClick={() => {
                   setShowEditModal(false);
-                  setEditingScheduleIndex(null); // Reset editing state
+                  setEditingScheduleIndex(null);
+                  setCurrentSchedule({
+                    day: 'Monday',
+                    startTime: '09:00',
+                    endTime: '10:30'
+                  });
                 }}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded"
               >
@@ -1488,20 +1514,80 @@ const TeacherSubjects_Page = () => {
                     <button
                       type="button"
                       onClick={() => {
+                        if (!currentSchedule.startTime || !currentSchedule.endTime) {
+                          toast.error('Please select both start and end time');
+                          return;
+                        }
+
+                        // Validate that end time is after start time
+                        if (currentSchedule.startTime >= currentSchedule.endTime) {
+                          toast.error('End time must be after start time');
+                          return;
+                        }
+
                         if (editingScheduleIndex !== null) {
-                          // Update existing schedule
+                          // Update existing schedule - PRESERVE THE ID
                           const updatedSchedules = [...classSchedule];
                           updatedSchedules[editingScheduleIndex] = {
+                            ...updatedSchedules[editingScheduleIndex], // Keep the existing _id
                             day: currentSchedule.day,
                             startTime: currentSchedule.startTime,
                             endTime: currentSchedule.endTime
                           };
+
+                          // Check for duplicates (excluding the current one)
+                          const isDuplicate = updatedSchedules.some((schedule, idx) =>
+                            idx !== editingScheduleIndex &&
+                            schedule.day === currentSchedule.day &&
+                            schedule.startTime === currentSchedule.startTime &&
+                            schedule.endTime === currentSchedule.endTime
+                          );
+
+                          if (isDuplicate) {
+                            toast.error('This schedule already exists for the selected day');
+                            return;
+                          }
+
+                          // Check for time overlap (excluding the current one)
+                          const hasOverlap = checkTimeOverlap(updatedSchedules, editingScheduleIndex);
+                          if (hasOverlap) {
+                            toast.error('This time overlaps with an existing schedule on the same day');
+                            return;
+                          }
+
                           setClassSchedule(updatedSchedules);
                           setEditingScheduleIndex(null);
+                          toast.success('Schedule updated successfully!');
                         } else {
                           // Add new schedule
-                          addSchedule();
+                          const newSchedule = {
+                            day: currentSchedule.day,
+                            startTime: currentSchedule.startTime,
+                            endTime: currentSchedule.endTime
+                            // No _id here - MongoDB will generate it
+                          };
+
+                          // Check for duplicates
+                          if (isScheduleDuplicate(currentSchedule.day, currentSchedule.startTime, currentSchedule.endTime)) {
+                            toast.error('This schedule already exists for the selected day');
+                            return;
+                          }
+
+                          // Check for time overlap
+                          if (isTimeOverlapping(currentSchedule.day, currentSchedule.startTime, currentSchedule.endTime)) {
+                            toast.error('This time overlaps with an existing schedule on the same day');
+                            return;
+                          }
+
+                          setClassSchedule(prev => [...prev, newSchedule]);
                         }
+
+                        // Reset current schedule
+                        setCurrentSchedule({
+                          day: 'Monday',
+                          startTime: '09:00',
+                          endTime: '10:30'
+                        });
                       }}
                       className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 flex items-center"
                       title={editingScheduleIndex !== null ? "Update schedule" : "Add schedule"}
@@ -1519,7 +1605,7 @@ const TeacherSubjects_Page = () => {
                     <div className="mt-3 space-y-2">
                       {classSchedule.map((schedule, index) => (
                         <div
-                          key={index}
+                          key={schedule._id || index}
                           className={`flex items-center justify-between py-2 px-3 border rounded-md transition-colors group ${editingScheduleIndex === index
                             ? 'border-blue-400 bg-blue-50'
                             : 'border-gray-200 hover:bg-gray-50'
@@ -1532,6 +1618,11 @@ const TeacherSubjects_Page = () => {
                             <span className="text-sm text-gray-700">
                               {schedule.startTime} – {schedule.endTime}
                             </span>
+                            {schedule._id && (
+                              <span className="text-[10px] text-gray-400 ml-2 hidden">
+                                ID: {schedule._id.substring(0, 4)}...
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center space-x-1">
                             <button
@@ -1650,6 +1741,11 @@ const TeacherSubjects_Page = () => {
                   onClick={() => {
                     setShowEditModal(false);
                     setEditingScheduleIndex(null);
+                    setCurrentSchedule({
+                      day: 'Monday',
+                      startTime: '09:00',
+                      endTime: '10:30'
+                    });
                   }}
                   className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium"
                 >
