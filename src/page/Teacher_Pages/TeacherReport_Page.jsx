@@ -624,7 +624,7 @@ const TeacherCourseReport_Page = () => {
               <div className="grid grid-cols-5 gap-2 text-sm">
                 <div className="text-center">
                   <span className="text-gray-500">Average Attendance</span>
-                  <p className="font-medium text-blue-900">{processedData.summary?.averageAttendance}%</p>
+                  <p className="font-medium text-blue-600">{processedData.summary?.averageAttendance}%</p>
                 </div>
                 <div className="text-center">
                   <span className="text-gray-500">Students ≥75%</span>
