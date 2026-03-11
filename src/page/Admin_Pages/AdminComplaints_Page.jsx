@@ -78,8 +78,8 @@ const AdminComplaints_Page = () => {
             </div>
 
             {/* Scrollable Content Area */}
-            <div className="flex-1 overflow-y-auto">
-                <div className="container max-w-full mx-auto p-4 lg:p-6 hide-scrollbar">
+            <div className="flex-1 overflow-y-auto hide-scrollbar">
+                <div className="container max-w-full mx-auto p-4 lg:p-6">
                     {/* Google Sheet Embed Section */}
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
