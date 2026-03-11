@@ -77,9 +77,9 @@ const AdminComplaints_Page = () => {
                 />
             </div>
 
-            {/* Scrollable Content Area */}
+            {/* Scrollable Content Area - with hide-scrollbar class */}
             <div className="flex-1 overflow-y-auto hide-scrollbar">
-                <div className="container max-w-full mx-auto p-4 lg:p-6 hide-scrollbar">
+                <div className="container max-w-full mx-auto p-4 lg:p-6">
                     {/* Google Sheet Embed Section */}
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
@@ -195,30 +195,17 @@ const AdminComplaints_Page = () => {
                 </div>
             </div>
 
-            {/* Custom Styles */}
+            {/* Custom Styles - Updated to hide scrollbar */}
             <style jsx>{`
                 /* Hide scrollbar for Chrome, Safari and Opera */
-                .overflow-y-auto::-webkit-scrollbar {
-                    width: 8px;
+                .hide-scrollbar::-webkit-scrollbar {
+                    display: none;
                 }
                 
-                .overflow-y-auto::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                }
-                
-                .overflow-y-auto::-webkit-scrollbar-thumb {
-                    background: #888;
-                    border-radius: 4px;
-                }
-                
-                .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-                    background: #555;
-                }
-                
-                /* For Firefox */
-                .overflow-y-auto {
-                    scrollbar-width: thin;
-                    scrollbar-color: #888 #f1f1f1;
+                /* Hide scrollbar for IE, Edge and Firefox */
+                .hide-scrollbar {
+                    -ms-overflow-style: none;  /* IE and Edge */
+                    scrollbar-width: none;  /* Firefox */
                 }
             `}</style>
         </div>
