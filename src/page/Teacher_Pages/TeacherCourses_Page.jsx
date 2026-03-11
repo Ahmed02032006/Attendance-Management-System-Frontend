@@ -1950,7 +1950,7 @@ const TeacherSubjects_Page = () => {
                   <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
                     <h4 className="text-xs font-medium text-gray-600">Class Schedule</h4>
                   </div>
-                  <div className="p-4">
+                  <div className="px-4 py-0">
                     {selectedSubject.classSchedule && selectedSubject.classSchedule.length > 0 ? (
                       <div className="space-y-2">
                         {formatScheduleDetailed(selectedSubject.classSchedule)}
