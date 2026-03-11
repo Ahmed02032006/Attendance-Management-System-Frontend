@@ -1952,7 +1952,7 @@ const TeacherSubjects_Page = () => {
                   </div>
                   <div className="px-4 py-0">
                     {selectedSubject.classSchedule && selectedSubject.classSchedule.length > 0 ? (
-                      <div className="space-y-2">
+                      <div className="">
                         {formatScheduleDetailed(selectedSubject.classSchedule)}
                       </div>
                     ) : (
