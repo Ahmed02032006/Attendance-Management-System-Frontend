@@ -119,22 +119,28 @@ const AdminComplaints_Page = () => {
                                 </div>
                             </div>
 
-                            {/* Google Sheet Iframe */}
-                            <div className="relative w-full overflow-hidden bg-gray-100">
-                                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-blue-500 to-purple-500"></div>
+                            {/* Scrollable Google Sheet Container */}
+                            <div className="relative w-full bg-gray-100">
+                                {/* Top gradient bar */}
+                                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-blue-500 to-purple-500 z-10"></div>
 
-                                <div key={iframeKey} className="iframe-container">
+                                {/* Scrollable container with custom scrollbar */}
+                                <div
+                                    className="overflow-auto max-h-[600px] lg:max-h-[700px] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 hover:scrollbar-thumb-gray-500"
+                                    key={iframeKey}
+                                >
                                     <iframe
                                         src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRi7Gv4sPMG5bVYyal3Wtku0i1nDnFWx5bMJVxKUOQhRhL_-AAvxAEmWI-ueduk0CvwIWg6WlF2SpiZ/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false"
                                         title="Complaints Google Sheet"
-                                        className="w-full h-[600px] lg:h-[700px] border-0"
+                                        className="w-full min-w-[800px] h-[800px] lg:h-[1000px] border-0"
                                         loading="lazy"
                                         sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                                         referrerPolicy="no-referrer"
                                     />
                                 </div>
 
-                                <div className="absolute bottom-0 left-0 right-0 h-4 bg-linear-to-t from-white to-transparent"></div>
+                                {/* Bottom fade effect */}
+                                <div className="absolute bottom-0 left-0 right-0 h-4 bg-linear-to-t from-white to-transparent pointer-events-none"></div>
                             </div>
 
                             {/* Instructions */}
