@@ -69,7 +69,7 @@ const AdminComplaints_Page = () => {
     return (
         <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
             {/* Fixed Header */}
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
                 <HeaderComponent
                     heading={"Complaints Management"}
                     subHeading={"Monitor and manage user complaints from Google Sheet"}
@@ -79,7 +79,7 @@ const AdminComplaints_Page = () => {
 
             {/* Scrollable Content Area */}
             <div className="flex-1 overflow-y-auto">
-                <div className="container max-w-full mx-auto p-4 lg:p-6">
+                <div className="container max-w-full mx-auto p-4 lg:p-6 hide-scrollbar">
                     {/* Google Sheet Embed Section */}
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
@@ -141,7 +141,7 @@ const AdminComplaints_Page = () => {
 
                                 {/* Google Sheet Iframe - Fixed height with internal scrolling */}
                                 <div className="relative w-full bg-gray-100 border-b border-gray-200">
-                                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                                    <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-blue-500 to-purple-500"></div>
                                     
                                     <div key={iframeKey} className="w-full" style={{ height: '600px' }}>
                                         <iframe
@@ -159,7 +159,7 @@ const AdminComplaints_Page = () => {
                                 <div className="px-4 lg:px-6 py-4 bg-gray-50">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div className="flex items-start space-x-3">
-                                            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                                 <span className="text-blue-600 font-bold">1</span>
                                             </div>
                                             <div>
@@ -169,7 +169,7 @@ const AdminComplaints_Page = () => {
                                         </div>
 
                                         <div className="flex items-start space-x-3">
-                                            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                                 <span className="text-blue-600 font-bold">2</span>
                                             </div>
                                             <div>
@@ -179,7 +179,7 @@ const AdminComplaints_Page = () => {
                                         </div>
 
                                         <div className="flex items-start space-x-3">
-                                            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                                 <span className="text-blue-600 font-bold">3</span>
                                             </div>
                                             <div>
