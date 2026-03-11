@@ -497,7 +497,7 @@ const TeacherCourseReport_Page = () => {
                         Roll No.
                       </th>
                       <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
-                        Marked Days
+                        Marked Sessions
                       </th>
                       <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
                         Present
@@ -688,10 +688,10 @@ const TeacherCourseReport_Page = () => {
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
                     <p className={`text-2xl font-bold ${studentAttendanceDetails.summary?.attendancePercentage >= 75
-                        ? 'text-green-600'
-                        : studentAttendanceDetails.summary?.attendancePercentage >= 50
-                          ? 'text-yellow-600'
-                          : 'text-red-600'
+                      ? 'text-green-600'
+                      : studentAttendanceDetails.summary?.attendancePercentage >= 50
+                        ? 'text-yellow-600'
+                        : 'text-red-600'
                       }`}>
                       {studentAttendanceDetails.summary?.attendancePercentage}%
                     </p>
