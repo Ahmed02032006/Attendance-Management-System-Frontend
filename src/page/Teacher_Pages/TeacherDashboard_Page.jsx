@@ -524,6 +524,7 @@ const TeacherDashboard_Page = () => {
         body: JSON.stringify({
           query: userQuery,
           userId: userId,
+          email: user?.email,
           context: {
             currentSubject: selectedSubjectData?.title,
             totalSubjects: dashboardSubjects.length
