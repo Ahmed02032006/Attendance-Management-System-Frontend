@@ -350,7 +350,7 @@ const TeacherCourseReport_Page = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Report Generation Form */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-4">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Generate Attendance Report</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -624,7 +624,7 @@ const TeacherCourseReport_Page = () => {
               <div className="grid grid-cols-5 gap-2 text-sm">
                 <div className="text-center">
                   <span className="text-gray-500">Average Attendance</span>
-                  <p className="font-medium text-gray-900">{processedData.summary?.averageAttendance}%</p>
+                  <p className="font-medium text-blue-900">{processedData.summary?.averageAttendance}%</p>
                 </div>
                 <div className="text-center">
                   <span className="text-gray-500">Students ≥75%</span>
