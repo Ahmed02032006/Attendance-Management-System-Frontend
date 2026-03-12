@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers, FiClock, FiBookOpen, FiCalendar } from 'react-icons/fi'
-import { HiOutlineClipboardList } from 'react-icons/hi'
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers, FiClock, FiBookOpen, FiFileText, FiGrid, FiEye } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
   getTeachersByUser,
@@ -27,8 +26,11 @@ const AdminTeachers_Page = () => {
   const [roleFilter, setRoleFilter] = useState('Teacher')
   const [currentPage, setCurrentPage] = useState(1)
   const [teachersPerPage] = useState(5)
-  const [auditLogs, setAuditLogs] = useState([])
-  const [auditLoading, setAuditLoading] = useState(false)
+  
+  // Audit log states
+  const [auditFilter, setAuditFilter] = useState('All')
+  const [auditDateFilter, setAuditDateFilter] = useState('All')
+  const [auditSearchTerm, setAuditSearchTerm] = useState('')
 
   const [teacherForm, setTeacherForm] = useState({
     userName: '',
@@ -38,91 +40,159 @@ const AdminTeachers_Page = () => {
     status: 'Active'
   })
 
-  // Mock audit logs data - In real application, this would come from API
-  const generateMockAuditLogs = (teacher) => {
-    const logs = [
+  // Mock audit logs data for demonstration
+  const getMockAuditLogs = (teacher) => {
+    if (!teacher) return []
+
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+    const twoDaysAgo = new Date(today)
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
+    const lastWeek = new Date(today)
+    lastWeek.setDate(lastWeek.getDate() - 7)
+    const lastMonth = new Date(today)
+    lastMonth.setMonth(lastMonth.getMonth() - 1)
+
+    return [
       {
         id: 1,
-        type: 'course_created',
-        action: 'Created new course',
-        details: 'Introduction to Computer Science',
-        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        icon: FiBookOpen
+        action: 'Course Created',
+        description: `Created new course "Advanced Mathematics"`,
+        timestamp: today.toISOString(),
+        icon: FiBookOpen,
+        iconBg: 'bg-blue-100',
+        iconColor: 'text-blue-600',
+        type: 'create'
       },
       {
         id: 2,
-        type: 'course_created',
-        action: 'Created new course',
-        details: 'Advanced Mathematics',
-        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        icon: FiBookOpen
+        action: 'Attendance QR Generated',
+        description: `Generated QR code for "Physics 101" class (Monday, 10:00 AM - 11:30 AM)`,
+        timestamp: today.toISOString(),
+        icon: FiGrid,
+        iconBg: 'bg-purple-100',
+        iconColor: 'text-purple-600',
+        type: 'qr'
       },
       {
         id: 3,
-        type: 'course_created',
-        action: 'Created new course',
-        details: 'Physics Fundamentals',
-        timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        icon: FiBookOpen
+        action: 'Manual Attendance Marked',
+        description: `Manually marked attendance for 5 students in "Chemistry Lab"`,
+        timestamp: yesterday.toISOString(),
+        icon: FiUsers,
+        iconBg: 'bg-green-100',
+        iconColor: 'text-green-600',
+        type: 'manual'
       },
       {
         id: 4,
-        type: 'course_created',
-        action: 'Created new course',
-        details: 'Data Structures',
-        timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        icon: FiBookOpen
+        action: 'Course Updated',
+        description: `Updated course details for "Computer Science"`,
+        timestamp: twoDaysAgo.toISOString(),
+        icon: FiEdit,
+        iconBg: 'bg-yellow-100',
+        iconColor: 'text-yellow-600',
+        type: 'update'
       },
       {
         id: 5,
-        type: 'course_created',
-        action: 'Created new course',
-        details: 'Algorithms',
-        timestamp: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        icon: FiBookOpen
+        action: 'Report Generated',
+        description: `Generated monthly attendance report for "Mathematics"`,
+        timestamp: lastWeek.toISOString(),
+        icon: FiFileText,
+        iconBg: 'bg-indigo-100',
+        iconColor: 'text-indigo-600',
+        type: 'report'
       },
       {
         id: 6,
-        type: 'course_created',
-        action: 'Created new course',
-        details: 'Database Management',
-        timestamp: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        icon: FiBookOpen
+        action: 'Course Deleted',
+        description: `Deleted course "History 101"`,
+        timestamp: lastWeek.toISOString(),
+        icon: FiTrash2,
+        iconBg: 'bg-red-100',
+        iconColor: 'text-red-600',
+        type: 'delete'
       },
       {
         id: 7,
-        type: 'course_created',
-        action: 'Created new course',
-        details: 'Web Development',
-        timestamp: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        icon: FiBookOpen
+        action: 'Attendance QR Generated',
+        description: `Generated QR code for "English Literature" class (Wednesday, 2:00 PM - 3:30 PM)`,
+        timestamp: lastMonth.toISOString(),
+        icon: FiGrid,
+        iconBg: 'bg-purple-100',
+        iconColor: 'text-purple-600',
+        type: 'qr'
       },
       {
         id: 8,
-        type: 'course_created',
-        action: 'Created new course',
-        details: 'Mobile App Development',
-        timestamp: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        icon: FiBookOpen
+        action: 'Manual Attendance Marked',
+        description: `Manually marked attendance for 3 students in "Physics Lab"`,
+        timestamp: lastMonth.toISOString(),
+        icon: FiUsers,
+        iconBg: 'bg-green-100',
+        iconColor: 'text-green-600',
+        type: 'manual'
       }
-    ];
-    
-    // Add teacher-specific name in details
-    return logs.map(log => ({
-      ...log,
-      details: `${log.details} - Created by ${teacher?.userName || 'Teacher'}`
-    }));
-  };
+    ]
+  }
 
-  // Fetch teachers on component mount
+  // Filter audit logs
+  const getFilteredAuditLogs = () => {
+    const logs = getMockAuditLogs(selectedTeacher)
+    
+    return logs.filter(log => {
+      // Filter by action type
+      if (auditFilter !== 'All') {
+        if (auditFilter === 'Create' && log.type !== 'create') return false
+        if (auditFilter === 'Update' && log.type !== 'update') return false
+        if (auditFilter === 'Delete' && log.type !== 'delete') return false
+        if (auditFilter === 'QR' && log.type !== 'qr') return false
+        if (auditFilter === 'Manual' && log.type !== 'manual') return false
+        if (auditFilter === 'Report' && log.type !== 'report') return false
+      }
+
+      // Filter by date
+      if (auditDateFilter !== 'All') {
+        const logDate = new Date(log.timestamp)
+        const today = new Date()
+        const yesterday = new Date(today)
+        yesterday.setDate(yesterday.getDate() - 1)
+        const lastWeek = new Date(today)
+        lastWeek.setDate(lastWeek.getDate() - 7)
+        const lastMonth = new Date(today)
+        lastMonth.setMonth(lastMonth.getMonth() - 1)
+
+        switch (auditDateFilter) {
+          case 'Today':
+            if (logDate.toDateString() !== today.toDateString()) return false
+            break
+          case 'Yesterday':
+            if (logDate.toDateString() !== yesterday.toDateString()) return false
+            break
+          case 'Last Week':
+            if (logDate < lastWeek) return false
+            break
+          case 'Last Month':
+            if (logDate < lastMonth) return false
+            break
+          default:
+            break
+        }
+      }
+
+      // Filter by search term
+      if (auditSearchTerm) {
+        const searchLower = auditSearchTerm.toLowerCase()
+        return log.action.toLowerCase().includes(searchLower) ||
+               log.description.toLowerCase().includes(searchLower)
+      }
+
+      return true
+    })
+  }
+
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
@@ -141,25 +211,21 @@ const AdminTeachers_Page = () => {
     fetchTeachers();
   }, [dispatch])
 
-  // Filter teachers based on search, filter, and role
   const filteredTeachers = teachers.filter(teacher => {
     const matchesSearch =
       teacher.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       teacher.userEmail?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus = statusFilter === 'All' || teacher.status === statusFilter
-
     const matchesRole = roleFilter === 'All' || teacher.userRole === roleFilter
 
     return matchesSearch && matchesStatus && matchesRole
   })
 
-  // Separate function to check if a teacher can be deleted
   const canDeleteTeacher = (teacher) => {
     return teacher.userRole !== 'Admin'
   }
 
-  // Pagination
   const indexOfLastTeacher = currentPage * teachersPerPage
   const indexOfFirstTeacher = indexOfLastTeacher - teachersPerPage
   const currentTeachers = filteredTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher)
@@ -173,7 +239,6 @@ const AdminTeachers_Page = () => {
     }))
   }
 
-  // Handle status toggle in form
   const handleStatusToggle = (status) => {
     setTeacherForm(prev => ({
       ...prev,
@@ -181,7 +246,6 @@ const AdminTeachers_Page = () => {
     }))
   }
 
-  // Get first letter of username for avatar
   const getAvatarLetter = (name) => {
     if (!name) return 'T'
     return name.charAt(0).toUpperCase()
@@ -298,15 +362,10 @@ const AdminTeachers_Page = () => {
 
   const openAuditModal = (teacher) => {
     setSelectedTeacher(teacher)
-    setAuditLoading(true)
-    
-    // Simulate API call to fetch audit logs
-    setTimeout(() => {
-      const logs = generateMockAuditLogs(teacher);
-      setAuditLogs(logs);
-      setAuditLoading(false);
-      setShowAuditModal(true);
-    }, 500);
+    setAuditFilter('All')
+    setAuditDateFilter('All')
+    setAuditSearchTerm('')
+    setShowAuditModal(true)
   }
 
   const resetForm = () => {
@@ -324,7 +383,6 @@ const AdminTeachers_Page = () => {
   const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages))
   const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1))
 
-  // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A'
     try {
@@ -332,6 +390,21 @@ const AdminTeachers_Page = () => {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
+      })
+    } catch (error) {
+      return 'Invalid Date'
+    }
+  }
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'N/A'
+    try {
+      return new Date(dateString).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
       })
     } catch (error) {
       return 'Invalid Date'
@@ -364,27 +437,6 @@ const AdminTeachers_Page = () => {
     return 'just now';
   }
 
-  // Format timestamp for audit log
-  const formatAuditTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) {
-      return 'Yesterday';
-    } else if (diffDays <= 7) {
-      return `${diffDays} days ago`;
-    } else {
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    }
-  }
-
-  // Get role badge color
   const getRoleBadgeColor = (role) => {
     switch (role) {
       case 'Admin':
@@ -398,7 +450,8 @@ const AdminTeachers_Page = () => {
     }
   }
 
-  // Show loading state while fetching data
+  const filteredAuditLogs = getFilteredAuditLogs()
+
   if (isTeacherLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -463,7 +516,6 @@ const AdminTeachers_Page = () => {
               <option value="Admin">Admins</option>
             </select>
 
-            {/* Create Teacher Button */}
             <button
               onClick={openCreateModal}
               disabled={isLoading}
@@ -598,9 +650,9 @@ const AdminTeachers_Page = () => {
                               title="View Audit Log"
                               disabled={isLoading}
                             >
-                              <HiOutlineClipboardList className="h-4 w-4 lg:h-5 lg:w-5" />
+                              <FiEye className="h-4 w-4 lg:h-5 lg:w-5" />
                             </button>
-
+                            
                             <button
                               onClick={() => openEditModal(teacher)}
                               className="text-blue-600 hover:text-blue-900 transition-colors p-1"
@@ -1020,102 +1072,136 @@ const AdminTeachers_Page = () => {
       {/* Audit Log Modal */}
       {showAuditModal && selectedTeacher && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <HiOutlineClipboardList className="h-5 w-5 text-purple-600" />
+                  <FiEye className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800">Teacher Activity Log</h3>
-                  <p className="text-sm text-gray-600">{selectedTeacher?.userName} • {selectedTeacher?.userEmail}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {selectedTeacher.userName} • {selectedTeacher.userEmail}
+                  </p>
                 </div>
               </div>
               <button
-                onClick={() => {
-                  setShowAuditModal(false);
-                  setAuditLogs([]);
-                }}
+                onClick={() => setShowAuditModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <FiX className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="p-6 max-h-[60vh] overflow-y-auto">
-              {auditLoading ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="text-gray-600">Loading audit logs...</p>
-                </div>
-              ) : auditLogs.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-medium text-gray-700">Course Creation History</h4>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                      Total {auditLogs.length} courses created
-                    </span>
-                  </div>
-                  
+            {/* Filters */}
+            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Search Activities
+                  </label>
                   <div className="relative">
-                    <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-purple-200"></div>
-                    
-                    {auditLogs.map((log, index) => {
-                      const Icon = log.icon;
-                      return (
-                        <div key={log.id} className="relative flex items-start space-x-4 mb-6 last:mb-0">
-                          <div className="relative z-10">
-                            <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                              <Icon className="h-5 w-5 text-purple-600" />
-                            </div>
-                          </div>
-                          
-                          <div className="flex-1 bg-gray-50 rounded-lg p-4 border border-gray-100 hover:border-purple-200 transition-colors">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-semibold text-gray-900">{log.action}</span>
-                              <span className="text-xs text-gray-500 flex items-center">
-                                <FiClock className="h-3 w-3 mr-1" />
-                                {formatAuditTimestamp(log.timestamp)}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-700 mb-2">{log.details}</p>
-                            <div className="flex items-center space-x-2">
-                              <span className={`text-xs px-2 py-1 rounded-full bg-green-100 text-green-700`}>
-                                {log.status}
-                              </span>
-                              <span className="text-xs text-gray-400">
-                                {new Date(log.timestamp).toLocaleTimeString('en-US', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <input
+                      type="text"
+                      placeholder="Search by action or description..."
+                      value={auditSearchTerm}
+                      onChange={(e) => setAuditSearchTerm(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    />
                   </div>
+                </div>
+                <div className="sm:w-48">
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Action Type
+                  </label>
+                  <select
+                    value={auditFilter}
+                    onChange={(e) => setAuditFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    <option value="All">All Actions</option>
+                    <option value="Create">Course Created</option>
+                    <option value="Update">Course Updated</option>
+                    <option value="Delete">Course Deleted</option>
+                    <option value="QR">QR Generated</option>
+                    <option value="Manual">Manual Attendance</option>
+                    <option value="Report">Report Generated</option>
+                  </select>
+                </div>
+                <div className="sm:w-48">
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Date Range
+                  </label>
+                  <select
+                    value={auditDateFilter}
+                    onChange={(e) => setAuditDateFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    <option value="All">All Time</option>
+                    <option value="Today">Today</option>
+                    <option value="Yesterday">Yesterday</option>
+                    <option value="Last Week">Last 7 Days</option>
+                    <option value="Last Month">Last 30 Days</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Audit Log List */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+              {filteredAuditLogs.length > 0 ? (
+                <div className="space-y-4">
+                  {filteredAuditLogs.map((log) => {
+                    const Icon = log.icon
+                    return (
+                      <div
+                        key={log.id}
+                        className="flex items-start space-x-4 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
+                      >
+                        <div className={`shrink-0 w-10 h-10 ${log.iconBg} rounded-full flex items-center justify-center`}>
+                          <Icon className={`h-5 w-5 ${log.iconColor}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="text-sm font-semibold text-gray-900">{log.action}</h4>
+                            <span className="text-xs text-gray-500 flex items-center">
+                              <FiClock className="h-3 w-3 mr-1" />
+                              {timeAgo(log.timestamp)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{log.description}</p>
+                          <p className="text-xs text-gray-400">
+                            {formatDateTime(log.timestamp)}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <HiOutlineClipboardList className="h-8 w-8 text-gray-400" />
+                    <FiEye className="h-8 w-8 text-gray-400" />
                   </div>
-                  <p className="text-gray-600 font-medium">No audit logs found</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    This teacher hasn't created any courses yet
+                  <h4 className="text-base font-medium text-gray-900 mb-1">No Activity Found</h4>
+                  <p className="text-sm text-gray-500">
+                    {auditSearchTerm || auditFilter !== 'All' || auditDateFilter !== 'All'
+                      ? 'Try adjusting your filters'
+                      : 'No activity logs available for this teacher'}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end sticky bottom-0 bg-white">
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
+              <p className="text-xs text-gray-500">
+                Showing {filteredAuditLogs.length} {filteredAuditLogs.length === 1 ? 'activity' : 'activities'}
+              </p>
               <button
-                onClick={() => {
-                  setShowAuditModal(false);
-                  setAuditLogs([]);
-                }}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors shadow-sm"
+                onClick={() => setShowAuditModal(false)}
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 font-medium transition-colors"
               >
                 Close
               </button>
