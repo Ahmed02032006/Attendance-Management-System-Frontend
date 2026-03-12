@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers, FiClock, FiBookOpen, FiFileText, FiGrid, FiEye, FiCalendar, FiCode, FiMapPin } from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
   getTeachersByUser,
@@ -16,15 +16,13 @@ const AdminTeachers_Page = () => {
   const { teachers, isLoading } = useSelector((state) => state.adminTeacher)
 
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [isTeacherLoading, setIsTeacherLoading] = useState(true)
+  const [isTeacherLoading, setIsTeacherLoading] = useState(true) // Changed to true initially
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showAuditModal, setShowAuditModal] = useState(false)
-  const [showSubjectsModal, setShowSubjectsModal] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
-  const [roleFilter, setRoleFilter] = useState('Teacher')
+  const [roleFilter, setRoleFilter] = useState('Teacher') // Default filter to show only teachers
   const [currentPage, setCurrentPage] = useState(1)
   const [teachersPerPage] = useState(5)
 
@@ -36,142 +34,7 @@ const AdminTeachers_Page = () => {
     status: 'Active'
   })
 
-  // Mock teacher subjects data
-  const getTeacherSubjects = (teacher) => {
-    if (!teacher) return []
-
-    return [
-      {
-        id: 1,
-        name: 'Advanced Mathematics',
-        code: 'MATH-401',
-        registeredStudents: 45,
-        schedule: 'Monday, Wednesday • 10:00 AM - 11:30 AM',
-        room: 'Room 301',
-        createdAt: '2024-01-15T10:30:00Z'
-      },
-      {
-        id: 2,
-        name: 'Physics 101',
-        code: 'PHYS-101',
-        registeredStudents: 38,
-        schedule: 'Tuesday, Thursday • 2:00 PM - 3:30 PM',
-        room: 'Lab 201',
-        createdAt: '2024-01-20T14:15:00Z'
-      },
-      {
-        id: 3,
-        name: 'Organic Chemistry',
-        code: 'CHEM-202',
-        registeredStudents: 32,
-        schedule: 'Monday, Wednesday • 2:00 PM - 3:30 PM',
-        room: 'Lab 105',
-        createdAt: '2024-02-05T09:45:00Z'
-      },
-      {
-        id: 4,
-        name: 'Computer Science Fundamentals',
-        code: 'CS-101',
-        registeredStudents: 52,
-        schedule: 'Tuesday, Thursday • 10:00 AM - 11:30 AM',
-        room: 'Room 405',
-        createdAt: '2024-02-10T11:20:00Z'
-      },
-      {
-        id: 5,
-        name: 'English Literature',
-        code: 'ENG-202',
-        registeredStudents: 28,
-        schedule: 'Friday • 9:00 AM - 12:00 PM',
-        room: 'Room 203',
-        createdAt: '2024-03-01T13:10:00Z'
-      }
-    ]
-  }
-
-  // Enhanced mock audit logs data
-  const getMockAuditLogs = (teacher) => {
-    if (!teacher) return []
-
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
-    const threeDaysAgo = new Date(today)
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
-    const lastWeek = new Date(today)
-    lastWeek.setDate(lastWeek.getDate() - 7)
-    const twoWeeksAgo = new Date(today)
-    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14)
-    const lastMonth = new Date(today)
-    lastMonth.setMonth(lastMonth.getMonth() - 1)
-
-    return [
-      {
-        id: 1,
-        action: 'created',
-        item: 'course',
-        name: 'Advanced Mathematics',
-        details: 'Created new course with 45 registered students',
-        time: today.toISOString(),
-        type: 'create'
-      },
-      {
-        id: 2,
-        action: 'created',
-        item: 'course',
-        name: 'Physics 101',
-        details: 'Created new course with 38 registered students',
-        time: yesterday.toISOString(),
-        type: 'create'
-      },
-      {
-        id: 3,
-        action: 'edited',
-        item: 'course',
-        name: 'Computer Science',
-        details: 'Updated course schedule and description',
-        time: yesterday.toISOString(),
-        type: 'edit'
-      },
-      {
-        id: 4,
-        action: 'generated QR',
-        item: 'attendance',
-        name: 'Physics 101',
-        details: 'Generated QR code for Monday 10:00 AM class',
-        time: yesterday.toISOString(),
-        type: 'qr'
-      },
-      {
-        id: 5,
-        action: 'deleted',
-        item: 'course',
-        name: 'History 101',
-        details: 'Permanently removed course from system',
-        time: lastWeek.toISOString(),
-        type: 'delete'
-      },
-      {
-        id: 6,
-        action: 'marked attendance',
-        item: 'manual',
-        name: 'Chemistry Lab',
-        details: 'Manually marked attendance for 8 students',
-        time: lastWeek.toISOString(),
-        type: 'manual'
-      },
-      {
-        id: 7,
-        action: 'generated report',
-        item: 'Monthly Attendance',
-        name: 'January 2024',
-        details: 'Generated comprehensive attendance report',
-        time: twoWeeksAgo.toISOString(),
-        type: 'report'
-      }
-    ]
-  }
-
+  // Fetch teachers on component mount
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
@@ -181,6 +44,7 @@ const AdminTeachers_Page = () => {
         console.error('Error fetching teachers:', error);
         toast.error('Failed to load teachers');
       } finally {
+        // Add a small delay to ensure data is properly set before hiding loader
         setTimeout(() => {
           setIsTeacherLoading(false);
         }, 300);
@@ -190,34 +54,27 @@ const AdminTeachers_Page = () => {
     fetchTeachers();
   }, [dispatch])
 
+  // Filter teachers based on search, filter, and role
   const filteredTeachers = teachers.filter(teacher => {
     const matchesSearch =
       teacher.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       teacher.userEmail?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus = statusFilter === 'All' || teacher.status === statusFilter
+
+    // Only show teachers by default, but allow filtering by role
     const matchesRole = roleFilter === 'All' || teacher.userRole === roleFilter
 
     return matchesSearch && matchesStatus && matchesRole
   })
 
+  // Separate function to check if a teacher can be deleted
   const canDeleteTeacher = (teacher) => {
+    // Don't allow deleting admin users from teacher management page
     return teacher.userRole !== 'Admin'
   }
 
-  const getRoleBadgeColor = (role) => {
-    switch (role) {
-      case 'Admin':
-        return 'bg-purple-100 text-purple-800 border-purple-200'
-      case 'Teacher':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'Student':
-        return 'bg-green-100 text-green-800 border-green-200'
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
-
+  // Pagination
   const indexOfLastTeacher = currentPage * teachersPerPage
   const indexOfFirstTeacher = indexOfLastTeacher - teachersPerPage
   const currentTeachers = filteredTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher)
@@ -231,6 +88,7 @@ const AdminTeachers_Page = () => {
     }))
   }
 
+  // Handle status toggle in form
   const handleStatusToggle = (status) => {
     setTeacherForm(prev => ({
       ...prev,
@@ -238,6 +96,7 @@ const AdminTeachers_Page = () => {
     }))
   }
 
+  // Get first letter of username for avatar
   const getAvatarLetter = (name) => {
     if (!name) return 'T'
     return name.charAt(0).toUpperCase()
@@ -257,11 +116,12 @@ const AdminTeachers_Page = () => {
     }
 
     try {
+      // Prepare form data for API using correct field names
       const formData = {
         userName: teacherForm.userName,
         userEmail: teacherForm.userEmail,
         userPassword: teacherForm.userPassword,
-        userRole: 'Teacher',
+        userRole: 'Teacher', // Always set role as Teacher when creating
         status: 'Active'
       }
 
@@ -285,6 +145,7 @@ const AdminTeachers_Page = () => {
     }
 
     try {
+      // Prepare form data for API
       const formData = {
         userName: teacherForm.userName,
         userEmail: teacherForm.userEmail,
@@ -308,6 +169,7 @@ const AdminTeachers_Page = () => {
   const handleDeleteTeacher = async () => {
     if (!selectedTeacher) return
 
+    // Double check - don't allow deleting admin users
     if (!canDeleteTeacher(selectedTeacher)) {
       toast.error('Cannot delete admin users from this page')
       setShowDeleteModal(false)
@@ -343,6 +205,7 @@ const AdminTeachers_Page = () => {
   }
 
   const openDeleteModal = (teacher) => {
+    // Don't allow deleting admin users
     if (!canDeleteTeacher(teacher)) {
       toast.error('Cannot delete admin users')
       return
@@ -350,16 +213,6 @@ const AdminTeachers_Page = () => {
 
     setSelectedTeacher(teacher)
     setShowDeleteModal(true)
-  }
-
-  const openAuditModal = (teacher) => {
-    setSelectedTeacher(teacher)
-    setShowAuditModal(true)
-  }
-
-  const openSubjectsModal = (teacher) => {
-    setSelectedTeacher(teacher)
-    setShowSubjectsModal(true)
   }
 
   const resetForm = () => {
@@ -377,6 +230,7 @@ const AdminTeachers_Page = () => {
   const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages))
   const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1))
 
+  // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A'
     try {
@@ -384,22 +238,6 @@ const AdminTeachers_Page = () => {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
-      })
-    } catch (error) {
-      return 'Invalid Date'
-    }
-  }
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A'
-    try {
-      const date = new Date(dateString)
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
       })
     } catch (error) {
       return 'Invalid Date'
@@ -432,47 +270,21 @@ const AdminTeachers_Page = () => {
     return 'just now';
   }
 
-  const getActionIcon = (type) => {
-    switch(type) {
-      case 'create':
-        return <FiPlus className="h-4 w-4 text-green-600" />
-      case 'edit':
-        return <FiEdit className="h-4 w-4 text-blue-600" />
-      case 'delete':
-        return <FiTrash2 className="h-4 w-4 text-red-600" />
-      case 'qr':
-        return <FiGrid className="h-4 w-4 text-indigo-600" />
-      case 'manual':
-        return <FiUsers className="h-4 w-4 text-amber-600" />
-      case 'report':
-        return <FiFileText className="h-4 w-4 text-gray-600" />
+  // Get role badge color
+  const getRoleBadgeColor = (role) => {
+    switch (role) {
+      case 'Admin':
+        return 'bg-purple-100 text-purple-800 border-purple-200'
+      case 'Teacher':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'Student':
+        return 'bg-green-100 text-green-800 border-green-200'
       default:
-        return <FiClock className="h-4 w-4 text-gray-600" />
+        return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
-  const getActionText = (log) => {
-    switch(log.type) {
-      case 'create':
-        return `Created ${log.item}: ${log.name}`
-      case 'edit':
-        return `Edited ${log.item}: ${log.name}`
-      case 'delete':
-        return `Deleted ${log.item}: ${log.name}`
-      case 'qr':
-        return `Generated QR for ${log.item}: ${log.name}`
-      case 'manual':
-        return `Marked manual attendance for ${log.name}`
-      case 'report':
-        return `Generated ${log.item}: ${log.name}`
-      default:
-        return log.action
-    }
-  }
-
-  const auditLogs = getMockAuditLogs(selectedTeacher)
-  const teacherSubjects = getTeacherSubjects(selectedTeacher)
-
+  // Show loading state while fetching data
   if (isTeacherLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -537,6 +349,7 @@ const AdminTeachers_Page = () => {
               <option value="Admin">Admins</option>
             </select>
 
+            {/* Create Teacher Button */}
             <button
               onClick={openCreateModal}
               disabled={isLoading}
@@ -563,13 +376,8 @@ const AdminTeachers_Page = () => {
                   <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Joined Date
                   </th>
-                  <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 hidden md:table-cell"
-                    onClick={() => selectedTeacher && openSubjectsModal(selectedTeacher)}
-                  >
-                    <div className="flex items-center justify-center space-x-1">
-                      <FiBookOpen className="h-3 w-3" />
-                      <span>Subjects Count</span>
-                    </div>
+                  <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    Subjects Count
                   </th>
                   <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Last Login
@@ -597,6 +405,7 @@ const AdminTeachers_Page = () => {
                                   alt={teacher.userName}
                                   className="h-full w-full object-cover"
                                   onError={(e) => {
+                                    // Fallback to avatar letter if image fails to load
                                     e.target.style.display = 'none';
                                     const parent = e.target.parentNode;
                                     const fallback = document.createElement('div');
@@ -645,13 +454,7 @@ const AdminTeachers_Page = () => {
                           {formatDate(teacher.createdAt)}
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
-                          <button
-                            onClick={() => openSubjectsModal(teacher)}
-                            className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors"
-                          >
-                            <FiBookOpen className="h-3 w-3 mr-1" />
-                            {teacher.subjectCount || 5} Subjects
-                          </button>
+                          {teacher.subjectCount}
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
                           {timeAgo(teacher.lastLogin)}
@@ -676,15 +479,6 @@ const AdminTeachers_Page = () => {
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                           <div className="flex justify-center space-x-2 lg:space-x-3">
-                            <button
-                              onClick={() => openAuditModal(teacher)}
-                              className="text-gray-600 hover:text-gray-900 transition-colors p-1"
-                              title="View Audit Log"
-                              disabled={isLoading}
-                            >
-                              <FiEye className="h-4 w-4 lg:h-5 lg:w-5" />
-                            </button>
-                            
                             <button
                               onClick={() => openEditModal(teacher)}
                               className="text-blue-600 hover:text-blue-900 transition-colors p-1"
@@ -1095,230 +889,6 @@ const AdminTeachers_Page = () => {
                 disabled={isLoading}
               >
                 {isLoading ? 'Deleting...' : 'Delete Teacher'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Enhanced Audit Log Modal */}
-      {showAuditModal && selectedTeacher && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden">
-            {/* Header with gradient */}
-            <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-5 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <FiEye className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-800">Activity Timeline</h3>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      {selectedTeacher.userName} • {selectedTeacher.userEmail}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowAuditModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full p-2"
-                >
-                  <FiX className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Timeline Activity List */}
-            <div className="max-h-[500px] overflow-y-auto px-6 py-4">
-              {auditLogs.length > 0 ? (
-                <div className="relative">
-                  {/* Timeline line */}
-                  <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-                  
-                  <div className="space-y-6">
-                    {auditLogs.map((log, index) => (
-                      <div key={log.id} className="relative flex items-start space-x-4">
-                        {/* Timeline dot with icon */}
-                        <div className={`relative z-10 w-12 h-12 ${log.type === 'create' ? 'bg-green-100' : 
-                          log.type === 'edit' ? 'bg-blue-100' :
-                          log.type === 'delete' ? 'bg-red-100' :
-                          log.type === 'qr' ? 'bg-purple-100' :
-                          log.type === 'manual' ? 'bg-amber-100' :
-                          'bg-gray-100'} rounded-xl flex items-center justify-center shadow-sm`}>
-                          {getActionIcon(log.type)}
-                        </div>
-                        
-                        {/* Content */}
-                        <div className="flex-1 bg-white rounded-lg p-4 border border-gray-100 hover:shadow-md transition-shadow">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                              log.type === 'create' ? 'bg-green-50 text-green-700' :
-                              log.type === 'edit' ? 'bg-blue-50 text-blue-700' :
-                              log.type === 'delete' ? 'bg-red-50 text-red-700' :
-                              log.type === 'qr' ? 'bg-purple-50 text-purple-700' :
-                              log.type === 'manual' ? 'bg-amber-50 text-amber-700' :
-                              'bg-gray-50 text-gray-700'
-                            }`}>
-                              {log.type.charAt(0).toUpperCase() + log.type.slice(1)}
-                            </span>
-                            <span className="text-xs text-gray-400 flex items-center">
-                              <FiClock className="h-3 w-3 mr-1" />
-                              {formatDateTime(log.time)}
-                            </span>
-                          </div>
-                          <h4 className="text-sm font-semibold text-gray-800 mb-1">
-                            {log.action.charAt(0).toUpperCase() + log.action.slice(1)} {log.item}
-                          </h4>
-                          <p className="text-sm text-gray-600 mb-2">{log.name}</p>
-                          {log.details && (
-                            <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded-md">
-                              {log.details}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FiEye className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h4 className="text-base font-medium text-gray-700 mb-1">No Activity Found</h4>
-                  <p className="text-sm text-gray-500">This teacher hasn't performed any actions yet</p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer with stats */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">
-                  <span className="font-semibold text-gray-900">{auditLogs.length}</span> total activities
-                </span>
-                <span className="text-sm text-gray-600">
-                  <span className="font-semibold text-gray-900">
-                    {auditLogs.filter(l => l.type === 'create').length}
-                  </span> creates
-                </span>
-                <span className="text-sm text-gray-600">
-                  <span className="font-semibold text-gray-900">
-                    {auditLogs.filter(l => l.type === 'edit').length}
-                  </span> edits
-                </span>
-              </div>
-              <button
-                onClick={() => setShowAuditModal(false)}
-                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors shadow-sm"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Teacher Subjects Modal */}
-      {showSubjectsModal && selectedTeacher && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-50 to-white px-6 py-5 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-                    <FiBookOpen className="h-6 w-6 text-indigo-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-800">Teacher Courses</h3>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      {selectedTeacher.userName} • {selectedTeacher.userEmail}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowSubjectsModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full p-2"
-                >
-                  <FiX className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Subjects List */}
-            <div className="max-h-[500px] overflow-y-auto p-6">
-              {teacherSubjects.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4">
-                  {teacherSubjects.map((subject) => (
-                    <div key={subject.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-shadow">
-                      {/* Course Header */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                            <FiBookOpen className="h-5 w-5 text-indigo-600" />
-                          </div>
-                          <div>
-                            <h4 className="text-base font-semibold text-gray-800">{subject.name}</h4>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                                {subject.code}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <span className="text-xs text-gray-400 flex items-center">
-                          <FiCalendar className="h-3 w-3 mr-1" />
-                          {formatDateTime(subject.createdAt)}
-                        </span>
-                      </div>
-
-                      {/* Course Details Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <div className="flex items-center space-x-2">
-                            <FiUsers className="h-4 w-4 text-blue-500" />
-                            <span className="text-xs text-gray-500">Registered Students</span>
-                          </div>
-                          <p className="text-lg font-semibold text-gray-800 mt-1">{subject.registeredStudents}</p>
-                        </div>
-
-                        <div className="bg-gray-50 rounded-lg p-3 md:col-span-2">
-                          <div className="flex items-center space-x-2">
-                            <FiClock className="h-4 w-4 text-amber-500" />
-                            <span className="text-xs text-gray-500">Class Schedule</span>
-                          </div>
-                          <p className="text-sm font-medium text-gray-800 mt-1">{subject.schedule}</p>
-                          <p className="text-xs text-gray-500 mt-1 flex items-center">
-                            <FiMapPin className="h-3 w-3 mr-1" />
-                            {subject.room}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FiBookOpen className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h4 className="text-base font-medium text-gray-700 mb-1">No Courses Found</h4>
-                  <p className="text-sm text-gray-500">This teacher hasn't been assigned any courses yet</p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
-              <span className="text-sm text-gray-600">
-                Total <span className="font-semibold text-gray-900">{teacherSubjects.length}</span> courses
-              </span>
-              <button
-                onClick={() => setShowSubjectsModal(false)}
-                className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"
-              >
-                Close
               </button>
             </div>
           </div>
