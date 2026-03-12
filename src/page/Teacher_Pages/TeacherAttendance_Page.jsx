@@ -491,8 +491,8 @@ const TeacherAttendance_Page = () => {
 
   // Function to generate random code
   const generateRandomCode = () => {
-    // Generate a 6-digit random number
-    const randomNum = Math.floor(100000 + Math.random() * 900000);
+    // Generate a 4-digit random number
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
     setAttendanceForm(prev => ({ ...prev, uniqueCode: randomNum.toString() }));
   };
 
@@ -1407,7 +1407,7 @@ const TeacherAttendance_Page = () => {
                   </button>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Click generate to create a random 6-digit code
+                  Click generate to create a random 4-digit code
                 </p>
               </div>
             </div>
