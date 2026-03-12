@@ -219,6 +219,20 @@ const AdminTeachers_Page = () => {
     return teacher.userRole !== 'Admin'
   }
 
+  // Add the missing getRoleBadgeColor function
+  const getRoleBadgeColor = (role) => {
+    switch (role) {
+      case 'Admin':
+        return 'bg-purple-100 text-purple-800 border-purple-200'
+      case 'Teacher':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'Student':
+        return 'bg-green-100 text-green-800 border-green-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
+    }
+  }
+
   const indexOfLastTeacher = currentPage * teachersPerPage
   const indexOfFirstTeacher = indexOfLastTeacher - teachersPerPage
   const currentTeachers = filteredTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher)
@@ -399,6 +413,32 @@ const AdminTeachers_Page = () => {
     } catch (error) {
       return 'Invalid Date'
     }
+  }
+
+  function timeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const seconds = Math.floor((now - date) / 1000);
+
+    const intervals = [
+      { label: 'year', seconds: 31536000 },
+      { label: 'month', seconds: 2592000 },
+      { label: 'day', seconds: 86400 },
+      { label: 'hour', seconds: 3600 },
+      { label: 'minute', seconds: 60 },
+    ];
+
+    for (const interval of intervals) {
+      const count = Math.floor(seconds / interval.seconds);
+      if (count >= 1) {
+        return new Intl.RelativeTimeFormat('en', {
+          numeric: 'auto',
+        }).format(-count, interval.label);
+      }
+    }
+
+    return 'just now';
   }
 
   const getActionIcon = (type) => {
