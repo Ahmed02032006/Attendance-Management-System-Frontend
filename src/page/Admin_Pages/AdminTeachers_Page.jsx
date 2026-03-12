@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers, FiClock, FiBookOpen, FiFileText, FiGrid, FiEye } from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers, FiClock, FiBookOpen, FiFileText, FiGrid, FiEye, FiCalendar, FiCode, FiMapPin } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
   getTeachersByUser,
@@ -20,6 +20,7 @@ const AdminTeachers_Page = () => {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAuditModal, setShowAuditModal] = useState(false)
+  const [showSubjectsModal, setShowSubjectsModal] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
@@ -35,7 +36,60 @@ const AdminTeachers_Page = () => {
     status: 'Active'
   })
 
-  // Mock audit logs data - multiple entries for each type
+  // Mock teacher subjects data
+  const getTeacherSubjects = (teacher) => {
+    if (!teacher) return []
+
+    return [
+      {
+        id: 1,
+        name: 'Advanced Mathematics',
+        code: 'MATH-401',
+        registeredStudents: 45,
+        schedule: 'Monday, Wednesday • 10:00 AM - 11:30 AM',
+        room: 'Room 301',
+        createdAt: '2024-01-15T10:30:00Z'
+      },
+      {
+        id: 2,
+        name: 'Physics 101',
+        code: 'PHYS-101',
+        registeredStudents: 38,
+        schedule: 'Tuesday, Thursday • 2:00 PM - 3:30 PM',
+        room: 'Lab 201',
+        createdAt: '2024-01-20T14:15:00Z'
+      },
+      {
+        id: 3,
+        name: 'Organic Chemistry',
+        code: 'CHEM-202',
+        registeredStudents: 32,
+        schedule: 'Monday, Wednesday • 2:00 PM - 3:30 PM',
+        room: 'Lab 105',
+        createdAt: '2024-02-05T09:45:00Z'
+      },
+      {
+        id: 4,
+        name: 'Computer Science Fundamentals',
+        code: 'CS-101',
+        registeredStudents: 52,
+        schedule: 'Tuesday, Thursday • 10:00 AM - 11:30 AM',
+        room: 'Room 405',
+        createdAt: '2024-02-10T11:20:00Z'
+      },
+      {
+        id: 5,
+        name: 'English Literature',
+        code: 'ENG-202',
+        registeredStudents: 28,
+        schedule: 'Friday • 9:00 AM - 12:00 PM',
+        room: 'Room 203',
+        createdAt: '2024-03-01T13:10:00Z'
+      }
+    ]
+  }
+
+  // Enhanced mock audit logs data
   const getMockAuditLogs = (teacher) => {
     if (!teacher) return []
 
@@ -52,12 +106,12 @@ const AdminTeachers_Page = () => {
     lastMonth.setMonth(lastMonth.getMonth() - 1)
 
     return [
-      // Create entries
       {
         id: 1,
         action: 'created',
         item: 'course',
         name: 'Advanced Mathematics',
+        details: 'Created new course with 45 registered students',
         time: today.toISOString(),
         type: 'create'
       },
@@ -66,120 +120,52 @@ const AdminTeachers_Page = () => {
         action: 'created',
         item: 'course',
         name: 'Physics 101',
+        details: 'Created new course with 38 registered students',
         time: yesterday.toISOString(),
         type: 'create'
       },
       {
         id: 3,
-        action: 'created',
-        item: 'course',
-        name: 'Organic Chemistry',
-        time: threeDaysAgo.toISOString(),
-        type: 'create'
-      },
-      
-      // Edit entries
-      {
-        id: 4,
         action: 'edited',
         item: 'course',
         name: 'Computer Science',
+        details: 'Updated course schedule and description',
         time: yesterday.toISOString(),
         type: 'edit'
+      },
+      {
+        id: 4,
+        action: 'generated QR',
+        item: 'attendance',
+        name: 'Physics 101',
+        details: 'Generated QR code for Monday 10:00 AM class',
+        time: yesterday.toISOString(),
+        type: 'qr'
       },
       {
         id: 5,
-        action: 'edited',
+        action: 'deleted',
         item: 'course',
-        name: 'English Literature',
+        name: 'History 101',
+        details: 'Permanently removed course from system',
         time: lastWeek.toISOString(),
-        type: 'edit'
+        type: 'delete'
       },
       {
         id: 6,
-        action: 'edited',
-        item: 'course',
-        name: 'History 101',
-        time: twoWeeksAgo.toISOString(),
-        type: 'edit'
+        action: 'marked attendance',
+        item: 'manual',
+        name: 'Chemistry Lab',
+        details: 'Manually marked attendance for 8 students',
+        time: lastWeek.toISOString(),
+        type: 'manual'
       },
-      
-      // Delete entries
       {
         id: 7,
-        action: 'deleted',
-        item: 'course',
-        name: 'Introduction to Programming',
-        time: lastWeek.toISOString(),
-        type: 'delete'
-      },
-      {
-        id: 8,
-        action: 'deleted',
-        item: 'course',
-        name: 'World History',
-        time: twoWeeksAgo.toISOString(),
-        type: 'delete'
-      },
-      {
-        id: 9,
-        action: 'deleted',
-        item: 'course',
-        name: 'Calculus II',
-        time: lastMonth.toISOString(),
-        type: 'delete'
-      },
-      
-      // QR Generation entries
-      {
-        id: 10,
-        action: 'generated QR for',
-        item: 'class',
-        name: 'Physics 101 (Monday 10:00 AM)',
-        time: today.toISOString(),
-        type: 'qr'
-      },
-      {
-        id: 11,
-        action: 'generated QR for',
-        item: 'class',
-        name: 'Mathematics (Wednesday 2:00 PM)',
-        time: yesterday.toISOString(),
-        type: 'qr'
-      },
-      
-      // Manual Attendance entries
-      {
-        id: 12,
-        action: 'marked manual attendance for',
-        item: '5 students',
-        name: 'Chemistry Lab',
-        time: yesterday.toISOString(),
-        type: 'manual'
-      },
-      {
-        id: 13,
-        action: 'marked manual attendance for',
-        item: '8 students',
-        name: 'Physics Lab',
-        time: threeDaysAgo.toISOString(),
-        type: 'manual'
-      },
-      
-      // Report entries
-      {
-        id: 14,
         action: 'generated report',
-        item: 'Monthly Attendance Report',
+        item: 'Monthly Attendance',
         name: 'January 2024',
-        time: lastWeek.toISOString(),
-        type: 'report'
-      },
-      {
-        id: 15,
-        action: 'generated report',
-        item: 'Course Completion Report',
-        name: 'Fall Semester',
+        details: 'Generated comprehensive attendance report',
         time: twoWeeksAgo.toISOString(),
         type: 'report'
       }
@@ -219,7 +205,6 @@ const AdminTeachers_Page = () => {
     return teacher.userRole !== 'Admin'
   }
 
-  // Add the missing getRoleBadgeColor function
   const getRoleBadgeColor = (role) => {
     switch (role) {
       case 'Admin':
@@ -372,6 +357,11 @@ const AdminTeachers_Page = () => {
     setShowAuditModal(true)
   }
 
+  const openSubjectsModal = (teacher) => {
+    setSelectedTeacher(teacher)
+    setShowSubjectsModal(true)
+  }
+
   const resetForm = () => {
     setTeacherForm({
       userName: '',
@@ -407,6 +397,7 @@ const AdminTeachers_Page = () => {
       return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
+        year: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
       })
@@ -471,7 +462,7 @@ const AdminTeachers_Page = () => {
       case 'qr':
         return `Generated QR for ${log.item}: ${log.name}`
       case 'manual':
-        return `Marked manual attendance for ${log.item} in ${log.name}`
+        return `Marked manual attendance for ${log.name}`
       case 'report':
         return `Generated ${log.item}: ${log.name}`
       default:
@@ -480,6 +471,7 @@ const AdminTeachers_Page = () => {
   }
 
   const auditLogs = getMockAuditLogs(selectedTeacher)
+  const teacherSubjects = getTeacherSubjects(selectedTeacher)
 
   if (isTeacherLoading) {
     return (
@@ -571,8 +563,13 @@ const AdminTeachers_Page = () => {
                   <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Joined Date
                   </th>
-                  <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                    Subjects Count
+                  <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 hidden md:table-cell"
+                    onClick={() => selectedTeacher && openSubjectsModal(selectedTeacher)}
+                  >
+                    <div className="flex items-center justify-center space-x-1">
+                      <FiBookOpen className="h-3 w-3" />
+                      <span>Subjects Count</span>
+                    </div>
                   </th>
                   <th scope="col" className="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Last Login
@@ -648,7 +645,13 @@ const AdminTeachers_Page = () => {
                           {formatDate(teacher.createdAt)}
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
-                          {teacher.subjectCount}
+                          <button
+                            onClick={() => openSubjectsModal(teacher)}
+                            className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors"
+                          >
+                            <FiBookOpen className="h-3 w-3 mr-1" />
+                            {teacher.subjectCount || 5} Subjects
+                          </button>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hidden md:table-cell">
                           {timeAgo(teacher.lastLogin)}
@@ -1098,60 +1101,222 @@ const AdminTeachers_Page = () => {
         </div>
       )}
 
-      {/* Audit Log Modal - List Type UI */}
+      {/* Enhanced Audit Log Modal */}
       {showAuditModal && selectedTeacher && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Activity Log</h3>
-                <p className="text-sm text-gray-500 mt-0.5">{selectedTeacher.userName} • {selectedTeacher.userEmail}</p>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden">
+            {/* Header with gradient */}
+            <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-5 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <FiEye className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">Activity Timeline</h3>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {selectedTeacher.userName} • {selectedTeacher.userEmail}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAuditModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full p-2"
+                >
+                  <FiX className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Timeline Activity List */}
+            <div className="max-h-[500px] overflow-y-auto px-6 py-4">
+              {auditLogs.length > 0 ? (
+                <div className="relative">
+                  {/* Timeline line */}
+                  <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                  
+                  <div className="space-y-6">
+                    {auditLogs.map((log, index) => (
+                      <div key={log.id} className="relative flex items-start space-x-4">
+                        {/* Timeline dot with icon */}
+                        <div className={`relative z-10 w-12 h-12 ${log.type === 'create' ? 'bg-green-100' : 
+                          log.type === 'edit' ? 'bg-blue-100' :
+                          log.type === 'delete' ? 'bg-red-100' :
+                          log.type === 'qr' ? 'bg-purple-100' :
+                          log.type === 'manual' ? 'bg-amber-100' :
+                          'bg-gray-100'} rounded-xl flex items-center justify-center shadow-sm`}>
+                          {getActionIcon(log.type)}
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="flex-1 bg-white rounded-lg p-4 border border-gray-100 hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                              log.type === 'create' ? 'bg-green-50 text-green-700' :
+                              log.type === 'edit' ? 'bg-blue-50 text-blue-700' :
+                              log.type === 'delete' ? 'bg-red-50 text-red-700' :
+                              log.type === 'qr' ? 'bg-purple-50 text-purple-700' :
+                              log.type === 'manual' ? 'bg-amber-50 text-amber-700' :
+                              'bg-gray-50 text-gray-700'
+                            }`}>
+                              {log.type.charAt(0).toUpperCase() + log.type.slice(1)}
+                            </span>
+                            <span className="text-xs text-gray-400 flex items-center">
+                              <FiClock className="h-3 w-3 mr-1" />
+                              {formatDateTime(log.time)}
+                            </span>
+                          </div>
+                          <h4 className="text-sm font-semibold text-gray-800 mb-1">
+                            {log.action.charAt(0).toUpperCase() + log.action.slice(1)} {log.item}
+                          </h4>
+                          <p className="text-sm text-gray-600 mb-2">{log.name}</p>
+                          {log.details && (
+                            <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded-md">
+                              {log.details}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FiEye className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h4 className="text-base font-medium text-gray-700 mb-1">No Activity Found</h4>
+                  <p className="text-sm text-gray-500">This teacher hasn't performed any actions yet</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer with stats */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">
+                  <span className="font-semibold text-gray-900">{auditLogs.length}</span> total activities
+                </span>
+                <span className="text-sm text-gray-600">
+                  <span className="font-semibold text-gray-900">
+                    {auditLogs.filter(l => l.type === 'create').length}
+                  </span> creates
+                </span>
+                <span className="text-sm text-gray-600">
+                  <span className="font-semibold text-gray-900">
+                    {auditLogs.filter(l => l.type === 'edit').length}
+                  </span> edits
+                </span>
               </div>
               <button
                 onClick={() => setShowAuditModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors shadow-sm"
               >
-                <FiX className="h-5 w-5" />
+                Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
 
-            {/* Activity List - Scrollable */}
-            <div className="max-h-[500px] overflow-y-auto">
-              {auditLogs.length > 0 ? (
-                <div className="divide-y divide-gray-100">
-                  {auditLogs.map((log) => (
-                    <div key={log.id} className="px-6 py-4 hover:bg-gray-50 transition-colors flex items-start space-x-3">
-                      <div className="shrink-0 mt-0.5">
-                        {getActionIcon(log.type)}
+      {/* Teacher Subjects Modal */}
+      {showSubjectsModal && selectedTeacher && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-50 to-white px-6 py-5 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <FiBookOpen className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">Teacher Courses</h3>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {selectedTeacher.userName} • {selectedTeacher.userEmail}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowSubjectsModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full p-2"
+                >
+                  <FiX className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Subjects List */}
+            <div className="max-h-[500px] overflow-y-auto p-6">
+              {teacherSubjects.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4">
+                  {teacherSubjects.map((subject) => (
+                    <div key={subject.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-shadow">
+                      {/* Course Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                            <FiBookOpen className="h-5 w-5 text-indigo-600" />
+                          </div>
+                          <div>
+                            <h4 className="text-base font-semibold text-gray-800">{subject.name}</h4>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                {subject.code}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <span className="text-xs text-gray-400 flex items-center">
+                          <FiCalendar className="h-3 w-3 mr-1" />
+                          {formatDateTime(subject.createdAt)}
+                        </span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-800">
-                          {getActionText(log)}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatDateTime(log.time)}
-                        </p>
+
+                      {/* Course Details Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="flex items-center space-x-2">
+                            <FiUsers className="h-4 w-4 text-blue-500" />
+                            <span className="text-xs text-gray-500">Registered Students</span>
+                          </div>
+                          <p className="text-lg font-semibold text-gray-800 mt-1">{subject.registeredStudents}</p>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-3 md:col-span-2">
+                          <div className="flex items-center space-x-2">
+                            <FiClock className="h-4 w-4 text-amber-500" />
+                            <span className="text-xs text-gray-500">Class Schedule</span>
+                          </div>
+                          <p className="text-sm font-medium text-gray-800 mt-1">{subject.schedule}</p>
+                          <p className="text-xs text-gray-500 mt-1 flex items-center">
+                            <FiMapPin className="h-3 w-3 mr-1" />
+                            {subject.room}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <FiEye className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500">No activity logs found</p>
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FiBookOpen className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h4 className="text-base font-medium text-gray-700 mb-1">No Courses Found</h4>
+                  <p className="text-sm text-gray-500">This teacher hasn't been assigned any courses yet</p>
                 </div>
               )}
             </div>
 
-            {/* Footer with count */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center rounded-b-lg">
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
               <span className="text-sm text-gray-600">
-                {auditLogs.length} {auditLogs.length === 1 ? 'activity' : 'activities'}
+                Total <span className="font-semibold text-gray-900">{teacherSubjects.length}</span> courses
               </span>
               <button
-                onClick={() => setShowAuditModal(false)}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm font-medium transition-colors"
+                onClick={() => setShowSubjectsModal(false)}
+                className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"
               >
                 Close
               </button>
