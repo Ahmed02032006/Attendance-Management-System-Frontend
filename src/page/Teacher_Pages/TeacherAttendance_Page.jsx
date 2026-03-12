@@ -509,21 +509,16 @@ const TeacherAttendance_Page = () => {
       return;
     }
 
-    const selectedSubject = subjectsWithAttendance.find(s => s.id === attendanceForm.subject);
-    const subjectName = selectedSubject?.title;
-    const subjectCode = selectedSubject?.code;
-
     const currentTime = new Date();
     const expiryTime = new Date(currentTime.getTime() + 80000);
 
     const originalCode = attendanceForm.uniqueCode;
     const baseUrl = `${window.location.origin}/student-attendance`;
     const url = new URL(baseUrl);
+
     url.searchParams.append('code', originalCode);
-    url.searchParams.append('subject', attendanceForm.subject); // subject ID
-    url.searchParams.append('scheduleId', selectedSchedule._id); // Add scheduleId
-    url.searchParams.append('subjectName', subjectName || 'Unknown Subject');
-    url.searchParams.append('subjectCode', subjectCode || 'N/A');
+    url.searchParams.append('subjectId', attendanceForm.subject);
+    url.searchParams.append('scheduleId', selectedSchedule._id);
     url.searchParams.append('timestamp', currentTime.getTime());
     url.searchParams.append('expiry', expiryTime.getTime());
 

@@ -93,12 +93,12 @@ const QRScanner_Page = () => {
 
     console.log('QR Data for parsing:', qrDataString);
 
-    // Try to parse as URL first (new simplified format)
+    // Try to parse as URL (simplified format with only subjectId)
     try {
       const url = new URL(qrDataString);
       const urlParams = new URLSearchParams(url.search);
 
-      // Already checked expiry in scanQRCode, but double-check here
+      // Check expiry
       const expiryTimestamp = urlParams.get('expiry');
       if (expiryTimestamp) {
         const expiryTime = new Date(parseInt(expiryTimestamp));
@@ -114,15 +114,16 @@ const QRScanner_Page = () => {
         throw new Error('Invalid QR code: No attendance code found');
       }
 
+      const subjectId = urlParams.get('subjectId'); // Changed from 'subject' to 'subjectId'
+      if (!subjectId) {
+        throw new Error('Invalid QR code: No subject ID found');
+      }
+
       const parsedData = {
         type: 'attendance',
         code: code,
-        originalCode: code,
-        subject: urlParams.get('subject') || 'Unknown Subject',
-        subjectName: urlParams.get('subjectName') || 'Unknown Subject',
-        subjectCode: urlParams.get('subjectCode') || 'N/A',
-        scheduleId: urlParams.get('scheduleId'), // Add this line
-        departmentOffering: urlParams.get('departmentOffering') || 'Unknown Subject',
+        subjectId: subjectId, // Store subject ID
+        scheduleId: urlParams.get('scheduleId'),
         attendanceTime: new Date().toLocaleTimeString('en-US', {
           hour: 'numeric',
           minute: '2-digit',
@@ -142,7 +143,7 @@ const QRScanner_Page = () => {
     try {
       const parsedData = JSON.parse(qrDataString);
 
-      // Validate QR code expiry (double-check)
+      // Validate QR code expiry
       if (parsedData.expiryTimestamp) {
         const expiryTime = new Date(parsedData.expiryTimestamp);
         const currentTime = new Date();
@@ -157,11 +158,8 @@ const QRScanner_Page = () => {
         const validatedData = {
           type: 'attendance',
           code: parsedData.code || parsedData.id || qrDataString,
-          originalCode: parsedData.originalCode || parsedData.code,
-          subject: parsedData.subject || 'Unknown Subject',
-          subjectName: parsedData.subjectName || parsedData.subject || 'Unknown Subject',
-          subjectCode: parsedData.subjectCode || 'N/A', // Add this line
-          departmentOffering: parsedData.departmentOffering || parsedData.subject || 'Unknown Subject',
+          subjectId: parsedData.subjectId || parsedData.subject, // Support both formats
+          scheduleId: parsedData.scheduleId,
           attendanceTime: parsedData.attendanceTime || parsedData.time || new Date().toLocaleTimeString(),
           attendanceDate: parsedData.attendanceDate || parsedData.date || new Date().toISOString().split('T')[0],
           timestamp: parsedData.timestamp || new Date().toISOString(),
@@ -171,36 +169,13 @@ const QRScanner_Page = () => {
         return validatedData;
       }
 
-      // If it's JSON but not attendance type, return as is
       return parsedData;
     } catch (error) {
       console.log('Not JSON format, trying other formats:', error);
     }
 
-    // Check for expired QR codes in URL format (alternative)
-    if (qrDataString.includes('expiry=')) {
-      try {
-        const urlParams = new URLSearchParams(qrDataString.includes('?')
-          ? qrDataString.split('?')[1]
-          : qrDataString
-        );
-
-        const expiryTimestamp = urlParams.get('expiry');
-        if (expiryTimestamp) {
-          const expiryTime = new Date(parseInt(expiryTimestamp));
-          const currentTime = new Date();
-
-          if (currentTime > expiryTime) {
-            throw new Error('QR code has expired. Please scan a fresh QR code.');
-          }
-        }
-      } catch (urlError) {
-        console.log('Error checking alternative URL expiry:', urlError);
-      }
-    }
-
-    // Check if it's URL encoded data (alternative format)
-    if (qrDataString.includes('=') && (qrDataString.includes('?') || qrDataString.includes('&'))) {
+    // If it's URL encoded data with subjectId
+    if (qrDataString.includes('subjectId=') && (qrDataString.includes('?') || qrDataString.includes('&'))) {
       try {
         const urlParams = new URLSearchParams(qrDataString.includes('?')
           ? qrDataString.split('?')[1]
@@ -210,12 +185,10 @@ const QRScanner_Page = () => {
         return {
           type: 'attendance',
           code: urlParams.get('code') || urlParams.get('id') || qrDataString,
-          subject: urlParams.get('subject') || 'Unknown Subject',
-          subjectName: urlParams.get('subjectName') || urlParams.get('subject') || 'Unknown Subject',
-          subjectCode: urlParams.get('subjectCode') || 'N/A', // Add this line
-          departmentOffering: urlParams.get('departmentOffering') || urlParams.get('subject') || 'Unknown Subject',
-          attendanceTime: urlParams.get('attendanceTime') || urlParams.get('time') || new Date().toLocaleTimeString(),
-          attendanceDate: urlParams.get('attendanceDate') || urlParams.get('date') || new Date().toISOString().split('T')[0],
+          subjectId: urlParams.get('subjectId'),
+          scheduleId: urlParams.get('scheduleId'),
+          attendanceTime: new Date().toLocaleTimeString(),
+          attendanceDate: new Date().toISOString().split('T')[0],
           timestamp: new Date().toISOString(),
         };
       } catch (urlError) {
@@ -223,18 +196,7 @@ const QRScanner_Page = () => {
       }
     }
 
-    // Plain text fallback
-    return {
-      type: 'attendance',
-      code: qrDataString,
-      subject: 'Scanned Subject',
-      subjectName: 'Scanned Subject',
-      subjectCode: 'N/A', // Add this line
-      departmentOffering: 'Scanned Subject',
-      attendanceTime: new Date().toLocaleTimeString(),
-      attendanceDate: new Date().toISOString().split('T')[0],
-      timestamp: new Date().toISOString(),
-    };
+    throw new Error('Invalid QR code format');
   };
 
   const navigateToAttendancePage = (qrData) => {
