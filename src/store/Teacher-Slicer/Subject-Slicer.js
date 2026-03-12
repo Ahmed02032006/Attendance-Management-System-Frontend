@@ -247,6 +247,10 @@ const subjectSlicer = createSlice({
     clearRegisteredStudents: (state) => {
       state.registeredStudents = [];
     },
+    clearSubjectDetails: (state) => {
+      state.subjectDetails = null;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -438,5 +442,5 @@ const subjectSlicer = createSlice({
   },
 });
 
-export const { clearSubjects, clearRegisteredStudents } = subjectSlicer.actions;
+export const { clearSubjects, clearRegisteredStudents, clearSubjectDetails } = subjectSlicer.actions;
 export default subjectSlicer.reducer;
