@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { createAttendance } from '../../store/Teacher-Slicer/Attendance-Slicer';
-import { getSubjectDetails, clearSubjectDetails } from '../../store/Student-Slicer/Subject-Slicer';
+import { getSubjectDetails, clearSubjectDetails } from '../../store/Teacher-Slicer/Subject-Slicer';
 import { useDispatch, useSelector } from 'react-redux';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import axios from 'axios';
