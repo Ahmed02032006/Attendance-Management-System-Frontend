@@ -26,11 +26,6 @@ const AdminTeachers_Page = () => {
   const [roleFilter, setRoleFilter] = useState('Teacher')
   const [currentPage, setCurrentPage] = useState(1)
   const [teachersPerPage] = useState(5)
-  
-  // Audit log states
-  const [auditFilter, setAuditFilter] = useState('All')
-  const [auditDateFilter, setAuditDateFilter] = useState('All')
-  const [auditSearchTerm, setAuditSearchTerm] = useState('')
 
   const [teacherForm, setTeacherForm] = useState({
     userName: '',
@@ -40,7 +35,7 @@ const AdminTeachers_Page = () => {
     status: 'Active'
   })
 
-  // Mock audit logs data for demonstration
+  // Mock audit logs data
   const getMockAuditLogs = (teacher) => {
     if (!teacher) return []
 
@@ -51,146 +46,57 @@ const AdminTeachers_Page = () => {
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
     const lastWeek = new Date(today)
     lastWeek.setDate(lastWeek.getDate() - 7)
-    const lastMonth = new Date(today)
-    lastMonth.setMonth(lastMonth.getMonth() - 1)
 
     return [
       {
         id: 1,
-        action: 'Course Created',
-        description: `Created new course "Advanced Mathematics"`,
-        timestamp: today.toISOString(),
+        action: 'Created Course: Advanced Mathematics',
+        time: today.toISOString(),
         icon: FiBookOpen,
         iconBg: 'bg-blue-100',
-        iconColor: 'text-blue-600',
-        type: 'create'
+        iconColor: 'text-blue-600'
       },
       {
         id: 2,
-        action: 'Attendance QR Generated',
-        description: `Generated QR code for "Physics 101" class (Monday, 10:00 AM - 11:30 AM)`,
-        timestamp: today.toISOString(),
+        action: 'Generated QR for Physics 101',
+        time: today.toISOString(),
         icon: FiGrid,
         iconBg: 'bg-purple-100',
-        iconColor: 'text-purple-600',
-        type: 'qr'
+        iconColor: 'text-purple-600'
       },
       {
         id: 3,
-        action: 'Manual Attendance Marked',
-        description: `Manually marked attendance for 5 students in "Chemistry Lab"`,
-        timestamp: yesterday.toISOString(),
+        action: 'Marked Manual Attendance (5 students)',
+        time: yesterday.toISOString(),
         icon: FiUsers,
         iconBg: 'bg-green-100',
-        iconColor: 'text-green-600',
-        type: 'manual'
+        iconColor: 'text-green-600'
       },
       {
         id: 4,
-        action: 'Course Updated',
-        description: `Updated course details for "Computer Science"`,
-        timestamp: twoDaysAgo.toISOString(),
+        action: 'Updated Course: Computer Science',
+        time: twoDaysAgo.toISOString(),
         icon: FiEdit,
         iconBg: 'bg-yellow-100',
-        iconColor: 'text-yellow-600',
-        type: 'update'
+        iconColor: 'text-yellow-600'
       },
       {
         id: 5,
-        action: 'Report Generated',
-        description: `Generated monthly attendance report for "Mathematics"`,
-        timestamp: lastWeek.toISOString(),
+        action: 'Generated Report: Monthly Attendance',
+        time: lastWeek.toISOString(),
         icon: FiFileText,
         iconBg: 'bg-indigo-100',
-        iconColor: 'text-indigo-600',
-        type: 'report'
+        iconColor: 'text-indigo-600'
       },
       {
         id: 6,
-        action: 'Course Deleted',
-        description: `Deleted course "History 101"`,
-        timestamp: lastWeek.toISOString(),
+        action: 'Deleted Course: History 101',
+        time: lastWeek.toISOString(),
         icon: FiTrash2,
         iconBg: 'bg-red-100',
-        iconColor: 'text-red-600',
-        type: 'delete'
-      },
-      {
-        id: 7,
-        action: 'Attendance QR Generated',
-        description: `Generated QR code for "English Literature" class (Wednesday, 2:00 PM - 3:30 PM)`,
-        timestamp: lastMonth.toISOString(),
-        icon: FiGrid,
-        iconBg: 'bg-purple-100',
-        iconColor: 'text-purple-600',
-        type: 'qr'
-      },
-      {
-        id: 8,
-        action: 'Manual Attendance Marked',
-        description: `Manually marked attendance for 3 students in "Physics Lab"`,
-        timestamp: lastMonth.toISOString(),
-        icon: FiUsers,
-        iconBg: 'bg-green-100',
-        iconColor: 'text-green-600',
-        type: 'manual'
+        iconColor: 'text-red-600'
       }
     ]
-  }
-
-  // Filter audit logs
-  const getFilteredAuditLogs = () => {
-    const logs = getMockAuditLogs(selectedTeacher)
-    
-    return logs.filter(log => {
-      // Filter by action type
-      if (auditFilter !== 'All') {
-        if (auditFilter === 'Create' && log.type !== 'create') return false
-        if (auditFilter === 'Update' && log.type !== 'update') return false
-        if (auditFilter === 'Delete' && log.type !== 'delete') return false
-        if (auditFilter === 'QR' && log.type !== 'qr') return false
-        if (auditFilter === 'Manual' && log.type !== 'manual') return false
-        if (auditFilter === 'Report' && log.type !== 'report') return false
-      }
-
-      // Filter by date
-      if (auditDateFilter !== 'All') {
-        const logDate = new Date(log.timestamp)
-        const today = new Date()
-        const yesterday = new Date(today)
-        yesterday.setDate(yesterday.getDate() - 1)
-        const lastWeek = new Date(today)
-        lastWeek.setDate(lastWeek.getDate() - 7)
-        const lastMonth = new Date(today)
-        lastMonth.setMonth(lastMonth.getMonth() - 1)
-
-        switch (auditDateFilter) {
-          case 'Today':
-            if (logDate.toDateString() !== today.toDateString()) return false
-            break
-          case 'Yesterday':
-            if (logDate.toDateString() !== yesterday.toDateString()) return false
-            break
-          case 'Last Week':
-            if (logDate < lastWeek) return false
-            break
-          case 'Last Month':
-            if (logDate < lastMonth) return false
-            break
-          default:
-            break
-        }
-      }
-
-      // Filter by search term
-      if (auditSearchTerm) {
-        const searchLower = auditSearchTerm.toLowerCase()
-        return log.action.toLowerCase().includes(searchLower) ||
-               log.description.toLowerCase().includes(searchLower)
-      }
-
-      return true
-    })
   }
 
   useEffect(() => {
@@ -362,9 +268,6 @@ const AdminTeachers_Page = () => {
 
   const openAuditModal = (teacher) => {
     setSelectedTeacher(teacher)
-    setAuditFilter('All')
-    setAuditDateFilter('All')
-    setAuditSearchTerm('')
     setShowAuditModal(true)
   }
 
@@ -400,7 +303,6 @@ const AdminTeachers_Page = () => {
     if (!dateString) return 'N/A'
     try {
       return new Date(dateString).toLocaleString('en-US', {
-        year: 'numeric',
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
@@ -450,7 +352,7 @@ const AdminTeachers_Page = () => {
     }
   }
 
-  const filteredAuditLogs = getFilteredAuditLogs()
+  const auditLogs = getMockAuditLogs(selectedTeacher)
 
   if (isTeacherLoading) {
     return (
@@ -1069,20 +971,19 @@ const AdminTeachers_Page = () => {
         </div>
       )}
 
-      {/* Audit Log Modal */}
+      {/* Simple Audit Log Modal */}
       {showAuditModal && selectedTeacher && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <FiEye className="h-5 w-5 text-purple-600" />
+                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                  <FiEye className="h-4 w-4 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Teacher Activity Log</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {selectedTeacher.userName} • {selectedTeacher.userEmail}
-                  </p>
+                  <h3 className="text-lg font-semibold text-gray-800">Activity Log</h3>
+                  <p className="text-xs text-gray-500">{selectedTeacher.userName}</p>
                 </div>
               </div>
               <button
@@ -1093,115 +994,38 @@ const AdminTeachers_Page = () => {
               </button>
             </div>
 
-            {/* Filters */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                    Search Activities
-                  </label>
-                  <div className="relative">
-                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <input
-                      type="text"
-                      placeholder="Search by action or description..."
-                      value={auditSearchTerm}
-                      onChange={(e) => setAuditSearchTerm(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    />
-                  </div>
-                </div>
-                <div className="sm:w-48">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                    Action Type
-                  </label>
-                  <select
-                    value={auditFilter}
-                    onChange={(e) => setAuditFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  >
-                    <option value="All">All Actions</option>
-                    <option value="Create">Course Created</option>
-                    <option value="Update">Course Updated</option>
-                    <option value="Delete">Course Deleted</option>
-                    <option value="QR">QR Generated</option>
-                    <option value="Manual">Manual Attendance</option>
-                    <option value="Report">Report Generated</option>
-                  </select>
-                </div>
-                <div className="sm:w-48">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                    Date Range
-                  </label>
-                  <select
-                    value={auditDateFilter}
-                    onChange={(e) => setAuditDateFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  >
-                    <option value="All">All Time</option>
-                    <option value="Today">Today</option>
-                    <option value="Yesterday">Yesterday</option>
-                    <option value="Last Week">Last 7 Days</option>
-                    <option value="Last Month">Last 30 Days</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Audit Log List */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-              {filteredAuditLogs.length > 0 ? (
+            {/* Activity List */}
+            <div className="p-6 max-h-[400px] overflow-y-auto">
+              {auditLogs.length > 0 ? (
                 <div className="space-y-4">
-                  {filteredAuditLogs.map((log) => {
+                  {auditLogs.map((log) => {
                     const Icon = log.icon
                     return (
-                      <div
-                        key={log.id}
-                        className="flex items-start space-x-4 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
-                      >
-                        <div className={`shrink-0 w-10 h-10 ${log.iconBg} rounded-full flex items-center justify-center`}>
-                          <Icon className={`h-5 w-5 ${log.iconColor}`} />
+                      <div key={log.id} className="flex items-start space-x-3">
+                        <div className={`shrink-0 w-8 h-8 ${log.iconBg} rounded-full flex items-center justify-center`}>
+                          <Icon className={`h-4 w-4 ${log.iconColor}`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <h4 className="text-sm font-semibold text-gray-900">{log.action}</h4>
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <FiClock className="h-3 w-3 mr-1" />
-                              {timeAgo(log.timestamp)}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">{log.description}</p>
-                          <p className="text-xs text-gray-400">
-                            {formatDateTime(log.timestamp)}
-                          </p>
+                          <p className="text-sm text-gray-800">{log.action}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{formatDateTime(log.time)}</p>
                         </div>
                       </div>
                     )
                   })}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FiEye className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h4 className="text-base font-medium text-gray-900 mb-1">No Activity Found</h4>
-                  <p className="text-sm text-gray-500">
-                    {auditSearchTerm || auditFilter !== 'All' || auditDateFilter !== 'All'
-                      ? 'Try adjusting your filters'
-                      : 'No activity logs available for this teacher'}
-                  </p>
+                <div className="text-center py-8">
+                  <FiEye className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No activity found</p>
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
-              <p className="text-xs text-gray-500">
-                Showing {filteredAuditLogs.length} {filteredAuditLogs.length === 1 ? 'activity' : 'activities'}
-              </p>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
               <button
                 onClick={() => setShowAuditModal(false)}
-                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 font-medium transition-colors"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm font-medium transition-colors"
               >
                 Close
               </button>
