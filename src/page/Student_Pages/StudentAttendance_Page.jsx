@@ -77,8 +77,8 @@ const StudentAttendance_Page = () => {
         return;
       }
 
-      const isAllowed = await isGenuineChromeStrict();
-      setIsAllowedDevice(isAllowed);
+      // const isAllowed = await isGenuineChromeStrict();
+      // setIsAllowedDevice(isAllowed);
     };
 
     checkBrowserRestrictions();
@@ -596,8 +596,8 @@ const StudentAttendance_Page = () => {
               <h2 className="text-xl font-semibold text-gray-800">Mark Your Attendance</h2>
               {qrData && (
                 <div className="mt-0.5 text-xs text-gray-600 space-y-1">
-                  <p><span className="font-medium">Course Name:</span> <span className='border-b border-gray-400'>{subjectDetails.subjectName || qrData.subject || 'N/A'}</span></p>
-                  <p><span className="font-medium">Course Code:</span> <span className='border-b border-gray-400'>{subjectDetails.subjectCode || qrData.code || 'N/A'}</span></p>
+                  <p><span className="font-medium">Course Name:</span> <span className='border-b border-gray-400'>{qrData.subjectName || qrData.subject || 'N/A'}</span></p>
+                  <p><span className="font-medium">Course Code:</span> <span className='border-b border-gray-400'>{qrData.subjectCode || qrData.code || 'N/A'}</span></p>
                 </div>
               )}
             </div>
