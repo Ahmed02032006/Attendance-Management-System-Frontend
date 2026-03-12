@@ -413,9 +413,9 @@ const TeacherSubjects_Page = () => {
       await dispatch(moveToTrash({
         subjectId: selectedSubject.id,
         userId: currentUserId,
-        deletedFrom: 'teacher'
+        deletedFrom: 'Teacher'
       })).unwrap();
-      
+
       // Then delete the subject from the active subjects list
       await dispatch(deleteSubject(selectedSubject.id)).unwrap()
       setShowDeleteModal(false)
