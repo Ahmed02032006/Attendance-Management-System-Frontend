@@ -184,12 +184,6 @@ const StudentAttendance_Page = () => {
             uniqueCode: code,
           }));
         }
-
-        console.log("==========================================");
-        console.log(subjectDetails);
-        console.log("==========================================");
-
-
       } catch (error) {
         console.error('Error fetching subject details:', error);
         toast.error('Failed to load course details. Please try again.');
@@ -601,19 +595,9 @@ const StudentAttendance_Page = () => {
             <div>
               <h2 className="text-xl font-semibold text-gray-800">Mark Your Attendance</h2>
               {qrData && (
-                <div className="mt-2 space-y-1">
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">Course:</span> {qrData.subjectName}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">Code:</span> {qrData.subjectCode}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">Department:</span> {qrData.departmentOffering}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">Semester:</span> {qrData.semester} • Session: {qrData.session}
-                  </p>
+                <div className="mt-0.5 text-xs text-gray-600 space-y-1">
+                  <p><span className="font-medium">Course Name:</span> <span className='border-b border-gray-400'>{subjectDetails.subjectName || qrData.subject || 'N/A'}</span></p>
+                  <p><span className="font-medium">Course Code:</span> <span className='border-b border-gray-400'>{subjectDetails.subjectCode || qrData.code || 'N/A'}</span></p>
                 </div>
               )}
             </div>
@@ -635,10 +619,10 @@ const StudentAttendance_Page = () => {
                   onChange={handleRollNoChange}
                   placeholder="Enter your roll number"
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${rollNoValid
-                      ? 'border-green-500 bg-green-50'
-                      : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-gray-300'
+                    ? 'border-green-500 bg-green-50'
+                    : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300'
                     }`}
                   required
                   autoComplete="off"
