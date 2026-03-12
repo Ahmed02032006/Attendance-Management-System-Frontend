@@ -119,7 +119,7 @@ const attendanceReportSlicer = createSlice({
         state.error = action.payload?.message || 'Failed to generate report';
         state.reportData = null;
       })
-      
+
       // Get Student Attendance Details
       .addCase(getStudentAttendanceDetails.pending, (state) => {
         state.studentDetailsLoading = true;

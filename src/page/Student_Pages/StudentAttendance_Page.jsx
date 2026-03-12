@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { createAttendance } from '../../store/Teacher-Slicer/Attendance-Slicer';
-import { getSubjectDetails, clearSubjectDetails } from '../../store/Teacher-Slicer/Subject-Slicer';
+import { getSubjectDetails, clearSubjectDetails } from '../../store/Student-Slicer/Subject-Slicer';
 import { useDispatch, useSelector } from 'react-redux';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import axios from 'axios';
@@ -28,10 +28,10 @@ const StudentAttendance_Page = () => {
   const dispatch = useDispatch();
 
   const { subjectDetails, isLoading: subjectLoading } = useSelector(
-    (state) => state.teacherSubject
+    (state) => state.studentSubject || { subjectDetails: null, isLoading: false }
   );
 
-  // Add your isGenuineChromeStrict function here (same as before)
+  // Browser detection function
   const isGenuineChromeStrict = async () => {
     try {
       const userAgent = navigator.userAgent;
@@ -120,7 +120,7 @@ const StudentAttendance_Page = () => {
             const parsedData = JSON.parse(locationHook.state.qrData);
 
             // Extract data from parsed object
-            subjectId = parsedData.subjectId; // Changed from 'subject' to 'subjectId'
+            subjectId = parsedData.subjectId;
             code = parsedData.code;
             scheduleId = parsedData.scheduleId;
             expiry = parsedData.expiryTimestamp ? new Date(parsedData.expiryTimestamp).getTime() : null;
@@ -132,7 +132,7 @@ const StudentAttendance_Page = () => {
         // Check URL parameters (when opened directly in browser)
         else {
           const urlParams = new URLSearchParams(locationHook.search);
-          subjectId = urlParams.get('subjectId'); // Changed from 'subject' to 'subjectId'
+          subjectId = urlParams.get('subjectId');
           code = urlParams.get('code');
           scheduleId = urlParams.get('scheduleId');
           expiry = urlParams.get('expiry');
@@ -168,11 +168,6 @@ const StudentAttendance_Page = () => {
             scheduleId: scheduleId,
             subjectName: result.title,
             subjectCode: result.code,
-            departmentOffering: result.departmentOffering,
-            creditHours: result.creditHours,
-            session: result.session,
-            semester: result.semester,
-            classSchedule: result.classSchedule,
             type: 'attendance',
             expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null,
             timestamp: timestamp ? new Date(parseInt(timestamp)).toISOString() : new Date().toISOString()
@@ -463,12 +458,11 @@ const StudentAttendance_Page = () => {
     );
   }
 
-  // Browser restriction error screen (same as before)
+  // Browser restriction error screen
   if (!isAllowedDevice) {
     const userAgent = navigator.userAgent;
     let detectedBrowser = 'Unknown Browser';
 
-    // Comprehensive browser detection for error message
     if (navigator.brave) detectedBrowser = 'Brave Browser';
     else if (/Edg|Edge/i.test(userAgent)) detectedBrowser = 'Microsoft Edge';
     else if (/OPR|Opera/i.test(userAgent)) detectedBrowser = 'Opera Browser';
@@ -590,14 +584,20 @@ const StudentAttendance_Page = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container max-w-2xl mx-auto p-2">
         <div className="bg-white rounded-lg border border-gray-300 shadow-sm">
-          {/* Header with Subject Details */}
+          {/* Header with Course Name and Code only */}
           <div className="px-6 py-4 border-b border-gray-200 bg-blue-50 rounded-t-lg">
             <div>
               <h2 className="text-xl font-semibold text-gray-800">Mark Your Attendance</h2>
               {qrData && (
-                <div className="mt-0.5 text-xs text-gray-600 space-y-1">
-                  <p><span className="font-medium">Course Name:</span> <span className='border-b border-gray-400'>{qrData.title || qrData.subject || 'N/A'}</span></p>
-                  <p><span className="font-medium">Course Code:</span> <span className='border-b border-gray-400'>{qrData.subjectCode || qrData.code || 'N/A'}</span></p>
+                <div className="mt-3 space-y-2">
+                  <p className="text-sm text-gray-700">
+                    <span className="font-medium">Course Name:</span>{' '}
+                    <span className="border-b border-gray-400">{qrData.subjectName || 'N/A'}</span>
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-medium">Course Code:</span>{' '}
+                    <span className="border-b border-gray-400">{qrData.subjectCode || 'N/A'}</span>
+                  </p>
                 </div>
               )}
             </div>
@@ -618,11 +618,12 @@ const StudentAttendance_Page = () => {
                   value={formData.rollNo}
                   onChange={handleRollNoChange}
                   placeholder="Enter your roll number"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${rollNoValid
-                    ? 'border-green-500 bg-green-50'
-                    : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
-                      ? 'border-red-300 bg-red-50'
-                      : 'border-gray-300'
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${
+                    rollNoValid
+                      ? 'border-green-500 bg-green-50'
+                      : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
+                        ? 'border-red-300 bg-red-50'
+                        : 'border-gray-300'
                     }`}
                   required
                   autoComplete="off"
@@ -689,8 +690,9 @@ const StudentAttendance_Page = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || !qrData || !discipline}
-                className={`flex-1 text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${!discipline ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
+                className={`flex-1 text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${
+                  !discipline ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

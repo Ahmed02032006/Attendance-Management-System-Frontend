@@ -9,6 +9,8 @@ import teacherUserReducer from "./Teacher-Slicer/User-Slicer.js";
 import teacherReportReducer from "./Teacher-Slicer/Report-Slicer.js";
 // ===== >
 import adminTeacherReducer from "./Admin-Slicer/Teacher-Slicer.js";
+// ===== >
+import studentSubjectReducer from "./Student-Slicer/Subject-Slicer.js";
 
 const store = configureStore({
   reducer: {
@@ -19,6 +21,8 @@ const store = configureStore({
     teacherSubject: teacherSubjectReducer,
     teacherUser: teacherUserReducer,
     teacherReport: teacherReportReducer,
+    // ===== >
+    studentSubject: studentSubjectReducer,
     // ===== >
     adminTeacher: adminTeacherReducer,
   },
