@@ -28,7 +28,7 @@ const StudentAttendance_Page = () => {
   const dispatch = useDispatch();
 
   const { subjectDetails, isLoading: subjectLoading } = useSelector(
-    (state) => state.studentSubject
+    (state) => state.teacherSubject
   );
 
   // Add your isGenuineChromeStrict function here (same as before)
