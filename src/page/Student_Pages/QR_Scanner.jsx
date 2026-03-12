@@ -17,7 +17,6 @@ const QRScanner_Page = () => {
   const scanInterval = useRef(null);
 
   // Add this function before the useEffect
-  // Add this function before the useEffect
   const isGenuineChromeStrict = async () => {
     try {
       // Test 1: User Agent
