@@ -20,6 +20,7 @@ import AdminDashboard_Page from './page/Admin_Pages/AdminDashboard_Page';
 import AdminComplaints_Page from './page/Admin_Pages/AdminComplaints_Page';
 import AdminIntegration_Page from './page/Admin_Pages/AdminIntegration_Page';
 import TeacherReport_Page from './page/Teacher_Pages/TeacherReport_Page';
+import AdminTrash_Page from './page/Admin_Pages/AdminTrash_Page';
 
 const App = () => {
 
@@ -77,6 +78,7 @@ const App = () => {
           <Route path="teachers" element={<AdminTeachers_Page />} />
           <Route path="complaints" element={<AdminComplaints_Page />} />
           <Route path="integration" element={<AdminIntegration_Page />} />
+          <Route path="trash" element={<AdminTrash_Page />} />
         </Route>
 
         {/* =====>] Students Routes [<===== */}

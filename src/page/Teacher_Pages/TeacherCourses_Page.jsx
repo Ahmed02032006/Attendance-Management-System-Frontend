@@ -46,6 +46,7 @@ import {
   deleteAllRegisteredStudents,
   updateRegisteredStudent
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
+import { moveToTrash } from '../../store/Admin-Slicer/Trash-Slicer.js'
 
 const TeacherSubjects_Page = () => {
   const dispatch = useDispatch()
@@ -408,6 +409,14 @@ const TeacherSubjects_Page = () => {
 
   const handleDeleteSubject = async () => {
     try {
+      // First move the subject to trash
+      await dispatch(moveToTrash({
+        subjectId: selectedSubject.id,
+        userId: currentUserId,
+        deletedFrom: 'teacher'
+      })).unwrap();
+      
+      // Then delete the subject from the active subjects list
       await dispatch(deleteSubject(selectedSubject.id)).unwrap()
       setShowDeleteModal(false)
       toast.success('Course deleted successfully!')

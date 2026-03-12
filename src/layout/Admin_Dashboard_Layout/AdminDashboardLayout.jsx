@@ -58,13 +58,19 @@ const AdminDashboardLayout = () => {
       icon: MessageSquareWarning,
       label: "Complaints",
       path: "/admin/complaints",
-    }, {
+    },
+    {
       name: "Integration",
       icon: Code,
       label: "Integration",
       path: "/admin/integration",
     },
-
+    {
+      name: "Trash",
+      icon: Code,
+      label: "Trash",
+      path: "/admin/trash",
+    }
   ];
 
   useEffect(() => {
