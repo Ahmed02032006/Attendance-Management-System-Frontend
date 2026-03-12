@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { createAttendance } from '../../store/Teacher-Slicer/Attendance-Slicer';
-import { getSubjectDetails, clearSubjectDetails } from '../../store/Teacher-Slicer/Subject-Slicer';
+import { getSubjectDetails, clearSubjectDetails } from '../../store/Student-Slicer/Subject-Slicer';
 import { useDispatch, useSelector } from 'react-redux';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import axios from 'axios';
@@ -28,7 +28,7 @@ const StudentAttendance_Page = () => {
   const dispatch = useDispatch();
 
   const { subjectDetails, isLoading: subjectLoading } = useSelector(
-    (state) => state.teacherSubject
+    (state) => state.studentSubject
   );
 
   // Add your isGenuineChromeStrict function here (same as before)
@@ -120,7 +120,7 @@ const StudentAttendance_Page = () => {
             const parsedData = JSON.parse(locationHook.state.qrData);
             
             // Extract data from parsed object
-            subjectId = parsedData.subjectId; // Changed from 'subject' to 'subjectId'
+            subjectId = parsedData.subjectId;
             code = parsedData.code;
             scheduleId = parsedData.scheduleId;
             expiry = parsedData.expiryTimestamp ? new Date(parsedData.expiryTimestamp).getTime() : null;
@@ -132,7 +132,7 @@ const StudentAttendance_Page = () => {
         // Check URL parameters (when opened directly in browser)
         else {
           const urlParams = new URLSearchParams(locationHook.search);
-          subjectId = urlParams.get('subjectId'); // Changed from 'subject' to 'subjectId'
+          subjectId = urlParams.get('subjectId');
           code = urlParams.get('code');
           scheduleId = urlParams.get('scheduleId');
           expiry = urlParams.get('expiry');
@@ -168,11 +168,6 @@ const StudentAttendance_Page = () => {
             scheduleId: scheduleId,
             subjectName: result.title,
             subjectCode: result.code,
-            departmentOffering: result.departmentOffering,
-            creditHours: result.creditHours,
-            session: result.session,
-            semester: result.semester,
-            classSchedule: result.classSchedule,
             type: 'attendance',
             expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null,
             timestamp: timestamp ? new Date(parseInt(timestamp)).toISOString() : new Date().toISOString()
@@ -466,10 +461,122 @@ const StudentAttendance_Page = () => {
 
   // Browser restriction error screen (same as before)
   if (!isAllowedDevice) {
-    // ... (keep your existing browser restriction JSX)
+    const userAgent = navigator.userAgent;
+    let detectedBrowser = 'Unknown Browser';
+
+    if (navigator.brave) detectedBrowser = 'Brave Browser';
+    else if (/Edg|Edge/i.test(userAgent)) detectedBrowser = 'Microsoft Edge';
+    else if (/OPR|Opera/i.test(userAgent)) detectedBrowser = 'Opera Browser';
+    else if (/SamsungBrowser/i.test(userAgent)) detectedBrowser = 'Samsung Internet';
+    else if (/UCBrowser/i.test(userAgent)) detectedBrowser = 'UC Browser';
+    else if (/Vivaldi/i.test(userAgent)) detectedBrowser = 'Vivaldi';
+    else if (/YaBrowser/i.test(userAgent)) detectedBrowser = 'Yandex Browser';
+    else if (/DuckDuckGo/i.test(userAgent)) detectedBrowser = 'DuckDuckGo Browser';
+    else if (/Phoenix/i.test(userAgent)) detectedBrowser = 'Phoenix Browser';
+    else if (/MiuiBrowser|XiaoMi/i.test(userAgent)) detectedBrowser = 'Mi Browser';
+    else if (/VivoBrowser/i.test(userAgent)) detectedBrowser = 'Vivo Browser';
+    else if (/HuaweiBrowser/i.test(userAgent)) detectedBrowser = 'Huawei Browser';
+    else if (/QQBrowser/i.test(userAgent)) detectedBrowser = 'QQ Browser';
+    else if (/BIDUBrowser|baiduboxapp/i.test(userAgent)) detectedBrowser = 'Baidu Browser';
+    else if (/360SE|360EE/i.test(userAgent)) detectedBrowser = '360 Browser';
+    else if (/MetaSr|SogouMobileBrowser/i.test(userAgent)) detectedBrowser = 'Sogou Browser';
+    else if (/Firefox|FxiOS/i.test(userAgent)) detectedBrowser = 'Mozilla Firefox';
+    else if (/Safari/i.test(userAgent) && !/Chrome|CriOS/i.test(userAgent)) detectedBrowser = 'Safari';
+    else if (/Chrome/i.test(userAgent)) detectedBrowser = 'Chromium-based Browser';
+
     return (
       <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center p-4">
-        {/* ... your existing browser restriction JSX ... */}
+        <div className="max-w-md w-full bg-white rounded-xl shadow-lg border border-red-200 p-8 text-center">
+          <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.232 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Browser Not Supported</h2>
+          <p className="text-gray-600 mb-4">
+            Detected: <span className="font-semibold text-red-600">{detectedBrowser}</span>
+          </p>
+
+          <div className="space-y-4 mb-6 text-left">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-1.76v.5a3.5 3.5 0 01-3.5 3.5h-.5V8h1.76V6.69h5.31a3 3 0 013 3v5.31H8V15h10.5a1.5 1.5 0 001.5-1.5v-6a4.81 4.81 0 01-4.41 4.81z" />
+                    <path d="M3.5 11.5a2 2 0 100 4 2 2 0 000-4z" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900">Google Chrome Required</h4>
+                <p className="text-sm text-gray-600">
+                  This attendance system requires Google Chrome browser for security and compatibility reasons.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-3">
+              <div className="shrink-0 mt-1">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 14a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fillRule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900">How to Access</h4>
+                <p className="text-sm text-gray-600">
+                  1. Download Google Chrome from your app store<br />
+                  2. Open Chrome and scan the QR code<br />
+                  3. Submit your attendance details
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900">Why Chrome?</h4>
+                <p className="text-sm text-gray-600">
+                  • Enhanced security features<br />
+                  • Better form handling<br />
+                  • Consistent user experience
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => window.open('https://www.google.com/chrome/', '_blank')}
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-1.76v.5a3.5 3.5 0 01-3.5 3.5h-.5V8h1.76V6.69h5.31a3 3 0 013 3v5.31H8V15h10.5a1.5 1.5 0 001.5-1.5v-6a4.81 4.81 0 01-4.41 4.81z" />
+                <path d="M3.5 11.5a2 2 0 100 4 2 2 0 000-4z" />
+              </svg>
+              Download Chrome
+            </button>
+
+            <button
+              onClick={() => navigate('/')}
+              className="inline-flex items-center px-6 py-3 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+            >
+              <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Return to Home
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -478,23 +585,17 @@ const StudentAttendance_Page = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container max-w-2xl mx-auto p-2">
         <div className="bg-white rounded-lg border border-gray-300 shadow-sm">
-          {/* Header with Subject Details */}
+          {/* Header with Course Code and Course Name only */}
           <div className="px-6 py-4 border-b border-gray-200 bg-blue-50 rounded-t-lg">
             <div>
               <h2 className="text-xl font-semibold text-gray-800">Mark Your Attendance</h2>
               {qrData && (
-                <div className="mt-2 space-y-1">
+                <div className="mt-3 space-y-2">
                   <p className="text-sm text-gray-700">
-                    <span className="font-medium">Course:</span> {qrData.subjectName}
+                    <span className="font-medium">Course Name:</span> {qrData.subjectName || 'N/A'}
                   </p>
                   <p className="text-sm text-gray-700">
-                    <span className="font-medium">Code:</span> {qrData.subjectCode}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">Department:</span> {qrData.departmentOffering}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">Semester:</span> {qrData.semester} • Session: {qrData.session}
+                    <span className="font-medium">Course Code:</span> {qrData.subjectCode || 'N/A'}
                   </p>
                 </div>
               )}
