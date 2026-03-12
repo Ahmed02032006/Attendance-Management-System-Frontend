@@ -162,12 +162,13 @@ const StudentAttendance_Page = () => {
         const result = await dispatch(getSubjectDetails(subjectId)).unwrap();
 
         if (result) {
+          const subjectData = result.data;
           const qrDataFromUrl = {
             code: code,
             subjectId: subjectId,
             scheduleId: scheduleId,
-            subjectName: result.title,
-            subjectCode: result.code,
+            subjectName: subjectData.title,
+            subjectCode: subjectData.code,
             type: 'attendance',
             expiryTimestamp: expiry ? new Date(parseInt(expiry)).toISOString() : null,
             timestamp: timestamp ? new Date(parseInt(timestamp)).toISOString() : new Date().toISOString()
@@ -618,12 +619,11 @@ const StudentAttendance_Page = () => {
                   value={formData.rollNo}
                   onChange={handleRollNoChange}
                   placeholder="Enter your roll number"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${
-                    rollNoValid
-                      ? 'border-green-500 bg-green-50'
-                      : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-gray-300'
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase pr-10 ${rollNoValid
+                    ? 'border-green-500 bg-green-50'
+                    : formData.rollNo.length >= 3 && !isFetchingStudent && !rollNoValid && discipline === ''
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300'
                     }`}
                   required
                   autoComplete="off"
@@ -690,9 +690,8 @@ const StudentAttendance_Page = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || !qrData || !discipline}
-                className={`flex-1 text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${
-                  !discipline ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+                className={`flex-1 text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${!discipline ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">
