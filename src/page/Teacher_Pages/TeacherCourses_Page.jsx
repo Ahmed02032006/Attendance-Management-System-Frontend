@@ -417,7 +417,7 @@ const TeacherSubjects_Page = () => {
       })).unwrap();
 
       // Then delete the subject from the active subjects list
-      await dispatch(deleteSubject(selectedSubject.id)).unwrap()
+      // await dispatch(deleteSubject(selectedSubject.id)).unwrap()
       setShowDeleteModal(false)
       toast.success('Course deleted successfully!')
     } catch (error) {
