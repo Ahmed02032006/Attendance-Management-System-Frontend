@@ -5,20 +5,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { 
   FiTrash2, 
   FiRefreshCw, 
-  FiSearch, 
   FiX, 
   FiCalendar,
-  FiFilter,
   FiBookOpen,
   FiUsers,
   FiClock,
   FiAlertCircle,
-  FiDownload,
   FiEye,
   FiRotateCcw,
-  FiChevronDown,
-  FiChevronUp,
-  FiArchive
+  FiChevronLeft,
+  FiChevronRight
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import {
@@ -26,9 +22,7 @@ import {
   getTrashItemDetails,
   recoverFromTrash,
   permanentDeleteFromTrash,
-  clearSelectedTrashItem,
-  setFilters,
-  clearTrash
+  clearSelectedTrashItem
 } from '../../store/Admin-Slicer/Trash-Slicer';
 import HeaderComponent from '../../components/HeaderComponent';
 
@@ -39,49 +33,26 @@ const AdminTrash_Page = () => {
   );
   const { user } = useSelector((state) => state.auth);
 
-  // Local state for filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [deletedFromFilter, setDeletedFromFilter] = useState('');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [showFilters, setShowFilters] = useState(false);
+  // Local state for pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
   const [selectedItems, setSelectedItems] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRecoverModal, setShowRecoverModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [itemToActOn, setItemToActOn] = useState(null);
-  const [expandedItems, setExpandedItems] = useState({});
 
   // Fetch trash items on component mount
   useEffect(() => {
     loadTrashItems();
     
     return () => {
-      dispatch(clearTrash());
+      dispatch(clearSelectedTrashItem());
     };
   }, [dispatch]);
 
-  const loadTrashItems = (filters = {}) => {
-    const filterParams = {
-      search: searchTerm || undefined,
-      deletedFrom: deletedFromFilter || undefined,
-      startDate: dateRange.start || undefined,
-      endDate: dateRange.end || undefined,
-      ...filters
-    };
-    dispatch(getTrashItems(filterParams));
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    loadTrashItems();
-  };
-
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setDeletedFromFilter('');
-    setDateRange({ start: '', end: '' });
-    dispatch(setFilters({}));
-    loadTrashItems({});
+  const loadTrashItems = () => {
+    dispatch(getTrashItems());
   };
 
   const handleRefresh = () => {
@@ -120,7 +91,7 @@ const AdminTrash_Page = () => {
     if (!itemToActOn) return;
     
     try {
-      const result = await dispatch(recoverFromTrash({
+      await dispatch(recoverFromTrash({
         trashId: itemToActOn.id,
         userId: user?.id
       })).unwrap();
@@ -129,6 +100,7 @@ const AdminTrash_Page = () => {
       setShowRecoverModal(false);
       setItemToActOn(null);
       setSelectedItems([]);
+      loadTrashItems();
     } catch (error) {
       toast.error(error?.message || 'Failed to recover item');
     }
@@ -143,12 +115,13 @@ const AdminTrash_Page = () => {
     if (!itemToActOn) return;
     
     try {
-      const result = await dispatch(permanentDeleteFromTrash(itemToActOn.id)).unwrap();
+      await dispatch(permanentDeleteFromTrash(itemToActOn.id)).unwrap();
       
       toast.success(`Permanently deleted ${itemToActOn.subject.title}`);
       setShowDeleteModal(false);
       setItemToActOn(null);
       setSelectedItems([]);
+      loadTrashItems();
     } catch (error) {
       toast.error(error?.message || 'Failed to delete item');
     }
@@ -162,41 +135,69 @@ const AdminTrash_Page = () => {
     
     if (window.confirm(`Are you sure you want to permanently delete ${selectedItems.length} item(s)?`)) {
       try {
-        // You'll need to implement bulk delete endpoint
         for (const id of selectedItems) {
           await dispatch(permanentDeleteFromTrash(id)).unwrap();
         }
         toast.success(`Deleted ${selectedItems.length} items`);
         setSelectedItems([]);
+        loadTrashItems();
       } catch (error) {
         toast.error('Failed to delete some items');
       }
     }
   };
 
-  const toggleExpand = (itemId) => {
-    setExpandedItems(prev => ({
-      ...prev,
-      [itemId]: !prev[itemId]
-    }));
-  };
-
   const getExpiryStatusColor = (daysRemaining) => {
-    if (daysRemaining > 14) return 'bg-green-100 text-green-700 border-green-200';
-    if (daysRemaining > 7) return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-    if (daysRemaining > 0) return 'bg-orange-100 text-orange-700 border-orange-200';
-    return 'bg-red-100 text-red-700 border-red-200';
+    if (daysRemaining > 14) return 'bg-green-100 text-green-700';
+    if (daysRemaining > 7) return 'bg-yellow-100 text-yellow-700';
+    if (daysRemaining > 0) return 'bg-orange-100 text-orange-700';
+    return 'bg-red-100 text-red-700';
   };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric'
     });
   };
+
+  const formatSchedule = (schedules) => {
+    if (!schedules || schedules.length === 0) return 'No schedule';
+    
+    const convertTo12Hour = (time) => {
+      const [hour, minute] = time.split(':');
+      const hourInt = parseInt(hour);
+      const ampm = hourInt >= 12 ? 'PM' : 'AM';
+      const hour12 = hourInt % 12 || 12;
+      return `${hour12}:${minute} ${ampm}`;
+    };
+
+    const grouped = schedules.reduce((acc, curr) => {
+      if (!acc[curr.day]) {
+        acc[curr.day] = [];
+      }
+      const startTime12 = convertTo12Hour(curr.startTime);
+      const endTime12 = convertTo12Hour(curr.endTime);
+      acc[curr.day].push(`${startTime12} - ${endTime12}`);
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).map(([day, times]) => (
+      <div key={day} className="text-xs">
+        <span className="font-medium">{day.substring(0, 3)}:</span> {times.join(', ')}
+      </div>
+    ));
+  };
+
+  // Pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = trashItems.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(trashItems.length / itemsPerPage);
+
+  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
 
   if (isLoading && trashItems.length === 0) {
     return (
@@ -233,7 +234,7 @@ const AdminTrash_Page = () => {
               <span>{typeof error === 'string' ? error : 'An error occurred'}</span>
             </div>
             <button 
-              onClick={() => dispatch(clearTrash())}
+              onClick={() => dispatch(clearSelectedTrashItem())}
               className="text-red-500 hover:text-red-700"
             >
               <FiX className="h-5 w-5" />
@@ -241,8 +242,8 @@ const AdminTrash_Page = () => {
           </div>
         )}
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        {/* Summary Cards - Updated without expired items */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -250,7 +251,7 @@ const AdminTrash_Page = () => {
                 <p className="text-2xl font-bold text-gray-800">{summary.totalItems}</p>
               </div>
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <FiArchive className="h-5 w-5 text-blue-600" />
+                <FiTrash2 className="h-5 w-5 text-blue-600" />
               </div>
             </div>
           </div>
@@ -290,277 +291,206 @@ const AdminTrash_Page = () => {
               </div>
             </div>
           </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Expired Items</p>
-                <p className="text-2xl font-bold text-gray-800">{summary.expiredItems}</p>
-              </div>
-              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                <FiAlertCircle className="h-5 w-5 text-red-600" />
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* Search and Filter Bar */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-          <div className="p-4">
-            <form onSubmit={handleSearch} className="flex flex-wrap gap-3 items-center">
-              <div className="flex-1 min-w-[200px] relative">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search by title, code, or semester..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
+        {/* Header with Refresh and Bulk Delete */}
+        <div className="mb-4 flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <h2 className="text-lg font-semibold text-gray-800">Deleted Items</h2>
+            <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
+              {trashItems.length} items
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleRefresh}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2 text-sm"
+              disabled={isLoading}
+            >
+              <FiRefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+            {selectedItems.length > 0 && (
               <button
-                type="button"
-                onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center space-x-2"
+                onClick={handleBulkDelete}
+                className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2 text-sm"
               >
-                <FiFilter className="h-4 w-4" />
-                <span>Filters</span>
-                {showFilters ? <FiChevronUp /> : <FiChevronDown />}
+                <FiTrash2 className="h-4 w-4" />
+                <span>Delete Selected ({selectedItems.length})</span>
               </button>
-
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Search
-              </button>
-
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Clear
-              </button>
-
-              <button
-                type="button"
-                onClick={handleRefresh}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
-                disabled={isLoading}
-              >
-                <FiRefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </button>
-
-              {selectedItems.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleBulkDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2"
-                >
-                  <FiTrash2 className="h-4 w-4" />
-                  <span>Delete Selected ({selectedItems.length})</span>
-                </button>
-              )}
-            </form>
-
-            {/* Expanded Filters */}
-            {showFilters && (
-              <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Deleted By
-                  </label>
-                  <select
-                    value={deletedFromFilter}
-                    onChange={(e) => setDeletedFromFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">All</option>
-                    <option value="Teacher">Teacher</option>
-                    <option value="Admin">Admin</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    value={dateRange.start}
-                    onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    value={dateRange.end}
-                    onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
             )}
           </div>
         </div>
 
-        {/* Trash Items List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 p-4 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase">
-            <div className="col-span-1 flex items-center">
-              <input
-                type="checkbox"
-                checked={selectedItems.length === trashItems.length && trashItems.length > 0}
-                onChange={handleSelectAll}
-                className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-              />
-            </div>
-            <div className="col-span-3">Subject</div>
-            <div className="col-span-2">Teacher</div>
-            <div className="col-span-2">Statistics</div>
-            <div className="col-span-2">Deleted By</div>
-            <div className="col-span-1">Status</div>
-            <div className="col-span-1 text-right">Actions</div>
+        {/* Trash Items Table - Updated to match provided design */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.length === trashItems.length && trashItems.length > 0}
+                      onChange={handleSelectAll}
+                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Course
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Discipline
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Code
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Semester
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Class Schedule
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Students
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {currentItems.length > 0 ? (
+                  currentItems.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.includes(item.id)}
+                          onChange={() => handleSelectItem(item.id)}
+                          className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                        />
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white font-medium text-sm shrink-0">
+                            {item.subject.title?.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="ml-3">
+                            <div className="text-sm font-medium text-gray-900">
+                              {item.subject.title}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {item.subject.session} | {item.subject.creditHours} Cr
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-600">
+                          {item.subject.department}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-600 font-mono">
+                          {item.subject.code}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <div className="text-sm text-gray-600">
+                          {item.subject.semester}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-gray-600 space-y-0.5">
+                          {formatSchedule(item.subject.classSchedule)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <div className="text-sm text-gray-600">
+                          {item.statistics.registeredStudents || 0}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getExpiryStatusColor(item.deletion.daysRemaining)}`}>
+                          {item.deletion.daysRemaining > 0 ? `${item.deletion.daysRemaining}d left` : 'Expired'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center justify-center space-x-2">
+                          <button
+                            onClick={() => handleViewDetails(item)}
+                            className="p-1.5 text-yellow-600 hover:text-yellow-700 hover:bg-gray-100 rounded-md transition-colors"
+                            title="View Details"
+                          >
+                            <FiEye className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleRecoverClick(item)}
+                            className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
+                            title="Recover"
+                          >
+                            <FiRotateCcw className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(item)}
+                            className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            title="Permanently Delete"
+                          >
+                            <FiTrash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="px-4 py-8 text-center">
+                      <div className="text-gray-500">
+                        <FiTrash2 className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-sm">Trash is empty</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
 
-          {/* Items */}
-          {trashItems.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FiArchive className="h-8 w-8 text-gray-400" />
+          {/* Pagination */}
+          {trashItems.length > 0 && (
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+              <span className="text-xs text-gray-500">
+                Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, trashItems.length)} of {trashItems.length}
+              </span>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className="p-1.5 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <FiChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="text-xs text-gray-600">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className="p-1.5 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <FiChevronRight className="h-4 w-4" />
+                </button>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-1">Trash is empty</h3>
-              <p className="text-sm text-gray-500">No items found in trash</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {trashItems.map((item) => (
-                <div key={item.id} className="hover:bg-gray-50 transition-colors">
-                  {/* Main Row */}
-                  <div className="grid grid-cols-12 gap-4 p-4 items-center">
-                    <div className="col-span-1">
-                      <input
-                        type="checkbox"
-                        checked={selectedItems.includes(item.id)}
-                        onChange={() => handleSelectItem(item.id)}
-                        className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                      />
-                    </div>
-                    
-                    <div className="col-span-3">
-                      <button
-                        onClick={() => toggleExpand(item.id)}
-                        className="flex items-center space-x-2 text-left"
-                      >
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <FiBookOpen className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{item.subject.title}</p>
-                          <p className="text-xs text-gray-500">{item.subject.code}</p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {item.subject.semester} • {item.subject.department}
-                          </p>
-                        </div>
-                      </button>
-                    </div>
-
-                    <div className="col-span-2">
-                      <p className="text-sm text-gray-900">{item.teacher.name}</p>
-                      <p className="text-xs text-gray-500">{item.teacher.email}</p>
-                    </div>
-
-                    <div className="col-span-2">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center space-x-1 text-xs bg-blue-50 px-2 py-1 rounded">
-                          <FiUsers className="h-3 w-3 text-blue-600" />
-                          <span className="text-blue-700">{item.statistics.registeredStudents}</span>
-                        </div>
-                        <div className="flex items-center space-x-1 text-xs bg-green-50 px-2 py-1 rounded">
-                          <FiClock className="h-3 w-3 text-green-600" />
-                          <span className="text-green-700">{item.statistics.attendanceRecords}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="col-span-2">
-                      <p className="text-sm text-gray-900">{item.deletion.deletedBy.name}</p>
-                      <p className="text-xs text-gray-500">{item.deletion.deletedBy.role}</p>
-                      <p className="text-xs text-gray-400">{formatDate(item.deletion.deletedAt)}</p>
-                    </div>
-
-                    <div className="col-span-1">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getExpiryStatusColor(item.deletion.daysRemaining)}`}>
-                        {item.deletion.daysRemaining > 0 ? `${item.deletion.daysRemaining}d` : 'Expired'}
-                      </span>
-                    </div>
-
-                    <div className="col-span-1 text-right space-x-1">
-                      <button
-                        onClick={() => handleViewDetails(item)}
-                        className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="View Details"
-                      >
-                        <FiEye className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleRecoverClick(item)}
-                        className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                        title="Recover"
-                      >
-                        <FiRotateCcw className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(item)}
-                        className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Permanently Delete"
-                      >
-                        <FiTrash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Expanded Details */}
-                  {expandedItems[item.id] && (
-                    <div className="p-4 bg-gray-50 border-t border-gray-200 ml-14">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <h4 className="text-xs font-medium text-gray-500 mb-2">Class Schedule</h4>
-                          {item.statistics.classSchedules > 0 ? (
-                            <div className="space-y-1">
-                              {/* You would map through actual schedules here */}
-                              <p className="text-sm text-gray-600">{item.statistics.classSchedules} schedule(s)</p>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-gray-500">No schedules</p>
-                          )}
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-medium text-gray-500 mb-2">Additional Info</h4>
-                          <p className="text-sm text-gray-600">Credit Hours: {item.subject.creditHours}</p>
-                          <p className="text-sm text-gray-600">Session: {item.subject.session}</p>
-                          <p className="text-sm text-gray-600">Expires: {formatDate(item.deletion.expiresAt)}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Recover Confirmation Modal */}
+      {/* Recover Confirmation Modal - Keep as is */}
       {showRecoverModal && itemToActOn && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -604,7 +534,7 @@ const AdminTrash_Page = () => {
         </div>
       )}
 
-      {/* Permanent Delete Confirmation Modal */}
+      {/* Permanent Delete Confirmation Modal - Keep as is */}
       {showDeleteModal && itemToActOn && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -648,7 +578,7 @@ const AdminTrash_Page = () => {
         </div>
       )}
 
-      {/* Details Modal */}
+      {/* Details Modal - Keep as is */}
       {showDetailsModal && selectedTrashItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -768,29 +698,6 @@ const AdminTrash_Page = () => {
                       <p className="text-xs text-purple-600">Unique Students</p>
                     </div>
                   </div>
-
-                  {/* Attendance by Date */}
-                  {Object.keys(selectedTrashItem.attendanceOverview.byDate || {}).length > 0 && (
-                    <div className="mt-4">
-                      <h4 className="font-medium mb-2">Attendance by Date</h4>
-                      <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
-                        {Object.entries(selectedTrashItem.attendanceOverview.byDate).map(([date, data]) => (
-                          <div key={date} className="p-3 border-b last:border-b-0 hover:bg-gray-50">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="font-medium">{date}</span>
-                              <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                                {data.count} students
-                              </span>
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              {data.students.slice(0, 3).map(s => s.name).join(', ')}
-                              {data.students.length > 3 && ` and ${data.students.length - 3} more`}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
