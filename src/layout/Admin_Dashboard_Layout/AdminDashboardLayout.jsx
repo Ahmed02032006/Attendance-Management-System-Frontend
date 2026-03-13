@@ -42,7 +42,7 @@ const AdminDashboardLayout = () => {
 
   const tabs = [
     {
-      name: "Dashboard",
+      name: "Admin Dashboard",
       icon: LayoutDashboard,
       label: "Admin Overview",
       path: "/admin/dashboard"
@@ -60,13 +60,13 @@ const AdminDashboardLayout = () => {
       path: "/admin/complaints",
     },
     {
-      name: "Recycle Bin",
+      name: "Discarded Courses",
       icon: FiTrash2,
-      label: "Recycle Bin",
+      label: "Discarded Courses",
       path: "/admin/trash",
     },
     {
-      name: "Integration",
+      name: "Code Integration",
       icon: Code,
       label: "Code Integration",
       path: "/admin/integration",
