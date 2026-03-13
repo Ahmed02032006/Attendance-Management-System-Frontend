@@ -640,26 +640,39 @@ const AdminTrash_Page = () => {
                     </div>
                   </div>
 
-                  {/* Teacher Information Card */}
+                  {/* Deletion Information Card */}
                   <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                     <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
                       <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-                        <FiUsers className="h-4 w-4 mr-2 text-blue-600" />
-                        Teacher Information
+                        <FiAlertCircle className="h-4 w-4 mr-2 text-orange-600" />
+                        Deletion Information
                       </h3>
                     </div>
                     <div className="p-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                          {selectedTrashItem.subjectDetails.teacher.name?.charAt(0).toUpperCase()}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                              <FiTrash2 className="h-3 w-3 text-red-600" />
+                            </div>
+                            <span className="text-xs text-gray-500">Deleted By</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-800">{selectedTrashItem.deletionInfo.deletedBy.name}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-800">{selectedTrashItem.subjectDetails.teacher.name}</p>
-                          <p className="text-xs text-gray-500">{selectedTrashItem.subjectDetails.teacher.email}</p>
+                        <div className="flex justify-between items-center py-0.5 border-t border-gray-100">
+                          <span className="text-xs text-gray-500">Deleted At</span>
+                          <span className="text-xs text-gray-800">{formatDate(selectedTrashItem.deletionInfo.deletedAt)}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-0.5 border-t border-gray-100">
+                          <span className="text-xs text-gray-500">Expires At</span>
+                          <span className="text-xs text-gray-800">{formatDate(selectedTrashItem.deletionInfo.expiresAt)}</span>
                         </div>
                       </div>
                     </div>
                   </div>
+
                 </div>
 
                 {/* Right Column */}
@@ -706,47 +719,35 @@ const AdminTrash_Page = () => {
                             <p className="text-xs text-green-600 mt-1">Dates</p>
                           </div>
                           <div className="bg-purple-50 rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-purple-700">{selectedTrashItem.attendanceOverview.uniqueStudents}</p>
-                            <p className="text-xs text-purple-600 mt-1">Students</p>
+                            <p className="text-2xl font-bold text-indigo-700">{selectedTrashItem.attendanceOverview.uniqueStudents}</p>
+                            <p className="text-xs text-indigo-600 mt-1">Students</p>
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Deletion Information Card */}
+                  {/* Teacher Information Card */}
                   <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                     <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
                       <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-                        <FiAlertCircle className="h-4 w-4 mr-2 text-orange-600" />
-                        Deletion Information
+                        <FiUsers className="h-4 w-4 mr-2 text-blue-600" />
+                        Teacher Information
                       </h3>
                     </div>
                     <div className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
-                              <FiTrash2 className="h-3 w-3 text-red-600" />
-                            </div>
-                            <span className="text-xs text-gray-500">Deleted By</span>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-medium text-gray-800">{selectedTrashItem.deletionInfo.deletedBy.name}</p>
-                            <p className="text-xs text-gray-500">{selectedTrashItem.deletionInfo.deletedBy.role}</p>
-                          </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                          {selectedTrashItem.subjectDetails.teacher.name?.charAt(0).toUpperCase()}
                         </div>
-                        <div className="flex justify-between items-center py-2 border-t border-gray-100">
-                          <span className="text-xs text-gray-500">Deleted At</span>
-                          <span className="text-sm font-medium text-gray-800">{formatDate(selectedTrashItem.deletionInfo.deletedAt)}</span>
-                        </div>
-                        <div className="flex justify-between items-center py-2 border-t border-gray-100">
-                          <span className="text-xs text-gray-500">Expires At</span>
-                          <span className="text-sm font-medium text-gray-800">{formatDate(selectedTrashItem.deletionInfo.expiresAt)}</span>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">{selectedTrashItem.subjectDetails.teacher.name}</p>
+                          <p className="text-xs text-gray-500">{selectedTrashItem.subjectDetails.teacher.email}</p>
                         </div>
                       </div>
                     </div>
                   </div>
+
                 </div>
               </div>
 
