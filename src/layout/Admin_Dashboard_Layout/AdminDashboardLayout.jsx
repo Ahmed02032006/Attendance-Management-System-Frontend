@@ -60,16 +60,16 @@ const AdminDashboardLayout = () => {
       path: "/admin/complaints",
     },
     {
-      name: "Integration",
-      icon: Code,
-      label: "Integration",
-      path: "/admin/integration",
-    },
-    {
       name: "Recycle Bin",
       icon: FiTrash2,
       label: "Recycle Bin",
       path: "/admin/trash",
+    },
+    {
+      name: "Integration",
+      icon: Code,
+      label: "Integration",
+      path: "/admin/integration",
     }
   ];
 
