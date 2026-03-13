@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FiMessageSquare, FiFilter, FiRefreshCw, FiDownload, FiAlertCircle, FiCheckCircle, FiClock, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiMessageSquare, FiFilter, FiRefreshCw, FiDownload, FiAlertCircle, FiCheckCircle, FiClock, FiSearch, FiChevronLeft, FiChevronRight, FiBookOpen } from 'react-icons/fi';
 import HeaderComponent from '../../components/HeaderComponent';
 
 const AdminComplaints_Page = () => {
     const [loading, setLoading] = useState(false);
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false);
     const [filter, setFilter] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
     const [refreshCount, setRefreshCount] = useState(0);
@@ -17,6 +18,21 @@ const AdminComplaints_Page = () => {
         resolved: 0,
         inProgress: 0
     });
+
+    // Simulate initial loading
+    useEffect(() => {
+        // Simulate initial data fetch
+        setTimeout(() => {
+            setStats({
+                total: 156,
+                pending: 24,
+                resolved: 125,
+                inProgress: 7
+            });
+            setInitialLoadComplete(true);
+            setLoading(false);
+        }, 2000);
+    }, []);
 
     // Refresh iframe function
     const handleRefresh = () => {
@@ -55,16 +71,23 @@ const AdminComplaints_Page = () => {
         });
     };
 
-    // Mock stats data - In real app, you would fetch this from your API
-    useEffect(() => {
-        // Simulate fetching stats
-        setStats({
-            total: 156,
-            pending: 24,
-            resolved: 125,
-            inProgress: 7
-        });
-    }, [refreshCount]);
+    // Initial Loading State
+    if (loading && !initialLoadComplete) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
+                <div className="text-center">
+                    <div className="relative">
+                        <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <FiMessageSquare className="h-8 w-8 text-blue-600 animate-pulse" />
+                        </div>
+                    </div>
+                    <p className="mt-6 text-lg font-medium text-gray-700">Loading Complaints Dashboard...</p>
+                    <p className="mt-2 text-sm text-gray-500">Fetching complaints data from Google Sheets</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -87,6 +110,21 @@ const AdminComplaints_Page = () => {
                             </div>
 
                             <div className="flex items-center space-x-4">
+                                <button
+                                    onClick={handleRefresh}
+                                    disabled={loading}
+                                    className="flex items-center space-x-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <FiRefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                                    <span>{loading ? 'Refreshing...' : 'Refresh'}</span>
+                                </button>
+                                <button
+                                    onClick={handleExport}
+                                    className="flex items-center space-x-2 px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                                >
+                                    <FiDownload className="h-4 w-4" />
+                                    <span>Export</span>
+                                </button>
                                 <div className="flex items-center space-x-2">
                                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                     <span className="text-xs text-gray-600">Live Connected</span>
@@ -95,8 +133,8 @@ const AdminComplaints_Page = () => {
                         </div>
                     </div>
 
-                    {/* Loading State */}
-                    {loading ? (
+                    {/* Loading State for Refresh */}
+                    {loading && initialLoadComplete ? (
                         <div className="p-8 lg:p-12 flex flex-col items-center justify-center">
                             <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
                             <p className="text-lg font-medium text-gray-700">Refreshing complaints data...</p>
