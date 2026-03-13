@@ -598,44 +598,6 @@ const AdminTrash_Page = () => {
 
             {/* Content */}
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {/* Course Header Card */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-100">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-200">
-                      {selectedTrashItem.subjectDetails.title?.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-800">{selectedTrashItem.subjectDetails.title}</h3>
-                      <div className="flex items-center space-x-3 mt-1">
-                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs font-mono text-gray-600 border border-gray-200">
-                          {selectedTrashItem.subjectDetails.code}
-                        </span>
-                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs text-gray-600 border border-gray-200">
-                          {selectedTrashItem.subjectDetails.semester}
-                        </span>
-                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs text-gray-600 border border-gray-200">
-                          {selectedTrashItem.subjectDetails.creditHours} Cr
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500 mb-1">Status</p>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${selectedTrashItem.deletionInfo.daysRemaining > 7
-                        ? 'bg-green-100 text-green-700 border border-green-200'
-                        : selectedTrashItem.deletionInfo.daysRemaining > 0
-                          ? 'bg-orange-100 text-orange-700 border border-orange-200'
-                          : 'bg-red-100 text-red-700 border border-red-200'
-                      }`}>
-                      {selectedTrashItem.deletionInfo.daysRemaining > 0
-                        ? `${selectedTrashItem.deletionInfo.daysRemaining} days remaining`
-                        : 'Expired'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
               {/* Two Column Layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column */}
@@ -645,22 +607,34 @@ const AdminTrash_Page = () => {
                     <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
                       <h3 className="text-sm font-semibold text-gray-700 flex items-center">
                         <FiBookOpen className="h-4 w-4 mr-2 text-blue-600" />
-                        Subject Information
+                        Course Information
                       </h3>
                     </div>
                     <div className="p-4">
                       <div className="space-y-3">
                         <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                          <span className="text-xs text-gray-500">Department</span>
-                          <span className="text-sm font-medium text-gray-800">{selectedTrashItem.subjectDetails.department}</span>
+                          <span className="text-xs text-gray-500">Course Name</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.title}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <span className="text-xs text-gray-500">Course Code</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.code}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <span className="text-xs text-gray-500">Semester</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.semester}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <span className="text-xs text-gray-500">Discipline</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.department}</span>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-gray-100">
                           <span className="text-xs text-gray-500">Session</span>
-                          <span className="text-sm font-medium text-gray-800">{selectedTrashItem.subjectDetails.session}</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.session}</span>
                         </div>
                         <div className="flex justify-between items-center py-2">
                           <span className="text-xs text-gray-500">Credit Hours</span>
-                          <span className="text-sm font-medium text-gray-800">{selectedTrashItem.subjectDetails.creditHours}</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.creditHours}</span>
                         </div>
                       </div>
                     </div>
@@ -670,52 +644,18 @@ const AdminTrash_Page = () => {
                   <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                     <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
                       <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-                        <FiUsers className="h-4 w-4 mr-2 text-purple-600" />
+                        <FiUsers className="h-4 w-4 mr-2 text-blue-600" />
                         Teacher Information
                       </h3>
                     </div>
                     <div className="p-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
                           {selectedTrashItem.subjectDetails.teacher.name?.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-800">{selectedTrashItem.subjectDetails.teacher.name}</p>
                           <p className="text-xs text-gray-500">{selectedTrashItem.subjectDetails.teacher.email}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Deletion Information Card */}
-                  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                      <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-                        <FiAlertCircle className="h-4 w-4 mr-2 text-orange-600" />
-                        Deletion Information
-                      </h3>
-                    </div>
-                    <div className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
-                              <FiTrash2 className="h-3 w-3 text-red-600" />
-                            </div>
-                            <span className="text-xs text-gray-500">Deleted By</span>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-medium text-gray-800">{selectedTrashItem.deletionInfo.deletedBy.name}</p>
-                            <p className="text-xs text-gray-500">{selectedTrashItem.deletionInfo.deletedBy.role}</p>
-                          </div>
-                        </div>
-                        <div className="flex justify-between items-center py-2 border-t border-gray-100">
-                          <span className="text-xs text-gray-500">Deleted At</span>
-                          <span className="text-sm font-medium text-gray-800">{formatDate(selectedTrashItem.deletionInfo.deletedAt)}</span>
-                        </div>
-                        <div className="flex justify-between items-center py-2 border-t border-gray-100">
-                          <span className="text-xs text-gray-500">Expires At</span>
-                          <span className="text-sm font-medium text-gray-800">{formatDate(selectedTrashItem.deletionInfo.expiresAt)}</span>
                         </div>
                       </div>
                     </div>
@@ -773,6 +713,40 @@ const AdminTrash_Page = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Deletion Information Card */}
+                  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                      <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                        <FiAlertCircle className="h-4 w-4 mr-2 text-orange-600" />
+                        Deletion Information
+                      </h3>
+                    </div>
+                    <div className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                              <FiTrash2 className="h-3 w-3 text-red-600" />
+                            </div>
+                            <span className="text-xs text-gray-500">Deleted By</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-800">{selectedTrashItem.deletionInfo.deletedBy.name}</p>
+                            <p className="text-xs text-gray-500">{selectedTrashItem.deletionInfo.deletedBy.role}</p>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-t border-gray-100">
+                          <span className="text-xs text-gray-500">Deleted At</span>
+                          <span className="text-sm font-medium text-gray-800">{formatDate(selectedTrashItem.deletionInfo.deletedAt)}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-t border-gray-100">
+                          <span className="text-xs text-gray-500">Expires At</span>
+                          <span className="text-sm font-medium text-gray-800">{formatDate(selectedTrashItem.deletionInfo.expiresAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
