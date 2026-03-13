@@ -6,7 +6,6 @@ import {
   FiTrash2,
   FiRefreshCw,
   FiX,
-  FiRefreshCcw,
   FiBookOpen,
   FiUsers,
   FiClock,
@@ -42,6 +41,7 @@ const AdminTrash_Page = () => {
   const [showRecoverModal, setShowRecoverModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [itemToActOn, setItemToActOn] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch trash items on component mount
   useEffect(() => {
@@ -52,8 +52,13 @@ const AdminTrash_Page = () => {
     };
   }, [dispatch]);
 
-  const loadTrashItems = () => {
-    dispatch(getTrashItems());
+  const loadTrashItems = async () => {
+    setIsRefreshing(true);
+    try {
+      await dispatch(getTrashItems());
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const handleRefresh = () => {
@@ -96,7 +101,7 @@ const AdminTrash_Page = () => {
         userId: user?.id
       })).unwrap();
 
-      toast.success(`Successfully recovered ${itemToActOn.subject.title}`);
+      toast.success(`Successfully recovered ${itemToActOn.subject?.title || 'item'}`);
       setShowRecoverModal(false);
       setItemToActOn(null);
       setSelectedItems([]);
@@ -117,7 +122,7 @@ const AdminTrash_Page = () => {
     try {
       await dispatch(permanentDeleteFromTrash(itemToActOn.id)).unwrap();
 
-      toast.success(`Permanently deleted ${itemToActOn.subject.title}`);
+      toast.success(`Permanently deleted ${itemToActOn.subject?.title || 'item'}`);
       setShowDeleteModal(false);
       setItemToActOn(null);
       setSelectedItems([]);
@@ -242,7 +247,7 @@ const AdminTrash_Page = () => {
           </div>
         )}
 
-        {/* Summary Cards - Updated without expired items */}
+        {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
             <div className="flex items-center justify-between">
@@ -304,11 +309,11 @@ const AdminTrash_Page = () => {
           <div className="flex items-center space-x-2">
             <button
               onClick={handleRefresh}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2 text-sm"
-              disabled={isLoading}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2 text-sm min-w-[80px] justify-center"
+              disabled={isRefreshing}
             >
-              <FiRefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
+              <FiRefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isRefreshing ? 'Loading...' : 'Refresh'}</span>
             </button>
             {selectedItems.length > 0 && (
               <button
@@ -322,7 +327,7 @@ const AdminTrash_Page = () => {
           </div>
         </div>
 
-        {/* Trash Items Table - Updated to match provided design */}
+        {/* Trash Items Table */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -374,41 +379,41 @@ const AdminTrash_Page = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white font-medium text-sm shrink-0">
-                            {item.subject.title?.charAt(0).toUpperCase()}
+                            {item.subject?.title?.charAt(0).toUpperCase() || '?'}
                           </div>
                           <div className="ml-3">
                             <div className="text-sm font-medium text-gray-900">
-                              {item.subject.title}
+                              {item.subject?.title || 'Unknown'}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {item.subject.session} | {item.subject.creditHours} Cr
+                              {item.subject?.session || 'N/A'} | {item.subject?.creditHours || '0'} Cr
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="text-sm text-gray-600">
-                          {item.subject.department}
+                          {item.subject?.department || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="text-sm text-gray-600 font-mono">
-                          {item.subject.code}
+                          {item.subject?.code || 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="text-sm text-gray-600">
-                          {item.subject.semester}
+                          {item.subject?.semester || 'N/A'}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="text-sm text-gray-600">
-                          {item.statistics.registeredStudents || 0}
+                          {item.statistics?.registeredStudents || 0}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getExpiryStatusColor(item.deletion.daysRemaining)}`}>
-                          {item.deletion.daysRemaining > 0 ? `${item.deletion.daysRemaining}d left` : 'Expired'}
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getExpiryStatusColor(item.deletion?.daysRemaining)}`}>
+                          {item.deletion?.daysRemaining > 0 ? `${item.deletion.daysRemaining}d left` : 'Expired'}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -482,7 +487,7 @@ const AdminTrash_Page = () => {
         </div>
       </div>
 
-      {/* Recover Confirmation Modal - Keep as is */}
+      {/* Recover Confirmation Modal */}
       {showRecoverModal && itemToActOn && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -491,21 +496,21 @@ const AdminTrash_Page = () => {
             </div>
             <h3 className="text-lg font-semibold text-center mb-2">Recover Item</h3>
             <p className="text-sm text-gray-600 text-center mb-6">
-              Are you sure you want to recover "{itemToActOn.subject.title}"?
+              Are you sure you want to recover "{itemToActOn.subject?.title || 'this item'}"?
               This will restore the subject and all its attendance records.
             </p>
             <div className="bg-gray-50 rounded-lg p-3 mb-6">
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600">Subject:</span>
-                <span className="font-medium">{itemToActOn.subject.title}</span>
+                <span className="font-medium">{itemToActOn.subject?.title || 'N/A'}</span>
               </div>
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600">Code:</span>
-                <span className="font-medium">{itemToActOn.subject.code}</span>
+                <span className="font-medium">{itemToActOn.subject?.code || 'N/A'}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Records to restore:</span>
-                <span className="font-medium">{itemToActOn.statistics.attendanceRecords} attendance</span>
+                <span className="font-medium">{itemToActOn.statistics?.attendanceRecords || 0} attendance</span>
               </div>
             </div>
             <div className="flex space-x-3">
@@ -526,7 +531,7 @@ const AdminTrash_Page = () => {
         </div>
       )}
 
-      {/* Permanent Delete Confirmation Modal - Keep as is */}
+      {/* Permanent Delete Confirmation Modal */}
       {showDeleteModal && itemToActOn && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -535,21 +540,21 @@ const AdminTrash_Page = () => {
             </div>
             <h3 className="text-lg font-semibold text-center mb-2">Permanently Delete</h3>
             <p className="text-sm text-gray-600 text-center mb-6">
-              Are you sure you want to permanently delete "{itemToActOn.subject.title}"?
+              Are you sure you want to permanently delete "{itemToActOn.subject?.title || 'this item'}"?
               This action cannot be undone.
             </p>
             <div className="bg-gray-50 rounded-lg p-3 mb-6">
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600">Subject:</span>
-                <span className="font-medium">{itemToActOn.subject.title}</span>
+                <span className="font-medium">{itemToActOn.subject?.title || 'N/A'}</span>
               </div>
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600">Code:</span>
-                <span className="font-medium">{itemToActOn.subject.code}</span>
+                <span className="font-medium">{itemToActOn.subject?.code || 'N/A'}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Records to delete:</span>
-                <span className="font-medium">{itemToActOn.statistics.attendanceRecords} attendance</span>
+                <span className="font-medium">{itemToActOn.statistics?.attendanceRecords || 0} attendance</span>
               </div>
             </div>
             <div className="flex space-x-3">
@@ -570,12 +575,12 @@ const AdminTrash_Page = () => {
         </div>
       )}
 
-      {/* Details Modal - Redesigned */}
+      {/* Details Modal - Fixed with proper height and scrolling */}
       {showDetailsModal && selectedTrashItem && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            {/* Header with gradient */}
-            <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-4 flex items-center justify-between">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            {/* Header with gradient - Fixed at top */}
+            <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-4 flex items-center justify-between flex-shrink-0 rounded-t-2xl">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm">
                   <FiTrash2 className="h-5 w-5 text-white" />
@@ -596,8 +601,47 @@ const AdminTrash_Page = () => {
               </button>
             </div>
 
-            {/* Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+            {/* Scrollable Content Area */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {/* Course Header Card */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-100">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-200">
+                      {selectedTrashItem.subjectDetails?.title?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-800">{selectedTrashItem.subjectDetails?.title || 'N/A'}</h3>
+                      <div className="flex items-center space-x-3 mt-1">
+                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs font-mono text-gray-600 border border-gray-200">
+                          {selectedTrashItem.subjectDetails?.code || 'N/A'}
+                        </span>
+                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs text-gray-600 border border-gray-200">
+                          {selectedTrashItem.subjectDetails?.semester || 'N/A'}
+                        </span>
+                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs text-gray-600 border border-gray-200">
+                          {selectedTrashItem.subjectDetails?.creditHours || '0'} Cr
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500 mb-1">Status</p>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                      selectedTrashItem.deletionInfo?.daysRemaining > 7 
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : selectedTrashItem.deletionInfo?.daysRemaining > 0 
+                        ? 'bg-orange-100 text-orange-700 border border-orange-200'
+                        : 'bg-red-100 text-red-700 border border-red-200'
+                    }`}>
+                      {selectedTrashItem.deletionInfo?.daysRemaining > 0 
+                        ? `${selectedTrashItem.deletionInfo.daysRemaining} days remaining` 
+                        : 'Expired'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Two Column Layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column */}
@@ -614,27 +658,27 @@ const AdminTrash_Page = () => {
                       <div className="space-y-3">
                         <div className="flex justify-between items-center py-2 border-b border-gray-100">
                           <span className="text-xs text-gray-500">Course Name</span>
-                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.title}</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails?.title || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-gray-100">
                           <span className="text-xs text-gray-500">Course Code</span>
-                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.code}</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails?.code || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-gray-100">
                           <span className="text-xs text-gray-500">Semester</span>
-                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.semester}</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails?.semester || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-gray-100">
                           <span className="text-xs text-gray-500">Discipline</span>
-                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.department}</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails?.department || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-gray-100">
                           <span className="text-xs text-gray-500">Session</span>
-                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.session}</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails?.session || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between items-center py-2">
                           <span className="text-xs text-gray-500">Credit Hours</span>
-                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails.creditHours}</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.subjectDetails?.creditHours || '0'}</span>
                         </div>
                       </div>
                     </div>
@@ -658,21 +702,20 @@ const AdminTrash_Page = () => {
                             <span className="text-xs text-gray-500">Deleted By</span>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-medium text-gray-800">{selectedTrashItem.deletionInfo.deletedBy.name}</p>
+                            <p className="text-sm font-medium text-gray-800">{selectedTrashItem.deletionInfo?.deletedBy?.name || 'N/A'}</p>
                           </div>
                         </div>
-                        <div className="flex justify-between items-center py-0.5 border-t border-gray-100">
+                        <div className="flex justify-between items-center py-1 border-t border-gray-100">
                           <span className="text-xs text-gray-500">Deleted At</span>
-                          <span className="text-xs text-gray-800">{formatDate(selectedTrashItem.deletionInfo.deletedAt)}</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.deletionInfo?.deletedAt ? formatDate(selectedTrashItem.deletionInfo.deletedAt) : 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between items-center py-0.5 border-t border-gray-100">
+                        <div className="flex justify-between items-center py-1 border-t border-gray-100">
                           <span className="text-xs text-gray-500">Expires At</span>
-                          <span className="text-xs text-gray-800">{formatDate(selectedTrashItem.deletionInfo.expiresAt)}</span>
+                          <span className="text-xs text-gray-800">{selectedTrashItem.deletionInfo?.expiresAt ? formatDate(selectedTrashItem.deletionInfo.expiresAt) : 'N/A'}</span>
                         </div>
                       </div>
                     </div>
                   </div>
-
                 </div>
 
                 {/* Right Column */}
@@ -711,15 +754,15 @@ const AdminTrash_Page = () => {
                       <div className="p-4">
                         <div className="grid grid-cols-3 gap-3">
                           <div className="bg-blue-50 rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-blue-700">{selectedTrashItem.attendanceOverview.totalRecords}</p>
+                            <p className="text-2xl font-bold text-blue-700">{selectedTrashItem.attendanceOverview.totalRecords || 0}</p>
                             <p className="text-xs text-blue-600 mt-1">Records</p>
                           </div>
                           <div className="bg-green-50 rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-green-700">{selectedTrashItem.attendanceOverview.uniqueDates}</p>
+                            <p className="text-2xl font-bold text-green-700">{selectedTrashItem.attendanceOverview.uniqueDates || 0}</p>
                             <p className="text-xs text-green-600 mt-1">Dates</p>
                           </div>
                           <div className="bg-purple-50 rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-indigo-700">{selectedTrashItem.attendanceOverview.uniqueStudents}</p>
+                            <p className="text-2xl font-bold text-indigo-700">{selectedTrashItem.attendanceOverview.uniqueStudents || 0}</p>
                             <p className="text-xs text-indigo-600 mt-1">Students</p>
                           </div>
                         </div>
@@ -738,16 +781,15 @@ const AdminTrash_Page = () => {
                     <div className="p-4">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                          {selectedTrashItem.subjectDetails.teacher.name?.charAt(0).toUpperCase()}
+                          {selectedTrashItem.subjectDetails?.teacher?.name?.charAt(0).toUpperCase() || '?'}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-gray-800">{selectedTrashItem.subjectDetails.teacher.name}</p>
-                          <p className="text-xs text-gray-500">{selectedTrashItem.subjectDetails.teacher.email}</p>
+                          <p className="text-sm font-semibold text-gray-800">{selectedTrashItem.subjectDetails?.teacher?.name || 'N/A'}</p>
+                          <p className="text-xs text-gray-500">{selectedTrashItem.subjectDetails?.teacher?.email || 'N/A'}</p>
                         </div>
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
 
@@ -776,11 +818,11 @@ const AdminTrash_Page = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                           {selectedTrashItem.registeredStudents.map((student, index) => (
-                            <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                            <tr key={student.id || index} className="hover:bg-gray-50 transition-colors">
                               <td className="px-4 py-2 text-xs text-gray-500">{index + 1}</td>
-                              <td className="px-4 py-2 text-xs font-mono text-gray-800">{student.registrationNo}</td>
-                              <td className="px-4 py-2 text-xs text-gray-800">{student.studentName}</td>
-                              <td className="px-4 py-2 text-xs text-gray-600">{student.discipline}</td>
+                              <td className="px-4 py-2 text-xs font-mono text-gray-800">{student.registrationNo || 'N/A'}</td>
+                              <td className="px-4 py-2 text-xs text-gray-800">{student.studentName || 'N/A'}</td>
+                              <td className="px-4 py-2 text-xs text-gray-600">{student.discipline || 'N/A'}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -791,8 +833,8 @@ const AdminTrash_Page = () => {
               )}
             </div>
 
-            {/* Footer Actions */}
-            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end space-x-3">
+            {/* Footer Actions - Fixed at bottom */}
+            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end space-x-3 flex-shrink-0 rounded-b-2xl">
               <button
                 onClick={() => {
                   setShowDetailsModal(false);
@@ -826,7 +868,6 @@ const AdminTrash_Page = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
