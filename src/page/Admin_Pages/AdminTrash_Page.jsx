@@ -88,7 +88,16 @@ const AdminTrash_Page = () => {
   };
 
   const handleRecoverClick = (item) => {
-    setItemToActOn(item);
+    // Create a properly structured object for recovery
+    const recoverItem = {
+      id: item.id || item._id,
+      subject: item.subject || item.subjectDetails || {},
+      statistics: item.statistics || {
+        attendanceRecords: item.attendanceOverview?.totalRecords || 0,
+        registeredStudents: item.registeredStudents?.length || 0
+      }
+    };
+    setItemToActOn(recoverItem);
     setShowRecoverModal(true);
   };
 
@@ -105,6 +114,8 @@ const AdminTrash_Page = () => {
       setShowRecoverModal(false);
       setItemToActOn(null);
       setSelectedItems([]);
+      setShowDetailsModal(false);
+      dispatch(clearSelectedTrashItem());
       loadTrashItems();
     } catch (error) {
       toast.error(error?.message || 'Failed to recover item');
@@ -112,7 +123,15 @@ const AdminTrash_Page = () => {
   };
 
   const handleDeleteClick = (item) => {
-    setItemToActOn(item);
+    // Create a properly structured object for deletion
+    const deleteItem = {
+      id: item.id || item._id,
+      subject: item.subject || item.subjectDetails || {},
+      statistics: item.statistics || {
+        attendanceRecords: item.attendanceOverview?.totalRecords || 0
+      }
+    };
+    setItemToActOn(deleteItem);
     setShowDeleteModal(true);
   };
 
@@ -126,6 +145,8 @@ const AdminTrash_Page = () => {
       setShowDeleteModal(false);
       setItemToActOn(null);
       setSelectedItems([]);
+      setShowDetailsModal(false);
+      dispatch(clearSelectedTrashItem());
       loadTrashItems();
     } catch (error) {
       toast.error(error?.message || 'Failed to delete item');
@@ -575,11 +596,11 @@ const AdminTrash_Page = () => {
         </div>
       )}
 
-      {/* Details Modal - Fixed with proper height and scrolling */}
+      {/* Details Modal */}
       {showDetailsModal && selectedTrashItem && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-            {/* Header with gradient - Fixed at top */}
+            {/* Header with gradient */}
             <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-4 flex items-center justify-between flex-shrink-0 rounded-t-2xl">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm">
@@ -603,45 +624,7 @@ const AdminTrash_Page = () => {
 
             {/* Scrollable Content Area */}
             <div className="flex-1 overflow-y-auto p-6">
-              {/* Course Header Card */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-100">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-200">
-                      {selectedTrashItem.subjectDetails?.title?.charAt(0).toUpperCase() || '?'}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-800">{selectedTrashItem.subjectDetails?.title || 'N/A'}</h3>
-                      <div className="flex items-center space-x-3 mt-1">
-                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs font-mono text-gray-600 border border-gray-200">
-                          {selectedTrashItem.subjectDetails?.code || 'N/A'}
-                        </span>
-                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs text-gray-600 border border-gray-200">
-                          {selectedTrashItem.subjectDetails?.semester || 'N/A'}
-                        </span>
-                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs text-gray-600 border border-gray-200">
-                          {selectedTrashItem.subjectDetails?.creditHours || '0'} Cr
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500 mb-1">Status</p>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                      selectedTrashItem.deletionInfo?.daysRemaining > 7 
-                        ? 'bg-green-100 text-green-700 border border-green-200'
-                        : selectedTrashItem.deletionInfo?.daysRemaining > 0 
-                        ? 'bg-orange-100 text-orange-700 border border-orange-200'
-                        : 'bg-red-100 text-red-700 border border-red-200'
-                    }`}>
-                      {selectedTrashItem.deletionInfo?.daysRemaining > 0 
-                        ? `${selectedTrashItem.deletionInfo.daysRemaining} days remaining` 
-                        : 'Expired'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
+              
               {/* Two Column Layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column */}
@@ -833,7 +816,7 @@ const AdminTrash_Page = () => {
               )}
             </div>
 
-            {/* Footer Actions - Fixed at bottom */}
+            {/* Footer Actions */}
             <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end space-x-3 flex-shrink-0 rounded-b-2xl">
               <button
                 onClick={() => {
@@ -847,7 +830,18 @@ const AdminTrash_Page = () => {
               <button
                 onClick={() => {
                   setShowDetailsModal(false);
-                  handleRecoverClick(selectedTrashItem);
+                  // Create a properly structured object for recovery from selectedTrashItem
+                  const recoverItem = {
+                    id: selectedTrashItem.id || selectedTrashItem._id,
+                    subject: {
+                      title: selectedTrashItem.subjectDetails?.title,
+                      code: selectedTrashItem.subjectDetails?.code
+                    },
+                    statistics: {
+                      attendanceRecords: selectedTrashItem.attendanceOverview?.totalRecords || 0
+                    }
+                  };
+                  handleRecoverClick(recoverItem);
                 }}
                 className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-sm shadow-green-200"
               >
@@ -857,7 +851,18 @@ const AdminTrash_Page = () => {
               <button
                 onClick={() => {
                   setShowDetailsModal(false);
-                  handleDeleteClick(selectedTrashItem);
+                  // Create a properly structured object for deletion from selectedTrashItem
+                  const deleteItem = {
+                    id: selectedTrashItem.id || selectedTrashItem._id,
+                    subject: {
+                      title: selectedTrashItem.subjectDetails?.title,
+                      code: selectedTrashItem.subjectDetails?.code
+                    },
+                    statistics: {
+                      attendanceRecords: selectedTrashItem.attendanceOverview?.totalRecords || 0
+                    }
+                  };
+                  handleDeleteClick(deleteItem);
                 }}
                 className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors flex items-center shadow-sm shadow-red-200"
               >
