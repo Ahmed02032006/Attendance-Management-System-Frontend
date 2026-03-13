@@ -1,10 +1,10 @@
-import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Menu, X, LayoutDashboard, MessageSquareWarning } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Menu, X, LayoutDashboard, MessageSquareWarning, Users, Code } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuthUser, logOutUser } from '../../store/Auth-Slicer/Auth-Slicer';
 import { toast } from 'react-toastify';
-import { Users, Code } from 'lucide-react'; // Changed from LayoutDashboard to Users
+import { FiTrash2 } from 'react-icons/fi'
 
 const AdminDashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -66,9 +66,9 @@ const AdminDashboardLayout = () => {
       path: "/admin/integration",
     },
     {
-      name: "Trash",
-      icon: Code,
-      label: "Trash",
+      name: "Recycle Bin",
+      icon: FiTrash2,
+      label: "Recycle Bin",
       path: "/admin/trash",
     }
   ];

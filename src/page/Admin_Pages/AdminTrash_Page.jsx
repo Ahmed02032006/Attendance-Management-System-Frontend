@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  FiTrash2, 
-  FiRefreshCw, 
-  FiX, 
+import {
+  FiTrash2,
+  FiRefreshCw,
+  FiX,
   FiRefreshCcw,
   FiBookOpen,
   FiUsers,
@@ -45,7 +45,7 @@ const AdminTrash_Page = () => {
   // Fetch trash items on component mount
   useEffect(() => {
     loadTrashItems();
-    
+
     return () => {
       dispatch(clearSelectedTrashItem());
     };
@@ -57,12 +57,11 @@ const AdminTrash_Page = () => {
 
   const handleRefresh = () => {
     loadTrashItems();
-    toast.info('Trash data refreshed');
   };
 
   const handleSelectItem = (itemId) => {
-    setSelectedItems(prev => 
-      prev.includes(itemId) 
+    setSelectedItems(prev =>
+      prev.includes(itemId)
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId]
     );
@@ -89,13 +88,13 @@ const AdminTrash_Page = () => {
 
   const handleRecoverConfirm = async () => {
     if (!itemToActOn) return;
-    
+
     try {
       await dispatch(recoverFromTrash({
         trashId: itemToActOn.id,
         userId: user?.id
       })).unwrap();
-      
+
       toast.success(`Successfully recovered ${itemToActOn.subject.title}`);
       setShowRecoverModal(false);
       setItemToActOn(null);
@@ -113,10 +112,10 @@ const AdminTrash_Page = () => {
 
   const handleDeleteConfirm = async () => {
     if (!itemToActOn) return;
-    
+
     try {
       await dispatch(permanentDeleteFromTrash(itemToActOn.id)).unwrap();
-      
+
       toast.success(`Permanently deleted ${itemToActOn.subject.title}`);
       setShowDeleteModal(false);
       setItemToActOn(null);
@@ -132,7 +131,7 @@ const AdminTrash_Page = () => {
       toast.warning('No items selected');
       return;
     }
-    
+
     if (window.confirm(`Are you sure you want to permanently delete ${selectedItems.length} item(s)?`)) {
       try {
         for (const id of selectedItems) {
@@ -164,7 +163,7 @@ const AdminTrash_Page = () => {
 
   const formatSchedule = (schedules) => {
     if (!schedules || schedules.length === 0) return 'No schedule';
-    
+
     const convertTo12Hour = (time) => {
       const [hour, minute] = time.split(':');
       const hourInt = parseInt(hour);
@@ -202,10 +201,10 @@ const AdminTrash_Page = () => {
   if (isLoading && trashItems.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <HeaderComponent 
-          heading="Trash Management" 
-          subHeading="Recover or permanently delete items" 
-          role="admin" 
+        <HeaderComponent
+          heading="Trash Management"
+          subHeading="Recover or permanently delete items"
+          role="admin"
         />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
@@ -219,10 +218,10 @@ const AdminTrash_Page = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderComponent 
-        heading="Trash Management" 
-        subHeading="Recover or permanently delete items" 
-        role="admin" 
+      <HeaderComponent
+        heading="Trash Management"
+        subHeading="Recover or permanently delete items"
+        role="admin"
       />
 
       <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -233,7 +232,7 @@ const AdminTrash_Page = () => {
               <FiAlertCircle className="h-5 w-5" />
               <span>{typeof error === 'string' ? error : 'An error occurred'}</span>
             </div>
-            <button 
+            <button
               onClick={() => dispatch(clearSelectedTrashItem())}
               className="text-red-500 hover:text-red-700"
             >
@@ -348,9 +347,6 @@ const AdminTrash_Page = () => {
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Semester
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Class Schedule
-                  </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Students
                   </th>
@@ -402,11 +398,6 @@ const AdminTrash_Page = () => {
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         <div className="text-sm text-gray-600">
                           {item.subject.semester}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="text-sm text-gray-600 space-y-0.5">
-                          {formatSchedule(item.subject.classSchedule)}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
@@ -492,14 +483,14 @@ const AdminTrash_Page = () => {
 
       {/* Recover Confirmation Modal - Keep as is */}
       {showRecoverModal && itemToActOn && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FiRotateCcw className="h-6 w-6 text-green-600" />
             </div>
             <h3 className="text-lg font-semibold text-center mb-2">Recover Item</h3>
             <p className="text-sm text-gray-600 text-center mb-6">
-              Are you sure you want to recover "{itemToActOn.subject.title}"? 
+              Are you sure you want to recover "{itemToActOn.subject.title}"?
               This will restore the subject and all its attendance records.
             </p>
             <div className="bg-gray-50 rounded-lg p-3 mb-6">
@@ -536,14 +527,14 @@ const AdminTrash_Page = () => {
 
       {/* Permanent Delete Confirmation Modal - Keep as is */}
       {showDeleteModal && itemToActOn && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FiTrash2 className="h-6 w-6 text-red-600" />
             </div>
             <h3 className="text-lg font-semibold text-center mb-2">Permanently Delete</h3>
             <p className="text-sm text-gray-600 text-center mb-6">
-              Are you sure you want to permanently delete "{itemToActOn.subject.title}"? 
+              Are you sure you want to permanently delete "{itemToActOn.subject.title}"?
               This action cannot be undone.
             </p>
             <div className="bg-gray-50 rounded-lg p-3 mb-6">
@@ -578,197 +569,288 @@ const AdminTrash_Page = () => {
         </div>
       )}
 
-      {/* Details Modal - Keep as is */}
+      {/* Details Modal - Redesigned */}
       {showDetailsModal && selectedTrashItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-800">Trash Item Details</h2>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            {/* Header with gradient */}
+            <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <FiTrash2 className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">Trash Item Details</h2>
+                  <p className="text-xs text-gray-300 mt-0.5">Review deleted item information</p>
+                </div>
+              </div>
               <button
                 onClick={() => {
                   setShowDetailsModal(false);
                   dispatch(clearSelectedTrashItem());
                 }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-white transition-colors"
               >
-                <FiX className="h-5 w-5" />
+                <FiX className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="p-6">
-              {/* Subject Details */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-4">Subject Information</h3>
-                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
-                  <div>
-                    <p className="text-xs text-gray-500">Title</p>
-                    <p className="font-medium">{selectedTrashItem.subjectDetails.title}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Code</p>
-                    <p className="font-medium">{selectedTrashItem.subjectDetails.code}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Department</p>
-                    <p>{selectedTrashItem.subjectDetails.department}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Credit Hours</p>
-                    <p>{selectedTrashItem.subjectDetails.creditHours}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Semester</p>
-                    <p>{selectedTrashItem.subjectDetails.semester}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Session</p>
-                    <p>{selectedTrashItem.subjectDetails.session}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Teacher Info */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-4">Teacher Information</h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="font-medium">{selectedTrashItem.subjectDetails.teacher.name}</p>
-                  <p className="text-sm text-gray-600">{selectedTrashItem.subjectDetails.teacher.email}</p>
-                </div>
-              </div>
-
-              {/* Class Schedule */}
-              {selectedTrashItem.classSchedule?.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-4">Class Schedule</h3>
-                  <div className="space-y-2">
-                    {selectedTrashItem.classSchedule.map((schedule, index) => (
-                      <div key={index} className="bg-gray-50 p-3 rounded-lg flex items-center justify-between">
-                        <span className="font-medium">{schedule.day}</span>
-                        <span className="text-gray-600">{schedule.startTime} - {schedule.endTime}</span>
+            {/* Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {/* Course Header Card */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-100">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-200">
+                      {selectedTrashItem.subjectDetails.title?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-800">{selectedTrashItem.subjectDetails.title}</h3>
+                      <div className="flex items-center space-x-3 mt-1">
+                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs font-mono text-gray-600 border border-gray-200">
+                          {selectedTrashItem.subjectDetails.code}
+                        </span>
+                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs text-gray-600 border border-gray-200">
+                          {selectedTrashItem.subjectDetails.semester}
+                        </span>
+                        <span className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs text-gray-600 border border-gray-200">
+                          {selectedTrashItem.subjectDetails.creditHours} Cr
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Registered Students */}
-              {selectedTrashItem.registeredStudents?.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-4">
-                    Registered Students ({selectedTrashItem.registeredStudents.length})
-                  </h3>
-                  <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Roll No</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Name</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Discipline</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {selectedTrashItem.registeredStudents.map((student) => (
-                          <tr key={student.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-2 text-sm">{student.registrationNo}</td>
-                            <td className="px-4 py-2 text-sm">{student.studentName}</td>
-                            <td className="px-4 py-2 text-sm">{student.discipline}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* Attendance Overview */}
-              {selectedTrashItem.attendanceOverview && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-4">Attendance Overview</h3>
-                  <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div className="bg-blue-50 p-3 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-blue-700">{selectedTrashItem.attendanceOverview.totalRecords}</p>
-                      <p className="text-xs text-blue-600">Total Records</p>
-                    </div>
-                    <div className="bg-green-50 p-3 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-green-700">{selectedTrashItem.attendanceOverview.uniqueDates}</p>
-                      <p className="text-xs text-green-600">Unique Dates</p>
-                    </div>
-                    <div className="bg-purple-50 p-3 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-purple-700">{selectedTrashItem.attendanceOverview.uniqueStudents}</p>
-                      <p className="text-xs text-purple-600">Unique Students</p>
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Deletion Info */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-4">Deletion Information</h3>
-                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
-                  <div>
-                    <p className="text-xs text-gray-500">Deleted By</p>
-                    <p className="font-medium">{selectedTrashItem.deletionInfo.deletedBy.name}</p>
-                    <p className="text-xs text-gray-600">{selectedTrashItem.deletionInfo.deletedBy.role}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Deleted At</p>
-                    <p className="font-medium">{formatDate(selectedTrashItem.deletionInfo.deletedAt)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Expires At</p>
-                    <p className="font-medium">{formatDate(selectedTrashItem.deletionInfo.expiresAt)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Days Remaining</p>
-                    <p className={`font-medium ${
-                      selectedTrashItem.deletionInfo.daysRemaining > 7 
-                        ? 'text-green-600' 
-                        : selectedTrashItem.deletionInfo.daysRemaining > 0 
-                        ? 'text-orange-600' 
-                        : 'text-red-600'
-                    }`}>
-                      {selectedTrashItem.deletionInfo.daysRemaining > 0 
-                        ? `${selectedTrashItem.deletionInfo.daysRemaining} days` 
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500 mb-1">Status</p>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${selectedTrashItem.deletionInfo.daysRemaining > 7
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : selectedTrashItem.deletionInfo.daysRemaining > 0
+                          ? 'bg-orange-100 text-orange-700 border border-orange-200'
+                          : 'bg-red-100 text-red-700 border border-red-200'
+                      }`}>
+                      {selectedTrashItem.deletionInfo.daysRemaining > 0
+                        ? `${selectedTrashItem.deletionInfo.daysRemaining} days remaining`
                         : 'Expired'}
-                    </p>
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex space-x-3 justify-end">
-                <button
-                  onClick={() => {
-                    setShowDetailsModal(false);
-                    dispatch(clearSelectedTrashItem());
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Close
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDetailsModal(false);
-                    handleRecoverClick(selectedTrashItem);
-                  }}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  Recover
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDetailsModal(false);
-                    handleDeleteClick(selectedTrashItem);
-                  }}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Delete Permanently
-                </button>
+              {/* Two Column Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  {/* Subject Information Card */}
+                  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                      <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                        <FiBookOpen className="h-4 w-4 mr-2 text-blue-600" />
+                        Subject Information
+                      </h3>
+                    </div>
+                    <div className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <span className="text-xs text-gray-500">Department</span>
+                          <span className="text-sm font-medium text-gray-800">{selectedTrashItem.subjectDetails.department}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <span className="text-xs text-gray-500">Session</span>
+                          <span className="text-sm font-medium text-gray-800">{selectedTrashItem.subjectDetails.session}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-xs text-gray-500">Credit Hours</span>
+                          <span className="text-sm font-medium text-gray-800">{selectedTrashItem.subjectDetails.creditHours}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Teacher Information Card */}
+                  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                      <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                        <FiUsers className="h-4 w-4 mr-2 text-purple-600" />
+                        Teacher Information
+                      </h3>
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                          {selectedTrashItem.subjectDetails.teacher.name?.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">{selectedTrashItem.subjectDetails.teacher.name}</p>
+                          <p className="text-xs text-gray-500">{selectedTrashItem.subjectDetails.teacher.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Deletion Information Card */}
+                  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                      <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                        <FiAlertCircle className="h-4 w-4 mr-2 text-orange-600" />
+                        Deletion Information
+                      </h3>
+                    </div>
+                    <div className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                              <FiTrash2 className="h-3 w-3 text-red-600" />
+                            </div>
+                            <span className="text-xs text-gray-500">Deleted By</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-800">{selectedTrashItem.deletionInfo.deletedBy.name}</p>
+                            <p className="text-xs text-gray-500">{selectedTrashItem.deletionInfo.deletedBy.role}</p>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-t border-gray-100">
+                          <span className="text-xs text-gray-500">Deleted At</span>
+                          <span className="text-sm font-medium text-gray-800">{formatDate(selectedTrashItem.deletionInfo.deletedAt)}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-t border-gray-100">
+                          <span className="text-xs text-gray-500">Expires At</span>
+                          <span className="text-sm font-medium text-gray-800">{formatDate(selectedTrashItem.deletionInfo.expiresAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-6">
+                  {/* Class Schedule Card */}
+                  {selectedTrashItem.classSchedule?.length > 0 && (
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                      <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                        <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                          <FiClock className="h-4 w-4 mr-2 text-green-600" />
+                          Class Schedule
+                        </h3>
+                      </div>
+                      <div className="p-4">
+                        <div className="space-y-2">
+                          {selectedTrashItem.classSchedule.map((schedule, index) => (
+                            <div key={index} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                              <span className="text-xs font-medium text-gray-600">{schedule.day}</span>
+                              <span className="text-sm text-gray-800">{schedule.startTime} - {schedule.endTime}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Attendance Overview Card */}
+                  {selectedTrashItem.attendanceOverview && (
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                      <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                        <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                          <FiCalendar className="h-4 w-4 mr-2 text-blue-600" />
+                          Attendance Overview
+                        </h3>
+                      </div>
+                      <div className="p-4">
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="bg-blue-50 rounded-lg p-3 text-center">
+                            <p className="text-2xl font-bold text-blue-700">{selectedTrashItem.attendanceOverview.totalRecords}</p>
+                            <p className="text-xs text-blue-600 mt-1">Records</p>
+                          </div>
+                          <div className="bg-green-50 rounded-lg p-3 text-center">
+                            <p className="text-2xl font-bold text-green-700">{selectedTrashItem.attendanceOverview.uniqueDates}</p>
+                            <p className="text-xs text-green-600 mt-1">Dates</p>
+                          </div>
+                          <div className="bg-purple-50 rounded-lg p-3 text-center">
+                            <p className="text-2xl font-bold text-purple-700">{selectedTrashItem.attendanceOverview.uniqueStudents}</p>
+                            <p className="text-xs text-purple-600 mt-1">Students</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Registered Students Section */}
+              {selectedTrashItem.registeredStudents?.length > 0 && (
+                <div className="mt-6 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                      <FiUsers className="h-4 w-4 mr-2 text-indigo-600" />
+                      Registered Students
+                    </h3>
+                    <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
+                      {selectedTrashItem.registeredStudents.length} Total
+                    </span>
+                  </div>
+                  <div className="p-4">
+                    <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
+                      <table className="min-w-full">
+                        <thead className="bg-gray-50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">#</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Registration No</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Student Name</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Discipline</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {selectedTrashItem.registeredStudents.map((student, index) => (
+                            <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-4 py-2 text-xs text-gray-500">{index + 1}</td>
+                              <td className="px-4 py-2 text-xs font-mono text-gray-800">{student.registrationNo}</td>
+                              <td className="px-4 py-2 text-xs text-gray-800">{student.studentName}</td>
+                              <td className="px-4 py-2 text-xs text-gray-600">{student.discipline}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Actions */}
+            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  dispatch(clearSelectedTrashItem());
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-white transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  handleRecoverClick(selectedTrashItem);
+                }}
+                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-sm shadow-green-200"
+              >
+                <FiRotateCcw className="h-4 w-4 mr-2" />
+                Recover Item
+              </button>
+              <button
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  handleDeleteClick(selectedTrashItem);
+                }}
+                className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors flex items-center shadow-sm shadow-red-200"
+              >
+                <FiTrash2 className="h-4 w-4 mr-2" />
+                Delete Permanently
+              </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };
