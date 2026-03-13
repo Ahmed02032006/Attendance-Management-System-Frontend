@@ -97,7 +97,7 @@ const AdminComplaints_Page = () => {
                 role='admin'
             />
 
-            <div className="container max-w-full mx-auto p-4 lg:p-6">
+            <div className="container max-w-full mx-auto p-4 lg:p-6 overflow-y-auto">
                 {/* Google Sheet Embed Section */}
                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                     <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
