@@ -523,7 +523,7 @@ const TeacherCourseReport_Page = () => {
                           {student.rollNo}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-center text-sm text-gray-600">
-                          {student.attendance?.length || 0}
+                          {student.presentCount + student.absentCount}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-center text-sm font-medium text-green-600">
                           {student.presentCount}

@@ -99,7 +99,7 @@ const AdminComplaints_Page = () => {
 
             <div className="container max-w-full mx-auto p-4 lg:p-6">
                 {/* Google Sheet Embed Section */}
-                <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-y-auto">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
                     <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
