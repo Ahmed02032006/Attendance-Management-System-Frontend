@@ -44,7 +44,7 @@ const AdminDashboardLayout = () => {
     {
       name: "Dashboard",
       icon: LayoutDashboard,
-      label: "Dashboard",
+      label: "Admin Overview",
       path: "/admin/dashboard"
     },
     {
@@ -56,7 +56,7 @@ const AdminDashboardLayout = () => {
     {
       name: "View Complaints",
       icon: MessageSquareWarning,
-      label: "Complaints",
+      label: "View Complaints",
       path: "/admin/complaints",
     },
     {
@@ -68,7 +68,7 @@ const AdminDashboardLayout = () => {
     {
       name: "Integration",
       icon: Code,
-      label: "Integration",
+      label: "Code Integration",
       path: "/admin/integration",
     }
   ];
