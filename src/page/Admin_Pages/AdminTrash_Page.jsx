@@ -6,7 +6,7 @@ import {
   FiTrash2, 
   FiRefreshCw, 
   FiX, 
-  FiCalendar,
+  FiRefreshCcw,
   FiBookOpen,
   FiUsers,
   FiClock,
