@@ -287,18 +287,16 @@ const AdminTeachers_Page = () => {
   // Show loading state while fetching data
   if (isTeacherLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <HeaderComponent
-          heading={"Teachers Management"}
-          subHeading={"Manage all faculty members and their profiles"}
-          role='admin'
-        />
-
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-4 text-lg font-medium text-gray-700">Loading Teachers...</p>
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
+        <div className="text-center">
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <FiUsers className="h-8 w-8 text-blue-600 animate-pulse" />
+            </div>
           </div>
+          <p className="mt-6 text-lg font-medium text-gray-700">Loading Teachers...</p>
+          <p className="mt-2 text-sm text-gray-500">Fetching teacher records</p>
         </div>
       </div>
     );
