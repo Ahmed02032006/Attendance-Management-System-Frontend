@@ -159,8 +159,6 @@ const AdminComplaints_Page = () => {
 
                             {/* Google Sheet Iframe */}
                             <div className="relative w-full overflow-hidden bg-gray-100">
-                                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-blue-500 to-purple-500"></div>
-
                                 <div key={iframeKey} className="iframe-container">
                                     <iframe
                                         src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRi7Gv4sPMG5bVYyal3Wtku0i1nDnFWx5bMJVxKUOQhRhL_-AAvxAEmWI-ueduk0CvwIWg6WlF2SpiZ/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false"
