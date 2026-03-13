@@ -350,7 +350,7 @@ const TeacherCourseReport_Page = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Report Generation Form */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-4">
+        <div className="bg-white rounded-lg border border-gray-400 p-6 mb-4">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Generate Attendance Report</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -459,7 +459,7 @@ const TeacherCourseReport_Page = () => {
 
         {/* Report Display */}
         {showReport && processedData && processedData.students && processedData.students.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-lg border border-gray-400 overflow-hidden">
             {/* Report Header */}
             <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
               <div>
