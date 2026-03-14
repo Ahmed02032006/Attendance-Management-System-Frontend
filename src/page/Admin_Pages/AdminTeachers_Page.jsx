@@ -1071,7 +1071,7 @@ const AdminTeachers_Page = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 bg-purple-50 rounded-xl flex items-center justify-center ring-1 ring-purple-100">
-                    <FiClock className="h-5 w-5 text-purple-600" />
+                    <FiClock className="h-5 w-5 text-indigo-600" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Activity Logs</h3>
@@ -1091,7 +1091,7 @@ const AdminTeachers_Page = () => {
             </div>
 
             {/* Content */}
-            <div className="p-5 overflow-y-auto max-h-[calc(80vh-120px)] bg-gray-50/80">
+            <div className="p-5 overflow-y-auto max-h-[calc(80vh-120px)] bg-gray-300/80">
               <div className="space-y-2.5">
                 {auditLogs.map((log, index) => (
                   <div
