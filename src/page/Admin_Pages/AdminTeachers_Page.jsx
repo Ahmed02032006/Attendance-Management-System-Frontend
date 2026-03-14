@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderComponent from '../../components/HeaderComponent'
-import { 
-  FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, 
-  FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers, FiClock, 
-  FiActivity, FiUserPlus, FiCalendar, FiCamera, 
-  FiDownload, FiBarChart2 
+import {
+  FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight,
+  FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers, FiClock,
+  FiActivity, FiUserPlus, FiCalendar, FiCamera,
+  FiDownload, FiBarChart2
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
@@ -369,7 +369,7 @@ const AdminTeachers_Page = () => {
     if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    
+
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -1111,23 +1111,25 @@ const AdminTeachers_Page = () => {
                 </button>
               </div>
             </div>
-            
+
             {/* Content */}
             <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)] bg-gray-50/50">
               <div className="space-y-3">
-                {auditLogs.map((log, index) => (
+                {auditLogs.map((log) => (
                   <div
                     key={log.id}
                     className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border-l-4"
                     style={{
-                      borderLeftColor: 
+                      borderLeftColor:
                         log.action === 'create' ? '#10b981' :
-                        log.action === 'edit' ? '#3b82f6' :
-                        log.action === 'delete' ? '#ef4444' :
-                        log.action === 'register' ? '#8b5cf6' :
-                        log.action === 'create_qr' ? '#6366f1' :
-                        log.action === 'export_attendance' || log.action === 'export_report' ? '#f59e0b' :
-                        log.action === 'generate_report' ? '#06b6d4' : '#6b7280'
+                          log.action === 'edit' ? '#3b82f6' :
+                            log.action === 'delete' ? '#ef4444' :
+                              log.action === 'register' ? '#8b5cf6' :
+                                log.action === 'edit_schedule' ? '#3b82f6' :
+                                  log.action === 'create_qr' ? '#6366f1' :
+                                    log.action === 'export_attendance' ? '#f59e0b' :
+                                      log.action === 'export_report' ? '#f59e0b' :
+                                        log.action === 'generate_report' ? '#06b6d4' : '#6b7280'
                     }}
                   >
                     {/* Top row: Action type and date */}
@@ -1141,11 +1143,10 @@ const AdminTeachers_Page = () => {
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                          log.status === 'success' ? 'bg-emerald-50 text-emerald-700' :
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${log.status === 'success' ? 'bg-emerald-50 text-emerald-700' :
                           log.status === 'warning' ? 'bg-amber-50 text-amber-700' :
-                          'bg-rose-50 text-rose-700'
-                        }`}>
+                            'bg-rose-50 text-rose-700'
+                          }`}>
                           {log.status}
                         </span>
                         <span className="text-xs text-gray-400 font-medium" title={formatFullDate(log.timestamp)}>
@@ -1153,8 +1154,8 @@ const AdminTeachers_Page = () => {
                         </span>
                       </div>
                     </div>
-                    
-                    {/* Heading */}
+
+                    {/* Heading only - no description */}
                     <p className="text-gray-800 font-medium text-sm pl-8">
                       {log.heading}
                     </p>
@@ -1186,6 +1187,7 @@ const AdminTeachers_Page = () => {
           </div>
         </div>
       )}
+
     </div>
   )
 }
