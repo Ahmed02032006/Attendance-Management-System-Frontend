@@ -51,7 +51,6 @@ const AdminTeachers_Page = () => {
         id: 1,
         action: 'create',
         actionType: 'Course Created',
-        heading: 'Created Mathematics 101 course',
         timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
         status: 'success'
       },
@@ -59,7 +58,6 @@ const AdminTeachers_Page = () => {
         id: 2,
         action: 'edit',
         actionType: 'Course Updated',
-        heading: 'Updated Physics Advanced curriculum',
         timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
         status: 'success'
       },
@@ -67,7 +65,6 @@ const AdminTeachers_Page = () => {
         id: 3,
         action: 'delete',
         actionType: 'Course Deleted',
-        heading: 'Deleted Chemistry Lab course',
         timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
         status: 'warning'
       },
@@ -75,7 +72,6 @@ const AdminTeachers_Page = () => {
         id: 4,
         action: 'register',
         actionType: 'Student Registered',
-        heading: 'Registered 5 students in English Literature',
         timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
         status: 'success'
       },
@@ -83,7 +79,6 @@ const AdminTeachers_Page = () => {
         id: 5,
         action: 'edit_schedule',
         actionType: 'Schedule Updated',
-        heading: 'Updated class schedule for History 201',
         timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
         status: 'success'
       },
@@ -91,7 +86,6 @@ const AdminTeachers_Page = () => {
         id: 6,
         action: 'create_qr',
         actionType: 'QR Code Created',
-        heading: 'Created attendance QR for Computer Science',
         timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
         status: 'success'
       },
@@ -99,7 +93,6 @@ const AdminTeachers_Page = () => {
         id: 7,
         action: 'export_attendance',
         actionType: 'Attendance Exported',
-        heading: 'Exported attendance record for Mathematics 101',
         timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
         status: 'success'
       },
@@ -107,7 +100,6 @@ const AdminTeachers_Page = () => {
         id: 8,
         action: 'generate_report',
         actionType: 'Course Report Generated',
-        heading: 'Generated performance report for Physics Advanced',
         timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
         status: 'success'
       },
@@ -115,7 +107,6 @@ const AdminTeachers_Page = () => {
         id: 9,
         action: 'export_report',
         actionType: 'Report Exported',
-        heading: 'Exported course report for English Literature',
         timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
         status: 'success'
       }
@@ -1154,11 +1145,6 @@ const AdminTeachers_Page = () => {
                         </span>
                       </div>
                     </div>
-
-                    {/* Heading only - no description */}
-                    <p className="text-gray-800 font-medium text-sm pl-8">
-                      {log.heading}
-                    </p>
                   </div>
                 ))}
               </div>
