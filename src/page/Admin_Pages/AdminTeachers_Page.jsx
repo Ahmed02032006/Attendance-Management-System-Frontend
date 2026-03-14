@@ -357,54 +357,81 @@ const AdminTeachers_Page = () => {
     }
   }
 
-  // Get action badge color
-  const getActionBadgeColor = (action) => {
-    switch (action) {
-      case 'create':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-200'
-      case 'edit':
-      case 'edit_schedule':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'delete':
-        return 'bg-rose-100 text-rose-800 border-rose-200'
-      case 'register':
-        return 'bg-violet-100 text-violet-800 border-violet-200'
-      case 'create_qr':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-200'
-      case 'export_attendance':
-      case 'export_report':
-        return 'bg-amber-100 text-amber-800 border-amber-200'
-      case 'generate_report':
-        return 'bg-cyan-100 text-cyan-800 border-cyan-200'
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
-
-  // Get action icon with consistent sizing
+  // Get action icon based on action type
   const getActionIcon = (action) => {
     switch (action) {
       case 'create':
-        return <FiPlus className="h-4 w-4" />
+        return <FiPlus className="h-4 w-4" />;
       case 'edit':
-        return <FiEdit className="h-4 w-4" />
+        return <FiEdit className="h-4 w-4" />;
       case 'delete':
-        return <FiTrash2 className="h-4 w-4" />
+        return <FiTrash2 className="h-4 w-4" />;
       case 'register':
-        return <FiUserPlus className="h-4 w-4" />
+        return <FiUserPlus className="h-4 w-4" />;
       case 'edit_schedule':
-        return <FiCalendar className="h-4 w-4" />
+        return <FiCalendar className="h-4 w-4" />;
       case 'create_qr':
-        return <FiCamera className="h-4 w-4" />
+        return <FiCamera className="h-4 w-4" />;
+      case 'export_attendance':
+        return <FiDownload className="h-4 w-4" />;
+      case 'generate_report':
+        return <FiBarChart2 className="h-4 w-4" />;
+      case 'export_report':
+        return <FiFileText className="h-4 w-4" />;
+      default:
+        return <FiActivity className="h-4 w-4" />;
+    }
+  };
+
+  // Get action badge color based on action type
+  const getActionBadgeColor = (action) => {
+    switch (action) {
+      case 'create':
+        return 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200';
+      case 'edit':
+      case 'edit_schedule':
+        return 'bg-blue-50 text-blue-600 ring-1 ring-blue-200';
+      case 'delete':
+        return 'bg-rose-50 text-rose-600 ring-1 ring-rose-200';
+      case 'register':
+        return 'bg-violet-50 text-violet-600 ring-1 ring-violet-200';
+      case 'create_qr':
+        return 'bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200';
       case 'export_attendance':
       case 'export_report':
-        return <FiDownload className="h-4 w-4" />
+        return 'bg-amber-50 text-amber-600 ring-1 ring-amber-200';
       case 'generate_report':
-        return <FiBarChart2 className="h-4 w-4" />
+        return 'bg-cyan-50 text-cyan-600 ring-1 ring-cyan-200';
       default:
-        return <FiActivity className="h-4 w-4" />
+        return 'bg-gray-50 text-gray-600 ring-1 ring-gray-200';
     }
-  }
+  };
+
+  // Get human-readable action text
+  const getActionText = (action) => {
+    switch (action) {
+      case 'create':
+        return 'Created';
+      case 'edit':
+        return 'Edited';
+      case 'delete':
+        return 'Deleted';
+      case 'register':
+        return 'Registered';
+      case 'edit_schedule':
+        return 'Schedule Updated';
+      case 'create_qr':
+        return 'QR Created';
+      case 'export_attendance':
+        return 'Attendance Exported';
+      case 'generate_report':
+        return 'Report Generated';
+      case 'export_report':
+        return 'Report Exported';
+      default:
+        return action;
+    }
+  };
 
   // Show loading state while fetching data
   if (isTeacherLoading) {
@@ -1058,37 +1085,44 @@ const AdminTeachers_Page = () => {
                   <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
                 </div>
               ) : (
-                <div className="space-y-2.5">
+                <div className="space-y-3">
                   {auditLogs.map((log) => (
                     <div
                       key={log._id}
                       className="group bg-white rounded-xl p-4 shadow-xs hover:shadow-md transition-all duration-200 border border-gray-100 hover:border-gray-200"
                     >
-                      <div className="flex items-center justify-between">
-                        {/* Heading */}
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">
-                            {log.heading}
-                          </p>
+                      <div className="flex items-start gap-3">
+                        {/* Action Icon */}
+                        <div className={`p-2.5 rounded-xl ${getActionBadgeColor(log.action)}`}>
+                          {getActionIcon(log.action)}
                         </div>
 
-                        {/* Status and Date */}
-                        <div className="flex items-center gap-3 ml-4">
-                          <span className={`
-                      text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap
-                      ${log.status === 'success' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50' :
-                              log.status === 'warning' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50' :
-                                'bg-rose-50 text-rose-700 ring-1 ring-rose-200/50'}
-                    `}>
-                            {log.status}
-                          </span>
-                          <span
-                            className="text-xs text-gray-400 font-medium whitespace-nowrap bg-gray-50 px-2 py-1 rounded-full ring-1 ring-gray-200/50"
-                            title={new Date(log.timestamp).toLocaleString()}
-                          >
-                            <FiClock className="h-3 w-3 inline mr-1 -mt-0.5" />
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              {getActionText(log.action)}
+                            </span>
+                            <span className={`
+                        text-xs px-2 py-0.5 rounded-full font-medium
+                        ${log.status === 'success' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50' :
+                                log.status === 'warning' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50' :
+                                  'bg-rose-50 text-rose-700 ring-1 ring-rose-200/50'}
+                      `}>
+                              {log.status}
+                            </span>
+                          </div>
+
+                          {/* Heading */}
+                          <p className="text-sm font-medium text-gray-900 mb-1">
+                            {log.heading}
+                          </p>
+
+                          {/* Date */}
+                          <p className="text-xs text-gray-400 flex items-center">
+                            <FiClock className="h-3 w-3 mr-1" />
                             {formatAuditTime(log.timestamp)}
-                          </span>
+                          </p>
                         </div>
                       </div>
                     </div>

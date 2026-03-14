@@ -370,6 +370,7 @@ const TeacherSubjects_Page = () => {
       toast.success('Course created successfully!')
       await dispatch(createAuditLog({
         userId: currentUserId,
+        action: 'create',
         heading: 'Course Created',
         status: 'success'
       })).unwrap();
@@ -408,6 +409,12 @@ const TeacherSubjects_Page = () => {
       resetForm()
       setClassSchedule([])
       toast.success('Course updated successfully!')
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'edit',
+        heading: 'Course Updated',
+        status: 'success'
+      })).unwrap();
     } catch (error) {
       toast.error(error?.message || 'Failed to update course')
     }
@@ -429,6 +436,12 @@ const TeacherSubjects_Page = () => {
 
       setShowDeleteModal(false)
       toast.success('Course deleted successfully!')
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'delete',
+        heading: 'Course Deleted',
+        status: 'success'
+      })).unwrap();
     } catch (error) {
       toast.error(error?.message || 'Failed to delete course')
     }
