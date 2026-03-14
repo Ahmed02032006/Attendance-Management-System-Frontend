@@ -2425,7 +2425,7 @@ const TeacherSubjects_Page = () => {
                                           <FiEdit className="h-4 w-4" />
                                         </button>
                                         <button
-                                          onClick={() => handleDeleteStudent(student._id)}
+                                          onClick={() => handleDeleteStudentClick(student)}
                                           className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
                                           title="Remove Student"
                                         >
