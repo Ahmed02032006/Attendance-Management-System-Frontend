@@ -1143,7 +1143,7 @@ const AdminTeachers_Page = () => {
                         <div className="flex-1 min-w-0">
                           {/* Top row with action type and date/status */}
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <span className="text-xs font-medium text-gray-500 uppercase underline tracking-wider">
                               {getActionText(log.action)}
                             </span>
                             <div className="flex items-center gap-2">

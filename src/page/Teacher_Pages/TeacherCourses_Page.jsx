@@ -67,6 +67,10 @@ const TeacherSubjects_Page = () => {
   const [subjectsPerPage] = useState(5)
   const [activeStudentTab, setActiveStudentTab] = useState('view')
 
+  const [showIndividualDeleteModal, setShowIndividualDeleteModal] = useState(false);
+  const [selectedStudentToDelete, setSelectedStudentToDelete] = useState(null);
+  const [isDeletingStudent, setIsDeletingStudent] = useState(false);
+
   // For class schedule with time picker interface
   const [classSchedule, setClassSchedule] = useState([])
   const [currentSchedule, setCurrentSchedule] = useState({
@@ -451,13 +455,57 @@ const TeacherSubjects_Page = () => {
         userId: currentUserId,
         action: 'delete',
         heading: `Deleted Course`,
-        status: 'warning'
+        status: 'success'
       })).unwrap();
 
     } catch (error) {
       toast.error(error?.message || 'Failed to delete course')
     }
   }
+
+  // Handle individual student delete confirmation
+  const handleDeleteStudentClick = (student) => {
+    setSelectedStudentToDelete(student);
+    setShowIndividualDeleteModal(true);
+  };
+
+  // Handle confirm delete student
+  const handleConfirmDeleteStudent = async () => {
+    if (!selectedStudentToDelete) return;
+
+    setIsDeletingStudent(true);
+
+    try {
+      await dispatch(deleteRegisteredStudent({
+        subjectId: selectedSubject.id,
+        studentId: selectedStudentToDelete._id,
+        teacherId: currentUserId
+      })).unwrap();
+
+      toast.success('Student removed successfully!');
+
+      // Refresh students list
+      await dispatch(getRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      }));
+
+      // Add audit log for student deletion
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'delete',
+        heading: `Removed Student`,
+        status: 'success'
+      })).unwrap();
+
+      setShowIndividualDeleteModal(false);
+      setSelectedStudentToDelete(null);
+    } catch (error) {
+      toast.error(error?.message || 'Failed to delete student');
+    } finally {
+      setIsDeletingStudent(false);
+    }
+  };
 
   const handleResetSubject = async () => {
     try {
@@ -858,7 +906,7 @@ const TeacherSubjects_Page = () => {
         userId: currentUserId,
         action: 'delete',
         heading: `Removed Student`,
-        status: 'warning'
+        status: 'success'
       })).unwrap();
     } catch (error) {
       toast.error(error?.message || 'Failed to delete student');
@@ -893,7 +941,7 @@ const TeacherSubjects_Page = () => {
         userId: currentUserId,
         action: 'delete',
         heading: `Removed All Students`,
-        status: 'warning'
+        status: 'success'
       })).unwrap();
 
     } catch (error) {
@@ -1951,6 +1999,62 @@ const TeacherSubjects_Page = () => {
               >
                 <FiTrash2 className="h-3 w-3 mr-1" />
                 Delete All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Individual Student Delete Confirmation Modal */}
+      {showIndividualDeleteModal && selectedStudentToDelete && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-[150]">
+          <div className="bg-white rounded-lg w-full max-w-sm">
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h3 className="text-base font-medium text-gray-900">Remove Student</h3>
+            </div>
+            <div className="p-4">
+              <div className="flex items-center justify-center mb-3">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <FiUserMinus className="h-6 w-6 text-red-600" />
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 text-center">
+                Are you sure you want to remove{' '}
+                <span className="font-semibold text-gray-900">"{selectedStudentToDelete.studentName}"</span>?
+              </p>
+              <p className="text-xs text-gray-500 text-center mt-2">
+                Registration No: {selectedStudentToDelete.registrationNo}
+              </p>
+              <p className="text-xs text-red-500 text-center mt-3">
+                This action cannot be undone!
+              </p>
+            </div>
+            <div className="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setShowIndividualDeleteModal(false);
+                  setSelectedStudentToDelete(null);
+                }}
+                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDeleteStudent}
+                disabled={isDeletingStudent}
+                className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeletingStudent ? (
+                  <>
+                    <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1"></div>
+                    Removing...
+                  </>
+                ) : (
+                  <>
+                    <FiTrash2 className="h-3 w-3 mr-1" />
+                    Remove
+                  </>
+                )}
               </button>
             </div>
           </div>

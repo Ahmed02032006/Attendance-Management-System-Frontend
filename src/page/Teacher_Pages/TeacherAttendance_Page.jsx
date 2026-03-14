@@ -728,7 +728,7 @@ const TeacherAttendance_Page = () => {
             userId: userId,
             action: 'delete',
             heading: `Deleted Attendance Record`,
-            status: 'warning'
+            status: 'success'
           })).unwrap();
         })
         .catch((error) => {
