@@ -1104,7 +1104,7 @@ const AdminTeachers_Page = () => {
             </div>
 
             {/* Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)] bg-gray-50/50">
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-100px)] bg-gray-50/50">
               <div className="space-y-3">
                 {auditLogs.map((log) => (
                   <div
