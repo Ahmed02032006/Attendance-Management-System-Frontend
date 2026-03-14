@@ -10,6 +10,7 @@ import teacherReportReducer from "./Teacher-Slicer/Report-Slicer.js";
 // ===== >
 import adminTeacherReducer from "./Admin-Slicer/Teacher-Slicer.js";
 import adminTrashReducer from "./Admin-Slicer/Trash-Slicer.js";
+import adminAuditLogReducer from "./Admin-Slicer/AuditLog-Slicer.js";
 // ===== >
 import studentSubjectReducer from "./Student-Slicer/Subject-Slicer.js";
 
@@ -27,6 +28,7 @@ const store = configureStore({
     // ===== >
     adminTeacher: adminTeacherReducer,
     adminTrash: adminTrashReducer,
+    adminAuditLog: adminAuditLogReducer,
   },
 });
 
