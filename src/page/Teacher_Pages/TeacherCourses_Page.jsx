@@ -47,6 +47,7 @@ import {
   updateRegisteredStudent
 } from '../../store/Teacher-Slicer/Subject-Slicer.js'
 import { moveToTrash } from '../../store/Admin-Slicer/Trash-Slicer.js'
+import { createAuditLog } from '../../store/Admin-Slicer/AuditLog-Slicer.js'
 
 const TeacherSubjects_Page = () => {
   const dispatch = useDispatch()
@@ -367,6 +368,11 @@ const TeacherSubjects_Page = () => {
       resetForm()
       setClassSchedule([])
       toast.success('Course created successfully!')
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        heading: 'Course Created',
+        status: 'success'
+      })).unwrap();
     } catch (error) {
       toast.error(error?.message || 'Failed to create course')
     }
