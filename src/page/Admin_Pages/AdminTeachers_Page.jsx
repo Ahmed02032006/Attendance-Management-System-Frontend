@@ -14,11 +14,7 @@ import {
   updateTeacher,
   deleteTeacher
 } from '../../store/Admin-Slicer/Teacher-Slicer.js'
-import {
-  getTeacherAuditLogs,
-  getTeacherAuditSummary,
-  clearTeacherAuditLogs
-} from '../../store/Admin-Slicer/AuditLog-Slicer.js';
+
 
 const AdminTeachers_Page = () => {
   const dispatch = useDispatch()
@@ -37,13 +33,8 @@ const AdminTeachers_Page = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [teachersPerPage] = useState(5)
 
-  const [auditLogs, setAuditLogs] = useState([]);
-  const [auditLoading, setAuditLoading] = useState(false);
-  const [auditPagination, setAuditPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 0
-  });
+  // Mock audit logs data - in real app, this would come from an API
+  const [auditLogs, setAuditLogs] = useState([])
 
   const [teacherForm, setTeacherForm] = useState({
     userName: '',
@@ -53,27 +44,76 @@ const AdminTeachers_Page = () => {
     status: 'Active'
   })
 
-  // Fetch real audit logs from API
-  const fetchTeacherAuditLogs = async (teacherId, page = 1) => {
-    try {
-      setAuditLoading(true);
-      const result = await dispatch(getTeacherAuditLogs({
-        teacherId,
-        page,
-        limit: 20
-      })).unwrap();
-
-      if (result.success) {
-        setAuditLogs(result.data.logs);
-        setAuditPagination(result.data.pagination);
+  // Generate mock audit logs on component mount
+  useEffect(() => {
+    // Mock data for demonstration - replace with actual API call
+    const mockAuditLogs = [
+      {
+        id: 1,
+        action: 'create',
+        actionType: 'Course Created',
+        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'success'
+      },
+      {
+        id: 2,
+        action: 'edit',
+        actionType: 'Course Updated',
+        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'success'
+      },
+      {
+        id: 3,
+        action: 'delete',
+        actionType: 'Course Deleted',
+        timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'warning'
+      },
+      {
+        id: 4,
+        action: 'register',
+        actionType: 'Student Registered',
+        timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'success'
+      },
+      {
+        id: 5,
+        action: 'edit_schedule',
+        actionType: 'Schedule Updated',
+        timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+        status: 'success'
+      },
+      {
+        id: 6,
+        action: 'create_qr',
+        actionType: 'QR Code Created',
+        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+        status: 'success'
+      },
+      {
+        id: 7,
+        action: 'export_attendance',
+        actionType: 'Attendance Exported',
+        timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+        status: 'success'
+      },
+      {
+        id: 8,
+        action: 'generate_report',
+        actionType: 'Course Report Generated',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        status: 'success'
+      },
+      {
+        id: 9,
+        action: 'export_report',
+        actionType: 'Report Exported',
+        timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        status: 'success'
       }
-    } catch (error) {
-      console.error('Error fetching audit logs:', error);
-      toast.error('Failed to load audit logs');
-    } finally {
-      setAuditLoading(false);
-    }
-  };
+    ]
+    setAuditLogs(mockAuditLogs)
+  }, [])
 
   // Fetch teachers on component mount
   useEffect(() => {
@@ -249,10 +289,9 @@ const AdminTeachers_Page = () => {
   }
 
   const openAuditModal = (teacher) => {
-    setSelectedTeacher(teacher);
-    setShowAuditModal(true);
-    fetchTeacherAuditLogs(teacher._id);
-  };
+    setSelectedTeacher(teacher)
+    setShowAuditModal(true)
+  }
 
   const resetForm = () => {
     setTeacherForm({
@@ -311,7 +350,6 @@ const AdminTeachers_Page = () => {
 
   // Format audit timestamp
   const formatAuditTime = (timestamp) => {
-    if (!timestamp) return 'N/A';
     const date = new Date(timestamp);
     const now = new Date();
     const diffMs = now - date;
@@ -335,7 +373,6 @@ const AdminTeachers_Page = () => {
 
   // Format full date for display
   const formatFullDate = (timestamp) => {
-    if (!timestamp) return 'N/A';
     const date = new Date(timestamp);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -1056,89 +1093,60 @@ const AdminTeachers_Page = () => {
 
             {/* Content */}
             <div className="p-5 overflow-y-auto max-h-[calc(80vh-120px)] bg-gray-100">
-              {auditLoading ? (
-                <div className="flex justify-center items-center h-40">
-                  <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  {auditLogs.map((log) => (
-                    <div
-                      key={log._id}
-                      className="group bg-white rounded-xl p-4 shadow-xs hover:shadow-md transition-all duration-200 border border-gray-100 hover:border-gray-200"
-                    >
-                      {/* Top row: Action type and date */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className={`
-                p-2 rounded-lg transition-colors
-                ${log.action === 'create' ? 'bg-emerald-50 text-emerald-600' :
-                              log.action === 'edit' || log.action === 'edit_schedule' ? 'bg-blue-50 text-blue-600' :
-                                log.action === 'delete' ? 'bg-rose-50 text-rose-600' :
-                                  log.action === 'register' ? 'bg-violet-50 text-violet-600' :
-                                    log.action === 'create_qr' ? 'bg-indigo-50 text-indigo-600' :
-                                      log.action === 'export_attendance' || log.action === 'export_report' ? 'bg-amber-50 text-amber-600' :
-                                        log.action === 'generate_report' ? 'bg-cyan-50 text-cyan-600' : 'bg-gray-50 text-gray-600'}
-              `}>
-                            {getActionIcon(log.action)}
-                          </div>
-                          <div>
-                            <span className="text-sm font-medium text-gray-900">
-                              {log.actionType}
-                            </span>
-                            <p className="text-xs text-gray-500 mt-0.5 max-w-md truncate">
-                              {log.heading}
-                            </p>
-                          </div>
+              <div className="space-y-2.5">
+                {auditLogs.map((log, index) => (
+                  <div
+                    key={log.id}
+                    className="group bg-white rounded-xl p-4 shadow-xs hover:shadow-md transition-all duration-200 border border-gray-100 hover:border-gray-200"
+                  >
+                    {/* Top row: Action type and date */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`
+                    p-2 rounded-lg transition-colors
+                    ${log.action === 'create' ? 'bg-emerald-50 text-emerald-600' :
+                            log.action === 'edit' || log.action === 'edit_schedule' ? 'bg-blue-50 text-blue-600' :
+                              log.action === 'delete' ? 'bg-rose-50 text-rose-600' :
+                                log.action === 'register' ? 'bg-violet-50 text-violet-600' :
+                                  log.action === 'create_qr' ? 'bg-indigo-50 text-indigo-600' :
+                                    log.action === 'export_attendance' || log.action === 'export_report' ? 'bg-amber-50 text-amber-600' :
+                                      log.action === 'generate_report' ? 'bg-cyan-50 text-cyan-600' : 'bg-gray-50 text-gray-600'}
+                  `}>
+                          {getActionIcon(log.action)}
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className={`
-                text-xs px-2.5 py-1 rounded-full font-medium
-                ${log.status === 'success' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50' :
-                              log.status === 'warning' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50' :
-                                'bg-rose-50 text-rose-700 ring-1 ring-rose-200/50'}
-              `}>
-                            {log.status}
+                        <div>
+                          <span className="text-sm font-medium text-gray-900">
+                            {log.actionType}
                           </span>
-                          <span
-                            className="text-xs text-gray-400 font-medium whitespace-nowrap bg-gray-50 px-2 py-1 rounded-full ring-1 ring-gray-200/50"
-                            title={formatFullDate(log.timestamp)}
-                          >
-                            <FiClock className="h-3 w-3 inline mr-1 -mt-0.5" />
-                            {formatAuditTime(log.timestamp)}
-                          </span>
+                          <p className="text-xs text-gray-500 mt-0.5 max-w-md truncate">
+                            {log.heading}
+                          </p>
                         </div>
                       </div>
+                      <div className="flex items-center gap-3">
+                        <span className={`
+                    text-xs px-2.5 py-1 rounded-full font-medium
+                    ${log.status === 'success' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50' :
+                            log.status === 'warning' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50' :
+                              'bg-rose-50 text-rose-700 ring-1 ring-rose-200/50'}
+                  `}>
+                          {log.status}
+                        </span>
+                        <span
+                          className="text-xs text-gray-400 font-medium whitespace-nowrap bg-gray-50 px-2 py-1 rounded-full ring-1 ring-gray-200/50"
+                          title={formatFullDate(log.timestamp)}
+                        >
+                          <FiClock className="h-3 w-3 inline mr-1 -mt-0.5" />
+                          {formatAuditTime(log.timestamp)}
+                        </span>
+                      </div>
                     </div>
-                  ))}
-
-                  {/* Pagination */}
-                  {auditPagination.totalPages > 1 && (
-                    <div className="flex justify-center items-center gap-2 mt-4 pt-2">
-                      <button
-                        onClick={() => fetchTeacherAuditLogs(selectedTeacher._id, auditPagination.currentPage - 1)}
-                        disabled={auditPagination.currentPage === 1}
-                        className="p-2 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <FiChevronLeft className="h-4 w-4" />
-                      </button>
-                      <span className="text-sm text-gray-600">
-                        Page {auditPagination.currentPage} of {auditPagination.totalPages}
-                      </span>
-                      <button
-                        onClick={() => fetchTeacherAuditLogs(selectedTeacher._id, auditPagination.currentPage + 1)}
-                        disabled={auditPagination.currentPage === auditPagination.totalPages}
-                        className="p-2 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <FiChevronRight className="h-4 w-4" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
 
               {/* Empty State */}
-              {!auditLoading && auditLogs.length === 0 && (
+              {auditLogs.length === 0 && (
                 <div className="text-center py-16 bg-white rounded-xl border border-gray-100">
                   <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-gray-200">
                     <FiClock className="h-8 w-8 text-gray-400" />

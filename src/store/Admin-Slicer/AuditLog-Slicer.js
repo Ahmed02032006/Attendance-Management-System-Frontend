@@ -14,15 +14,38 @@ const initialState = {
     itemsPerPage: 20
   },
   isLoading: false,
+  isCreating: false,
   error: null
 };
+
+// Create a new audit log
+export const createAuditLog = createAsyncThunk(
+  "auditLogs/create",
+  async (logData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/audit/logs`,
+        logData
+      );
+
+      if (response.status !== 201) {
+        return rejectWithValue(response.data);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error creating audit log:", error);
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 
 // Get all audit logs (admin view)
 export const getAllAuditLogs = createAsyncThunk(
   "auditLogs/getAll",
   async ({ page = 1, limit = 20, teacherId, action, status, startDate, endDate } = {}, { rejectWithValue }) => {
     try {
-      let url = `${API_BASE_URL}/auditLog/logs?page=${page}&limit=${limit}`;
+      let url = `${API_BASE_URL}/audit/logs?page=${page}&limit=${limit}`;
       
       if (teacherId) url += `&teacherId=${teacherId}`;
       if (action) url += `&action=${action}`;
@@ -49,7 +72,7 @@ export const getTeacherAuditLogs = createAsyncThunk(
   "auditLogs/getByTeacher",
   async ({ teacherId, page = 1, limit = 20, action, status, startDate, endDate }, { rejectWithValue }) => {
     try {
-      let url = `${API_BASE_URL}/auditLog/logs/teacher/${teacherId}?page=${page}&limit=${limit}`;
+      let url = `${API_BASE_URL}/audit/logs/teacher/${teacherId}?page=${page}&limit=${limit}`;
       
       if (action) url += `&action=${action}`;
       if (status) url += `&status=${status}`;
@@ -75,7 +98,7 @@ export const getTeacherAuditSummary = createAsyncThunk(
   "auditLogs/getTeacherSummary",
   async (teacherId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/auditLog/logs/teacher/${teacherId}/summary`);
+      const response = await axios.get(`${API_BASE_URL}/audit/logs/teacher/${teacherId}/summary`);
       
       if (response.status !== 200) {
         return rejectWithValue(response.data);
@@ -105,6 +128,23 @@ const auditLogSlicer = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Create Audit Log
+      .addCase(createAuditLog.pending, (state) => {
+        state.isCreating = true;
+        state.error = null;
+      })
+      .addCase(createAuditLog.fulfilled, (state, action) => {
+        state.isCreating = false;
+        // Optionally add the new log to the beginning of the list
+        if (action.payload.data) {
+          state.auditLogs.unshift(action.payload.data);
+        }
+      })
+      .addCase(createAuditLog.rejected, (state, action) => {
+        state.isCreating = false;
+        state.error = action.payload;
+      })
+
       // Get All Audit Logs
       .addCase(getAllAuditLogs.pending, (state) => {
         state.isLoading = true;
