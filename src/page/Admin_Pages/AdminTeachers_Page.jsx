@@ -4,8 +4,8 @@ import HeaderComponent from '../../components/HeaderComponent'
 import { 
   FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight, 
   FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers, FiClock, 
-  FiBookOpen, FiActivity, FiUserPlus, FiCalendar, FiCamera, 
-  FiDownload, FiFileText, FiBarChart2 
+  FiActivity, FiUserPlus, FiCalendar, FiCamera, 
+  FiDownload, FiBarChart2 
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
@@ -52,9 +52,6 @@ const AdminTeachers_Page = () => {
         action: 'create',
         actionType: 'Course Created',
         heading: 'Created Mathematics 101 course',
-        courseName: 'Mathematics 101',
-        teacherName: 'John Doe',
-        teacherEmail: 'john.doe@example.com',
         timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
         status: 'success'
       },
@@ -63,9 +60,6 @@ const AdminTeachers_Page = () => {
         action: 'edit',
         actionType: 'Course Updated',
         heading: 'Updated Physics Advanced curriculum',
-        courseName: 'Physics Advanced',
-        teacherName: 'Jane Smith',
-        teacherEmail: 'jane.smith@example.com',
         timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
         status: 'success'
       },
@@ -74,9 +68,6 @@ const AdminTeachers_Page = () => {
         action: 'delete',
         actionType: 'Course Deleted',
         heading: 'Deleted Chemistry Lab course',
-        courseName: 'Chemistry Lab',
-        teacherName: 'Robert Johnson',
-        teacherEmail: 'robert.j@example.com',
         timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
         status: 'warning'
       },
@@ -85,72 +76,48 @@ const AdminTeachers_Page = () => {
         action: 'register',
         actionType: 'Student Registered',
         heading: 'Registered 5 students in English Literature',
-        courseName: 'English Literature',
-        teacherName: 'Emily Brown',
-        teacherEmail: 'emily.b@example.com',
         timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        details: 'Added 5 new students to the course'
+        status: 'success'
       },
       {
         id: 5,
         action: 'edit_schedule',
         actionType: 'Schedule Updated',
         heading: 'Updated class schedule for History 201',
-        courseName: 'History 201',
-        teacherName: 'Michael Wilson',
-        teacherEmail: 'michael.w@example.com',
         timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        details: 'Changed class timings from 10 AM to 11 AM'
+        status: 'success'
       },
       {
         id: 6,
         action: 'create_qr',
         actionType: 'QR Code Created',
         heading: 'Created attendance QR for Computer Science',
-        courseName: 'Computer Science',
-        teacherName: 'David Lee',
-        teacherEmail: 'david.l@example.com',
         timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        details: 'Generated QR code for today\'s attendance'
+        status: 'success'
       },
       {
         id: 7,
         action: 'export_attendance',
         actionType: 'Attendance Exported',
         heading: 'Exported attendance record for Mathematics 101',
-        courseName: 'Mathematics 101',
-        teacherName: 'John Doe',
-        teacherEmail: 'john.doe@example.com',
         timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        details: 'Exported attendance for last 30 days'
+        status: 'success'
       },
       {
         id: 8,
         action: 'generate_report',
         actionType: 'Course Report Generated',
         heading: 'Generated performance report for Physics Advanced',
-        courseName: 'Physics Advanced',
-        teacherName: 'Jane Smith',
-        teacherEmail: 'jane.smith@example.com',
         timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        details: 'Generated mid-term performance report'
+        status: 'success'
       },
       {
         id: 9,
         action: 'export_report',
         actionType: 'Report Exported',
         heading: 'Exported course report for English Literature',
-        courseName: 'English Literature',
-        teacherName: 'Emily Brown',
-        teacherEmail: 'emily.b@example.com',
         timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-        status: 'success',
-        details: 'Exported as PDF format'
+        status: 'success'
       }
     ]
     setAuditLogs(mockAuditLogs)
@@ -442,21 +409,21 @@ const AdminTeachers_Page = () => {
   const getActionBadgeColor = (action) => {
     switch (action) {
       case 'create':
-        return 'bg-green-100 text-green-800 border-green-200'
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200'
       case 'edit':
       case 'edit_schedule':
         return 'bg-blue-100 text-blue-800 border-blue-200'
       case 'delete':
-        return 'bg-red-100 text-red-800 border-red-200'
+        return 'bg-rose-100 text-rose-800 border-rose-200'
       case 'register':
-        return 'bg-purple-100 text-purple-800 border-purple-200'
+        return 'bg-violet-100 text-violet-800 border-violet-200'
       case 'create_qr':
         return 'bg-indigo-100 text-indigo-800 border-indigo-200'
       case 'export_attendance':
       case 'export_report':
-        return 'bg-orange-100 text-orange-800 border-orange-200'
+        return 'bg-amber-100 text-amber-800 border-amber-200'
       case 'generate_report':
-        return 'bg-teal-100 text-teal-800 border-teal-200'
+        return 'bg-cyan-100 text-cyan-800 border-cyan-200'
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200'
     }
@@ -466,24 +433,24 @@ const AdminTeachers_Page = () => {
   const getActionIcon = (action) => {
     switch (action) {
       case 'create':
-        return <FiPlus className="h-3 w-3" />
+        return <FiPlus className="h-3.5 w-3.5" />
       case 'edit':
-        return <FiEdit className="h-3 w-3" />
+        return <FiEdit className="h-3.5 w-3.5" />
       case 'delete':
-        return <FiTrash2 className="h-3 w-3" />
+        return <FiTrash2 className="h-3.5 w-3.5" />
       case 'register':
-        return <FiUserPlus className="h-3 w-3" />
+        return <FiUserPlus className="h-3.5 w-3.5" />
       case 'edit_schedule':
-        return <FiCalendar className="h-3 w-3" />
+        return <FiCalendar className="h-3.5 w-3.5" />
       case 'create_qr':
-        return <FiCamera className="h-3 w-3" />
+        return <FiCamera className="h-3.5 w-3.5" />
       case 'export_attendance':
       case 'export_report':
-        return <FiDownload className="h-3 w-3" />
+        return <FiDownload className="h-3.5 w-3.5" />
       case 'generate_report':
-        return <FiBarChart2 className="h-3 w-3" />
+        return <FiBarChart2 className="h-3.5 w-3.5" />
       default:
-        return <FiActivity className="h-3 w-3" />
+        return <FiActivity className="h-3.5 w-3.5" />
     }
   }
 
@@ -491,13 +458,13 @@ const AdminTeachers_Page = () => {
   const getStatusBadgeColor = (status) => {
     switch (status) {
       case 'success':
-        return 'bg-green-100 text-green-800 border-green-200'
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200'
       case 'warning':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        return 'bg-amber-50 text-amber-700 border-amber-200'
       case 'error':
-        return 'bg-red-100 text-red-800 border-red-200'
+        return 'bg-rose-50 text-rose-700 border-rose-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-50 text-gray-700 border-gray-200'
     }
   }
 
@@ -1118,118 +1085,103 @@ const AdminTeachers_Page = () => {
         </div>
       )}
 
-      {/* Audit Log Modal - Updated without stats box */}
+      {/* Audit Log Modal - Clean and Decent UI */}
       {showAuditModal && selectedTeacher && (
-        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[85vh] overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <FiClock className="h-5 w-5 text-purple-600" />
+        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center shadow-sm">
+                    <FiClock className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800">Activity Logs</h3>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {selectedTeacher.userName}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Course Audit Logs</h3>
-                  <p className="text-sm text-gray-500">
-                    {selectedTeacher.userName} • {selectedTeacher.userEmail}
-                  </p>
-                </div>
+                <button
+                  onClick={() => setShowAuditModal(false)}
+                  className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
+                >
+                  <FiX className="h-5 w-5 text-gray-500" />
+                </button>
               </div>
-              <button
-                onClick={() => setShowAuditModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <FiX className="h-5 w-5" />
-              </button>
             </div>
             
-            <div className="p-6 overflow-y-auto max-h-[calc(85vh-120px)]">
-              {/* Filter Tabs */}
-              <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-3">
-                <button className="px-4 py-2 text-sm font-medium text-purple-600 border-b-2 border-purple-600">
-                  All Activities
-                </button>
-                <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300">
-                  Course Actions
-                </button>
-                <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300">
-                  Student Registrations
-                </button>
-                <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300">
-                  Attendance
-                </button>
-                <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300">
-                  Reports
-                </button>
-              </div>
-
-              {/* Audit Logs List */}
-              <div className="space-y-4">
-                {auditLogs.map((log) => (
+            {/* Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)] bg-gray-50/50">
+              <div className="space-y-3">
+                {auditLogs.map((log, index) => (
                   <div
                     key={log.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+                    className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border-l-4"
+                    style={{
+                      borderLeftColor: 
+                        log.action === 'create' ? '#10b981' :
+                        log.action === 'edit' ? '#3b82f6' :
+                        log.action === 'delete' ? '#ef4444' :
+                        log.action === 'register' ? '#8b5cf6' :
+                        log.action === 'create_qr' ? '#6366f1' :
+                        log.action === 'export_attendance' || log.action === 'export_report' ? '#f59e0b' :
+                        log.action === 'generate_report' ? '#06b6d4' : '#6b7280'
+                    }}
                   >
-                    {/* Header with Action Type, Status, and Date */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <span className={`px-3 py-1.5 text-xs font-semibold rounded-full inline-flex items-center ${getActionBadgeColor(log.action)}`}>
+                    {/* Top row: Action type and date */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="p-1.5 rounded-lg bg-gray-50">
                           {getActionIcon(log.action)}
-                          <span className="ml-1.5">{log.actionType}</span>
                         </span>
-                        <span className={`px-3 py-1.5 text-xs font-semibold rounded-full inline-flex items-center ${getStatusBadgeColor(log.status)}`}>
-                          {log.status}
+                        <span className="text-sm font-medium text-gray-700">
+                          {log.actionType}
                         </span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <FiClock className="h-3.5 w-3.5 mr-1.5" />
-                        <span title={formatFullDate(log.timestamp)}>
+                      <div className="flex items-center space-x-3">
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                          log.status === 'success' ? 'bg-emerald-50 text-emerald-700' :
+                          log.status === 'warning' ? 'bg-amber-50 text-amber-700' :
+                          'bg-rose-50 text-rose-700'
+                        }`}>
+                          {log.status}
+                        </span>
+                        <span className="text-xs text-gray-400 font-medium" title={formatFullDate(log.timestamp)}>
                           {formatAuditTime(log.timestamp)}
                         </span>
                       </div>
                     </div>
-
+                    
                     {/* Heading */}
-                    <h4 className="text-md font-medium text-gray-900 mb-2">
+                    <p className="text-gray-800 font-medium text-sm pl-8">
                       {log.heading}
-                    </h4>
-
-                    {/* Course and Teacher Details */}
-                    <div className="flex items-center text-sm text-gray-600">
-                      <FiBookOpen className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
-                      <span className="mr-3">{log.courseName}</span>
-                      <FiUser className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
-                      <span>{log.teacherName}</span>
-                    </div>
-
-                    {/* Additional Details if available */}
-                    {log.details && (
-                      <p className="mt-2 text-sm text-gray-500 bg-gray-50 p-2 rounded border border-gray-100">
-                        {log.details}
-                      </p>
-                    )}
+                    </p>
                   </div>
                 ))}
               </div>
 
-              {/* No Logs Message */}
+              {/* Empty State */}
               {auditLogs.length === 0 && (
-                <div className="text-center py-12">
-                  <FiClock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-lg font-medium text-gray-900">No audit logs found</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    No course activities have been recorded for this teacher
-                  </p>
+                <div className="text-center py-12 bg-white rounded-lg">
+                  <FiClock className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <p className="text-gray-500 font-medium">No activity logs found</p>
+                  <p className="text-sm text-gray-400 mt-1">Activities will appear here</p>
                 </div>
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end bg-gray-50">
-              <button
-                onClick={() => setShowAuditModal(false)}
-                className="px-4 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition-colors rounded-lg hover:bg-gray-200"
-              >
-                Close
-              </button>
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-white">
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowAuditModal(false)}
+                  className="px-5 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
