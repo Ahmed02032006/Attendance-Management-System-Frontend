@@ -1076,73 +1076,155 @@ const AdminTeachers_Page = () => {
         </div>
       )}
 
-      {/* Audit Log Modal - Clean and Decent UI */}
+      {/* Audit Log Modal - Enhanced Design */}
       {showAuditModal && selectedTeacher && (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
-            {/* Header */}
-            <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
-              <div className="flex items-center justify-between">
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden transform transition-all animate-slideUp">
+            {/* Header with Gradient Background */}
+            <div className="relative px-6 py-6 bg-gradient-to-r from-purple-600 to-purple-700">
+              {/* Decorative Elements */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-8 -mt-8"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-6 -mb-6"></div>
+
+              <div className="flex items-center justify-between relative z-10">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center shadow-sm">
-                    <FiClock className="h-6 w-6 text-purple-600" />
+                  <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg border border-white/30">
+                    <FiClock className="h-7 w-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800">Activity Logs</h3>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      {selectedTeacher.userName}
-                    </p>
+                    <h3 className="text-2xl font-bold text-white tracking-tight">Activity Timeline</h3>
+                    <div className="flex items-center mt-1.5 space-x-2">
+                      <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                        <span className="text-white font-semibold text-sm">
+                          {getAvatarLetter(selectedTeacher.userName)}
+                        </span>
+                      </div>
+                      <p className="text-white/90 font-medium">
+                        {selectedTeacher.userName}
+                      </p>
+                    </div>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowAuditModal(false)}
-                  className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
+                  className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all border border-white/30 group"
                 >
-                  <FiX className="h-5 w-5 text-gray-500" />
+                  <FiX className="h-5 w-5 text-white group-hover:rotate-90 transition-transform" />
                 </button>
+              </div>
+
+              {/* Stats Summary */}
+              <div className="grid grid-cols-4 gap-3 mt-6 relative z-10">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/20">
+                  <p className="text-white/70 text-xs">Total</p>
+                  <p className="text-white font-bold text-lg">{auditLogs.length}</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/20">
+                  <p className="text-white/70 text-xs">Created</p>
+                  <p className="text-white font-bold text-lg">{auditLogs.filter(l => l.action === 'create').length}</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/20">
+                  <p className="text-white/70 text-xs">Updated</p>
+                  <p className="text-white font-bold text-lg">{auditLogs.filter(l => l.action === 'edit' || l.action === 'edit_schedule').length}</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/20">
+                  <p className="text-white/70 text-xs">Deleted</p>
+                  <p className="text-white font-bold text-lg">{auditLogs.filter(l => l.action === 'delete').length}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Search and Filter Bar */}
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+              <div className="flex items-center space-x-3">
+                <div className="flex-1 relative">
+                  <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="text"
+                    placeholder="Search activities..."
+                    className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all bg-white"
+                  />
+                </div>
+                <select className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 bg-white">
+                  <option value="all">All Actions</option>
+                  <option value="create">Created</option>
+                  <option value="edit">Updated</option>
+                  <option value="delete">Deleted</option>
+                  <option value="register">Registered</option>
+                  <option value="export">Exported</option>
+                </select>
               </div>
             </div>
 
             {/* Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(80vh-100px)] bg-gray-50/50">
+            <div className="p-6 overflow-y-auto max-h-[calc(85vh-280px)] bg-gradient-to-b from-gray-50/50 to-white">
               <div className="space-y-3">
-                {auditLogs.map((log) => (
+                {auditLogs.map((log, index) => (
                   <div
                     key={log.id}
-                    className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border-l-4"
-                    style={{
-                      borderLeftColor:
-                        log.action === 'create' ? '#10b981' :
-                          log.action === 'edit' ? '#3b82f6' :
-                            log.action === 'delete' ? '#ef4444' :
-                              log.action === 'register' ? '#8b5cf6' :
-                                log.action === 'edit_schedule' ? '#3b82f6' :
-                                  log.action === 'create_qr' ? '#6366f1' :
-                                    log.action === 'export_attendance' ? '#f59e0b' :
-                                      log.action === 'export_report' ? '#f59e0b' :
-                                        log.action === 'generate_report' ? '#06b6d4' : '#6b7280'
-                    }}
+                    className="group relative bg-white rounded-xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-purple-100"
                   >
-                    {/* Top row: Action type and date */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="p-1.5 rounded-lg bg-gray-50">
-                          {getActionIcon(log.action)}
-                        </span>
-                        <span className="text-sm font-medium text-gray-700">
-                          {log.actionType}
-                        </span>
+                    {/* Decorative Timeline Line */}
+                    {index < auditLogs.length - 1 && (
+                      <div className="absolute left-8 top-14 bottom-0 w-0.5 bg-gradient-to-b from-purple-200 to-transparent"></div>
+                    )}
+
+                    <div className="flex items-start space-x-4">
+                      {/* Icon with Gradient Background */}
+                      <div className={`
+                  relative z-10 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg
+                  ${log.action === 'create' ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' :
+                          log.action === 'edit' || log.action === 'edit_schedule' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
+                            log.action === 'delete' ? 'bg-gradient-to-br from-rose-500 to-rose-600' :
+                              log.action === 'register' ? 'bg-gradient-to-br from-violet-500 to-violet-600' :
+                                log.action === 'create_qr' ? 'bg-gradient-to-br from-indigo-500 to-indigo-600' :
+                                  log.action === 'export_attendance' || log.action === 'export_report' ? 'bg-gradient-to-br from-amber-500 to-amber-600' :
+                                    log.action === 'generate_report' ? 'bg-gradient-to-br from-cyan-500 to-cyan-600' :
+                                      'bg-gradient-to-br from-gray-500 to-gray-600'}
+                `}>
+                        {getActionIcon(log.action)}
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${log.status === 'success' ? 'bg-emerald-50 text-emerald-700' :
-                          log.status === 'warning' ? 'bg-amber-50 text-amber-700' :
-                            'bg-rose-50 text-rose-700'
-                          }`}>
-                          {log.status}
-                        </span>
-                        <span className="text-xs text-gray-400 font-medium" title={formatFullDate(log.timestamp)}>
-                          {formatAuditTime(log.timestamp)}
-                        </span>
+
+                      <div className="flex-1">
+                        {/* Top Row */}
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-sm font-semibold text-gray-900">
+                              {log.actionType}
+                            </span>
+                            <span className={`
+                        text-xs px-2.5 py-1 rounded-full font-medium shadow-sm
+                        ${log.status === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                log.status === 'warning' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                                  'bg-rose-50 text-rose-700 border border-rose-200'}
+                      `}>
+                              <span className="relative flex items-center">
+                                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${log.status === 'success' ? 'bg-emerald-500 animate-pulse' :
+                                    log.status === 'warning' ? 'bg-amber-500' : 'bg-rose-500'
+                                  }`}></span>
+                                {log.status}
+                              </span>
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs text-gray-400 font-medium bg-gray-100 px-2.5 py-1 rounded-full" title={formatFullDate(log.timestamp)}>
+                              <FiClock className="inline h-3 w-3 mr-1" />
+                              {formatAuditTime(log.timestamp)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Heading */}
+                        <p className="text-gray-700 text-sm pl-1 border-l-2 border-gray-200 pl-3">
+                          {log.heading}
+                        </p>
+
+                        {/* Action Buttons - Show on Hover */}
+                        <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="View Details">
+                            <FiActivity className="h-4 w-4 text-gray-400" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1151,20 +1233,34 @@ const AdminTeachers_Page = () => {
 
               {/* Empty State */}
               {auditLogs.length === 0 && (
-                <div className="text-center py-12 bg-white rounded-lg">
-                  <FiClock className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                  <p className="text-gray-500 font-medium">No activity logs found</p>
-                  <p className="text-sm text-gray-400 mt-1">Activities will appear here</p>
+                <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                  <div className="w-20 h-20 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <FiClock className="h-10 w-10 text-purple-300" />
+                  </div>
+                  <p className="text-gray-700 font-semibold text-lg">No activity logs found</p>
+                  <p className="text-sm text-gray-400 mt-1 max-w-sm mx-auto">
+                    Activities will appear here when teachers perform actions like creating courses, taking attendance, or generating reports
+                  </p>
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-white">
-              <div className="flex justify-end">
+            <div className="px-6 py-4 border-t border-gray-100 bg-white flex items-center justify-between">
+              <div className="text-xs text-gray-400">
+                Showing <span className="font-medium text-gray-700">{auditLogs.length}</span> activities
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => {/* Export functionality */ }}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors flex items-center space-x-2"
+                >
+                  <FiDownload className="h-4 w-4" />
+                  <span>Export</span>
+                </button>
                 <button
                   onClick={() => setShowAuditModal(false)}
-                  className="px-5 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="px-5 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-medium rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg shadow-purple-500/25 hover:shadow-xl"
                 >
                   Close
                 </button>
