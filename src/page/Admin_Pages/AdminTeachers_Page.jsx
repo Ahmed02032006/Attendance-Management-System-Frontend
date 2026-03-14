@@ -5,7 +5,7 @@ import {
   FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight,
   FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers, FiClock,
   FiActivity, FiUserPlus, FiCalendar, FiCamera,
-  FiDownload, FiBarChart2
+  FiDownload, FiBarChart2, FiFileText
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
@@ -639,11 +639,11 @@ const AdminTeachers_Page = () => {
                           <div className="flex justify-center space-x-2 lg:space-x-3">
                             <button
                               onClick={() => openAuditModal(teacher)}
-                              className="text-purple-600 hover:text-purple-900 transition-colors p-1"
+                              className="text-indigo-600 hover:text-purple-900 transition-colors p-1"
                               title="View Course Audit Logs"
                               disabled={isLoading}
                             >
-                              <FiClock className="h-4 w-4 lg:h-5 lg:w-5" />
+                              <FiFileText className="h-4 w-4 lg:h-5 lg:w-5" />
                             </button>
 
                             <button
