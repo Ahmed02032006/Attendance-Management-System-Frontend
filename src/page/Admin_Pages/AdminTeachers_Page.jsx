@@ -5,7 +5,7 @@ import {
   FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiChevronLeft, FiChevronRight,
   FiUser, FiMail, FiCheck, FiSlash, FiShield, FiUsers, FiClock,
   FiActivity, FiUserPlus, FiCalendar, FiCamera,
-  FiDownload, FiBarChart2, FiFileText, FiAlertCircle 
+  FiDownload, FiBarChart2, FiFileText, FiAlertCircle
 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import {
@@ -1141,29 +1141,32 @@ const AdminTeachers_Page = () => {
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          {/* Top row with action type and date/status */}
+                          <div className="flex items-center justify-between mb-1">
                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
                               {getActionText(log.action)}
                             </span>
-                            <span className={`
-                        text-xs px-2 py-0.5 rounded-full font-medium
-                        ${log.status === 'success' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50' :
-                                log.status === 'warning' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50' :
-                                  'bg-rose-50 text-rose-700 ring-1 ring-rose-200/50'}
-                      `}>
-                              {log.status}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              {/* Date first */}
+                              <span className="text-xs text-gray-400 flex items-center">
+                                <FiClock className="h-3 w-3 mr-1" />
+                                {formatAuditTime(log.timestamp)}
+                              </span>
+                              {/* Status on the right */}
+                              <span className={`
+                          text-xs px-2 py-0.5 rounded-full font-medium
+                          ${log.status === 'success' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50' :
+                                  log.status === 'warning' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50' :
+                                    'bg-rose-50 text-rose-700 ring-1 ring-rose-200/50'}
+                        `}>
+                                {log.status}
+                              </span>
+                            </div>
                           </div>
 
                           {/* Heading */}
-                          <p className="text-sm font-medium text-gray-900 mb-1">
+                          <p className="text-sm font-medium text-gray-900">
                             {log.heading}
-                          </p>
-
-                          {/* Date */}
-                          <p className="text-xs text-gray-400 flex items-center">
-                            <FiClock className="h-3 w-3 mr-1" />
-                            {formatAuditTime(log.timestamp)}
                           </p>
                         </div>
                       </div>
