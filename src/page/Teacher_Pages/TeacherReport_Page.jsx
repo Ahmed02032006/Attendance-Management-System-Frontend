@@ -21,6 +21,7 @@ import {
   clearStudentDetails
 } from '../../store/Teacher-Slicer/Report-Slicer.js'
 import { getSubjectsByUser } from '../../store/Teacher-Slicer/Subject-Slicer.js'
+import { createAuditLog } from '../../store/Admin-Slicer/AuditLog-Slicer.js'
 
 const TeacherCourseReport_Page = () => {
   const dispatch = useDispatch()
@@ -208,7 +209,7 @@ const TeacherCourseReport_Page = () => {
       teacherId: user?.id,
       fromDate,
       toDate
-    })).then((result) => {
+    })).then(async (result) => {
       setIsGenerating(false)
       console.log('API Response:', result)
       console.log('Payload data:', result.payload)
@@ -218,6 +219,16 @@ const TeacherCourseReport_Page = () => {
         const processed = processReportData(result.payload.data)
         setProcessedData(processed)
         setShowReport(true)
+
+        // Add audit log for report generation
+        const course = subjects.find(s => s.id === selectedCourse);
+        await dispatch(createAuditLog({
+          userId: user?.id,
+          action: 'generate_report',
+          heading: `Generated attendance report for ${course?.title || 'course'} (${fromDate} to ${toDate})`,
+          status: 'success'
+        })).unwrap();
+
         toast.success('Report generated successfully')
       } else {
         toast.error(result.payload?.message || 'Failed to generate report')
@@ -284,8 +295,18 @@ const TeacherCourseReport_Page = () => {
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
+    
+    // Add audit log for report export
+    dispatch(createAuditLog({
+      userId: user?.id,
+      action: 'export_report',
+      heading: `Exported attendance report for ${subjectDetails.title} (${dateRange.fromDate} to ${dateRange.toDate})`,
+      status: 'success'
+    })).unwrap();
+
     a.download = `attendance_report_${subjectDetails.code}_${dateRange.fromDate}_to_${dateRange.toDate}.csv`
     a.click()
+
     toast.success('Report exported successfully')
   }
 

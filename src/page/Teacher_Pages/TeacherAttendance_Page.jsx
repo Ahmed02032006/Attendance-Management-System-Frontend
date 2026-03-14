@@ -27,6 +27,7 @@ import {
   createAttendance
 } from '../../store/Teacher-Slicer/Attendance-Slicer.js'
 import { getRegisteredStudents } from '../../store/Teacher-Slicer/Subject-Slicer.js'
+import { createAuditLog } from '../../store/Admin-Slicer/AuditLog-Slicer.js'
 
 const TeacherAttendance_Page = () => {
   const dispatch = useDispatch()
@@ -497,7 +498,7 @@ const TeacherAttendance_Page = () => {
   };
 
   // Function to generate QR
-  const handleQRGeneration = (isInitial = false) => {
+  const handleQRGeneration = async (isInitial = false) => {
     if (!attendanceForm.subject || !attendanceForm.uniqueCode) {
       toast.error('Please fill all fields');
       return;
@@ -524,6 +525,16 @@ const TeacherAttendance_Page = () => {
 
     setCurrentQrCode(url.toString());
     setQrExpiryTime(expiryTime);
+
+    // Add audit log for QR creation
+    const subject = subjectsWithAttendance.find(s => s.id === attendanceForm.subject);
+    await dispatch(createAuditLog({
+      userId: userId,
+      action: 'create_qr',
+      heading: `Generated QR code for ${subject?.title} - ${selectedSchedule.day} ${selectedSchedule.startTime}`,
+      status: 'success'
+    })).unwrap();
+
 
     if (isInitial) {
       toast.success('QR code generated successfully!', { autoClose: 2000 });
@@ -620,11 +631,21 @@ const TeacherAttendance_Page = () => {
     console.log('Manual attendance payload:', attendanceRecord);
 
     dispatch(createAttendance(attendanceRecord))
-      .then((res) => {
+      .then(async (res) => {
         console.log('Attendance response:', res);
 
         // Check if the payload exists and has success property
         if (res.payload && res.payload.success === true) {
+
+          // Add audit log for manual attendance
+          const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+          await dispatch(createAuditLog({
+            userId: userId,
+            action: 'create',
+            heading: `Marked manual attendance for ${manualAttendanceForm.studentName} (${manualAttendanceForm.rollNo}) in ${subject?.title}`,
+            status: 'success'
+          })).unwrap();
+
           toast.success('Manual attendance marked successfully!');
 
           // Refresh the attendance data
@@ -695,8 +716,25 @@ const TeacherAttendance_Page = () => {
 
   const handleConfirmDelete = () => {
     if (attendanceToDelete) {
-      dispatch(deleteAttendance(attendanceToDelete)).unwrap();
-      toast.success(`Attendance record deleted successfully`);
+      dispatch(deleteAttendance(attendanceToDelete))
+        .unwrap()
+        .then(async () => {
+          // Find the student name from current attendance records
+          const student = currentAttendanceRecords.find(s => s.id === attendanceToDelete);
+
+          // Add audit log for attendance deletion
+          await dispatch(createAuditLog({
+            userId: userId,
+            action: 'delete',
+            heading: `Deleted attendance record for ${student?.studentName || 'student'}`,
+            status: 'warning'
+          })).unwrap();
+
+          toast.success(`Attendance record deleted successfully`);
+        })
+        .catch((error) => {
+          toast.error('Failed to delete attendance record');
+        });
     }
     setShowDeleteModal(false);
     setAttendanceToDelete(null);

@@ -364,16 +364,19 @@ const TeacherSubjects_Page = () => {
       }
 
       await dispatch(createSubject(formData)).unwrap()
+
+      // Add audit log for course creation
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'create',
+        heading: `Created new course: ${subjectForm.subjectTitle} (${subjectForm.subjectCode})`,
+        status: 'success'
+      })).unwrap();
+
       setShowCreateModal(false)
       resetForm()
       setClassSchedule([])
       toast.success('Course created successfully!')
-      await dispatch(createAuditLog({
-        userId: currentUserId,
-        action: 'create',
-        heading: 'Course Created',
-        status: 'success'
-      })).unwrap();
     } catch (error) {
       toast.error(error?.message || 'Failed to create course')
     }
@@ -405,16 +408,18 @@ const TeacherSubjects_Page = () => {
         formData: formData
       })).unwrap();
 
+      // Add audit log for course edit
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'edit',
+        heading: `Updated course: ${subjectForm.subjectTitle} (${subjectForm.subjectCode})`,
+        status: 'success'
+      })).unwrap();
+
       setShowEditModal(false)
       resetForm()
       setClassSchedule([])
       toast.success('Course updated successfully!')
-      await dispatch(createAuditLog({
-        userId: currentUserId,
-        action: 'edit',
-        heading: 'Course Updated',
-        status: 'success'
-      })).unwrap();
     } catch (error) {
       toast.error(error?.message || 'Failed to update course')
     }
@@ -432,16 +437,18 @@ const TeacherSubjects_Page = () => {
       // Then delete the subject from the active subjects list
       // await dispatch(deleteSubject(selectedSubject.id)).unwrap()
 
+      // Add audit log for course deletion
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'delete',
+        heading: `Deleted course: ${selectedSubject.title} (${selectedSubject.code})`,
+        status: 'warning'
+      })).unwrap();
+
       dispatch(getSubjectsByUser(currentUserId)).unwrap();
 
       setShowDeleteModal(false)
       toast.success('Course deleted successfully!')
-      await dispatch(createAuditLog({
-        userId: currentUserId,
-        action: 'delete',
-        heading: 'Course Deleted',
-        status: 'success'
-      })).unwrap();
     } catch (error) {
       toast.error(error?.message || 'Failed to delete course')
     }
@@ -610,6 +617,14 @@ const TeacherSubjects_Page = () => {
         students: importedStudents
       })).unwrap();
 
+      // Add audit log for bulk student registration
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'register',
+        heading: `Added ${importedStudents.length} students to course: ${selectedSubject.title}`,
+        status: 'success'
+      })).unwrap();
+
       toast.success(
         <div>
           <div className="font-medium">{importedStudents.length} students added successfully!</div>
@@ -680,6 +695,14 @@ const TeacherSubjects_Page = () => {
           studentName: individualStudent.studentName.trim(),
           discipline: individualStudent.discipline.trim()
         }]
+      })).unwrap();
+
+      // Add audit log for individual student registration
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'register',
+        heading: `Added student ${individualStudent.studentName} (${individualStudent.registrationNo}) to course: ${selectedSubject.title}`,
+        status: 'success'
       })).unwrap();
 
       toast.success('Student added successfully!');
@@ -773,6 +796,14 @@ const TeacherSubjects_Page = () => {
         }
       })).unwrap();
 
+      // Add audit log for student update
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'edit',
+        heading: `Updated student ${editFormData.studentName} (${editFormData.registrationNo}) in course: ${selectedSubject.title}`,
+        status: 'success'
+      })).unwrap();
+
       toast.success('Student updated successfully!');
 
       // Clear edit state
@@ -809,6 +840,14 @@ const TeacherSubjects_Page = () => {
         teacherId: currentUserId
       })).unwrap();
 
+      // Add audit log for student deletion
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'delete',
+        heading: `Removed student from course: ${selectedSubject.title}`,
+        status: 'warning'
+      })).unwrap();
+
       toast.success('Student removed successfully!');
 
       dispatch(getRegisteredStudents({
@@ -833,6 +872,14 @@ const TeacherSubjects_Page = () => {
       await dispatch(deleteAllRegisteredStudents({
         subjectId: selectedSubject.id,
         teacherId: currentUserId
+      })).unwrap();
+
+      // Add audit log for deleting all students
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'delete',
+        heading: `Deleted all students (${registeredStudents?.registeredStudents?.length || 0}) from course: ${selectedSubject.title}`,
+        status: 'warning'
       })).unwrap();
 
       toast.success('All students deleted successfully!');
