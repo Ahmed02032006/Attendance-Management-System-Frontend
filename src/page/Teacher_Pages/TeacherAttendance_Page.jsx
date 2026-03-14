@@ -531,7 +531,7 @@ const TeacherAttendance_Page = () => {
     await dispatch(createAuditLog({
       userId: userId,
       action: 'create_qr',
-      heading: `Generated QR code for ${subject?.title} - ${selectedSchedule.day} ${selectedSchedule.startTime}`,
+      heading: `Generated QR Code`,
       status: 'success'
     })).unwrap();
 
@@ -638,15 +638,14 @@ const TeacherAttendance_Page = () => {
         if (res.payload && res.payload.success === true) {
 
           // Add audit log for manual attendance
-          const subject = subjectsWithAttendance.find(s => s.id === selectedSubject);
+          toast.success('Manual attendance marked successfully!');
+          
           await dispatch(createAuditLog({
             userId: userId,
             action: 'create',
-            heading: `Marked manual attendance for ${manualAttendanceForm.studentName} (${manualAttendanceForm.rollNo}) in ${subject?.title}`,
+            heading: `Marked Manual Attendance`,
             status: 'success'
           })).unwrap();
-
-          toast.success('Manual attendance marked successfully!');
 
           // Refresh the attendance data
           dispatch(getSubjectsWithAttendance(userId)).unwrap()
@@ -722,15 +721,15 @@ const TeacherAttendance_Page = () => {
           // Find the student name from current attendance records
           const student = currentAttendanceRecords.find(s => s.id === attendanceToDelete);
 
+          toast.success(`Attendance record deleted successfully`);
+          
           // Add audit log for attendance deletion
           await dispatch(createAuditLog({
             userId: userId,
             action: 'delete',
-            heading: `Deleted attendance record for ${student?.studentName || 'student'}`,
+            heading: `Deleted Attendance Record`,
             status: 'warning'
           })).unwrap();
-
-          toast.success(`Attendance record deleted successfully`);
         })
         .catch((error) => {
           toast.error('Failed to delete attendance record');
