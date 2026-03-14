@@ -15,7 +15,8 @@ import {
   deleteTeacher
 } from '../../store/Admin-Slicer/Teacher-Slicer.js'
 import {
-  getTeacherAuditLogs
+  getTeacherAuditLogs,
+  deleteAllTeacherAuditLogs
 } from '../../store/Admin-Slicer/AuditLog-Slicer.js';
 
 
@@ -44,6 +45,9 @@ const AdminTeachers_Page = () => {
     totalItems: 0
   });
 
+  const [showDeleteAllAuditModal, setShowDeleteAllAuditModal] = useState(false);
+  const [isDeletingAllAudit, setIsDeletingAllAudit] = useState(false);
+
   const [teacherForm, setTeacherForm] = useState({
     userName: '',
     userEmail: '',
@@ -71,6 +75,31 @@ const AdminTeachers_Page = () => {
       toast.error('Failed to load audit logs');
     } finally {
       setAuditLoading(false);
+    }
+  };
+
+  const handleDeleteAllAuditLogs = async () => {
+    if (!selectedTeacher) return;
+
+    try {
+      setIsDeletingAllAudit(true);
+      const result = await dispatch(deleteAllTeacherAuditLogs(selectedTeacher._id)).unwrap();
+
+      if (result.success) {
+        toast.success(result.message || 'All audit logs deleted successfully');
+        setAuditLogs([]); // Clear the logs in local state
+        setAuditPagination({
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0
+        });
+        setShowDeleteAllAuditModal(false);
+      }
+    } catch (error) {
+      console.error('Error deleting audit logs:', error);
+      toast.error(error?.message || 'Failed to delete audit logs');
+    } finally {
+      setIsDeletingAllAudit(false);
     }
   };
 
@@ -1050,7 +1079,7 @@ const AdminTeachers_Page = () => {
         </div>
       )}
 
-      {/* Audit Log Modal - Polished Design */}
+      {/* Audit Log Modal */}
       {showAuditModal && selectedTeacher && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden border border-gray-100">
@@ -1069,12 +1098,25 @@ const AdminTeachers_Page = () => {
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowAuditModal(false)}
-                  className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-all text-gray-400 hover:text-gray-600"
-                >
-                  <FiX className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Delete All Button - Only show if there are logs */}
+                  {auditLogs.length > 0 && (
+                    <button
+                      onClick={() => setShowDeleteAllAuditModal(true)}
+                      className="px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1.5"
+                      title="Delete all audit logs"
+                    >
+                      <FiTrash2 className="h-3.5 w-3.5" />
+                      Delete All ({auditLogs.length})
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowAuditModal(false)}
+                    className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-all text-gray-400 hover:text-gray-600"
+                  >
+                    <FiX className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1085,7 +1127,7 @@ const AdminTeachers_Page = () => {
                   <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {auditLogs.map((log) => (
                     <div
                       key={log._id}
@@ -1175,6 +1217,74 @@ const AdminTeachers_Page = () => {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete All Audit Logs Confirmation Modal */}
+      {showDeleteAllAuditModal && selectedTeacher && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-100 bg-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                  <FiTrash2 className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">Delete All Audit Logs</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {selectedTeacher.userName}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <div className="text-center mb-4">
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <FiAlertCircle className="h-8 w-8 text-red-500" />
+                </div>
+                <p className="text-sm text-gray-700 mb-2">
+                  Are you sure you want to delete all audit logs?
+                </p>
+                <p className="text-xs text-gray-500">
+                  This will permanently remove <span className="font-semibold text-red-600">{auditLogs.length}</span> activity log{auditLogs.length !== 1 ? 's' : ''} for this teacher.
+                </p>
+                <p className="text-xs text-red-500 font-medium mt-3">
+                  This action cannot be undone!
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteAllAuditModal(false)}
+                disabled={isDeletingAllAudit}
+                className="px-4 py-2 text-xs font-medium text-gray-600 hover:text-gray-800 bg-white hover:bg-gray-100 rounded-lg transition-colors ring-1 ring-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAllAuditLogs}
+                disabled={isDeletingAllAudit}
+                className="px-4 py-2 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeletingAllAudit ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <FiTrash2 className="h-3.5 w-3.5" />
+                    Delete All
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

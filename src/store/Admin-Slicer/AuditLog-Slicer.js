@@ -46,7 +46,7 @@ export const getTeacherAuditLogs = createAsyncThunk(
       const response = await axios.get(
         `${API_BASE_URL}/audit/logs/teacher/${teacherId}?page=${page}&limit=${limit}`
       );
-      
+
       if (response.status !== 200) {
         return rejectWithValue(response.data);
       }
@@ -54,6 +54,27 @@ export const getTeacherAuditLogs = createAsyncThunk(
       return response.data;
     } catch (error) {
       console.error("Error fetching teacher audit logs:", error);
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+// Delete all audit logs for a teacher
+export const deleteAllTeacherAuditLogs = createAsyncThunk(
+  "auditLogs/deleteAllByTeacher",
+  async (teacherId, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(
+        `${API_BASE_URL}/audit/logs/teacher/${teacherId}`
+      );
+
+      if (response.status !== 200) {
+        return rejectWithValue(response.data);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting teacher audit logs:", error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -99,6 +120,26 @@ const auditLogSlicer = createSlice({
         };
       })
       .addCase(getTeacherAuditLogs.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      
+      // Delete All Teacher Audit Logs
+      .addCase(deleteAllTeacherAuditLogs.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteAllTeacherAuditLogs.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.teacherAuditLogs = [];
+        state.pagination = {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0,
+          itemsPerPage: 20
+        };
+      })
+      .addCase(deleteAllTeacherAuditLogs.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });
