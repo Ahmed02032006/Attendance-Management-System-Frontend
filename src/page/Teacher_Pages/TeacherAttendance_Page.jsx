@@ -637,15 +637,7 @@ const TeacherAttendance_Page = () => {
         // Check if the payload exists and has success property
         if (res.payload && res.payload.success === true) {
 
-          // Add audit log for manual attendance
           toast.success('Manual attendance marked successfully!');
-          
-          await dispatch(createAuditLog({
-            userId: userId,
-            action: 'create',
-            heading: `Marked Manual Attendance`,
-            status: 'success'
-          })).unwrap();
 
           // Refresh the attendance data
           dispatch(getSubjectsWithAttendance(userId)).unwrap()
@@ -655,6 +647,14 @@ const TeacherAttendance_Page = () => {
             .catch((refreshError) => {
               console.error('Error refreshing attendance:', refreshError);
             });
+
+          // Add audit log for manual attendance
+          await dispatch(createAuditLog({
+            userId: userId,
+            action: 'create',
+            heading: `Marked Manual Attendance`,
+            status: 'success'
+          })).unwrap();
 
           // Reset form
           setManualAttendanceForm({
@@ -722,7 +722,7 @@ const TeacherAttendance_Page = () => {
           const student = currentAttendanceRecords.find(s => s.id === attendanceToDelete);
 
           toast.success(`Attendance record deleted successfully`);
-          
+
           // Add audit log for attendance deletion
           await dispatch(createAuditLog({
             userId: userId,

@@ -803,14 +803,6 @@ const TeacherSubjects_Page = () => {
       })).unwrap();
 
       toast.success('Student updated successfully!');
-      
-      // Add audit log for student update
-      await dispatch(createAuditLog({
-        userId: currentUserId,
-        action: 'edit',
-        heading: 'Updated Student Record',
-        status: 'success'
-      })).unwrap();
 
       // Clear edit state
       setEditingStudent(null);
@@ -825,6 +817,14 @@ const TeacherSubjects_Page = () => {
         subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
+
+      // Add audit log for student update
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'edit',
+        heading: 'Updated Student Record',
+        status: 'success'
+      })).unwrap();
     } catch (error) {
       console.error('Update error:', error);
       toast.error(error?.message || 'Failed to update student');
@@ -845,9 +845,14 @@ const TeacherSubjects_Page = () => {
         studentId: studentId,
         teacherId: currentUserId
       })).unwrap();
- 
+
       toast.success('Student removed successfully!');
-     
+
+      dispatch(getRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      }));
+
       // Add audit log for student deletion
       await dispatch(createAuditLog({
         userId: currentUserId,
@@ -855,11 +860,6 @@ const TeacherSubjects_Page = () => {
         heading: `Removed Student`,
         status: 'warning'
       })).unwrap();
-
-      dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id,
-        teacherId: currentUserId
-      }));
     } catch (error) {
       toast.error(error?.message || 'Failed to delete student');
     }
@@ -880,6 +880,14 @@ const TeacherSubjects_Page = () => {
         teacherId: currentUserId
       })).unwrap();
 
+      toast.success('All students deleted successfully!');
+      setShowDeleteAllModal(false);
+
+      await dispatch(getRegisteredStudents({
+        subjectId: selectedSubject.id,
+        teacherId: currentUserId
+      }));
+
       // Add audit log for deleting all students
       await dispatch(createAuditLog({
         userId: currentUserId,
@@ -888,13 +896,6 @@ const TeacherSubjects_Page = () => {
         status: 'warning'
       })).unwrap();
 
-      toast.success('All students deleted successfully!');
-      setShowDeleteAllModal(false);
-
-      await dispatch(getRegisteredStudents({
-        subjectId: selectedSubject.id,
-        teacherId: currentUserId
-      }));
     } catch (error) {
       console.error('Delete all students error:', error);
       toast.error(error?.message || 'Failed to delete students');
