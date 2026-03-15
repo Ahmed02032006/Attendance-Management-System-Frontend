@@ -656,7 +656,7 @@ const AdminTeachers_Page = () => {
                           <div className="flex justify-center space-x-2 lg:space-x-3">
                             <button
                               onClick={() => openAuditModal(teacher)}
-                              className="text-indigo-600 hover:text-purple-900 transition-colors p-1"
+                              className="text-green-700 hover:text-green-800 transition-colors p-1"
                               title="View Course Audit Logs"
                               disabled={isLoading}
                             >
@@ -1088,7 +1088,7 @@ const AdminTeachers_Page = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 bg-purple-50 rounded-xl flex items-center justify-center ring-1 ring-purple-100">
-                    <FiClock className="h-5 w-5 text-indigo-600" />
+                    <FiClock className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Activity Logs</h3>
@@ -1124,7 +1124,7 @@ const AdminTeachers_Page = () => {
             <div className="p-5 overflow-y-auto max-h-[calc(80vh-120px)] bg-gray-100">
               {auditLoading ? (
                 <div className="flex justify-center items-center h-40">
-                  <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                  <div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
                 </div>
               ) : (
                 <div className="space-y-2.5">
