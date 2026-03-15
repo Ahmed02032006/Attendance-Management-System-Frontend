@@ -218,8 +218,8 @@ const AdminTrash_Page = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderComponent
-        heading="Trash Management"
-        subHeading="Recover or permanently delete items"
+        heading="Discarded Courses"
+        subHeading="Recover or permanently delete discarded courses"
         role="admin"
       />
 
@@ -441,7 +441,7 @@ const AdminTrash_Page = () => {
                     <td colSpan="9" className="px-4 py-8 text-center">
                       <div className="text-gray-500">
                         <FiTrash2 className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-sm">Trash is empty</p>
+                        <p className="text-sm">No discarded courses</p>
                       </div>
                     </td>
                   </tr>
