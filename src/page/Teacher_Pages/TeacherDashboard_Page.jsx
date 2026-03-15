@@ -59,8 +59,6 @@ const TeacherDashboard_Page = () => {
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [selectedSchedule, setSelectedSchedule] = useState(null)
   const [currentDate, setCurrentDate] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [recordsPerPage] = useState(5)
   const [dataLoaded, setDataLoaded] = useState(false)
 
   // Chat state variables
@@ -424,16 +422,6 @@ const TeacherDashboard_Page = () => {
   // Get current selected schedule details
   const currentSchedule = availableSchedules.find(s => s.id === selectedSchedule);
 
-  // Pagination
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = currentAttendanceRecords.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(currentAttendanceRecords.length / recordsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
-
   // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -456,17 +444,14 @@ const TeacherDashboard_Page = () => {
     const currentIndex = availableDates.indexOf(currentDate);
     if (direction === 'prev' && currentIndex < availableDates.length - 1) {
       setCurrentDate(availableDates[currentIndex + 1]);
-      setCurrentPage(1);
     } else if (direction === 'next' && currentIndex > 0) {
       setCurrentDate(availableDates[currentIndex - 1]);
-      setCurrentPage(1);
     }
   };
 
   // Handle subject selection
   const handleSubjectSelect = (subjectId) => {
     setSelectedSubject(subjectId);
-    setCurrentPage(1);
 
     const subjectAttendance = dashboardAttendance[subjectId];
     if (subjectAttendance && Object.keys(subjectAttendance).length > 0) {
@@ -489,7 +474,6 @@ const TeacherDashboard_Page = () => {
   // Handle schedule selection
   const handleScheduleSelect = (e) => {
     setSelectedSchedule(e.target.value);
-    setCurrentPage(1);
   };
 
   // Subject color
@@ -793,7 +777,7 @@ const TeacherDashboard_Page = () => {
                   </div>
                 )}
 
-                {/* Attendance Table */}
+                {/* Attendance Table - Scrollable without Pagination */}
                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                   <div className="p-4 border-b border-gray-200">
                     <div className="flex items-center justify-between">
@@ -814,76 +798,46 @@ const TeacherDashboard_Page = () => {
                     </div>
                   </div>
 
-                  {currentRecords.length > 0 ? (
-                    <>
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
-                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  {currentAttendanceRecords.length > 0 ? (
+                    <div className="max-h-[350px] overflow-y-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 sticky top-0 z-10">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {currentAttendanceRecords.map((record, index) => (
+                            <tr key={record.id || index} className="hover:bg-gray-50">
+                              <td className="px-4 py-3 whitespace-nowrap">
+                                <span className="text-sm text-gray-900">{record.studentName}</span>
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">
+                                {record.rollNo}
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">
+                                {record.time ? (
+                                  <div className="flex items-center justify-center">
+                                    <FiClock className="h-3 w-3 mr-1 text-gray-400" />
+                                    {record.time}
+                                  </div>
+                                ) : (
+                                  '—'
+                                )}
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap text-center">
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(record.status)}`}>
+                                  {record.status || 'Present'}
+                                </span>
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200">
-                            {currentRecords.map((record, index) => (
-                              <tr key={record.id || index} className="hover:bg-gray-50">
-                                <td className="px-4 py-3 whitespace-nowrap">
-                                  <span className="text-sm text-gray-900">{record.studentName}</span>
-                                </td>
-                                <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">
-                                  {record.rollNo}
-                                </td>
-                                <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">
-                                  {record.time ? (
-                                    <div className="flex items-center justify-center">
-                                      <FiClock className="h-3 w-3 mr-1 text-gray-400" />
-                                      {record.time}
-                                    </div>
-                                  ) : (
-                                    '—'
-                                  )}
-                                </td>
-                                <td className="px-4 py-3 whitespace-nowrap text-center">
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(record.status)}`}>
-                                    {record.status || 'Present'}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-
-                      {/* Pagination */}
-                      {totalPages > 1 && (
-                        <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
-                          <span className="text-xs text-gray-500">
-                            Showing {indexOfFirstRecord + 1}-{Math.min(indexOfLastRecord, currentAttendanceRecords.length)} of {currentAttendanceRecords.length}
-                          </span>
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={prevPage}
-                              disabled={currentPage === 1}
-                              className="px-3 py-1 text-xs border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40"
-                            >
-                              Previous
-                            </button>
-                            <span className="text-xs text-gray-600">
-                              Page {currentPage} of {totalPages}
-                            </span>
-                            <button
-                              onClick={nextPage}
-                              disabled={currentPage === totalPages}
-                              className="px-3 py-1 text-xs border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40"
-                            >
-                              Next
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   ) : (
                     <div className="p-8 text-center">
                       <FiEye className="h-8 w-8 text-gray-300 mx-auto mb-2" />
