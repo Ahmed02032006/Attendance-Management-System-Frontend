@@ -410,26 +410,6 @@ const TeacherDashboardLayout = () => {
               </div>
             ) : (
               <div className="flex justify-center">
-                {/* {hasValidProfilePicture() ? (
-                  // Show profile picture thumbnail in collapsed sidebar
-                  <div className="relative">
-                    <img
-                      src={user.profilePicture}
-                      alt="User Avatar"
-                      className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
-                      onError={handleImageError}
-                    />
-                    <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
-                  </div>
-                ) : (
-                  // Show fallback avatar in collapsed sidebar
-                  <div className="h-9 w-9 rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
-                    <span className="text-white font-semibold text-sm">
-                      {getInitial()}
-                    </span>
-                    <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
-                  </div>
-                )} */}
                 <button
                   className="p-2 rounded-full hover:bg-slate-200 text-slate-500 hover:text-red-500 transition-colors duration-200"
                   title="Logout"
@@ -441,30 +421,30 @@ const TeacherDashboardLayout = () => {
             )}
           </div>
         </aside>
+      </div>
 
-        {/* Professional Footer Strip */}
-        <footer className="bg-white border-t border-slate-200 py-3 px-6 mt-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-2">
-            <div className="flex items-center space-x-2 text-sm text-slate-600">
-              <Code className="w-4 h-4 text-blue-500" />
-              <span>Designed & Developed with</span>
-              <Heart className="w-4 h-4 text-red-500 fill-current" />
-              <span>by</span>
-              <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                Muhammad Ahmed
-              </span>
+      {/* Main Content Area with Header Strip and Outlet */}
+      <main className="flex-1 overflow-x-hidden flex flex-col">
+        {/* Professional Header Strip */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 px-6 shadow-md">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 text-sm">
+              <Code className="w-4 h-4 text-blue-200" />
+              <span className="font-light">Enterprise Attendance Management System</span>
             </div>
-            
-            <div className="flex items-center space-x-4 text-xs text-slate-500">
+            <div className="flex items-center space-x-4 text-xs">
               <div className="flex items-center space-x-1">
-                <span>© {new Date().getFullYear()}</span>
-                <span className="font-medium text-slate-700">ATTMARK</span>
-                <span>| All rights reserved</span>
+                <span>Designed & Developed with</span>
+                <Heart className="w-3 h-3 text-red-300 fill-current animate-pulse" />
+                <span>by</span>
+                <span className="font-semibold text-white bg-white/20 px-2 py-0.5 rounded-full">
+                  Muhammad Ahmed
+                </span>
               </div>
-              <div className="hidden md:block w-px h-4 bg-slate-300"></div>
+              <div className="hidden md:block w-px h-4 bg-white/30"></div>
               <a 
                 href="mailto:m.ahmedofficial677@gmail.com"
-                className="flex items-center space-x-1 hover:text-blue-600 transition-colors group"
+                className="flex items-center space-x-1 hover:text-blue-200 transition-colors group"
               >
                 <svg className="w-3 h-3 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -473,12 +453,12 @@ const TeacherDashboardLayout = () => {
               </a>
             </div>
           </div>
-        </footer>
-      </div>
+        </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-x-hidden">
-        <Outlet />
+        {/* Page Content */}
+        <div className="flex-1">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
