@@ -40,6 +40,7 @@ const AdminTrash_Page = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [itemToActOn, setItemToActOn] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
   // Fetch trash items on component mount
   useEffect(() => {
@@ -156,19 +157,7 @@ const AdminTrash_Page = () => {
       toast.warning('No items selected');
       return;
     }
-
-    if (window.confirm(`Are you sure you want to permanently delete ${selectedItems.length} item(s)?`)) {
-      try {
-        for (const id of selectedItems) {
-          await dispatch(permanentDeleteFromTrash(id)).unwrap();
-        }
-        toast.success(`Deleted ${selectedItems.length} items`);
-        setSelectedItems([]);
-        loadTrashItems();
-      } catch (error) {
-        toast.error('Failed to delete some items');
-      }
-    }
+    setShowBulkDeleteModal(true);
   };
 
   const getExpiryStatusColor = (daysRemaining) => {
@@ -186,32 +175,18 @@ const AdminTrash_Page = () => {
     });
   };
 
-  const formatSchedule = (schedules) => {
-    if (!schedules || schedules.length === 0) return 'No schedule';
-
-    const convertTo12Hour = (time) => {
-      const [hour, minute] = time.split(':');
-      const hourInt = parseInt(hour);
-      const ampm = hourInt >= 12 ? 'PM' : 'AM';
-      const hour12 = hourInt % 12 || 12;
-      return `${hour12}:${minute} ${ampm}`;
-    };
-
-    const grouped = schedules.reduce((acc, curr) => {
-      if (!acc[curr.day]) {
-        acc[curr.day] = [];
+  const handleBulkDeleteConfirm = async () => {
+    try {
+      for (const id of selectedItems) {
+        await dispatch(permanentDeleteFromTrash(id)).unwrap();
       }
-      const startTime12 = convertTo12Hour(curr.startTime);
-      const endTime12 = convertTo12Hour(curr.endTime);
-      acc[curr.day].push(`${startTime12} - ${endTime12}`);
-      return acc;
-    }, {});
-
-    return Object.entries(grouped).map(([day, times]) => (
-      <div key={day} className="text-xs">
-        <span className="font-medium">{day.substring(0, 3)}:</span> {times.join(', ')}
-      </div>
-    ));
+      toast.success(`Deleted ${selectedItems.length} items`);
+      setSelectedItems([]);
+      setShowBulkDeleteModal(false);
+      loadTrashItems();
+    } catch (error) {
+      toast.error('Failed to delete some items');
+    }
   };
 
   // Pagination
@@ -621,7 +596,7 @@ const AdminTrash_Page = () => {
 
             {/* Scrollable Content Area */}
             <div className="flex-1 overflow-y-auto p-6">
-              
+
               {/* Two Column Layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column */}
@@ -865,6 +840,51 @@ const AdminTrash_Page = () => {
               >
                 <FiTrash2 className="h-4 w-4 mr-2" />
                 Delete Permanently
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FiTrash2 className="h-6 w-6 text-red-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-center mb-2">Bulk Delete Confirmation</h3>
+            <p className="text-sm text-gray-600 text-center mb-6">
+              Are you sure you want to permanently delete <span className="font-bold text-red-600">{selectedItems.length}</span> item(s)? This action cannot be undone.
+            </p>
+            <div className="bg-gray-50 rounded-lg p-3 mb-6">
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-600">Items to delete:</span>
+                <span className="font-medium text-red-600">{selectedItems.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Selected items:</span>
+                <span className="font-medium text-gray-700">
+                  {trashItems
+                    .filter(item => selectedItems.includes(item.id))
+                    .map(item => item.subject?.title)
+                    .slice(0, 3)
+                    .join(', ')}
+                  {selectedItems.length > 3 && ` +${selectedItems.length - 3} more`}
+                </span>
+              </div>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowBulkDeleteModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBulkDeleteConfirm}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete {selectedItems.length} Items
               </button>
             </div>
           </div>
