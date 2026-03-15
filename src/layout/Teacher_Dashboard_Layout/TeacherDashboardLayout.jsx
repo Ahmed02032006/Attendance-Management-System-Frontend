@@ -1,4 +1,4 @@
-import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, FileBarChart, MapPin, Menu, MessageSquare, UserCheck, Users, X, Code, Heart } from 'lucide-react';
+import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, FileBarChart, MapPin, Menu, MessageSquare, UserCheck, Users, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -410,6 +410,26 @@ const TeacherDashboardLayout = () => {
               </div>
             ) : (
               <div className="flex justify-center">
+                {/* {hasValidProfilePicture() ? (
+                  // Show profile picture thumbnail in collapsed sidebar
+                  <div className="relative">
+                    <img
+                      src={user.profilePicture}
+                      alt="User Avatar"
+                      className="h-9 w-9 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                      onError={handleImageError}
+                    />
+                    <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                  </div>
+                ) : (
+                  // Show fallback avatar in collapsed sidebar
+                  <div className="h-9 w-9 rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 shadow-sm">
+                    <span className="text-white font-semibold text-sm">
+                      {getInitial()}
+                    </span>
+                    <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
+                  </div>
+                )} */}
                 <button
                   className="p-2 rounded-full hover:bg-slate-200 text-slate-500 hover:text-red-500 transition-colors duration-200"
                   title="Logout"
@@ -421,13 +441,6 @@ const TeacherDashboardLayout = () => {
             )}
           </div>
         </aside>
-      </div>
-
-      {/* Main Content Area with Outlet and Footer Strip */}
-      <main className="flex-1 overflow-x-hidden flex flex-col">
-        <div className="flex-1">
-          <Outlet />
-        </div>
         
         {/* Professional Footer Strip */}
         <footer className="bg-white border-t border-slate-200 py-3 px-6 mt-auto">
@@ -461,6 +474,11 @@ const TeacherDashboardLayout = () => {
             </div>
           </div>
         </footer>
+      </div>
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-x-hidden">
+        <Outlet />
       </main>
     </div>
   );
