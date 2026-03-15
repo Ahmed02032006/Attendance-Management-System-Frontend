@@ -636,7 +636,6 @@ const TeacherAttendance_Page = () => {
 
         // Check if the payload exists and has success property
         if (res.payload && res.payload.success === true) {
-
           toast.success('Manual attendance marked successfully!');
 
           // Refresh the attendance data
@@ -648,24 +647,17 @@ const TeacherAttendance_Page = () => {
               console.error('Error refreshing attendance:', refreshError);
             });
 
-            // Reset form
-            setManualAttendanceForm({
-              studentName: '',
-              rollNo: '',
-              discipline: '',
-              subjectId: '',
-              date: '',
-              time: '',
-              ipAddress: ''
-            });
+          // Reset form
+          setManualAttendanceForm({
+            studentName: '',
+            rollNo: '',
+            discipline: '',
+            subjectId: '',
+            date: '',
+            time: '',
+            ipAddress: ''
+          });
 
-            // Add audit log for manual attendance
-            await dispatch(createAuditLog({
-              userId: userId,
-              action: 'create',
-              heading: `Marked Manual Attendance`,
-              status: 'success'
-            })).unwrap();
         } else {
           // Handle error case
           const errorMessage = res.payload?.message || 'Failed to mark attendance';
@@ -685,7 +677,7 @@ const TeacherAttendance_Page = () => {
           toast.error('Failed to mark attendance');
         }
       })
-      .finally(() => {
+      .finally(async () => {
         setShowManualModal(false);
         setRollNoSearchTerm('');
 
@@ -699,6 +691,14 @@ const TeacherAttendance_Page = () => {
           time: '',
           ipAddress: ''
         });
+
+        // Add audit log for manual attendance
+        await dispatch(createAuditLog({
+          userId: userId,
+          action: 'create',
+          heading: `Marked Manual Attendance`,
+          status: 'success'
+        })).unwrap();
       });
   };
 
