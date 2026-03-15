@@ -799,7 +799,7 @@ const TeacherDashboard_Page = () => {
                   </div>
 
                   {currentAttendanceRecords.length > 0 ? (
-                    <div className="max-h-[250px] overflow-y-auto">
+                    <div className="max-h-[275px] overflow-y-auto">
                       <table className="w-full">
                         <thead className="bg-gray-50 sticky top-0 z-10">
                           <tr>
