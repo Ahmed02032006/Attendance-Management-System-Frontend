@@ -1,4 +1,4 @@
-import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, FileBarChart, MapPin, Menu, MessageSquare, UserCheck, Users, X } from 'lucide-react';
+import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, FileBarChart, MapPin, Menu, MessageSquare, UserCheck, Users, X, Code, Heart } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -441,7 +441,7 @@ const TeacherDashboardLayout = () => {
             )}
           </div>
         </aside>
-        
+
         {/* Professional Footer Strip */}
         <footer className="bg-white border-t border-slate-200 py-3 px-6 mt-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-2">
