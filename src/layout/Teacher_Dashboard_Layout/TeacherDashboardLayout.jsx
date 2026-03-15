@@ -1,4 +1,4 @@
-import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, FileBarChart, MapPin, Menu, MessageSquare, UserCheck, Users, X, Code, Heart } from 'lucide-react';
+import { Bell, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, GraduationCap, LayoutDashboard, LogOut, FileBarChart, MapPin, Menu, MessageSquare, UserCheck, Users, X, Code, Award, Mail } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -63,10 +63,10 @@ const TeacherDashboardLayout = () => {
   useEffect(() => {
     if (user?.status === 'Inactive') {
       setShowInactiveModal(true);
-    } else {
+    } else if (user?.id) {
       dispatch(updateTeacherLastLogin({ userId: user.id }));
     }
-  }, [user]);
+  }, [user, dispatch]);
 
   const tabs = [
     {
@@ -240,8 +240,8 @@ const TeacherDashboardLayout = () => {
 
       {/* Sidebar Container */}
       <div className={`${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"} 
-				md:translate-x-0 fixed md:relative inset-y-0 left-0 z-40 transition-transform duration-300
-				${sidebarOpen ? 'w-64' : 'w-20'}`}>
+        md:translate-x-0 fixed md:relative inset-y-0 left-0 z-40 transition-transform duration-300
+        ${sidebarOpen ? 'w-64' : 'w-20'}`}>
 
         {/* Sidebar with toggle button */}
         <aside
@@ -298,7 +298,7 @@ const TeacherDashboardLayout = () => {
                       setMobileMenuOpen(false);
                     }}
                     className={`group relative cursor-pointer flex items-center ${sidebarOpen ? 'justify-start' : 'justify-center'} w-full p-2 rounded-sm transition-all duration-200
-											${isActive(path)
+                      ${isActive(path)
                         ? "text-slate-700 font-medium bg-slate-200"
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-600"
                       }`}
@@ -315,7 +315,7 @@ const TeacherDashboardLayout = () => {
                     <button
                       onClick={() => toggleSubItems(name)}
                       className={`group relative cursor-pointer flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'} w-full p-2 rounded-sm transition-all duration-200
-												${isActive(path)
+                        ${isActive(path)
                           ? "text-slate-700 font-medium bg-slate-200"
                           : "text-slate-600 hover:bg-slate-50 hover:text-slate-600"
                         }`}
@@ -345,12 +345,12 @@ const TeacherDashboardLayout = () => {
                               setMobileMenuOpen(false);
                             }}
                             className={`
-															w-full text-left py-2 px-4 text-sm rounded transition-all duration-200
-															${isActive(subItem.path)
+                              w-full text-left py-2 px-4 text-sm rounded transition-all duration-200
+                              ${isActive(subItem.path)
                                 ? "bg-slate-200 text-slate-800 font-medium"
                                 : "text-slate-600 hover:bg-slate-100"
                               }
-														`}
+                            `}
                           >
                             <div className="flex items-center">
                               <ChevronRight className={`w-3 h-3 mr-2 ${isActive(subItem.path) ? 'text-slate-700' : 'text-slate-500'}`} />
@@ -423,43 +423,39 @@ const TeacherDashboardLayout = () => {
         </aside>
       </div>
 
-      {/* Main Content Area with Header Strip and Outlet */}
-      <main className="flex-1 overflow-x-hidden flex flex-col">
-        {/* Professional Header Strip */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 px-6 shadow-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-sm">
-              <Code className="w-4 h-4 text-blue-200" />
-              <span className="font-light">Enterprise Attendance Management System</span>
+      {/* Main Content Area with Footer at Bottom */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        <main className="flex-1 overflow-x-hidden">
+          <Outlet />
+        </main>
+        
+        {/* Professional Footer Strip - Now at the very bottom of the page */}
+        <footer className="bg-white border-t border-slate-200 py-3 px-6 w-full">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+            <div className="flex items-center space-x-2">
+              <Award className="w-4 h-4 text-blue-500" />
+              <span className="font-medium text-slate-700">ATTMARK</span>
+              <span>•</span>
+              <span>Enterprise Attendance Management System</span>
             </div>
-            <div className="flex items-center space-x-4 text-xs">
+            
+            <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1">
-                <span>Designed & Developed with</span>
-                <Heart className="w-3 h-3 text-red-300 fill-current animate-pulse" />
-                <span>by</span>
-                <span className="font-semibold text-white bg-white/20 px-2 py-0.5 rounded-full">
-                  Muhammad Ahmed
-                </span>
+                <span>© {new Date().getFullYear()}</span>
+                <span>All rights reserved</span>
               </div>
-              <div className="hidden md:block w-px h-4 bg-white/30"></div>
+              <div className="hidden md:block w-px h-3 bg-slate-300"></div>
               <a 
                 href="mailto:m.ahmedofficial677@gmail.com"
-                className="flex items-center space-x-1 hover:text-blue-200 transition-colors group"
+                className="flex items-center space-x-1 hover:text-blue-600 transition-colors group"
               >
-                <svg className="w-3 h-3 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>Contact Developer</span>
+                <Mail className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                <span>Technical Support</span>
               </a>
             </div>
           </div>
-        </div>
-
-        {/* Page Content */}
-        <div className="flex-1">
-          <Outlet />
-        </div>
-      </main>
+        </footer>
+      </div>
     </div>
   );
 };
