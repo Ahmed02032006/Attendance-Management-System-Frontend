@@ -421,7 +421,14 @@ const TeacherDashboardLayout = () => {
             )}
           </div>
         </aside>
+      </div>
 
+      {/* Main Content Area with Footer */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        <main className="flex-1 overflow-x-hidden">
+          <Outlet />
+        </main>
+        
         {/* Professional Footer Strip - Now at the very bottom of the page */}
         <footer className="bg-white border-t border-slate-200 py-3 px-6 w-full">
           <div className="flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-slate-500">
@@ -448,13 +455,6 @@ const TeacherDashboardLayout = () => {
             </div>
           </div>
         </footer>
-      </div>
-
-      {/* Main Content Area with Footer at Bottom */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        <main className="flex-1 overflow-x-hidden">
-          <Outlet />
-        </main>
       </div>
     </div>
   );
