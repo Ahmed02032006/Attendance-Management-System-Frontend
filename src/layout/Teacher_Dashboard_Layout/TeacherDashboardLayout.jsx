@@ -223,7 +223,7 @@ const TeacherDashboardLayout = () => {
   }
 
   return (
-    <div className="flex h-4/5 bg-slate-50">
+    <div className="flex h-3/5 bg-slate-50">
       {/* Mobile menu button */}
       <div className="md:hidden fixed top-4 right-4 z-50">
         <button
