@@ -429,36 +429,38 @@ const TeacherDashboardLayout = () => {
           <main className="flex-1 overflow-y-auto">
             <Outlet />
           </main>
+
+          {/* Professional Footer Strip - Now at the very bottom of the page */}
+          <footer className="bg-white border-t border-slate-200 py-2 px-6 w-full shrink-0">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-1 text-xs text-slate-500">
+              <div className="flex items-center space-x-2">
+                <Award className="w-3.5 h-3.5 text-blue-500" />
+                <span className="font-medium text-slate-700">ATTMARK</span>
+                <span>•</span>
+                <span>Enterprise Attendance Management System</span>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-1">
+                  <span>© {new Date().getFullYear()}</span>
+                  <span>All rights reserved</span>
+                </div>
+                <div className="hidden md:block w-px h-3 bg-slate-300"></div>
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=m.ahmedofficial677@gmail.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-1 hover:text-blue-600 transition-colors group"
+                >
+                  <Mail className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                  <span>Technical Support</span>
+                </a>
+              </div>
+            </div>
+          </footer>
         </div>
       </div>
-      {/* Professional Footer Strip - Now at the very bottom of the page */}
-      <footer className="bg-white border-t border-slate-200 py-2 px-6 w-full shrink-0">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-1 text-xs text-slate-500">
-          <div className="flex items-center space-x-2">
-            <Award className="w-3.5 h-3.5 text-blue-500" />
-            <span className="font-medium text-slate-700">ATTMARK</span>
-            <span>•</span>
-            <span>Enterprise Attendance Management System</span>
-          </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1">
-              <span>© {new Date().getFullYear()}</span>
-              <span>All rights reserved</span>
-            </div>
-            <div className="hidden md:block w-px h-3 bg-slate-300"></div>
-            <a
-              href="https://mail.google.com/mail/?view=cm&fs=1&to=m.ahmedofficial677@gmail.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-1 hover:text-blue-600 transition-colors group"
-            >
-              <Mail className="w-3 h-3 group-hover:scale-110 transition-transform" />
-              <span>Technical Support</span>
-            </a>
-          </div>
-        </div>
-      </footer>
     </div >
   );
 };
