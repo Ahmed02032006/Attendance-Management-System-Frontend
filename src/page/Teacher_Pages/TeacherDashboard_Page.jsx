@@ -603,7 +603,7 @@ const TeacherDashboard_Page = () => {
           ) : (
             <p className="text-2xl font-semibold text-gray-900">{value}</p>
           )}
-          {subtext && !loading && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
+          {/* {subtext && !loading && <p className="text-xs text-gray-400 mt-1">{subtext}</p>} */}
         </div>
         <div className={`w-10 h-10 ${bgColor} rounded-lg flex items-center justify-center`}>
           <Icon className={`h-5 w-5 ${color}`} />
@@ -912,7 +912,7 @@ const TeacherDashboard_Page = () => {
 
       {/* Chat Box */}
       {isChatOpen && (
-        <div className="fixed bottom-20 right-6 z-50 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+        <div className="fixed bottom-36 right-6 z-50 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
           {/* Chat Header */}
           <div className="bg-blue-600 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center space-x-2">
