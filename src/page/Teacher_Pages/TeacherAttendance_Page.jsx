@@ -648,24 +648,24 @@ const TeacherAttendance_Page = () => {
               console.error('Error refreshing attendance:', refreshError);
             });
 
-          // Add audit log for manual attendance
-          await dispatch(createAuditLog({
-            userId: userId,
-            action: 'create',
-            heading: `Marked Manual Attendance`,
-            status: 'success'
-          })).unwrap();
+            // Reset form
+            setManualAttendanceForm({
+              studentName: '',
+              rollNo: '',
+              discipline: '',
+              subjectId: '',
+              date: '',
+              time: '',
+              ipAddress: ''
+            });
 
-          // Reset form
-          setManualAttendanceForm({
-            studentName: '',
-            rollNo: '',
-            discipline: '',
-            subjectId: '',
-            date: '',
-            time: '',
-            ipAddress: ''
-          });
+            // Add audit log for manual attendance
+            await dispatch(createAuditLog({
+              userId: userId,
+              action: 'create',
+              heading: `Marked Manual Attendance`,
+              status: 'success'
+            })).unwrap();
         } else {
           // Handle error case
           const errorMessage = res.payload?.message || 'Failed to mark attendance';
