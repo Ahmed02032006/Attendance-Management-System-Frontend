@@ -71,10 +71,6 @@ const TeacherSubjects_Page = () => {
   const [selectedStudentToDelete, setSelectedStudentToDelete] = useState(null);
   const [isDeletingStudent, setIsDeletingStudent] = useState(false);
 
-  // Cooldown state
-  const [actionCooldown, setActionCooldown] = useState(false);
-  const [cooldownTimer, setCooldownTimer] = useState(null);
-
   // For class schedule with time picker interface
   const [classSchedule, setClassSchedule] = useState([])
   const [currentSchedule, setCurrentSchedule] = useState({
@@ -123,32 +119,6 @@ const TeacherSubjects_Page = () => {
 
   const { user } = useSelector((state) => state.auth)
   const currentUserId = user?.id
-
-  // Cooldown function
-  const startCooldown = () => {
-    setActionCooldown(true);
-    
-    // Clear any existing timer
-    if (cooldownTimer) {
-      clearTimeout(cooldownTimer);
-    }
-    
-    // Set new timer to end cooldown after 5 seconds
-    const timer = setTimeout(() => {
-      setActionCooldown(false);
-    }, 5000);
-    
-    setCooldownTimer(timer);
-  };
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (cooldownTimer) {
-        clearTimeout(cooldownTimer);
-      }
-    };
-  }, [cooldownTimer]);
 
   useEffect(() => {
     if (currentUserId) {
@@ -399,6 +369,7 @@ const TeacherSubjects_Page = () => {
 
       await dispatch(createSubject(formData)).unwrap()
 
+
       setShowCreateModal(false)
       resetForm()
       setClassSchedule([])
@@ -412,9 +383,6 @@ const TeacherSubjects_Page = () => {
         heading: `Created Course`,
         status: 'success'
       })).unwrap();
-
-      // Start cooldown after action
-      startCooldown();
 
     } catch (error) {
       toast.error(error?.message || 'Failed to create course')
@@ -460,9 +428,6 @@ const TeacherSubjects_Page = () => {
         status: 'success'
       })).unwrap();
 
-      // Start cooldown after action
-      startCooldown();
-
     } catch (error) {
       toast.error(error?.message || 'Failed to update course')
     }
@@ -492,9 +457,6 @@ const TeacherSubjects_Page = () => {
         heading: `Deleted Course`,
         status: 'success'
       })).unwrap();
-
-      // Start cooldown after action
-      startCooldown();
 
     } catch (error) {
       toast.error(error?.message || 'Failed to delete course')
@@ -538,10 +500,6 @@ const TeacherSubjects_Page = () => {
 
       setShowIndividualDeleteModal(false);
       setSelectedStudentToDelete(null);
-
-      // Start cooldown after action
-      startCooldown();
-
     } catch (error) {
       toast.error(error?.message || 'Failed to delete student');
     } finally {
@@ -554,10 +512,6 @@ const TeacherSubjects_Page = () => {
       await dispatch(resetSubjectAttendance(selectedSubject.id)).unwrap()
       setShowResetModal(false)
       toast.success('Course attendance records cleared successfully!')
-
-      // Start cooldown after action
-      startCooldown();
-
     } catch (error) {
       toast.error(error?.message || 'Failed to reset course attendance')
     }
@@ -738,10 +692,6 @@ const TeacherSubjects_Page = () => {
         subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
-
-      // Start cooldown after action
-      startCooldown();
-
     } catch (error) {
       toast.error(error?.message || 'Failed to add students');
     }
@@ -823,10 +773,6 @@ const TeacherSubjects_Page = () => {
         subjectId: selectedSubject.id,
         teacherId: currentUserId
       }));
-
-      // Start cooldown after action
-      startCooldown();
-
     } catch (error) {
       toast.error(error?.message || 'Failed to add student');
     } finally {
@@ -927,10 +873,6 @@ const TeacherSubjects_Page = () => {
         heading: 'Updated Student Record',
         status: 'success'
       })).unwrap();
-
-      // Start cooldown after action
-      startCooldown();
-
     } catch (error) {
       console.error('Update error:', error);
       toast.error(error?.message || 'Failed to update student');
@@ -966,10 +908,6 @@ const TeacherSubjects_Page = () => {
         heading: `Removed Student`,
         status: 'success'
       })).unwrap();
-
-      // Start cooldown after action
-      startCooldown();
-
     } catch (error) {
       toast.error(error?.message || 'Failed to delete student');
     }
@@ -1005,9 +943,6 @@ const TeacherSubjects_Page = () => {
         heading: `Removed All Students`,
         status: 'success'
       })).unwrap();
-
-      // Start cooldown after action
-      startCooldown();
 
     } catch (error) {
       console.error('Delete all students error:', error);
@@ -1225,11 +1160,11 @@ const TeacherSubjects_Page = () => {
 
             <button
               onClick={openCreateModal}
-              disabled={isLoading || actionCooldown}
-              className={`bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors flex items-center whitespace-nowrap ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isLoading}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors flex items-center whitespace-nowrap disabled:opacity-50"
             >
               <FiPlus className="h-4 w-4 mr-1.5" />
-              {actionCooldown ? 'Please wait...' : 'New Course'}
+              New Course
             </button>
           </div>
         </div>
@@ -1319,8 +1254,7 @@ const TeacherSubjects_Page = () => {
                         <div className="flex items-center justify-center space-x-2">
                           <button
                             onClick={() => handleStudentManagement(subject)}
-                            disabled={actionCooldown}
-                            className={`p-1.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className="p-1.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
                             title="Manage Students"
                           >
                             <FiUsers className="h-4 w-4" />
@@ -1334,24 +1268,21 @@ const TeacherSubjects_Page = () => {
                           </button>
                           <button
                             onClick={() => openEditModal(subject)}
-                            disabled={actionCooldown}
-                            className={`p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                             title="Edit Course"
                           >
                             <FiEdit className="h-4 w-4" />
                           </button>
                           {/* <button
                             onClick={() => openResetModal(subject)}
-                            disabled={actionCooldown}
-                            className={`p-1.5 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className="p-1.5 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors"
                             title="Reset Attendance"
                           >
                             <FiRefreshCcw className="h-4 w-4" />
                           </button> */}
                           <button
                             onClick={() => openDeleteModal(subject)}
-                            disabled={actionCooldown}
-                            className={`p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                             title="Delete Course"
                           >
                             <FiTrash2 className="h-4 w-4" />
@@ -1615,10 +1546,9 @@ const TeacherSubjects_Page = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={actionCooldown}
-                  className={`px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium"
                 >
-                  {actionCooldown ? 'Please wait...' : 'Create Course'}
+                  Create Course
                 </button>
               </div>
             </form>
@@ -1956,10 +1886,9 @@ const TeacherSubjects_Page = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={actionCooldown}
-                  className={`px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium"
                 >
-                  {actionCooldown ? 'Please wait...' : 'Update Course'}
+                  Update Course
                 </button>
               </div>
             </form>
@@ -1992,10 +1921,9 @@ const TeacherSubjects_Page = () => {
               </button>
               <button
                 onClick={handleDeleteSubject}
-                disabled={actionCooldown}
-                className={`px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium"
               >
-                {actionCooldown ? 'Please wait...' : 'Delete'}
+                Delete
               </button>
             </div>
           </div>
@@ -2027,10 +1955,9 @@ const TeacherSubjects_Page = () => {
               </button>
               <button
                 onClick={handleResetSubject}
-                disabled={actionCooldown}
-                className={`px-3 py-1.5 bg-yellow-600 text-white text-xs rounded-md hover:bg-yellow-700 font-medium ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className="px-3 py-1.5 bg-yellow-600 text-white text-xs rounded-md hover:bg-yellow-700 font-medium"
               >
-                {actionCooldown ? 'Please wait...' : 'Reset'}
+                Reset
               </button>
             </div>
           </div>
@@ -2068,11 +1995,10 @@ const TeacherSubjects_Page = () => {
               </button>
               <button
                 onClick={handleDeleteAllStudents}
-                disabled={actionCooldown}
-                className={`px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium flex items-center ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium flex items-center"
               >
                 <FiTrash2 className="h-3 w-3 mr-1" />
-                {actionCooldown ? 'Please wait...' : 'Delete All'}
+                Delete All
               </button>
             </div>
           </div>
@@ -2115,8 +2041,8 @@ const TeacherSubjects_Page = () => {
               </button>
               <button
                 onClick={handleConfirmDeleteStudent}
-                disabled={isDeletingStudent || actionCooldown}
-                className={`px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium flex items-center ${(isDeletingStudent || actionCooldown) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={isDeletingStudent}
+                className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isDeletingStudent ? (
                   <>
@@ -2126,7 +2052,7 @@ const TeacherSubjects_Page = () => {
                 ) : (
                   <>
                     <FiTrash2 className="h-3 w-3 mr-1" />
-                    {actionCooldown ? 'Please wait...' : 'Remove'}
+                    Remove
                   </>
                 )}
               </button>
@@ -2294,11 +2220,10 @@ const TeacherSubjects_Page = () => {
                   setImportedStudents([]);
                   setEditingStudent(null);
                 }}
-                disabled={actionCooldown}
                 className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeStudentTab === 'import'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  }`}
               >
                 <FiUpload className="h-4 w-4 inline mr-2" />
                 Import Students
@@ -2333,7 +2258,7 @@ const TeacherSubjects_Page = () => {
                             onChange={handleIndividualStudentChange}
                             placeholder="Registration Number *"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            disabled={isAddingStudent || actionCooldown}
+                            disabled={isAddingStudent}
                           />
                         </div>
                         <div className="flex-1">
@@ -2344,7 +2269,7 @@ const TeacherSubjects_Page = () => {
                             onChange={handleIndividualStudentChange}
                             placeholder="Student Name *"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            disabled={isAddingStudent || actionCooldown}
+                            disabled={isAddingStudent}
                           />
                         </div>
                         <div className="flex-1">
@@ -2355,14 +2280,14 @@ const TeacherSubjects_Page = () => {
                             onChange={handleIndividualStudentChange}
                             placeholder="Discipline *"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            disabled={isAddingStudent || actionCooldown}
+                            disabled={isAddingStudent}
                           />
                         </div>
                         <div>
                           <button
                             onClick={handleAddIndividualStudent}
-                            disabled={isAddingStudent || actionCooldown || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim() || !individualStudent.discipline.trim()}
-                            className={`h-full px-4 py-2 text-sm rounded-md font-medium transition-all flex items-center whitespace-nowrap ${(isAddingStudent || actionCooldown || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim() || !individualStudent.discipline.trim())
+                            disabled={isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim() || !individualStudent.discipline.trim()}
+                            className={`h-full px-4 py-2 text-sm rounded-md font-medium transition-all flex items-center whitespace-nowrap ${isAddingStudent || !individualStudent.registrationNo.trim() || !individualStudent.studentName.trim() || !individualStudent.discipline.trim()
                               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                               : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
                               }`}
@@ -2375,7 +2300,7 @@ const TeacherSubjects_Page = () => {
                             ) : (
                               <>
                                 <FiUserPlus className="h-4 w-4 mr-2" />
-                                {actionCooldown ? 'Please wait...' : 'Add'}
+                                Add
                               </>
                             )}
                           </button>
@@ -2399,11 +2324,10 @@ const TeacherSubjects_Page = () => {
                     {registeredStudents?.registeredStudents?.length > 0 && (
                       <button
                         onClick={openDeleteAllModal}
-                        disabled={actionCooldown}
-                        className={`flex items-center px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium"
                       >
                         <FiTrash2 className="h-3.5 w-3.5 mr-1.5" />
-                        {actionCooldown ? 'Please wait...' : `Delete All (${registeredStudents?.registeredStudents?.length || 0})`}
+                        Delete All ({registeredStudents?.registeredStudents?.length || 0})
                       </button>
                     )}
                   </div>
@@ -2476,16 +2400,16 @@ const TeacherSubjects_Page = () => {
                                       <div className="flex items-center justify-center space-x-1">
                                         <button
                                           onClick={handleSaveEdit}
-                                          disabled={isEditingStudent || actionCooldown}
-                                          className={`p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors ${(isEditingStudent || actionCooldown) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                          disabled={isEditingStudent}
+                                          className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
                                           title="Save"
                                         >
                                           <FiSave className="h-4 w-4" />
                                         </button>
                                         <button
                                           onClick={handleCancelEdit}
-                                          disabled={isEditingStudent || actionCooldown}
-                                          className={`p-1 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors ${(isEditingStudent || actionCooldown) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                          disabled={isEditingStudent}
+                                          className="p-1 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
                                           title="Cancel"
                                         >
                                           <FiXCircle className="h-4 w-4" />
@@ -2495,16 +2419,14 @@ const TeacherSubjects_Page = () => {
                                       <div className="flex items-center justify-center space-x-1">
                                         <button
                                           onClick={() => handleEditStudent(student)}
-                                          disabled={actionCooldown}
-                                          className={`p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                          className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                                           title="Edit Student"
                                         >
                                           <FiEdit className="h-4 w-4" />
                                         </button>
                                         <button
                                           onClick={() => handleDeleteStudentClick(student)}
-                                          disabled={actionCooldown}
-                                          className={`p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${actionCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
                                           title="Remove Student"
                                         >
                                           <FiUserMinus className="h-4 w-4" />
@@ -2586,7 +2508,7 @@ const TeacherSubjects_Page = () => {
                           accept=".xlsx,.xls,.csv"
                           onChange={handleFileUpload}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          disabled={isUploading || actionCooldown}
+                          disabled={isUploading}
                         />
 
                         <div className="p-6 text-center">
@@ -2765,8 +2687,8 @@ const TeacherSubjects_Page = () => {
               {activeStudentTab === 'import' && (
                 <button
                   onClick={handleInsertStudents}
-                  disabled={importedStudents.length === 0 || studentsLoading || actionCooldown}
-                  className={`px-5 py-2 text-xs rounded-lg font-medium transition-all flex items-center shadow-sm ${importedStudents.length > 0 && !studentsLoading && !actionCooldown
+                  disabled={importedStudents.length === 0 || studentsLoading}
+                  className={`px-5 py-2 text-xs rounded-lg font-medium transition-all flex items-center shadow-sm ${importedStudents.length > 0 && !studentsLoading
                     ? 'bg-linear-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
@@ -2779,7 +2701,7 @@ const TeacherSubjects_Page = () => {
                   ) : (
                     <>
                       <FiUpload className="h-4 w-4 mr-2" />
-                      {actionCooldown ? 'Please wait...' : `Import ${importedStudents.length > 0 ? `${importedStudents.length} Students` : 'Students'}`}
+                      Import {importedStudents.length > 0 ? `${importedStudents.length} Students` : 'Students'}
                     </>
                   )}
                 </button>

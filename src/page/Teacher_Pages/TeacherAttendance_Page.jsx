@@ -1385,8 +1385,6 @@ const TeacherAttendance_Page = () => {
               <button
                 onClick={() => {
                   setShowSubjectModal(false);
-                  setSelectedSubject('');
-                  setSelectedSchedule(null);
                 }}
                 className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 font-medium hover:bg-gray-200 rounded-lg transition-colors"
               >
