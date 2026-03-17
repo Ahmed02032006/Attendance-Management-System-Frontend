@@ -1087,8 +1087,8 @@ const AdminTeachers_Page = () => {
             <div className="px-6 py-5 border-b border-gray-100 bg-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center ring-1 ring-purple-100">
-                    <FiClock className="h-5 w-5 text-green-700" />
+                  <div className="w-11 h-11 bg-yellow-50 rounded-xl flex items-center justify-center ring-1 ring-purple-100">
+                    <FiClock className="h-5 w-5 text-yellow-700" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Activity Logs</h3>
@@ -1124,7 +1124,7 @@ const AdminTeachers_Page = () => {
             <div className="p-5 overflow-y-auto max-h-[calc(80vh-120px)] bg-gray-100">
               {auditLoading ? (
                 <div className="flex justify-center items-center h-40">
-                  <div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+                  <div className="w-8 h-8 border-4 border-yellow-200 border-t-yellow-600 rounded-full animate-spin"></div>
                 </div>
               ) : (
                 <div className="space-y-2.5">
