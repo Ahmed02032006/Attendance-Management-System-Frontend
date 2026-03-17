@@ -2019,8 +2019,12 @@ const TeacherSubjects_Page = () => {
                 Cancel
               </button>
               <button
-                onClick={handleDeleteAllStudents}
-                className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium flex items-center"
+                onClick={() => {
+                  handleDeleteAllStudents();
+                  disableButton('delete-all-btn');
+                }}
+                disabled={disabledButtons['delete-all-btn']}
+                className={`${disabledButtons['delete-all-btn'] ? 'opacity-50 cursor-not-allowed' : ''} px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium flex items-center`}
               >
                 <FiTrash2 className="h-3 w-3 mr-1" />
                 Delete All
