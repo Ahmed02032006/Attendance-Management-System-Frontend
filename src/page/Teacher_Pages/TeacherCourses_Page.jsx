@@ -1362,7 +1362,10 @@ const TeacherSubjects_Page = () => {
                 <FiX className="h-4 w-4" />
               </button>
             </div>
-            <form onSubmit={handleCreateSubject}>
+            <form onSubmit={() => {
+              handleCreateSubject();
+              disableButton('create-btn');
+            }}>
               <div className="p-4 space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -1555,7 +1558,8 @@ const TeacherSubjects_Page = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium"
+                  disabled={disabledButtons['create-btn']}
+                  className={`${disabledButtons['create-btn'] ? 'opacity-50 cursor-not-allowed' : ''} px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium`}
                 >
                   Create Course
                 </button>
@@ -1586,7 +1590,12 @@ const TeacherSubjects_Page = () => {
                 <FiX className="h-4 w-4" />
               </button>
             </div>
-            <form onSubmit={handleEditSubject}>
+            <form
+              onSubmit={() => {
+                handleEditSubject();
+                disableButton('edit-btn');
+              }}
+            >
               <div className="p-4 space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -1895,7 +1904,8 @@ const TeacherSubjects_Page = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium"
+                  disabled={disabledButtons['edit-btn']}
+                  className={`${disabledButtons['edit-btn'] ? 'opacity-50 cursor-not-allowed' : ''} px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 font-medium`}
                 >
                   Update Course
                 </button>
