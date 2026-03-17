@@ -1597,9 +1597,8 @@ const TeacherAttendance_Page = () => {
               <div className='flex items-center justify-between gap-3'>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-gray-600">Active</span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code -m</h3>
+                <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
               </div>
               <div className="flex items-center space-x-4">
                 <button
@@ -1616,21 +1615,6 @@ const TeacherAttendance_Page = () => {
               </div>
             </div>
             <div className="p-6 flex flex-col items-center">
-              {/* Expiry Timer Message */}
-              <div className="mb-4 w-full bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center space-x-2">
-                  <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="text-sm font-medium text-yellow-800">
-                    ⏰ This QR code will expire in <span className="font-bold">30 seconds</span>
-                  </p>
-                </div>
-                <p className="text-xs text-yellow-600 mt-1">
-                  Students must scan before the timer runs out
-                </p>
-              </div>
-
               <div
                 className={`${isQrZoomed ? 'w-96 h-96' : 'w-64 h-64'} bg-white flex items-center justify-center rounded-lg mb-4 border-2 border-gray-200 p-2 transition-all duration-300`}
                 id="qr-code-container"
