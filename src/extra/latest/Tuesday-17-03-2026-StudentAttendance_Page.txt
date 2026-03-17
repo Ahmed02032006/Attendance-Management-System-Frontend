@@ -23,9 +23,6 @@ const StudentAttendance_Page = () => {
   const [rollNoValid, setRollNoValid] = useState(false);
   const [isLoadingSubject, setIsLoadingSubject] = useState(true);
 
-  const rollNoRef = useRef(null);
-  const studentNameRef = useRef(null);
-
   const locationHook = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -284,30 +281,6 @@ const StudentAttendance_Page = () => {
     }));
   };
 
-  useEffect(() => {
-    // Disable browser autofill for all inputs on this page
-    const disableAutofill = () => {
-      // Add random name attributes to confuse browser autofill
-      const inputs = document.querySelectorAll('input');
-      inputs.forEach(input => {
-        if (!input.hasAttribute('data-original-name')) {
-          input.setAttribute('data-original-name', input.name);
-          // Randomize name attribute to prevent browser from recognizing the field
-          input.name = input.name + '_' + Math.random().toString(36).substring(7);
-        }
-      });
-    };
-
-    // Run after render
-    setTimeout(disableAutofill, 100);
-
-    // Also run on any dynamic changes
-    const observer = new MutationObserver(disableAutofill);
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    return () => observer.disconnect();
-  }, []);
-
   const getUniqueDeviceFingerprint = async () => {
     try {
       const storedFingerprint = localStorage.getItem('deviceFingerprint');
@@ -376,15 +349,6 @@ const StudentAttendance_Page = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Get values from refs instead of formData
-    const rollNo = rollNoRef.current?.value || formData.rollNo;
-    const studentName = studentNameRef.current?.value || formData.studentName;
-
-    if (!studentName.trim() || !rollNo.trim() || !formData.uniqueCode.trim()) {
-      toast.error('Please fill all fields');
-      return;
-    }
 
     if (!formData.studentName.trim() || !formData.rollNo.trim() || !formData.uniqueCode.trim()) {
       toast.error('Please fill all fields');
@@ -649,7 +613,6 @@ const StudentAttendance_Page = () => {
               </label>
               <div className="relative">
                 <input
-                  ref={rollNoRef}
                   type="text"
                   id="rollNo"
                   name="rollNo"
@@ -664,14 +627,8 @@ const StudentAttendance_Page = () => {
                     }`}
                   required
                   autoComplete="off"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  spellCheck="false"
-                  data-lpignore="true"
-                  data-form-type="other"
                   style={{ textTransform: 'uppercase' }}
                 />
-                {/* Loading indicator and validation icons remain the same */}
                 {isFetchingStudent && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
@@ -698,7 +655,6 @@ const StudentAttendance_Page = () => {
                 Full Name *
               </label>
               <input
-                ref={studentNameRef}
                 type="text"
                 id="studentName"
                 name="studentName"
@@ -708,11 +664,6 @@ const StudentAttendance_Page = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors uppercase"
                 required
                 autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck="false"
-                data-lpignore="true"
-                data-form-type="other"
                 style={{ textTransform: 'uppercase' }}
               />
             </div>

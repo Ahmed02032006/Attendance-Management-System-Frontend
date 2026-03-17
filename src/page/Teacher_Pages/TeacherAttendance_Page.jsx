@@ -115,7 +115,7 @@ const TeacherAttendance_Page = () => {
   useEffect(() => {
     if (showQRModal) {
       handleQRGeneration();
-      const interval = setInterval(() => handleQRGeneration(), 80000);
+      const interval = setInterval(() => handleQRGeneration(), 30000);
       setQrRefreshInterval(interval);
       return () => {
         if (interval) clearInterval(interval);
@@ -511,7 +511,8 @@ const TeacherAttendance_Page = () => {
     }
 
     const currentTime = new Date();
-    const expiryTime = new Date(currentTime.getTime() + 80000);
+    // Set expiry to 30 seconds from now (30000 ms)
+    const expiryTime = new Date(currentTime.getTime() + 30000); // Changed from 80000 to 30000
 
     const originalCode = attendanceForm.uniqueCode;
     const baseUrl = `${window.location.origin}/student-attendance`;
@@ -534,7 +535,6 @@ const TeacherAttendance_Page = () => {
       heading: `Generated QR Code`,
       status: 'success'
     })).unwrap();
-
 
     if (isInitial) {
       toast.success('QR code generated successfully!', { autoClose: 2000 });
@@ -1467,7 +1467,7 @@ const TeacherAttendance_Page = () => {
         </div>
       )}
 
-      {/* Manual Attendance Modal - UPDATED with searchable roll number dropdown */}
+      {/* Manual Attendance Modal */}
       {showManualModal && (
         <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -1841,6 +1841,7 @@ const TeacherAttendance_Page = () => {
           </div>
         </div>
       )}
+
     </div>
   )
 }
