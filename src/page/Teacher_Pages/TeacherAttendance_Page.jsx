@@ -1599,7 +1599,7 @@ const TeacherAttendance_Page = () => {
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="text-sm font-medium text-gray-600">Active</span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code</h3>
+                <h3 className="text-lg font-semibold text-gray-800">Attendance QR Code -m</h3>
               </div>
               <div className="flex items-center space-x-4">
                 <button
