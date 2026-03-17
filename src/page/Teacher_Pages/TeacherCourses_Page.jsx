@@ -2629,8 +2629,12 @@ const TeacherSubjects_Page = () => {
                           </div>
                         </div>
                         <button
-                          onClick={downloadDummyExcel}
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-blue-300 rounded-lg text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+                          onClick={() => {
+                            downloadDummyExcel();
+                            disableButton('download-template-btn');
+                          }}
+                          disabled={disabledButtons['download-template-btn']}
+                          className={`${disabledButtons['create-btn'] ? 'opacity-50 cursor-not-allowed' : ''} w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-blue-300 rounded-lg text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors`}
                         >
                           <FiDownload className="h-3.5 w-3.5" />
                           Download Template
