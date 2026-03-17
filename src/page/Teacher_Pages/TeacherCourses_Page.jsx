@@ -1362,8 +1362,9 @@ const TeacherSubjects_Page = () => {
                 <FiX className="h-4 w-4" />
               </button>
             </div>
-            <form onSubmit={() => {
-              handleCreateSubject();
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleCreateSubject(e);
               disableButton('create-btn');
             }}>
               <div className="p-4 space-y-4">
@@ -1591,8 +1592,9 @@ const TeacherSubjects_Page = () => {
               </button>
             </div>
             <form
-              onSubmit={() => {
-                handleEditSubject();
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleEditSubject(e);
                 disableButton('edit-btn');
               }}
             >
