@@ -753,14 +753,6 @@ const TeacherSubjects_Page = () => {
 
       toast.success('Student added successfully!');
 
-      // Add audit log for individual student registration
-      await dispatch(createAuditLog({
-        userId: currentUserId,
-        action: 'register',
-        heading: `Added Individual Student`,
-        status: 'success'
-      })).unwrap();
-
       // Clear form
       setIndividualStudent({
         registrationNo: '',
@@ -777,6 +769,14 @@ const TeacherSubjects_Page = () => {
       toast.error(error?.message || 'Failed to add student');
     } finally {
       setIsAddingStudent(false);
+
+      // Add audit log for individual student registration
+      await dispatch(createAuditLog({
+        userId: currentUserId,
+        action: 'register',
+        heading: `Added Individual Student`,
+        status: 'success'
+      })).unwrap();
     }
   };
 
