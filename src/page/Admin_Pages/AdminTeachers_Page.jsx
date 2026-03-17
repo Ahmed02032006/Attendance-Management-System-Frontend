@@ -656,7 +656,7 @@ const AdminTeachers_Page = () => {
                           <div className="flex justify-center space-x-2 lg:space-x-3">
                             <button
                               onClick={() => openAuditModal(teacher)}
-                              className="text-green-700 hover:text-green-800 transition-colors p-1"
+                              className="text-yellow-600 hover:text-yellow-900 transition-colors p-1"
                               title="View Course Audit Logs"
                               disabled={isLoading}
                             >

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { checkAuthUser, logOutUser } from '../../store/Auth-Slicer/Auth-Slicer';
 import { toast } from 'react-toastify';
 import { FiTrash2 } from 'react-icons/fi'
+import { updateTeacherLastLogin } from '../../store/Teacher-Slicer/User-Slicer';
 
 const AdminDashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -37,6 +38,8 @@ const AdminDashboardLayout = () => {
   useEffect(() => {
     if (user?.status === 'Inactive') {
       setShowInactiveModal(true);
+    } else if (user?.id) {
+      dispatch(updateTeacherLastLogin({ userId: user.id }));
     }
   }, [user]);
 
