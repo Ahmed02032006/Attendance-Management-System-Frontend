@@ -192,7 +192,9 @@ const TeacherDashboardLayout = () => {
                         <div>
                           <p className="text-xs font-medium text-slate-500 mb-1">CONTACT EMAIL</p>
                           <a
-                            href="mailto:m.ahmedofficial677@gmail.com"
+                            href="https://mail.google.com/mail/?view=cm&fs=1&to=m.ahmedofficial677@gmail.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline transition-colors"
                           >
                             m.ahmedofficial677@gmail.com

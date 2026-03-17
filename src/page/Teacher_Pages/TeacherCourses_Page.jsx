@@ -1048,6 +1048,15 @@ const TeacherSubjects_Page = () => {
       : 'bg-gray-100 text-gray-700'
   }
 
+  // Disabled Working
+  const [disabledButtons, setDisabledButtons] = useState({});
+
+  const disableButton = (buttonId, duration = 2000) => {
+    setDisabledButtons(prev => ({ ...prev, [buttonId]: true }));
+    setTimeout(() => {
+      setDisabledButtons(prev => ({ ...prev, [buttonId]: false }));
+    }, duration);
+  };
 
   if (isLoading) {
     return (
@@ -1920,8 +1929,12 @@ const TeacherSubjects_Page = () => {
                 Cancel
               </button>
               <button
-                onClick={handleDeleteSubject}
-                className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium"
+                onClick={() => {
+                  handleDeleteSubject();
+                  disableButton('delete-btn');
+                }}
+                disabled={disabledButtons['delete-btn']}
+                className={`${disabledButtons['delete-btn'] ? 'opacity-50 cursor-not-allowed' : ''} px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 font-medium`}
               >
                 Delete
               </button>
