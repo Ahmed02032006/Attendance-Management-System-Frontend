@@ -191,7 +191,7 @@ const RegisterPage = () => {
         {/* Terms */}
         <div className="flex items-start gap-2.5 pt-0.5">
           <input id="terms" name="terms" type="checkbox"
-            className="mt-0.5 w-3.5 h-3.5 rounded border-slate-300 flex-shrink-0"
+            className="mt-0.5 w-3.5 h-3.5 rounded border-slate-300 shrink-0"
             style={{ accentColor: '#0047AB' }} />
           <label htmlFor="terms" className="text-xs text-slate-600 leading-snug">
             I agree to the{' '}
