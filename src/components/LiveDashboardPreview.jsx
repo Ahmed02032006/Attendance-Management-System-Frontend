@@ -2,31 +2,16 @@ import React, { useState, useEffect } from 'react';
 
 const LiveDashboardPreview = () => {
   const [sessions, setSessions] = useState([]);
-  const [stats, setStats] = useState({
-    totalStudents: 1240,
-    activeSessions: 12,
-    avgAttendance: 92,
-    avgCheckInTime: 4
-  });
 
   // Blue color code used throughout the component
   const BLUE_COLOR = '#155dfc';
 
-  // Generate 12 dummy subjects with random attendance data
+  // Generate 3 dummy subjects with random attendance data
   const generateDummySessions = () => {
     const dummySubjects = [
       { code: "CS-402", title: "Advanced Algorithms" },
       { code: "CS-305", title: "Database Management Systems" },
-      { code: "EE-201", title: "Digital Logic Design" },
-      { code: "CS-401", title: "Computer Networks" },
-      { code: "MT-302", title: "Linear Algebra" },
-      { code: "CS-310", title: "Web Development" },
-      { code: "CS-450", title: "Artificial Intelligence" },
-      { code: "EE-310", title: "Microprocessors" },
-      { code: "MT-201", title: "Calculus II" },
-      { code: "PHY-301", title: "Quantum Physics" },
-      { code: "CS-320", title: "Operating Systems" },
-      { code: "SE-401", title: "Software Engineering" }
+      { code: "EE-201", title: "Digital Logic Design" }
     ];
 
     return dummySubjects.map(subject => ({
@@ -42,10 +27,9 @@ const LiveDashboardPreview = () => {
     setSessions(generateDummySessions());
   }, []);
 
-  // Update attendance and stats every 5 minutes (300000 ms)
+  // Update attendance every 5 minutes (300000 ms)
   useEffect(() => {
     const attendanceInterval = setInterval(() => {
-      // Update sessions
       setSessions(prevSessions =>
         prevSessions.map(session => ({
           ...session,
@@ -53,14 +37,6 @@ const LiveDashboardPreview = () => {
           total: Math.floor(Math.random() * (75 - 60 + 1) + 60) // Random between 60-75
         }))
       );
-
-      // Update stats
-      setStats({
-        totalStudents: Math.floor(Math.random() * (1280 - 1220 + 1) + 1220), // Random between 1220-1280
-        activeSessions: Math.floor(Math.random() * (14 - 10 + 1) + 10), // Random between 10-14
-        avgAttendance: Math.floor(Math.random() * (94 - 90 + 1) + 90), // Random between 90-94%
-        avgCheckInTime: (Math.random() * (5 - 3) + 3).toFixed(1) // Random between 3-5 seconds
-      });
     }, 300000); // 5 minutes
 
     return () => clearInterval(attendanceInterval);
@@ -86,13 +62,13 @@ const LiveDashboardPreview = () => {
       }} />
 
       {/* Main Content */}
-      <div className="relative w-full max-w-6xl px-8 py-4 z-10 overflow-y-auto max-h-screen">
+      <div className="relative w-full max-w-4xl px-8 py-4 z-10">
         {/* Header Section */}
-        <DashboardHeader blueColor={BLUE_COLOR} totalSessions={sessions.length} />
+        <DashboardHeader blueColor={BLUE_COLOR} />
 
-        {/* Cards Grid - 4 cards per row for 12 subjects */}
-        <div className="grid grid-cols-4 gap-4">
-          {sessions.map((session, index) => (
+        {/* First Row - 2 Subject Boxes */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          {sessions.slice(0, 2).map((session, index) => (
             <SessionCard
               key={index}
               code={session.code}
@@ -105,32 +81,36 @@ const LiveDashboardPreview = () => {
           ))}
         </div>
 
-        {/* Stats Cards - Three boxes layout */}
-        <div className="mt-6">
-          {/* First row - Two stats boxes */}
-          <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto mb-4">
+        {/* Second Row - 1 Subject Box + Stats Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Third Subject Box */}
+          {sessions.slice(2, 3).map((session, index) => (
+            <SessionCard
+              key={index}
+              code={session.code}
+              title={session.title}
+              location={session.location}
+              present={session.present}
+              total={session.total}
+              blueColor={BLUE_COLOR}
+            />
+          ))}
+
+          {/* Stats Cards - Side by side in one box */}
+          <div className="grid grid-cols-2 gap-4">
             <StatCard
               icon="group"
-              value={stats.totalStudents.toLocaleString()}
-              label="Total Students"
+              value="92%"
+              label="Avg. Attendance"
               color={BLUE_COLOR}
               bgColor="bg-blue-50"
             />
             <StatCard
-              icon="calendar_today"
-              value={stats.activeSessions}
-              label="Active Sessions"
+              icon="speed"
+              value="4s"
+              label="Avg. Check-in Time"
               color="#059669"
               bgColor="bg-emerald-50"
-            />
-          </div>
-
-          {/* Second row - Combined stats box with two columns */}
-          <div className="max-w-2xl mx-auto">
-            <CombinedStatsCard
-              avgAttendance={stats.avgAttendance}
-              avgCheckInTime={stats.avgCheckInTime}
-              blueColor={BLUE_COLOR}
             />
           </div>
         </div>
@@ -140,7 +120,7 @@ const LiveDashboardPreview = () => {
 };
 
 // Dashboard Header Component
-const DashboardHeader = ({ blueColor, totalSessions }) => {
+const DashboardHeader = ({ blueColor }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Update time every minute
@@ -175,7 +155,7 @@ const DashboardHeader = ({ blueColor, totalSessions }) => {
         </div>
         <h3 className="text-2xl font-bold text-slate-900">Today's Sessions</h3>
         <p className="text-slate-500 mt-1 text-sm">
-          Spring 2026 • {formattedDate} • {totalSessions} Active Sessions
+          Spring 2026 • {formattedDate} • 3 Active Sessions
         </p>
       </div>
       <div className="text-right mb-1">
@@ -192,7 +172,7 @@ const SessionCard = ({ code, title, location, present, total, blueColor }) => {
 
   return (
     <div
-      className="p-3 rounded-xl flex flex-col gap-2 hover:scale-[1.02] transition-transform duration-200"
+      className="p-4 rounded-xl flex flex-col gap-2 hover:scale-[1.02] transition-transform duration-200"
       style={{
         background: 'rgba(255,255,255,0.75)',
         backdropFilter: 'blur(12px)',
@@ -204,7 +184,7 @@ const SessionCard = ({ code, title, location, present, total, blueColor }) => {
       <div className="flex justify-between items-start">
         <div>
           <span
-            className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded"
             style={{
               color: blueColor,
               background: `rgba(21,93,252,0.05)`
@@ -212,26 +192,26 @@ const SessionCard = ({ code, title, location, present, total, blueColor }) => {
           >
             {code}
           </span>
-          <h4 className="text-xs font-bold text-slate-800 mt-1.5 line-clamp-1">{title}</h4>
+          <h4 className="text-sm font-bold text-slate-800 mt-2 line-clamp-1">{title}</h4>
           <div className="flex items-center gap-1 mt-1 text-slate-500">
-            <span className="material-icons" style={{ fontSize: '10px' }}>event</span>
-            <span className="text-[8px] font-medium">{location}</span>
+            <span className="material-icons" style={{ fontSize: '11px' }}>event</span>
+            <span className="text-[9px] font-medium">{location}</span>
           </div>
         </div>
-        <div className="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-full text-[7px] font-bold uppercase shrink-0">
+        <div className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase shrink-0">
           Live
         </div>
       </div>
 
       {/* Attendance Section */}
-      <div className="mt-1">
+      <div className="mt-2">
         <div className="flex justify-between items-end mb-1">
-          <span className="text-[8px] font-bold text-slate-500 uppercase">Attendance</span>
-          <span className="text-[10px] font-bold" style={{ color: blueColor }}>
+          <span className="text-[9px] font-bold text-slate-500 uppercase">Attendance</span>
+          <span className="text-[11px] font-bold" style={{ color: blueColor }}>
             {present} / {total}
           </span>
         </div>
-        <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: `rgba(21,93,252,0.06)` }}>
+        <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: `rgba(21,93,252,0.06)` }}>
           <div
             className="h-full rounded-full transition-all duration-500"
             style={{ width: `${percentage}%`, background: blueColor }}
@@ -259,41 +239,6 @@ const StatCard = ({ icon, value, label, color, bgColor }) => {
       </div>
       <p className="text-lg font-bold text-slate-800">{value}</p>
       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">{label}</p>
-    </div>
-  );
-};
-
-// Combined Stats Card Component (for Avg Attendance + Avg Check-in Time)
-const CombinedStatsCard = ({ avgAttendance, avgCheckInTime, blueColor }) => {
-  return (
-    <div
-      className="p-4 rounded-xl transition-all duration-300"
-      style={{
-        background: 'rgba(255,255,255,0.75)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255,255,255,0.5)',
-        boxShadow: '0 6px 24px 0 rgba(31,38,135,0.07)'
-      }}
-    >
-      <div className="grid grid-cols-2 gap-4">
-        {/* Avg Attendance */}
-        <div className="flex flex-col items-center text-center border-r border-slate-200">
-          <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center mb-2" style={{ color: blueColor }}>
-            <span className="material-icons" style={{ fontSize: '18px' }}>trending_up</span>
-          </div>
-          <p className="text-lg font-bold text-slate-800">{avgAttendance}%</p>
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Avg. Attendance</p>
-        </div>
-
-        {/* Avg Check-in Time */}
-        <div className="flex flex-col items-center text-center">
-          <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center mb-2" style={{ color: '#059669' }}>
-            <span className="material-icons" style={{ fontSize: '18px' }}>speed</span>
-          </div>
-          <p className="text-lg font-bold text-slate-800">{avgCheckInTime}s</p>
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Avg. Check-in Time</p>
-        </div>
-      </div>
     </div>
   );
 };
