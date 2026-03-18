@@ -6,64 +6,87 @@ const LiveDashboardPreview = () => {
     avgCheckInTime: 4
   });
 
-  // Simulate changing stats every 10 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStats({
-        avgAttendance: Math.floor(Math.random() * (96 - 88 + 1) + 88), // Random between 88-96%
-        avgCheckInTime: (Math.random() * (6 - 3) + 3).toFixed(1) // Random between 3-6 seconds
-      });
-    }, 10000); // Update every 10 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Generate random attendance data for each card
-  const getRandomAttendance = () => {
-    const present = Math.floor(Math.random() * (65 - 45 + 1) + 45); // Random between 45-65
-    const total = Math.floor(Math.random() * (75 - 55 + 1) + 55); // Random between 55-75
-    return { present, total };
-  };
-
-  // Dummy data for sessions
-  const sessions = [
+  const [sessions, setSessions] = useState([
     {
       code: "CS-402",
       title: "Advanced Algorithms",
       location: "Spring-2026",
-      attendance: getRandomAttendance()
+      present: 51,
+      total: 68
     },
     {
       code: "CS-305",
       title: "Database Management Systems",
       location: "Spring-2026",
-      attendance: getRandomAttendance()
+      present: 47,
+      total: 62
     },
     {
       code: "EE-201",
       title: "Digital Logic Design",
       location: "Spring-2026",
-      attendance: getRandomAttendance()
-    },
-    {
-      code: "CS-401",
-      title: "Computer Networks",
-      location: "Spring-2026",
-      attendance: getRandomAttendance()
-    },
-    {
-      code: "MT-302",
-      title: "Linear Algebra",
-      location: "Spring-2026",
-      attendance: getRandomAttendance()
-    },
-    {
-      code: "CS-310",
-      title: "Web Development",
-      location: "Spring-2026",
-      attendance: getRandomAttendance()
+      present: 58,
+      total: 71
     }
-  ];
+    // {
+    //   code: "CS-401",
+    //   title: "Computer Networks",
+    //   location: "Spring-2026",
+    //   present: 43,
+    //   total: 59
+    // },
+    // {
+    //   code: "MT-302",
+    //   title: "Linear Algebra",
+    //   location: "Spring-2026",
+    //   present: 62,
+    //   total: 74
+    // },
+    // {
+    //   code: "CS-310",
+    //   title: "Web Development",
+    //   location: "Spring-2026",
+    //   present: 49,
+    //   total: 65
+    // }
+  ]);
+
+  // Generate random attendance data ensuring present < total
+  const getRandomAttendance = () => {
+    const total = Math.floor(Math.random() * (75 - 55 + 1) + 55); // Random between 55-75
+    const present = Math.floor(Math.random() * (total - 40) + 40); // Random between 40 and total-1
+    return { present, total };
+  };
+
+  // Update attendance every 5 minutes (300000 ms)
+  useEffect(() => {
+    const attendanceInterval = setInterval(() => {
+      setSessions(prevSessions => 
+        prevSessions.map(session => {
+          const { present, total } = getRandomAttendance();
+          return {
+            ...session,
+            present,
+            total
+          };
+        })
+      );
+    }, 300000); // 5 minutes
+
+    return () => clearInterval(attendanceInterval);
+  }, []);
+
+  // Update stats every 10 seconds
+  useEffect(() => {
+    const statsInterval = setInterval(() => {
+      setStats({
+        avgAttendance: Math.floor(Math.random() * (96 - 88 + 1) + 88), // Random between 88-96%
+        avgCheckInTime: (Math.random() * (6 - 3) + 3).toFixed(1) // Random between 3-6 seconds
+      });
+    }, 10000); // 10 seconds
+
+    return () => clearInterval(statsInterval);
+  }, []);
 
   return (
     <main
@@ -97,8 +120,8 @@ const LiveDashboardPreview = () => {
               code={session.code}
               title={session.title}
               location={session.location}
-              present={session.attendance.present}
-              total={session.attendance.total}
+              present={session.present}
+              total={session.total}
             />
           ))}
         </div>
@@ -133,6 +156,12 @@ const DashboardHeader = () => {
     hour12: true 
   });
 
+  const formattedDate = currentTime.toLocaleDateString('en-US', { 
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
   return (
     <div className="flex items-end justify-between mb-6">
       <div>
@@ -145,7 +174,7 @@ const DashboardHeader = () => {
         </div>
         <h3 className="text-2xl font-bold text-slate-900">Today's Sessions</h3>
         <p className="text-slate-500 mt-1 text-sm">
-          Spring 2026 • Real-time attendance monitoring
+          Spring 2026 • {formattedDate}
         </p>
       </div>
       <div className="text-right mb-1">
