@@ -44,13 +44,13 @@ const AuthLayout = () => {
             <span>© 2026 ATTMARK</span>
             <div className="flex gap-3 sm:gap-4">
               <a
+                href="#"
+                className="hover:text-[#155dfc] transition-colors">How to Use</a>
+              <a
                 href="https://mail.google.com/mail/?view=cm&fs=1&to=m.ahmedofficial677@gmail.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-[#155dfc] transition-colors">Teachnical Support</a>
-              <a
-                href="#"
-                className="hover:text-[#155dfc] transition-colors">How to Use</a>
             </div>
           </div>
         </div>
