@@ -11,7 +11,7 @@ const AuthLayout = () => {
           background: 'rgba(255,255,255,0.96)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderRight: '1px solid rgba(0,71,171,0.08)',
+          borderRight: '1px solid rgba(21,93,252,0.08)',
         }}
       >
         {/* Logo */}
@@ -19,12 +19,12 @@ const AuthLayout = () => {
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: '#0047AB', boxShadow: '0 6px 18px rgba(0,71,171,0.22)' }}
+              style={{ background: '#155dfc', boxShadow: '0 6px 18px rgba(21,93,252,0.22)' }}
             >
               <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>verified_user</span>
             </div>
             <div>
-              <h1 className="text-lg font-extrabold tracking-wider leading-tight" style={{ color: '#0047AB' }}>
+              <h1 className="text-lg font-extrabold tracking-wider leading-tight" style={{ color: '#155dfc' }}>
                 ATTMARK
               </h1>
               <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">fOR UNIVERSITY</p>
@@ -42,8 +42,8 @@ const AuthLayout = () => {
           <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
             <span>© 2026 EDU-SYSTEM</span>
             <div className="flex gap-4">
-              <a href="#" className="hover:text-blue-700 transition-colors">IT Helpdesk</a>
-              <a href="#" className="hover:text-blue-700 transition-colors">Guidelines</a>
+              <a href="#" className="hover:text-[#155dfc] transition-colors">IT Helpdesk</a>
+              <a href="#" className="hover:text-[#155dfc] transition-colors">Guidelines</a>
             </div>
           </div>
         </div>
@@ -55,15 +55,15 @@ const AuthLayout = () => {
         style={{ background: '#F8FAFC' }}
       >
         <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(#e2e8f0 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-        <div className="absolute top-0 right-0 w-1/2 h-1/2 rounded-full" style={{ background: 'rgba(0,71,171,0.05)', filter: 'blur(120px)' }} />
-        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 rounded-full" style={{ background: 'rgba(59,130,246,0.05)', filter: 'blur(100px)' }} />
+        <div className="absolute top-0 right-0 w-1/2 h-1/2 rounded-full" style={{ background: 'rgba(21,93,252,0.05)', filter: 'blur(120px)' }} />
+        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 rounded-full" style={{ background: 'rgba(21,93,252,0.05)', filter: 'blur(100px)' }} />
 
         <div className="relative w-full max-w-4xl px-8 py-4 z-10">
           {/* Header */}
           <div className="flex items-end justify-between mb-6">
             <div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3"
-                style={{ background: 'rgba(0,71,171,0.08)', color: '#0047AB' }}>
+                style={{ background: 'rgba(21,93,252,0.08)', color: '#155dfc' }}>
                 <span className="material-icons" style={{ fontSize: '12px' }}>calendar_today</span>
                 Live Dashboard Preview
               </div>
@@ -79,10 +79,10 @@ const AuthLayout = () => {
           {/* Cards */}
           <div className="grid grid-cols-2 gap-4">
             {/* Card 1 */}
-            <div className="p-4 rounded-2xl flex flex-col gap-3" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)', borderLeft: '5px solid #0047AB', boxShadow: '0 6px 24px 0 rgba(31,38,135,0.07)' }}>
+            <div className="p-4 rounded-2xl flex flex-col gap-3" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)', borderLeft: '5px solid #155dfc', boxShadow: '0 6px 24px 0 rgba(31,38,135,0.07)' }}>
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ color: '#0047AB', background: 'rgba(0,71,171,0.05)' }}>Lec-402</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ color: '#155dfc', background: 'rgba(21,93,252,0.05)' }}>Lec-402</span>
                   <h4 className="text-base font-bold text-slate-800 mt-2">Advanced Algorithms</h4>
                   <div className="flex items-center gap-1.5 mt-0.5 text-slate-500">
                     <span className="material-icons" style={{ fontSize: '13px' }}>location_on</span>
@@ -94,10 +94,10 @@ const AuthLayout = () => {
               <div>
                 <div className="flex justify-between items-end mb-1.5">
                   <span className="text-[10px] font-bold text-slate-500 uppercase">Student Arrival</span>
-                  <span className="text-xs font-bold" style={{ color: '#0047AB' }}>82 / 120</span>
+                  <span className="text-xs font-bold" style={{ color: '#155dfc' }}>82 / 120</span>
                 </div>
-                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,71,171,0.06)' }}>
-                  <div className="h-full rounded-full" style={{ width: '68%', background: '#0047AB' }} />
+                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(21,93,252,0.06)' }}>
+                  <div className="h-full rounded-full" style={{ width: '68%', background: '#155dfc' }} />
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -128,17 +128,17 @@ const AuthLayout = () => {
                   <span className="text-[10px] font-bold text-slate-500 uppercase">Waitlist / Pre-check</span>
                   <span className="text-xs font-bold text-slate-400">0 / 45</span>
                 </div>
-                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,71,171,0.06)' }}>
+                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(21,93,252,0.06)' }}>
                   <div className="h-full bg-slate-200 rounded-full" style={{ width: '0%' }} />
                 </div>
               </div>
             </div>
 
             {/* Card 3 */}
-            <div className="p-4 rounded-2xl flex flex-col gap-3" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)', borderLeft: '5px solid #0047AB', boxShadow: '0 6px 24px 0 rgba(31,38,135,0.07)' }}>
+            <div className="p-4 rounded-2xl flex flex-col gap-3" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)', borderLeft: '5px solid #155dfc', boxShadow: '0 6px 24px 0 rgba(31,38,135,0.07)' }}>
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ color: '#0047AB', background: 'rgba(0,71,171,0.05)' }}>Lab-09</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ color: '#155dfc', background: 'rgba(21,93,252,0.05)' }}>Lab-09</span>
                   <h4 className="text-base font-bold text-slate-800 mt-2">Network Security</h4>
                   <div className="flex items-center gap-1.5 mt-0.5 text-slate-500">
                     <span className="material-icons" style={{ fontSize: '13px' }}>location_on</span>
@@ -150,10 +150,10 @@ const AuthLayout = () => {
               <div>
                 <div className="flex justify-between items-end mb-1.5">
                   <span className="text-[10px] font-bold text-slate-500 uppercase">Student Arrival</span>
-                  <span className="text-xs font-bold" style={{ color: '#0047AB' }}>28 / 30</span>
+                  <span className="text-xs font-bold" style={{ color: '#155dfc' }}>28 / 30</span>
                 </div>
-                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,71,171,0.06)' }}>
-                  <div className="h-full rounded-full" style={{ width: '93%', background: '#0047AB' }} />
+                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(21,93,252,0.06)' }}>
+                  <div className="h-full rounded-full" style={{ width: '93%', background: '#155dfc' }} />
                 </div>
               </div>
             </div>
@@ -161,7 +161,7 @@ const AuthLayout = () => {
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3">
               <div className="p-4 rounded-2xl flex flex-col justify-center items-center text-center" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)', boxShadow: '0 6px 24px 0 rgba(31,38,135,0.07)' }}>
-                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center mb-2" style={{ color: '#0047AB' }}>
+                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center mb-2" style={{ color: '#155dfc' }}>
                   <span className="material-icons" style={{ fontSize: '18px' }}>group</span>
                 </div>
                 <p className="text-xl font-bold text-slate-800">92%</p>
