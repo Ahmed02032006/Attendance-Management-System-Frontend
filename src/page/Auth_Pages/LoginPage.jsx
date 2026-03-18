@@ -37,19 +37,38 @@ const LoginPage = () => {
       .catch(() => toast.error('An unexpected error occurred.'));
   };
 
-  const getInputStyle = (fieldName) => ({
-    border: focusedField === fieldName
-      ? '1.5px solid #0047AB'
-      : '1.5px solid #E2E8F0',
-    boxShadow: focusedField === fieldName
-      ? '0 0 0 3px rgba(0,71,171,0.1)'
-      : 'none',
-    outline: 'none',
-    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-  });
-
   return (
     <div className="w-full">
+
+      {/* Global styles — injected once, highest specificity wins */}
+      <style>{`
+        .auth-input {
+          border: 1.5px solid #E2E8F0 !important;
+          outline: none !important;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+          background-color: #ffffff !important;
+          -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+          box-shadow: none;
+        }
+        .auth-input:focus {
+          border: 1.5px solid #0047AB !important;
+          box-shadow: 0 0 0 3px rgba(0,71,171,0.1) !important;
+        }
+        /* Override browser autofill yellow/blue tint */
+        .auth-input:-webkit-autofill,
+        .auth-input:-webkit-autofill:hover,
+        .auth-input:-webkit-autofill:focus {
+          -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+          -webkit-text-fill-color: #1e293b !important;
+          border: 1.5px solid #E2E8F0 !important;
+          transition: background-color 9999s ease-in-out 0s;
+        }
+        .auth-input:-webkit-autofill:focus {
+          border: 1.5px solid #0047AB !important;
+          box-shadow: 0 0 0 3px rgba(0,71,171,0.1) !important;
+        }
+      `}</style>
+
       {/* Heading */}
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-900 mb-1.5">Staff Login</h2>
@@ -59,6 +78,7 @@ const LoginPage = () => {
       </div>
 
       <form onSubmit={handleLoginSubmit} className="space-y-4">
+
         {/* Email */}
         <div>
           <label htmlFor="loginEmail" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-0.5">
@@ -82,10 +102,9 @@ const LoginPage = () => {
               value={formData.userEmail}
               onChange={handleLoginChange}
               placeholder="you@example.com"
-              style={getInputStyle('userEmail')}
               onFocus={() => setFocusedField('userEmail')}
               onBlur={() => setFocusedField(null)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 bg-white placeholder-slate-400 text-sm"
+              className="auth-input w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 text-sm placeholder-slate-400"
             />
           </div>
         </div>
@@ -116,10 +135,9 @@ const LoginPage = () => {
               value={formData.userPassword}
               onChange={handleLoginChange}
               placeholder="••••••••"
-              style={getInputStyle('userPassword')}
               onFocus={() => setFocusedField('userPassword')}
               onBlur={() => setFocusedField(null)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 bg-white placeholder-slate-400 text-sm"
+              className="auth-input w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 text-sm placeholder-slate-400"
             />
           </div>
         </div>
