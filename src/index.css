@@ -118,3 +118,26 @@
 
 /* =================================================== */
 
+.font-display {
+  font-family: 'Lexend', sans-serif;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+/* Responsive styles for material icons */
+@media (max-width: 640px) {
+  .material-symbols-outlined {
+    font-size: 16px !important;
+  }
+}

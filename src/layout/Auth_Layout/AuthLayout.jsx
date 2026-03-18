@@ -52,22 +52,7 @@ const AuthLayout = () => {
 
       {/* Right Panel - Dashboard Preview - Hidden on mobile/tablet */}
       <LiveDashboardPreview />
-
-      {/* Fonts & Icons */}
-      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-      <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-      <style>{`
-        .font-display { font-family: 'Lexend', sans-serif; }
-        .material-symbols-outlined { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; display: inline-block; line-height: 1; text-transform: none; letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr; }
-        
-        /* Responsive styles for material icons */
-        @media (max-width: 640px) {
-          .material-symbols-outlined {
-            font-size: 16px !important;
-          }
-        }
-      `}</style>
+      
     </div>
   );
 };
