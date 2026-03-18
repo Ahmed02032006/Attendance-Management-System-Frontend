@@ -6,7 +6,7 @@ const LiveDashboardPreview = () => {
   // Blue color code used throughout the component
   const BLUE_COLOR = '#155dfc';
 
-  // Generate 3 dummy subjects with random attendance data
+  // Generate 3 dummy subjects with random attendance data (present < total)
   const generateDummySessions = () => {
     const dummySubjects = [
       { code: "CS-402", title: "Advanced Algorithms" },
@@ -14,12 +14,21 @@ const LiveDashboardPreview = () => {
       { code: "EE-201", title: "Digital Logic Design" }
     ];
 
-    return dummySubjects.map(subject => ({
-      ...subject,
-      location: "Spring-2026",
-      present: Math.floor(Math.random() * (65 - 45 + 1) + 45), // Random between 45-65
-      total: Math.floor(Math.random() * (75 - 60 + 1) + 60) // Random between 60-75
-    }));
+    return dummySubjects.map(subject => {
+      // Generate total first (between 60-75)
+      const total = Math.floor(Math.random() * (75 - 60 + 1) + 60);
+      // Generate present that is always less than total (between 45 and total-1)
+      const maxPresent = Math.min(65, total - 1); // Ensure present doesn't exceed total-1
+      const minPresent = 45;
+      const present = Math.floor(Math.random() * (maxPresent - minPresent + 1) + minPresent);
+      
+      return {
+        ...subject,
+        location: "Spring-2026",
+        present,
+        total
+      };
+    });
   };
 
   // Initialize sessions
@@ -31,11 +40,20 @@ const LiveDashboardPreview = () => {
   useEffect(() => {
     const attendanceInterval = setInterval(() => {
       setSessions(prevSessions =>
-        prevSessions.map(session => ({
-          ...session,
-          present: Math.floor(Math.random() * (65 - 45 + 1) + 45), // Random between 45-65
-          total: Math.floor(Math.random() * (75 - 60 + 1) + 60) // Random between 60-75
-        }))
+        prevSessions.map(session => {
+          // Generate total first (between 60-75)
+          const total = Math.floor(Math.random() * (75 - 60 + 1) + 60);
+          // Generate present that is always less than total (between 45 and total-1)
+          const maxPresent = Math.min(65, total - 1); // Ensure present doesn't exceed total-1
+          const minPresent = 45;
+          const present = Math.floor(Math.random() * (maxPresent - minPresent + 1) + minPresent);
+          
+          return {
+            ...session,
+            present,
+            total
+          };
+        })
       );
     }, 300000); // 5 minutes
 
@@ -107,7 +125,7 @@ const LiveDashboardPreview = () => {
             />
             <StatCard
               icon="speed"
-              value="4s"
+              value="14.3s"
               label="Avg. Check-in Time"
               color="#059669"
               bgColor="bg-emerald-50"
