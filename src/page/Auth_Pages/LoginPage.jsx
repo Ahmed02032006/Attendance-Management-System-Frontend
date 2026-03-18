@@ -88,7 +88,7 @@ const LoginPage = () => {
         {/* Email */}
         <div>
           <label htmlFor="loginEmail" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-0.5">
-            Staff ID / Email
+            Teacher Email
           </label>
           <div className="relative">
             <span
@@ -99,7 +99,7 @@ const LoginPage = () => {
                 transition: 'color 0.2s ease',
               }}
             >
-              badge
+              {/* badge */}
             </span>
             <input
               type="email"
@@ -119,7 +119,7 @@ const LoginPage = () => {
         <div>
           <div className="flex justify-between items-center mb-1.5 ml-0.5">
             <label htmlFor="loginPassword" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              Security Key
+              Password
             </label>
             {/* <Link to="/auth/forgotPassword" style={{ color: BLUE_COLOR }} className="text-[10px] font-semibold hover:text-[#1045c4] transition-colors">Reset PIN</Link> */}
           </div>
@@ -132,7 +132,7 @@ const LoginPage = () => {
                 transition: 'color 0.2s ease',
               }}
             >
-              key
+              {/* key */}
             </span>
             <input
               type="password"
