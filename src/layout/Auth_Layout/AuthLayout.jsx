@@ -43,8 +43,11 @@ const AuthLayout = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 text-[9px] sm:text-[10px] text-slate-400 font-medium">
             <span>© 2026 ATTMARK</span>
             <div className="flex gap-3 sm:gap-4">
-              <a href="#" className="hover:text-[#155dfc] transition-colors">IT Helpdesk</a>
-              <a href="#" className="hover:text-[#155dfc] transition-colors">Guidelines</a>
+              <a
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=m.ahmedofficial677@gmail.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#155dfc] transition-colors">Teachnical Support</a>
             </div>
           </div>
         </div>
@@ -52,7 +55,7 @@ const AuthLayout = () => {
 
       {/* Right Panel - Dashboard Preview - Hidden on mobile/tablet */}
       <LiveDashboardPreview />
-      
+
     </div>
   );
 };

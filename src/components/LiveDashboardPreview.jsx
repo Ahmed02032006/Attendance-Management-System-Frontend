@@ -2,16 +2,26 @@ import React, { useState, useEffect } from 'react';
 
 const LiveDashboardPreview = () => {
   const [sessions, setSessions] = useState([]);
+  const [displaySessions, setDisplaySessions] = useState([]);
 
   // Blue color code used throughout the component
   const BLUE_COLOR = '#155dfc';
 
-  // Generate 3 dummy subjects with random attendance data (present < total)
+  // Generate 12 dummy subjects with random attendance data (present < total)
   const generateDummySessions = () => {
     const dummySubjects = [
       { code: "CS-402", title: "Advanced Algorithms" },
       { code: "CS-305", title: "Database Management Systems" },
-      { code: "EE-201", title: "Digital Logic Design" }
+      { code: "EE-201", title: "Digital Logic Design" },
+      { code: "CS-310", title: "Operating Systems" },
+      { code: "CS-350", title: "Computer Networks" },
+      { code: "EE-220", title: "Circuit Analysis" },
+      { code: "MATH-201", title: "Linear Algebra" },
+      { code: "CS-340", title: "Artificial Intelligence" },
+      { code: "CS-330", title: "Software Engineering" },
+      { code: "EE-240", title: "Microprocessors" },
+      { code: "CS-320", title: "Web Development" },
+      { code: "CS-360", title: "Cybersecurity Fundamentals" }
     ];
 
     return dummySubjects.map(subject => {
@@ -31,34 +41,41 @@ const LiveDashboardPreview = () => {
     });
   };
 
-  // Initialize sessions
+  // Initialize sessions and first set of display sessions
   useEffect(() => {
-    setSessions(generateDummySessions());
+    const allSessions = generateDummySessions();
+    setSessions(allSessions);
+    setDisplaySessions(allSessions.slice(0, 3));
   }, []);
 
-  // Update attendance every 5 minutes (300000 ms)
+  // Update displayed sessions every 5 minutes (300000 ms)
   useEffect(() => {
-    const attendanceInterval = setInterval(() => {
-      setSessions(prevSessions =>
-        prevSessions.map(session => {
-          // Generate total first (between 60-75)
-          const total = Math.floor(Math.random() * (75 - 60 + 1) + 60);
-          // Generate present that is always less than total (between 45 and total-1)
-          const maxPresent = Math.min(65, total - 1); // Ensure present doesn't exceed total-1
-          const minPresent = 45;
-          const present = Math.floor(Math.random() * (maxPresent - minPresent + 1) + minPresent);
-          
-          return {
-            ...session,
-            present,
-            total
-          };
-        })
-      );
+    if (sessions.length === 0) return;
+
+    let currentIndex = 0;
+    
+    const rotationInterval = setInterval(() => {
+      setDisplaySessions(prevDisplay => {
+        // Calculate next set of 3 sessions
+        const totalSessions = sessions.length;
+        currentIndex = (currentIndex + 3) % totalSessions;
+        
+        // If we're near the end, wrap around to the beginning
+        if (currentIndex + 3 > totalSessions) {
+          const remaining = totalSessions - currentIndex;
+          const wrapAround = 3 - remaining;
+          return [
+            ...sessions.slice(currentIndex),
+            ...sessions.slice(0, wrapAround)
+          ];
+        }
+        
+        return sessions.slice(currentIndex, currentIndex + 3);
+      });
     }, 300000); // 5 minutes
 
-    return () => clearInterval(attendanceInterval);
-  }, []);
+    return () => clearInterval(rotationInterval);
+  }, [sessions]);
 
   return (
     <main
@@ -84,11 +101,11 @@ const LiveDashboardPreview = () => {
         {/* Header Section */}
         <DashboardHeader blueColor={BLUE_COLOR} />
 
-        {/* First Row - 2 Subject Boxes */}
+        {/* First Row - First 2 Subject Boxes */}
         <div className="grid grid-cols-2 gap-4 mb-4">
-          {sessions.slice(0, 2).map((session, index) => (
+          {displaySessions.slice(0, 2).map((session, index) => (
             <SessionCard
-              key={index}
+              key={`${session.code}-${index}`}
               code={session.code}
               title={session.title}
               location={session.location}
@@ -99,12 +116,12 @@ const LiveDashboardPreview = () => {
           ))}
         </div>
 
-        {/* Second Row - 1 Subject Box + Stats Cards */}
+        {/* Second Row - Third Subject Box + Stats Cards */}
         <div className="grid grid-cols-2 gap-4">
           {/* Third Subject Box */}
-          {sessions.slice(2, 3).map((session, index) => (
+          {displaySessions.slice(2, 3).map((session, index) => (
             <SessionCard
-              key={index}
+              key={`${session.code}-${index}`}
               code={session.code}
               title={session.title}
               location={session.location}
@@ -173,7 +190,7 @@ const DashboardHeader = ({ blueColor }) => {
         </div>
         <h3 className="text-2xl font-bold text-slate-900">Today's Sessions</h3>
         <p className="text-slate-500 mt-1 text-sm">
-          Spring 2026 • {formattedDate} • 3 Active Sessions
+          Spring 2026 • {formattedDate} • 12 Active Sessions
         </p>
       </div>
       <div className="text-right mb-1">
