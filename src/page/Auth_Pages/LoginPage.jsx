@@ -41,7 +41,7 @@ const LoginPage = () => {
   };
   const handleBlur = (e) => {
     e.target.style.borderColor = '#E2E8F0';
-    e.target.style.boxShadow = 'none';
+    e.target.style.boxShadow = '0 0 0 3px rgba(0,71,171,0.1)';
   };
 
   // Shared input style — border always set inline so Tailwind can't override it

@@ -40,7 +40,7 @@ const AuthLayout = () => {
         {/* Footer */}
         <div className="px-8 lg:px-10 pb-5 pt-3 border-t border-slate-100 flex-shrink-0">
           <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
-            <span>© 2024 EDU-SYSTEM</span>
+            <span>© 2026 EDU-SYSTEM</span>
             <div className="flex gap-4">
               <a href="#" className="hover:text-blue-700 transition-colors">IT Helpdesk</a>
               <a href="#" className="hover:text-blue-700 transition-colors">Guidelines</a>
@@ -176,13 +176,6 @@ const AuthLayout = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Bottom badge */}
-        <div className="absolute bottom-6 right-8 flex items-center gap-2 px-4 py-2 rounded-full"
-          style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(12px)', border: '1px solid rgba(203,213,225,0.5)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-          <span className="material-icons" style={{ color: '#0047AB', fontSize: '14px' }}>lan</span>
-          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Network Node: Central-01</span>
         </div>
       </main>
 
