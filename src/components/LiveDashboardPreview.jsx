@@ -72,7 +72,7 @@ const LiveDashboardPreview = () => {
         
         return sessions.slice(currentIndex, currentIndex + 3);
       });
-    }, ); // 1 minutes
+    }, 60000); // 1 minutes
 
     return () => clearInterval(rotationInterval);
   }, [sessions]);
