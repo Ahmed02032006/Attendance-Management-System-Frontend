@@ -27,14 +27,14 @@ const LiveDashboardPreview = () => {
       location: "Spring-2026",
       present: 58,
       total: 71
-    }
-    // {
-    //   code: "CS-401",
-    //   title: "Computer Networks",
-    //   location: "Spring-2026",
-    //   present: 43,
-    //   total: 59
-    // },
+    },
+    {
+      code: "CS-401",
+      title: "Computer Networks",
+      location: "Spring-2026",
+      present: 43,
+      total: 59
+    },
     // {
     //   code: "MT-302",
     //   title: "Linear Algebra",
