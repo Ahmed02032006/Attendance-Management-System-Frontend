@@ -224,7 +224,7 @@ const SessionCard = ({ code, title, location, present, total, blueColor }) => {
       {/* Attendance Section */}
       <div className="mt-2">
         <div className="flex justify-between items-end mb-1">
-          <span className="text-[9px] font-bold text-slate-500 uppercase">Attendance</span>
+          <span className="text-[9px] font-bold text-slate-500 uppercase">Mark Attendance</span>
           <span className="text-[11px] font-bold" style={{ color: blueColor }}>
             {present} / {total}
           </span>
