@@ -25,9 +25,9 @@ const AuthLayout = () => {
             </div>
             <div>
               <h1 className="text-lg font-extrabold tracking-tight leading-tight" style={{ color: '#0047AB' }}>
-                ATTENDANCE
+                ATTMARK
               </h1>
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Faculty Portal</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">fOR UNIVERSITY</p>
             </div>
           </div>
         </div>

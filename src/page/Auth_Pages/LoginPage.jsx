@@ -24,7 +24,7 @@ const LoginPage = () => {
       .then((res) => {
         if (res.payload?.status === 'Success') {
           toast.success('Login successful');
-          setTimeout(() => {}, 2000);
+          setTimeout(() => { }, 2000);
           setFormData({ userEmail: '', userPassword: '' });
         } else if (res.payload?.status === 'Error') {
           toast.error(res.payload.message || 'Login failed');
@@ -76,7 +76,10 @@ const LoginPage = () => {
               value={formData.userEmail}
               onChange={handleLoginChange}
               placeholder="you@example.com"
-              style={inputBase}
+              style={{
+                border: '1.5px solid #E2E8F0',
+                transition: 'all 0.2s ease-in-out'
+              }}
               onFocus={onFocus}
               onBlur={onBlur}
               className="w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 bg-white placeholder-slate-400 text-sm"
