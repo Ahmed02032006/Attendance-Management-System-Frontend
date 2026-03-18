@@ -24,7 +24,7 @@ const LoginPage = () => {
       .then((res) => {
         if (res.payload?.status === 'Success') {
           toast.success('Login successful');
-          setTimeout(() => {}, 2000);
+          setTimeout(() => { }, 2000);
           setFormData({ userEmail: '', userPassword: '' });
         } else if (res.payload?.status === 'Error') {
           toast.error(res.payload.message || 'Login failed');
@@ -36,12 +36,12 @@ const LoginPage = () => {
   };
 
   const handleFocus = (e) => {
-    e.target.style.borderColor = '#E2E8F0';
+    e.target.style.borderColor = '#0047AB';
     e.target.style.boxShadow = '0 0 0 3px rgba(0,71,171,0.1)';
   };
   const handleBlur = (e) => {
     e.target.style.borderColor = '#E2E8F0';
-    e.target.style.boxShadow = '0 0 0 3px rgba(0,71,171,0.1)';
+    e.target.style.boxShadow = 'none';
   };
 
   // Shared input style — border always set inline so Tailwind can't override it
@@ -57,7 +57,7 @@ const LoginPage = () => {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-900 mb-1.5">Staff Login</h2>
         <p className="text-slate-500 text-xs leading-relaxed">
-          Access the faculty dashboard to manage student attendance, track session metrics, and generate reports.
+          Sign in to manage your attendance dashboard.
         </p>
       </div>
 
