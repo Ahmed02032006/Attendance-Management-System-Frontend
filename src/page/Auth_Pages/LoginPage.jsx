@@ -62,7 +62,7 @@ const LoginPage = () => {
       <form onSubmit={handleLoginSubmit} className="space-y-4">
         {/* Email */}
         <div>
-          <label htmlFor="loginEmail" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-0.5">
+          <label htmlFor="loginPassword" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-0.5">
             Staff ID / Email
           </label>
           <div className="relative">
