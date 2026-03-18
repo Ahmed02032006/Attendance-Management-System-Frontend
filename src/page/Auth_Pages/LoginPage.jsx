@@ -36,7 +36,7 @@ const LoginPage = () => {
   };
 
   const handleFocus = (e) => {
-    e.target.style.borderColor = '#0047AB';
+    e.target.style.borderColor = '#E2E8F0';
     e.target.style.boxShadow = '0 0 0 3px rgba(0,71,171,0.1)';
   };
   const handleBlur = (e) => {
