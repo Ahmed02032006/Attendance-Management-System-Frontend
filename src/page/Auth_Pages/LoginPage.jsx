@@ -82,12 +82,12 @@ const LoginPage = () => {
               className="w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 bg-white placeholder-slate-400 text-sm"
             /> */}
             <input
-              type="password"
-              id="loginPassword"
-              name="userPassword"
-              value={formData.userPassword}
+              type="email"
+              id="loginEmail"
+              name="userEmail"
+              value={formData.userEmail}
               onChange={handleLoginChange}
-              placeholder="••••••••"
+              placeholder="you@example.com"
               style={inputBase}
               onFocus={onFocus}
               onBlur={onBlur}
