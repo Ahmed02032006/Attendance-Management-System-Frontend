@@ -1,9 +1,24 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { registerUser } from '../../store/Auth-Slicer/Auth-Slicer';
+
+const inputStyle = {
+  border: '1.5px solid #E2E8F0',
+  transition: 'all 0.2s ease-in-out',
+};
+
+const inputFocus = (e) => {
+  e.target.style.borderColor = '#0047AB';
+  e.target.style.boxShadow = '0 0 0 4px rgba(0,71,171,0.1)';
+  e.target.style.outline = 'none';
+};
+
+const inputBlur = (e) => {
+  e.target.style.borderColor = '#E2E8F0';
+  e.target.style.boxShadow = 'none';
+};
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -28,10 +43,9 @@ const RegisterPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Check if password and confirm password match
     if (formData.userPassword !== formData.confirmPassword) {
       toast.error("Passwords do not match!");
-      return; // Stop the form submission
+      return;
     }
 
     dispatch(registerUser(formData))
@@ -57,18 +71,28 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="py-8 px-6 sm:px-10 bg-white rounded-lg shadow-sm border border-gray-100">
-      <h2 className="text-3xl font-bold text-center text-blue-700 mb-2">Create Your Account</h2>
-      <p className="text-center text-gray-500 mb-8 text-sm">Join us and start managing your dashboard</p>
+    <div className="w-full">
+      {/* Heading */}
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-slate-900 mb-2">Create Your Account</h2>
+        <p className="text-slate-500 text-sm leading-relaxed">
+          Join us and start managing your attendance dashboard.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Full Name */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="name"
+            className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 ml-1"
+          >
             Full Name
           </label>
           <div className="relative">
-            <User className="absolute top-3 left-3 h-5 w-5 text-gray-400" />
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xl select-none">
+              person
+            </span>
             <input
               type="text"
               id="name"
@@ -76,18 +100,26 @@ const RegisterPage = () => {
               value={formData.userName}
               onChange={handleInputChange}
               placeholder="John Doe"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
+              style={inputStyle}
+              onFocus={inputFocus}
+              onBlur={inputBlur}
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl text-slate-800 bg-white placeholder-slate-400"
             />
           </div>
         </div>
 
         {/* Email */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="email"
+            className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 ml-1"
+          >
             Email Address
           </label>
           <div className="relative">
-            <Mail className="absolute top-3 left-3 h-5 w-5 text-gray-400" />
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xl select-none">
+              badge
+            </span>
             <input
               type="email"
               id="email"
@@ -95,18 +127,26 @@ const RegisterPage = () => {
               value={formData.userEmail}
               onChange={handleInputChange}
               placeholder="you@example.com"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
+              style={inputStyle}
+              onFocus={inputFocus}
+              onBlur={inputBlur}
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl text-slate-800 bg-white placeholder-slate-400"
             />
           </div>
         </div>
 
         {/* Password */}
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="password"
+            className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 ml-1"
+          >
             Password
           </label>
           <div className="relative">
-            <Lock className="absolute top-3 left-3 h-5 w-5 text-gray-400" />
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xl select-none">
+              key
+            </span>
             <input
               type="password"
               id="password"
@@ -114,18 +154,26 @@ const RegisterPage = () => {
               value={formData.userPassword}
               onChange={handleInputChange}
               placeholder="••••••••"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
+              style={inputStyle}
+              onFocus={inputFocus}
+              onBlur={inputBlur}
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl text-slate-800 bg-white placeholder-slate-400"
             />
           </div>
         </div>
 
         {/* Confirm Password */}
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="confirmPassword"
+            className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 ml-1"
+          >
             Confirm Password
           </label>
           <div className="relative">
-            <Lock className="absolute top-3 left-3 h-5 w-5 text-gray-400" />
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xl select-none">
+              key
+            </span>
             <input
               type="password"
               id="confirmPassword"
@@ -133,28 +181,45 @@ const RegisterPage = () => {
               value={formData.confirmPassword}
               onChange={handleInputChange}
               placeholder="••••••••"
-              className={`w-full pl-10 pr-4 py-2.5 border ${formData.confirmPassword && formData.userPassword !== formData.confirmPassword
-                  ? 'border-red-500'
-                  : 'border-gray-300'
-                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+              style={{
+                ...inputStyle,
+                ...(formData.confirmPassword && formData.userPassword !== formData.confirmPassword
+                  ? { borderColor: '#EF4444' }
+                  : {}),
+              }}
+              onFocus={inputFocus}
+              onBlur={e => {
+                if (formData.confirmPassword && formData.userPassword !== formData.confirmPassword) {
+                  e.target.style.borderColor = '#EF4444';
+                  e.target.style.boxShadow = 'none';
+                } else {
+                  inputBlur(e);
+                }
+              }}
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl text-slate-800 bg-white placeholder-slate-400"
             />
           </div>
           {formData.confirmPassword && formData.userPassword !== formData.confirmPassword && (
-            <p className="mt-1 text-sm text-red-600">Passwords do not match</p>
+            <p className="mt-1.5 text-xs font-medium text-red-500 ml-1">Passwords do not match</p>
           )}
         </div>
 
-        {/* Terms & Conditions */}
-        <div className="flex items-start text-sm">
+        {/* Terms */}
+        <div className="flex items-start text-sm pt-1">
           <input
             id="terms"
             name="terms"
             type="checkbox"
-            className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 focus:ring-2"
+            style={{ accentColor: '#0047AB' }}
           />
-          <label htmlFor="terms" className="ml-3 text-gray-700">
+          <label htmlFor="terms" className="ml-3 text-slate-600 text-xs">
             I agree to the{' '}
-            <Link to={"/auth/termsAndConditions"} className="text-blue-600 hover:underline">
+            <Link
+              to="/auth/termsAndConditions"
+              className="font-semibold hover:underline"
+              style={{ color: '#0047AB' }}
+            >
               terms and conditions
             </Link>
           </label>
@@ -163,16 +228,28 @@ const RegisterPage = () => {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="w-full text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] mt-2"
+          style={{
+            background: '#0047AB',
+            boxShadow: '0 8px 24px rgba(0,71,171,0.22)',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = '#003d96'}
+          onMouseLeave={e => e.currentTarget.style.background = '#0047AB'}
         >
-          Register
+          Create Account
+          <span className="material-icons text-lg">person_add</span>
         </button>
       </form>
 
+      {/* Login link */}
       <div className="mt-6 text-center text-sm">
-        <p className="text-gray-600">
+        <p className="text-slate-500">
           Already have an account?{' '}
-          <Link to="/auth/login" className="font-medium text-blue-600 hover:text-blue-500 hover:underline">
+          <Link
+            to="/auth/login"
+            className="font-semibold hover:underline transition-colors"
+            style={{ color: '#0047AB' }}
+          >
             Sign in
           </Link>
         </p>

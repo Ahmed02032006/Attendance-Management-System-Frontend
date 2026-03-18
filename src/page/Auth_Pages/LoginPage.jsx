@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { loginUser } from '../../store/Auth-Slicer/Auth-Slicer';
@@ -46,17 +45,28 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="py-8 px-6 sm:px-10 bg-white rounded-lg shadow-sm border border-gray-100">
-      <h2 className="text-3xl font-bold text-center text-blue-700 mb-2">Welcome Back <span className='animate-wave'>👋</span></h2>
-      <p className="text-center text-gray-500 mb-8 text-sm">Login to continue to your dashboard</p>
+    <div className="w-full">
+      {/* Heading */}
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-slate-900 mb-2">Staff Login</h2>
+        <p className="text-slate-500 text-sm leading-relaxed">
+          Access the faculty dashboard to manage student attendance, track session metrics, and generate reports.
+        </p>
+      </div>
+
       <form onSubmit={handleLoginSubmit} className="space-y-5">
         {/* Email */}
         <div>
-          <label htmlFor="loginEmail" className="block text-sm font-medium text-gray-700 mb-1">
-            Email address
+          <label
+            htmlFor="loginEmail"
+            className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 ml-1"
+          >
+            Staff ID / Email
           </label>
           <div className="relative">
-            <Mail className="absolute top-3 left-3 h-5 w-5 text-gray-400" />
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xl select-none">
+              badge
+            </span>
             <input
               type="email"
               id="loginEmail"
@@ -64,18 +74,42 @@ const LoginPage = () => {
               value={formData.userEmail}
               onChange={handleLoginChange}
               placeholder="you@example.com"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
+              style={{
+                border: '1.5px solid #E2E8F0',
+                transition: 'all 0.2s ease-in-out',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = '#0047AB';
+                e.target.style.boxShadow = '0 0 0 4px rgba(0,71,171,0.1)';
+                e.target.style.outline = 'none';
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = '#E2E8F0';
+                e.target.style.boxShadow = 'none';
+              }}
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl text-slate-800 bg-white placeholder-slate-400"
             />
           </div>
         </div>
 
         {/* Password */}
         <div>
-          <label htmlFor="loginPassword" className="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
+          <div className="flex justify-between items-center mb-2 ml-1">
+            <label
+              htmlFor="loginPassword"
+              className="block text-[11px] font-bold uppercase tracking-wider text-slate-500"
+            >
+              Security Key
+            </label>
+            {/* Uncomment to enable forgot password:
+            <Link to="/auth/forgotPassword" className="text-xs font-semibold hover:text-blue-800 transition-colors" style={{ color: '#0047AB' }}>
+              Reset PIN
+            </Link> */}
+          </div>
           <div className="relative">
-            <Lock className="absolute top-3 left-3 h-5 w-5 text-gray-400" />
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xl select-none">
+              key
+            </span>
             <input
               type="password"
               id="loginPassword"
@@ -83,39 +117,81 @@ const LoginPage = () => {
               value={formData.userPassword}
               onChange={handleLoginChange}
               placeholder="••••••••"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
+              style={{
+                border: '1.5px solid #E2E8F0',
+                transition: 'all 0.2s ease-in-out',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = '#0047AB';
+                e.target.style.boxShadow = '0 0 0 4px rgba(0,71,171,0.1)';
+                e.target.style.outline = 'none';
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = '#E2E8F0';
+                e.target.style.boxShadow = 'none';
+              }}
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl text-slate-800 bg-white placeholder-slate-400"
             />
           </div>
         </div>
 
         {/* Options */}
-        <div className="flex items-center justify-between text-sm">
-          <label className="flex items-center space-x-2">
+        <div className="flex items-center justify-between py-1">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              className="w-4 h-4 rounded border-slate-300 focus:ring-2"
+              style={{ accentColor: '#0047AB' }}
             />
-            <span className="text-gray-700">Remember me</span>
+            <span className="text-xs font-medium text-slate-600">Keep session active</span>
           </label>
-          {/* <Link to="/auth/forgotPassword" className="text-blue-600 hover:underline">
-            Forgot password?
-          </Link> */}
+          <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+            <span
+              className="w-2 h-2 rounded-full bg-emerald-500"
+              style={{ animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }}
+            />
+            Server Online
+          </div>
         </div>
 
         {/* Submit */}
         <button
           type="submit"
-          className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="w-full text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 mt-2 transition-all active:scale-[0.98]"
+          style={{
+            background: '#0047AB',
+            boxShadow: '0 8px 24px rgba(0,71,171,0.22)',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = '#003d96'}
+          onMouseLeave={e => e.currentTarget.style.background = '#0047AB'}
         >
-          Sign in
+          Authorize Access
+          <span className="material-icons text-lg">login</span>
         </button>
       </form>
 
-      <div className="mt-6 text-center text-sm">
-        <p className="text-gray-600">
+      {/* Stats */}
+      <div className="mt-8 grid grid-cols-2 gap-4">
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Active Staff</p>
+          <p className="text-lg font-bold text-slate-700">1,240+</p>
+        </div>
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">System Uptime</p>
+          <p className="text-lg font-bold text-slate-700">99.9%</p>
+        </div>
+      </div>
+
+      {/* Register link */}
+      <div className="mt-8 text-center text-sm">
+        <p className="text-slate-500">
           Don't have an account?{' '}
-          <Link to="/auth/register" className="font-medium text-blue-600 hover:text-blue-500 hover:underline">
-            Register
+          <Link
+            to="/auth/register"
+            className="font-semibold hover:underline transition-colors"
+            style={{ color: '#0047AB' }}
+          >
+            Register here
           </Link>
         </p>
       </div>
