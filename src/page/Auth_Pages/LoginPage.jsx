@@ -24,7 +24,7 @@ const LoginPage = () => {
       .then((res) => {
         if (res.payload?.status === 'Success') {
           toast.success('Login successful');
-          setTimeout(() => { }, 2000);
+          setTimeout(() => {}, 2000);
           setFormData({ userEmail: '', userPassword: '' });
         } else if (res.payload?.status === 'Error') {
           toast.error(res.payload.message || 'Login failed');
@@ -35,18 +35,20 @@ const LoginPage = () => {
       .catch(() => toast.error('An unexpected error occurred.'));
   };
 
-  const inputBase = {
-    border: '1.5px solid #E2E8F0',
-    transition: 'all 0.2s ease-in-out',
-  };
-  const onFocus = (e) => {
+  const handleFocus = (e) => {
     e.target.style.borderColor = '#0047AB';
     e.target.style.boxShadow = '0 0 0 3px rgba(0,71,171,0.1)';
-    e.target.style.outline = 'none';
   };
-  const onBlur = (e) => {
+  const handleBlur = (e) => {
     e.target.style.borderColor = '#E2E8F0';
     e.target.style.boxShadow = 'none';
+  };
+
+  // Shared input style — border always set inline so Tailwind can't override it
+  const inputStyle = {
+    border: '1.5px solid #E2E8F0',
+    outline: 'none',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
   };
 
   return (
@@ -62,35 +64,26 @@ const LoginPage = () => {
       <form onSubmit={handleLoginSubmit} className="space-y-4">
         {/* Email */}
         <div>
-          <label htmlFor="loginPassword" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-0.5">
+          <label htmlFor="loginEmail" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-0.5">
             Staff ID / Email
           </label>
           <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 select-none" style={{ fontSize: '18px' }}>
+            <span
+              className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 select-none"
+              style={{ fontSize: '18px' }}
+            >
               badge
             </span>
-            {/* <input
+            <input
               type="email"
               id="loginEmail"
               name="userEmail"
               value={formData.userEmail}
               onChange={handleLoginChange}
               placeholder="you@example.com"
-              style={inputBase}
-              onFocus={onFocus}
-              onBlur={onBlur}
-              className="w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 bg-white placeholder-slate-400 text-sm"
-            /> */}
-            <input
-              type="email"
-              id="loginPassword"
-              name="userEmail"
-              value={formData.userEmail}
-              onChange={handleLoginChange}
-              placeholder="you@example.com"
-              style={inputBase}
-              onFocus={onFocus}
-              onBlur={onBlur}
+              style={inputStyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               className="w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 bg-white placeholder-slate-400 text-sm"
             />
           </div>
@@ -102,10 +95,13 @@ const LoginPage = () => {
             <label htmlFor="loginPassword" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
               Security Key
             </label>
-            {/* <Link to="/auth/forgotPassword" className="text-[10px] font-semibold hover:text-blue-800 transition-colors" style={{ color: '#0047AB' }}>Reset PIN</Link> */}
+            {/* <Link to="/auth/forgotPassword" style={{ color: '#0047AB' }} className="text-[10px] font-semibold hover:text-blue-800 transition-colors">Reset PIN</Link> */}
           </div>
           <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 select-none" style={{ fontSize: '18px' }}>
+            <span
+              className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 select-none"
+              style={{ fontSize: '18px' }}
+            >
               key
             </span>
             <input
@@ -115,9 +111,9 @@ const LoginPage = () => {
               value={formData.userPassword}
               onChange={handleLoginChange}
               placeholder="••••••••"
-              style={inputBase}
-              onFocus={onFocus}
-              onBlur={onBlur}
+              style={inputStyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               className="w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 bg-white placeholder-slate-400 text-sm"
             />
           </div>
@@ -126,7 +122,11 @@ const LoginPage = () => {
         {/* Options row */}
         <div className="flex items-center justify-between py-0.5">
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" className="w-3.5 h-3.5 rounded border-slate-300" style={{ accentColor: '#0047AB' }} />
+            <input
+              type="checkbox"
+              className="w-3.5 h-3.5 rounded border-slate-300"
+              style={{ accentColor: '#0047AB' }}
+            />
             <span className="text-xs font-medium text-slate-600">Keep session active</span>
           </label>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600">
@@ -164,7 +164,11 @@ const LoginPage = () => {
       <div className="mt-5 text-center text-xs">
         <p className="text-slate-500">
           Don't have an account?{' '}
-          <Link to="/auth/register" className="font-semibold hover:underline transition-colors" style={{ color: '#0047AB' }}>
+          <Link
+            to="/auth/register"
+            className="font-semibold hover:underline transition-colors"
+            style={{ color: '#0047AB' }}
+          >
             Register here
           </Link>
         </p>
