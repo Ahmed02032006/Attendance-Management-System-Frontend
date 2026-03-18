@@ -15,6 +15,9 @@ const RegisterPage = () => {
 
   const [focusedField, setFocusedField] = useState(null);
 
+  // Blue color constant
+  const BLUE_COLOR = '#155dfc';
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -47,7 +50,7 @@ const RegisterPage = () => {
   const passwordMismatch = formData.confirmPassword && formData.userPassword !== formData.confirmPassword;
 
   const getIconColor = (fieldName) =>
-    focusedField === fieldName ? '#0047AB' : '#94A3B8';
+    focusedField === fieldName ? BLUE_COLOR : '#94A3B8';
 
   return (
     <div className="w-full">
@@ -63,8 +66,8 @@ const RegisterPage = () => {
           box-shadow: none;
         }
         .auth-input:focus {
-          border: 1.5px solid #0047AB !important;
-          box-shadow: 0 0 0 3px rgba(0,71,171,0.1) !important;
+          border: 1.5px solid ${BLUE_COLOR} !important;
+          box-shadow: 0 0 0 3px rgba(21,93,252,0.1) !important;
         }
         .auth-input.input-error {
           border: 1.5px solid #EF4444 !important;
@@ -82,8 +85,8 @@ const RegisterPage = () => {
           transition: background-color 9999s ease-in-out 0s;
         }
         .auth-input:-webkit-autofill:focus {
-          border: 1.5px solid #0047AB !important;
-          box-shadow: 0 0 0 3px rgba(0,71,171,0.1) !important;
+          border: 1.5px solid ${BLUE_COLOR} !important;
+          box-shadow: 0 0 0 3px rgba(21,93,252,0.1) !important;
         }
       `}</style>
 
@@ -192,10 +195,10 @@ const RegisterPage = () => {
         <div className="flex items-start gap-2.5 pt-0.5">
           <input id="terms" name="terms" type="checkbox"
             className="mt-0.5 w-3.5 h-3.5 rounded border-slate-300 shrink-0"
-            style={{ accentColor: '#0047AB' }} />
+            style={{ accentColor: BLUE_COLOR }} />
           <label htmlFor="terms" className="text-xs text-slate-600 leading-snug">
             I agree to the{' '}
-            <Link to="/auth/termsAndConditions" className="font-semibold hover:underline" style={{ color: '#0047AB' }}>
+            <Link to="/auth/termsAndConditions" className="font-semibold hover:underline" style={{ color: BLUE_COLOR }}>
               terms and conditions
             </Link>
           </label>
@@ -205,9 +208,9 @@ const RegisterPage = () => {
         <button
           type="submit"
           className="w-full text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] text-sm"
-          style={{ background: '#0047AB', boxShadow: '0 6px 20px rgba(0,71,171,0.22)' }}
-          onMouseEnter={e => (e.currentTarget.style.background = '#003d96')}
-          onMouseLeave={e => (e.currentTarget.style.background = '#0047AB')}
+          style={{ background: BLUE_COLOR, boxShadow: '0 6px 20px rgba(21,93,252,0.22)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = '#1045c4')}
+          onMouseLeave={e => (e.currentTarget.style.background = BLUE_COLOR)}
         >
           Create Account
           <span className="material-icons" style={{ fontSize: '18px' }}>person_add</span>
@@ -218,7 +221,7 @@ const RegisterPage = () => {
       <div className="mt-5 text-center text-xs">
         <p className="text-slate-500">
           Already have an account?{' '}
-          <Link to="/auth/login" className="font-semibold hover:underline transition-colors" style={{ color: '#0047AB' }}>
+          <Link to="/auth/login" className="font-semibold hover:underline transition-colors" style={{ color: BLUE_COLOR }}>
             Sign in
           </Link>
         </p>

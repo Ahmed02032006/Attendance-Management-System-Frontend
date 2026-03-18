@@ -1,91 +1,54 @@
 import React, { useState, useEffect } from 'react';
 
 const LiveDashboardPreview = () => {
-  const [stats, setStats] = useState({
-    avgAttendance: 92,
-    avgCheckInTime: 4
-  });
+  const [sessions, setSessions] = useState([]);
 
-  const [sessions, setSessions] = useState([
-    {
-      code: "CS-402",
-      title: "Advanced Algorithms",
-      location: "Spring-2026",
-      present: 51,
-      total: 68
-    },
-    {
-      code: "CS-305",
-      title: "Database Management Systems",
-      location: "Spring-2026",
-      present: 47,
-      total: 62
-    },
-    {
-      code: "EE-201",
-      title: "Digital Logic Design",
-      location: "Spring-2026",
-      present: 58,
-      total: 71
-    }
-    // {
-    //   code: "CS-401",
-    //   title: "Computer Networks",
-    //   location: "Spring-2026",
-    //   present: 43,
-    //   total: 59
-    // },
-    // {
-    //   code: "MT-302",
-    //   title: "Linear Algebra",
-    //   location: "Spring-2026",
-    //   present: 62,
-    //   total: 74
-    // },
-    // {
-    //   code: "CS-310",
-    //   title: "Web Development",
-    //   location: "Spring-2026",
-    //   present: 49,
-    //   total: 65
-    // }
-  ]);
+  // Blue color code used throughout the component
+  const BLUE_COLOR = '#155dfc';
 
-  // Generate random attendance data ensuring present < total
-  const getRandomAttendance = () => {
-    const total = Math.floor(Math.random() * (75 - 55 + 1) + 55); // Random between 55-75
-    const present = Math.floor(Math.random() * (total - 40) + 40); // Random between 40 and total-1
-    return { present, total };
+  // Generate 12 dummy subjects with random attendance data
+  const generateDummySessions = () => {
+    const dummySubjects = [
+      { code: "CS-402", title: "Advanced Algorithms" },
+      { code: "CS-305", title: "Database Management Systems" },
+      { code: "EE-201", title: "Digital Logic Design" },
+      { code: "CS-401", title: "Computer Networks" },
+      { code: "MT-302", title: "Linear Algebra" },
+      { code: "CS-310", title: "Web Development" },
+      { code: "CS-450", title: "Artificial Intelligence" },
+      { code: "EE-310", title: "Microprocessors" },
+      { code: "MT-201", title: "Calculus II" },
+      { code: "PHY-301", title: "Quantum Physics" },
+      { code: "CS-320", title: "Operating Systems" },
+      { code: "SE-401", title: "Software Engineering" }
+    ];
+
+    return dummySubjects.map(subject => ({
+      ...subject,
+      location: "Spring-2026",
+      present: Math.floor(Math.random() * (65 - 45 + 1) + 45), // Random between 45-65
+      total: Math.floor(Math.random() * (75 - 60 + 1) + 60) // Random between 60-75
+    }));
   };
+
+  // Initialize sessions
+  useEffect(() => {
+    setSessions(generateDummySessions());
+  }, []);
 
   // Update attendance every 5 minutes (300000 ms)
   useEffect(() => {
     const attendanceInterval = setInterval(() => {
       setSessions(prevSessions =>
-        prevSessions.map(session => {
-          const { present, total } = getRandomAttendance();
-          return {
-            ...session,
-            present,
-            total
-          };
-        })
+        prevSessions.map(session => ({
+          ...session,
+          present: Math.floor(Math.random() * (65 - 45 + 1) + 45), // Random between 45-65
+          total: Math.floor(Math.random() * (75 - 60 + 1) + 60) // Random between 60-75
+        }))
       );
     }, 300000); // 5 minutes
 
     return () => clearInterval(attendanceInterval);
-  }, []);
-
-  // Update stats every 10 seconds
-  useEffect(() => {
-    const statsInterval = setInterval(() => {
-      setStats({
-        avgAttendance: Math.floor(Math.random() * (96 - 88 + 1) + 88), // Random between 88-96%
-        avgCheckInTime: (Math.random() * (6 - 3) + 3).toFixed(1) // Random between 3-6 seconds
-      });
-    }, 10000); // 10 seconds
-
-    return () => clearInterval(statsInterval);
   }, []);
 
   return (
@@ -99,23 +62,22 @@ const LiveDashboardPreview = () => {
         backgroundSize: '28px 28px'
       }} />
       <div className="absolute top-0 right-0 w-1/2 h-1/2 rounded-full" style={{
-        background: 'rgba(21,93,252,0.05)',
+        background: `rgba(21,93,252,0.05)`,
         filter: 'blur(120px)'
       }} />
       <div className="absolute bottom-0 left-0 w-1/3 h-1/3 rounded-full" style={{
-        background: 'rgba(21,93,252,0.05)',
+        background: `rgba(21,93,252,0.05)`,
         filter: 'blur(100px)'
       }} />
 
       {/* Main Content */}
-      <div className="relative w-full max-w-4xl px-8 py-4 z-10">
+      <div className="relative w-full max-w-6xl px-8 py-4 z-10 overflow-y-auto max-h-screen">
         {/* Header Section */}
-        <DashboardHeader />
+        <DashboardHeader blueColor={BLUE_COLOR} />
 
-        {/* Cards Grid - 2 cards per row */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* First 3 Session Cards */}
-          {sessions.slice(0, 3).map((session, index) => (
+        {/* Cards Grid - 4 cards per row for 12 subjects */}
+        <div className="grid grid-cols-4 gap-4">
+          {sessions.map((session, index) => (
             <SessionCard
               key={index}
               code={session.code}
@@ -123,16 +85,27 @@ const LiveDashboardPreview = () => {
               location={session.location}
               present={session.present}
               total={session.total}
+              blueColor={BLUE_COLOR}
             />
           ))}
+        </div>
 
-          {/* Stats Cards - positioned after the 3rd card in the same row */}
-          <div className="grid grid-cols-2 gap-4">
-            <StatsGrid
-              avgAttendance={stats.avgAttendance}
-              avgCheckInTime={stats.avgCheckInTime}
-            />
-          </div>
+        {/* Stats Cards - Full width at bottom */}
+        <div className="mt-6 grid grid-cols-2 gap-4 max-w-md mx-auto">
+          <StatCard
+            icon="group"
+            value="92%"
+            label="Avg. Attendance"
+            color={BLUE_COLOR}
+            bgColor="bg-blue-50"
+          />
+          <StatCard
+            icon="speed"
+            value="4s"
+            label="Avg. Check-in Time"
+            color="#059669"
+            bgColor="bg-emerald-50"
+          />
         </div>
       </div>
     </main>
@@ -140,7 +113,7 @@ const LiveDashboardPreview = () => {
 };
 
 // Dashboard Header Component
-const DashboardHeader = () => {
+const DashboardHeader = ({ blueColor }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Update time every minute
@@ -168,14 +141,14 @@ const DashboardHeader = () => {
       <div>
         <div
           className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3"
-          style={{ background: 'rgba(21,93,252,0.08)', color: '#155dfc' }}
+          style={{ background: `rgba(21,93,252,0.08)`, color: blueColor }}
         >
           <span className="material-icons" style={{ fontSize: '12px' }}>dashboard</span>
           Live Dashboard Preview
         </div>
         <h3 className="text-2xl font-bold text-slate-900">Today's Sessions</h3>
         <p className="text-slate-500 mt-1 text-sm">
-          Spring 2026 • {formattedDate}
+          Spring 2026 • {formattedDate} • 12 Active Sessions
         </p>
       </div>
       <div className="text-right mb-1">
@@ -187,83 +160,58 @@ const DashboardHeader = () => {
 };
 
 // Session Card Component
-const SessionCard = ({ code, title, location, present, total }) => {
+const SessionCard = ({ code, title, location, present, total, blueColor }) => {
   const percentage = Math.round((present / total) * 100);
 
   return (
     <div
-      className="p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] transition-transform duration-200"
+      className="p-3 rounded-xl flex flex-col gap-2 hover:scale-[1.02] transition-transform duration-200"
       style={{
         background: 'rgba(255,255,255,0.75)',
         backdropFilter: 'blur(12px)',
         border: '1px solid rgba(255,255,255,0.5)',
-        borderLeft: '5px solid #155dfc',
+        borderLeft: `5px solid ${blueColor}`,
         boxShadow: '0 6px 24px 0 rgba(31,38,135,0.07)',
       }}
     >
       <div className="flex justify-between items-start">
         <div>
           <span
-            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded"
+            className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
             style={{
-              color: '#155dfc',
-              background: 'rgba(21,93,252,0.05)'
+              color: blueColor,
+              background: `rgba(21,93,252,0.05)`
             }}
           >
             {code}
           </span>
-          <h4 className="text-sm font-bold text-slate-800 mt-2 line-clamp-1">{title}</h4>
-          <div className="flex items-center gap-1.5 mt-0.5 text-slate-500">
-            <span className="material-icons" style={{ fontSize: '12px' }}>event</span>
-            <span className="text-[10px] font-medium">{location}</span>
+          <h4 className="text-xs font-bold text-slate-800 mt-1.5 line-clamp-1">{title}</h4>
+          <div className="flex items-center gap-1 mt-1 text-slate-500">
+            <span className="material-icons" style={{ fontSize: '10px' }}>event</span>
+            <span className="text-[8px] font-medium">{location}</span>
           </div>
         </div>
-        <div className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase shrink-0">
+        <div className="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-full text-[7px] font-bold uppercase shrink-0">
           Live
         </div>
       </div>
 
       {/* Attendance Section */}
-      <div>
-        <div className="flex justify-between items-end mb-1.5">
-          <span className="text-[9px] font-bold text-slate-500 uppercase">Mark Attendance</span>
-          <span className="text-xs font-bold" style={{ color: '#155dfc' }}>
+      <div className="mt-1">
+        <div className="flex justify-between items-end mb-1">
+          <span className="text-[8px] font-bold text-slate-500 uppercase">Attendance</span>
+          <span className="text-[10px] font-bold" style={{ color: blueColor }}>
             {present} / {total}
           </span>
         </div>
-        <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(21,93,252,0.06)' }}>
+        <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: `rgba(21,93,252,0.06)` }}>
           <div
             className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${percentage}%`, background: '#155dfc' }}
+            style={{ width: `${percentage}%`, background: blueColor }}
           />
         </div>
-        <p className="text-[8px] text-slate-400 mt-1.5 text-right">
-          {percentage}% attendance rate
-        </p>
       </div>
     </div>
-  );
-};
-
-// Stats Grid Component
-const StatsGrid = ({ avgAttendance, avgCheckInTime }) => {
-  return (
-    <>
-      <StatCard
-        icon="group"
-        value={`${avgAttendance}%`}
-        label="Avg. Attendance"
-        color="#155dfc"
-        bgColor="bg-blue-50"
-      />
-      <StatCard
-        icon="speed"
-        value={`${avgCheckInTime}s`}
-        label="Avg. Check-in Time"
-        color="#059669"
-        bgColor="bg-emerald-50"
-      />
-    </>
   );
 };
 
