@@ -24,7 +24,7 @@ const LoginPage = () => {
       .then((res) => {
         if (res.payload?.status === 'Success') {
           toast.success('Login successful');
-          setTimeout(() => {}, 2000);
+          setTimeout(() => { }, 2000);
           setFormData({ userEmail: '', userPassword: '' });
         } else if (res.payload?.status === 'Error') {
           toast.error(res.payload.message || 'Login failed');
@@ -69,13 +69,25 @@ const LoginPage = () => {
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 select-none" style={{ fontSize: '18px' }}>
               badge
             </span>
-            <input
+            {/* <input
               type="email"
               id="loginEmail"
               name="userEmail"
               value={formData.userEmail}
               onChange={handleLoginChange}
               placeholder="you@example.com"
+              style={inputBase}
+              onFocus={onFocus}
+              onBlur={onBlur}
+              className="w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 bg-white placeholder-slate-400 text-sm"
+            /> */}
+            <input
+              type="password"
+              id="loginPassword"
+              name="userPassword"
+              value={formData.userPassword}
+              onChange={handleLoginChange}
+              placeholder="••••••••"
               style={inputBase}
               onFocus={onFocus}
               onBlur={onBlur}
