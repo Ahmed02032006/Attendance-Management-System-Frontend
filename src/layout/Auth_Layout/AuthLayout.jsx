@@ -41,7 +41,7 @@ const AuthLayout = () => {
         {/* Footer */}
         <div className="px-8 lg:px-10 pb-5 pt-3 border-t border-slate-100 shrink-0">
           <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
-            <span>© 2026 EDU-SYSTEM</span>
+            <span>© 2026 ATTMARK</span>
             <div className="flex gap-4">
               <a href="#" className="hover:text-[#155dfc] transition-colors">IT Helpdesk</a>
               <a href="#" className="hover:text-[#155dfc] transition-colors">Guidelines</a>
