@@ -108,7 +108,7 @@ const LiveDashboardPreview = () => {
       }} />
 
       {/* Main Content */}
-      <div className="relative w-full max-w-5xl px-8 py-4 z-10">
+      <div className="relative w-full max-w-4xl px-8 py-4 z-10">
         {/* Header Section */}
         <DashboardHeader />
 
