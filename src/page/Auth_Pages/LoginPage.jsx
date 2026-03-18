@@ -10,6 +10,8 @@ const LoginPage = () => {
     userPassword: '',
   });
 
+  const [focusedField, setFocusedField] = useState(null);
+
   const handleLoginChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -35,21 +37,16 @@ const LoginPage = () => {
       .catch(() => toast.error('An unexpected error occurred.'));
   };
 
-  const handleFocus = (e) => {
-    e.target.style.borderColor = '#0047AB';
-    e.target.style.boxShadow = '0 0 0 3px rgba(0,71,171,0.1)';
-  };
-  const handleBlur = (e) => {
-    e.target.style.borderColor = '#E2E8F0';
-    e.target.style.boxShadow = 'none';
-  };
-
-  // Shared input style — border always set inline so Tailwind can't override it
-  const inputStyle = {
-    border: '1.5px solid #E2E8F0',
+  const getInputStyle = (fieldName) => ({
+    border: focusedField === fieldName
+      ? '1.5px solid #0047AB'
+      : '1.5px solid #E2E8F0',
+    boxShadow: focusedField === fieldName
+      ? '0 0 0 3px rgba(0,71,171,0.1)'
+      : 'none',
     outline: 'none',
     transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-  };
+  });
 
   return (
     <div className="w-full">
@@ -69,8 +66,12 @@ const LoginPage = () => {
           </label>
           <div className="relative">
             <span
-              className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 select-none"
-              style={{ fontSize: '18px' }}
+              className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none"
+              style={{
+                fontSize: '18px',
+                color: focusedField === 'userEmail' ? '#0047AB' : '#94A3B8',
+                transition: 'color 0.2s ease',
+              }}
             >
               badge
             </span>
@@ -81,9 +82,9 @@ const LoginPage = () => {
               value={formData.userEmail}
               onChange={handleLoginChange}
               placeholder="you@example.com"
-              style={inputStyle}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
+              style={getInputStyle('userEmail')}
+              onFocus={() => setFocusedField('userEmail')}
+              onBlur={() => setFocusedField(null)}
               className="w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 bg-white placeholder-slate-400 text-sm"
             />
           </div>
@@ -99,8 +100,12 @@ const LoginPage = () => {
           </div>
           <div className="relative">
             <span
-              className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 select-none"
-              style={{ fontSize: '18px' }}
+              className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none"
+              style={{
+                fontSize: '18px',
+                color: focusedField === 'userPassword' ? '#0047AB' : '#94A3B8',
+                transition: 'color 0.2s ease',
+              }}
             >
               key
             </span>
@@ -111,9 +116,9 @@ const LoginPage = () => {
               value={formData.userPassword}
               onChange={handleLoginChange}
               placeholder="••••••••"
-              style={inputStyle}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
+              style={getInputStyle('userPassword')}
+              onFocus={() => setFocusedField('userPassword')}
+              onBlur={() => setFocusedField(null)}
               className="w-full pl-10 pr-4 py-3 rounded-xl text-slate-800 bg-white placeholder-slate-400 text-sm"
             />
           </div>

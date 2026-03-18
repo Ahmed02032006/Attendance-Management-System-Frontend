@@ -24,7 +24,7 @@ const AuthLayout = () => {
               <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>verified_user</span>
             </div>
             <div>
-              <h1 className="text-lg font-extrabold tracking-widest leading-tight" style={{ color: '#0047AB' }}>
+              <h1 className="text-lg font-extrabold tracking-wider leading-tight" style={{ color: '#0047AB' }}>
                 ATTMARK
               </h1>
               <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">fOR UNIVERSITY</p>
