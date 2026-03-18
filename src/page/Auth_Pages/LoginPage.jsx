@@ -83,8 +83,8 @@ const LoginPage = () => {
             /> */}
             <input
               type="email"
-              id="loginEmail"
-              name="userPassword"
+              id="loginPassword"
+              name="userEmail"
               value={formData.userEmail}
               onChange={handleLoginChange}
               placeholder="you@example.com"
