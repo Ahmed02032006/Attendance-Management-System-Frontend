@@ -461,13 +461,6 @@ const TeacherDashboardLayout = () => {
               <Mail className="w-3 h-3 group-hover:scale-110 transition-transform" />
               <span>Technical Support</span>
             </a>
-            <a
-              href="#"
-              className="flex items-center space-x-1 hover:text-blue-600 transition-colors group"
-            >
-              <Mail className="w-3 h-3 group-hover:scale-110 transition-transform" />
-              <span>How to Use</span>
-            </a>
           </div>
         </div>
       </footer>

@@ -4,7 +4,7 @@ import LiveDashboardPreview from '../../components/LiveDashboardPreview';
 
 const AuthLayout = () => {
   return (
-    <div className="flex flex-col lg:flex-row h-screen w-full font-display overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen w-full overflow-hidden">
       {/* Left Panel - Form */}
       <aside
         className="w-full lg:w-[38%] xl:w-[34%] h-auto lg:h-full z-20 flex flex-col overflow-y-auto"
@@ -48,6 +48,9 @@ const AuthLayout = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-[#155dfc] transition-colors">Teachnical Support</a>
+              <a
+                href="#"
+                className="hover:text-[#155dfc] transition-colors">How to Use</a>
             </div>
           </div>
         </div>

@@ -181,15 +181,15 @@ const LoginPage = () => {
         </button>
       </form>
 
-      {/* Stats - Responsive grid */}
-      <div className="mt-4 sm:mt-5 grid grid-cols-2 gap-2 sm:gap-3">
-        <div className="p-2 sm:p-3 rounded-xl bg-slate-50 border border-slate-100">
-          <p className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase mb-0.5">Active Staff</p>
-          <p className="text-sm sm:text-base font-bold text-slate-700">1,240+</p>
+      {/* Stats */}
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <p className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">Active Staff</p>
+          <p className="text-base font-bold text-slate-700">1,240+</p>
         </div>
-        <div className="p-2 sm:p-3 rounded-xl bg-slate-50 border border-slate-100">
-          <p className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase mb-0.5">System Uptime</p>
-          <p className="text-sm sm:text-base font-bold text-slate-700">99.9%</p>
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <p className="text-[9px] font-bold text-slate-400 uppercase mb-0.5">System Uptime</p>
+          <p className="text-base font-bold text-slate-700">99.9%</p>
         </div>
       </div>
 

@@ -48,7 +48,7 @@ const LiveDashboardPreview = () => {
     setDisplaySessions(allSessions.slice(0, 3));
   }, []);
 
-  // Update displayed sessions every 5 minutes (300000 ms)
+  // Update displayed sessions every 1 minutes (60000 ms)
   useEffect(() => {
     if (sessions.length === 0) return;
 
@@ -72,7 +72,7 @@ const LiveDashboardPreview = () => {
         
         return sessions.slice(currentIndex, currentIndex + 3);
       });
-    }, 300000); // 5 minutes
+    }, ); // 1 minutes
 
     return () => clearInterval(rotationInterval);
   }, [sessions]);
@@ -190,7 +190,7 @@ const DashboardHeader = ({ blueColor }) => {
         </div>
         <h3 className="text-2xl font-bold text-slate-900">Today's Sessions</h3>
         <p className="text-slate-500 mt-1 text-sm">
-          Spring 2026 • {formattedDate} • 12 Active Sessions
+          Spring 2026 • {formattedDate}
         </p>
       </div>
       <div className="text-right mb-1">
