@@ -51,8 +51,8 @@ const LoginPage = () => {
           box-shadow: none;
         }
         .auth-input:focus {
-          border: 1.5px solid #155dfc !important;
-          box-shadow: 0 0 0 3px rgba(21,93,252,0.1) !important;
+          border: 1.5px solid #0047AB !important;
+          box-shadow: 0 0 0 3px rgba(0,71,171,0.1) !important;
         }
         /* Override browser autofill yellow/blue tint */
         .auth-input:-webkit-autofill,
@@ -64,8 +64,8 @@ const LoginPage = () => {
           transition: background-color 9999s ease-in-out 0s;
         }
         .auth-input:-webkit-autofill:focus {
-          border: 1.5px solid #155dfc !important;
-          box-shadow: 0 0 0 3px rgba(21,93,252,0.1) !important;
+          border: 1.5px solid #0047AB !important;
+          box-shadow: 0 0 0 3px rgba(0,71,171,0.1) !important;
         }
       `}</style>
 
@@ -89,7 +89,7 @@ const LoginPage = () => {
               className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none"
               style={{
                 fontSize: '18px',
-                color: focusedField === 'userEmail' ? '#155dfc' : '#94A3B8',
+                color: focusedField === 'userEmail' ? '#0047AB' : '#94A3B8',
                 transition: 'color 0.2s ease',
               }}
             >
@@ -115,14 +115,14 @@ const LoginPage = () => {
             <label htmlFor="loginPassword" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
               Security Key
             </label>
-            {/* <Link to="/auth/forgotPassword" style={{ color: '#155dfc' }} className="text-[10px] font-semibold hover:text-[#1045c4] transition-colors">Reset PIN</Link> */}
+            {/* <Link to="/auth/forgotPassword" style={{ color: '#0047AB' }} className="text-[10px] font-semibold hover:text-blue-800 transition-colors">Reset PIN</Link> */}
           </div>
           <div className="relative">
             <span
               className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none"
               style={{
                 fontSize: '18px',
-                color: focusedField === 'userPassword' ? '#155dfc' : '#94A3B8',
+                color: focusedField === 'userPassword' ? '#0047AB' : '#94A3B8',
                 transition: 'color 0.2s ease',
               }}
             >
@@ -148,7 +148,7 @@ const LoginPage = () => {
             <input
               type="checkbox"
               className="w-3.5 h-3.5 rounded border-slate-300"
-              style={{ accentColor: '#155dfc' }}
+              style={{ accentColor: '#0047AB' }}
             />
             <span className="text-xs font-medium text-slate-600">Keep session active</span>
           </label>
@@ -162,9 +162,9 @@ const LoginPage = () => {
         <button
           type="submit"
           className="w-full text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] text-sm"
-          style={{ background: '#155dfc', boxShadow: '0 6px 20px rgba(21,93,252,0.22)' }}
-          onMouseEnter={e => (e.currentTarget.style.background = '#1045c4')}
-          onMouseLeave={e => (e.currentTarget.style.background = '#155dfc')}
+          style={{ background: '#0047AB', boxShadow: '0 6px 20px rgba(0,71,171,0.22)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = '#003d96')}
+          onMouseLeave={e => (e.currentTarget.style.background = '#0047AB')}
         >
           Authorize Access
           <span className="material-icons" style={{ fontSize: '18px' }}>login</span>
@@ -190,7 +190,7 @@ const LoginPage = () => {
           <Link
             to="/auth/register"
             className="font-semibold hover:underline transition-colors"
-            style={{ color: '#155dfc' }}
+            style={{ color: '#0047AB' }}
           >
             Register here
           </Link>
