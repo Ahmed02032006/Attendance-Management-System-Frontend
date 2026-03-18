@@ -153,7 +153,7 @@ const LoginPage = () => {
         </div>
 
         {/* Options row - Responsive layout */}
-        <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-0 py-0.5">
+        <div className="flex flex-row items-start xs:items-center justify-between gap-2 xs:gap-0 py-0.5">
           <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer">
             <input
               type="checkbox"
