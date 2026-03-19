@@ -5,10 +5,7 @@ import {
   ArrowRight,
   GraduationCap,
   Sparkles,
-  ChevronDown,
-  Bell,
-  Settings,
-  User
+  ChevronDown
 } from 'lucide-react';
 
 const MainPage = () => {
@@ -80,7 +77,7 @@ const MainPage = () => {
                   Attmark
                 </span>
                 <span className="text-[10px] font-medium text-gray-400 block -mt-1">
-                  attendance simplified
+                  For University
                 </span>
               </div>
             </div>
@@ -116,38 +113,9 @@ const MainPage = () => {
                 </div>
               </div>
 
-              {/* Action Buttons with unique design */}
-              <div className="flex items-center space-x-3 ml-4">
-                {/* Notification Bell with badge */}
-                <button className="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
-                </button>
-                
-                {/* Profile with dropdown */}
-                <div className="relative group/profile">
-                  <button className="flex items-center space-x-2 p-1.5 pr-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl hover:from-blue-100 hover:to-cyan-100 transition-all border border-blue-100">
-                    <div className="w-7 h-7 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">Demo</span>
-                    <ChevronDown className="w-4 h-4 text-gray-500 group-hover/profile:rotate-180 transition-transform" />
-                  </button>
-                  
-                  {/* Profile Dropdown */}
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 opacity-0 invisible group-hover/profile:opacity-100 group-hover/profile:visible transition-all duration-300 transform translate-y-2 group-hover/profile:translate-y-0">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">Demo Account</p>
-                      <p className="text-xs text-gray-500">demo@attmark.com</p>
-                    </div>
-                    <a href="#dashboard" className="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600">Dashboard</a>
-                    <a href="#settings" className="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600">Settings</a>
-                    <a href="#logout" className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-xl">Sign out</a>
-                  </div>
-                </div>
-
-                {/* Primary CTA */}
-                <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-5 py-2 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-sm font-medium">
+              {/* Primary CTA - Smaller */}
+              <div className="ml-4">
+                <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-xs font-medium">
                   Get Started
                 </button>
               </div>
@@ -172,17 +140,6 @@ const MainPage = () => {
           isMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-4'
         }`}>
           <div className="px-4 py-4 space-y-3">
-            {/* Mobile Profile Section */}
-            <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Demo Account</p>
-                <p className="text-xs text-gray-500">demo@attmark.com</p>
-              </div>
-            </div>
-
             {/* Mobile Navigation Links */}
             <div className="space-y-1">
               <a href="#features" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">Features</a>
@@ -194,10 +151,10 @@ const MainPage = () => {
 
             {/* Mobile Action Buttons */}
             <div className="pt-3 space-y-2">
-              <button className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all font-medium">
+              <button className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all font-medium text-sm">
                 Get Started
               </button>
-              <button className="w-full border border-gray-300 text-gray-700 px-4 py-3 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all">
+              <button className="w-full border border-gray-300 text-gray-700 px-4 py-3 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all text-sm">
                 Sign In
               </button>
             </div>
@@ -208,9 +165,9 @@ const MainPage = () => {
       {/* Hero Section - Simplified */}
       <section className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto relative z-10 w-full">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             {/* Heading */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4">
               Track Attendance
               <br />
               <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
@@ -218,15 +175,15 @@ const MainPage = () => {
               </span>
             </h1>
             
-            {/* Subheading */}
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            {/* Subheading - Smaller font */}
+            <p className="text-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Manual entry or QR codes • Generate detailed reports • Export data instantly • 
               24/7 support for teachers
             </p>
           </div>
 
           {/* Dashboard Preview Image */}
-          <div className="relative max-w-5xl mx-auto mt-12">
+          <div className="relative max-w-5xl mx-auto mt-8">
             {/* Decorative elements around image */}
             <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10 animate-float"></div>
             <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-cyan-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
@@ -261,32 +218,32 @@ const MainPage = () => {
             </div>
 
             {/* Caption */}
-            <p className="text-center text-sm text-gray-500 mt-4">
+            <p className="text-center text-xs text-gray-500 mt-3">
               *Actual Attmark dashboard interface
             </p>
           </div>
 
-          {/* CTA Buttons below dashboard */}
-          <div className="flex flex-wrap gap-4 justify-center mt-12">
-            <button className="group bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-xl hover:shadow-xl hover:shadow-blue-500/30 transition-all transform hover:-translate-y-1 text-lg font-semibold inline-flex items-center">
+          {/* CTA Buttons below dashboard - Smaller */}
+          <div className="flex flex-wrap gap-3 justify-center mt-8">
+            <button className="group bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-sm font-semibold inline-flex items-center">
               Start tracking free
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="bg-white text-gray-700 px-8 py-4 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all transform hover:-translate-y-1 text-lg font-semibold border-2 border-gray-200">
+            <button className="bg-white text-gray-700 px-5 py-2.5 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all transform hover:-translate-y-0.5 text-sm font-semibold border border-gray-200">
               See how it works
             </button>
           </div>
 
-          {/* Trust indicators */}
-          <div className="flex items-center justify-center space-x-6 mt-8">
-            <div className="flex items-center text-sm text-gray-500">
-              <Sparkles className="w-4 h-4 text-blue-600 mr-1" />
+          {/* Trust indicators - Smaller */}
+          <div className="flex items-center justify-center space-x-4 mt-6">
+            <div className="flex items-center text-xs text-gray-500">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600 mr-1" />
               <span>No credit card required</span>
             </div>
             <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-            <div className="flex items-center text-sm text-gray-500">
-              <GraduationCap className="w-4 h-4 text-blue-600 mr-1" />
-              <span>Built for teachers</span>
+            <div className="flex items-center text-xs text-gray-500">
+              <GraduationCap className="w-3.5 h-3.5 text-blue-600 mr-1" />
+              <span>Built for universities</span>
             </div>
           </div>
         </div>
