@@ -74,7 +74,7 @@ const MainPage = () => {
 
             {/* Desktop Navigation - Centered */}
             <div className="hidden md:flex items-center justify-center flex-1">
-              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-2xl px-2 py-1.5 border border-white/20 shadow-sm">
+              <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-2xl px-2 py-1.5 border border-white/20 shadow-sm">
                 <a href="#features" className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all relative group">
                   Features
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
