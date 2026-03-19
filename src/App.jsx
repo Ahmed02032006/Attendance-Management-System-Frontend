@@ -21,6 +21,7 @@ import AdminComplaints_Page from './page/Admin_Pages/AdminComplaints_Page';
 import AdminIntegration_Page from './page/Admin_Pages/AdminIntegration_Page';
 import TeacherReport_Page from './page/Teacher_Pages/TeacherReport_Page';
 import AdminTrash_Page from './page/Admin_Pages/AdminTrash_Page';
+import MainPage from './page/Landing_Pages/Main_Page';
 
 const App = () => {
 
@@ -47,6 +48,7 @@ const App = () => {
       <Routes>
 
         {/* =====>] By Default [< ===== */}
+        <Route path="main" element={<MainPage />} />
         <Route path="/" element={<Navigate to="/auth/login" replace />} />
 
         {/* =====>] All Authentication Routes [<===== */}
