@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import {
   Menu,
   X,
-  ArrowRight,
   GraduationCap,
   Sparkles
 } from 'lucide-react';
@@ -11,6 +12,8 @@ const MainPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -96,7 +99,9 @@ const MainPage = () => {
 
             {/* Primary CTA */}
             <div className="hidden md:block">
-              <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform text-xs font-medium">
+              <button
+                onClick={() => navigate("/auth/register")}
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform text-xs font-medium">
                 Get Started
               </button>
             </div>
@@ -175,7 +180,7 @@ const MainPage = () => {
                     <div className="text-gray-400">Loading dashboard preview...</div>
                   </div>
                 )}
-                
+
                 {/* Actual Image */}
                 <img
                   src="/Pages-Picture/Attmark-Dashboard_Page.png"
