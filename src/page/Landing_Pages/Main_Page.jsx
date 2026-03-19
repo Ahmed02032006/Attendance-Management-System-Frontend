@@ -1,114 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Camera, 
-  FileText, 
-  Download, 
-  RefreshCw, 
-  MessageCircle, 
-  HeadphonesIcon,
-  CheckCircle,
-  ArrowRight,
   Menu,
   X,
-  Users,
-  BarChart3,
-  QrCode,
-  Clock,
-  Shield,
-  Mail,
-  ChevronRight,
+  ArrowRight,
+  GraduationCap,
   Sparkles,
-  GraduationCap
+  ChevronDown,
+  Bell,
+  Settings,
+  User
 } from 'lucide-react';
 
 const MainPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeFaq, setActiveFaq] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
     const handleMouseMove = (e) => {
       setMousePosition({
         x: (e.clientX / window.innerWidth) * 100,
         y: (e.clientY / window.innerHeight) * 100
       });
     };
+    
+    window.addEventListener('scroll', handleScroll);
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
   }, []);
-
-  const features = [
-    {
-      icon: <div className="relative"><Camera className="w-8 h-8 text-blue-600" /><QrCode className="w-4 h-4 text-blue-600 absolute -bottom-1 -right-1" /></div>,
-      title: "Flexible Attendance",
-      description: "Switch between manual entry and QR scanning seamlessly"
-    },
-    {
-      icon: <BarChart3 className="w-8 h-8 text-blue-600" />,
-      title: "Smart Reports",
-      description: "Generate detailed attendance reports with one click"
-    },
-    {
-      icon: <Download className="w-8 h-8 text-blue-600" />,
-      title: "Export Data",
-      description: "Export to Excel, PDF, or CSV formats instantly"
-    },
-    {
-      icon: <RefreshCw className="w-8 h-8 text-blue-600" />,
-      title: "Auto Recovery",
-      description: "Never lose data with automatic cloud backup"
-    },
-    {
-      icon: <MessageCircle className="w-8 h-8 text-blue-600" />,
-      title: "Smart Guide",
-      description: "Step-by-step guidance for new teachers"
-    },
-    {
-      icon: <HeadphonesIcon className="w-8 h-8 text-blue-600" />,
-      title: "24/7 Support",
-      description: "Round-the-clock assistance when you need it"
-    }
-  ];
-
-  const steps = [
-    {
-      title: "Create Account",
-      description: "Sign up with email or Google in seconds"
-    },
-    {
-      title: "Add Your Class",
-      description: "Import students or add them manually"
-    },
-    {
-      title: "Start Tracking",
-      description: "Take attendance manually or with QR codes"
-    }
-  ];
-
-  const faqs = [
-    {
-      q: "How do I switch between manual and QR attendance?",
-      a: "Simply tap the mode switch button on your dashboard. You can change modes anytime, even mid-session."
-    },
-    {
-      q: "Can I export data to my school's system?",
-      a: "Yes! Export to Excel, CSV, or PDF formats. Compatible with most school management systems."
-    },
-    {
-      q: "Is my data backed up automatically?",
-      a: "Absolutely. All attendance records are backed up in real-time to our secure cloud."
-    },
-    {
-      q: "How long does it take to set up?",
-      a: "Most teachers are up and running in under 2 minutes. No technical knowledge required."
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-white relative overflow-x-hidden">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* Gradient Orbs */}
         <div 
           className="absolute w-[500px] h-[500px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"
           style={{
@@ -125,344 +56,241 @@ const MainPage = () => {
             transform: 'translate(50%, 50%)'
           }}
         ></div>
-        
-        {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        
-        {/* Floating Particles */}
-        <div className="absolute top-0 left-0 w-full h-full">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-blue-400 rounded-full opacity-20 animate-particle"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${10 + Math.random() * 10}s`
-              }}
-            />
-          ))}
-        </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="relative bg-white/80 backdrop-blur-md border-b border-gray-200 fixed w-full z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <GraduationCap className="w-5 h-5 text-white" />
+      {/* Unique Navbar Design */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled 
+          ? 'bg-white/95 backdrop-blur-md shadow-lg py-2' 
+          : 'bg-transparent py-4'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            {/* Logo with unique design */}
+            <div className="flex items-center group">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                  <GraduationCap className="w-6 h-6 text-white" />
+                </div>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity"></div>
               </div>
-              <span className="text-xl font-bold text-blue-600">
-                Attmark
-              </span>
-            </div>
-            
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-600 hover:text-blue-600 transition text-sm">Features</a>
-              <a href="#about" className="text-gray-600 hover:text-blue-600 transition text-sm">About</a>
-              <a href="#how-it-works" className="text-gray-600 hover:text-blue-600 transition text-sm">How it Works</a>
-              <a href="#faq" className="text-gray-600 hover:text-blue-600 transition text-sm">FAQ</a>
-              <a href="#contact" className="text-gray-600 hover:text-blue-600 transition text-sm">Contact</a>
-              <button className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition text-sm">
-                Get Started
-              </button>
+              <div className="ml-3 overflow-hidden">
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent block leading-tight">
+                  Attmark
+                </span>
+                <span className="text-[10px] font-medium text-gray-400 block -mt-1">
+                  attendance simplified
+                </span>
+              </div>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {/* Desktop Navigation - Unique Design */}
+            <div className="hidden md:flex items-center space-x-1">
+              {/* Navigation Items with hover effects */}
+              <div className="flex items-center bg-gray-50/80 backdrop-blur-sm rounded-2xl px-2 py-1.5 border border-gray-200/50 shadow-sm">
+                <a href="#features" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all relative group">
+                  Features
+                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
+                </a>
+                <a href="#about" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all relative group">
+                  About
+                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
+                </a>
+                <a href="#pricing" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all relative group">
+                  Pricing
+                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
+                </a>
+                
+                {/* Dropdown Menu Example */}
+                <div className="relative group/more">
+                  <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all flex items-center">
+                    More
+                    <ChevronDown className="w-4 h-4 ml-1 group-hover/more:rotate-180 transition-transform" />
+                  </button>
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 opacity-0 invisible group-hover/more:opacity-100 group-hover/more:visible transition-all duration-300 transform translate-y-2 group-hover/more:translate-y-0">
+                    <a href="#faq" className="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 first:rounded-t-xl last:rounded-b-xl">FAQ</a>
+                    <a href="#contact" className="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600">Contact</a>
+                    <a href="#blog" className="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600">Blog</a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons with unique design */}
+              <div className="flex items-center space-x-3 ml-4">
+                {/* Notification Bell with badge */}
+                <button className="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+                </button>
+                
+                {/* Profile with dropdown */}
+                <div className="relative group/profile">
+                  <button className="flex items-center space-x-2 p-1.5 pr-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl hover:from-blue-100 hover:to-cyan-100 transition-all border border-blue-100">
+                    <div className="w-7 h-7 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Demo</span>
+                    <ChevronDown className="w-4 h-4 text-gray-500 group-hover/profile:rotate-180 transition-transform" />
+                  </button>
+                  
+                  {/* Profile Dropdown */}
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 opacity-0 invisible group-hover/profile:opacity-100 group-hover/profile:visible transition-all duration-300 transform translate-y-2 group-hover/profile:translate-y-0">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">Demo Account</p>
+                      <p className="text-xs text-gray-500">demo@attmark.com</p>
+                    </div>
+                    <a href="#dashboard" className="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600">Dashboard</a>
+                    <a href="#settings" className="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600">Settings</a>
+                    <a href="#logout" className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-xl">Sign out</a>
+                  </div>
+                </div>
+
+                {/* Primary CTA */}
+                <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-5 py-2 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-sm font-medium">
+                  Get Started
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile Menu Button - Unique Design */}
+            <button 
+              className="md:hidden relative w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center group"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <div className="absolute inset-0 bg-white rounded-xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
+              {isMenuOpen ? 
+                <X className="w-5 h-5 text-white" /> : 
+                <Menu className="w-5 h-5 text-white" />
+              }
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t">
-            <div className="px-4 py-2 space-y-2">
-              <a href="#features" className="block py-2 text-gray-600">Features</a>
-              <a href="#about" className="block py-2 text-gray-600">About</a>
-              <a href="#how-it-works" className="block py-2 text-gray-600">How it Works</a>
-              <a href="#faq" className="block py-2 text-gray-600">FAQ</a>
-              <a href="#contact" className="block py-2 text-gray-600">Contact</a>
-              <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg">
+        {/* Mobile Menu - Unique Design */}
+        <div className={`md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-xl transition-all duration-500 ${
+          isMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-4'
+        }`}>
+          <div className="px-4 py-4 space-y-3">
+            {/* Mobile Profile Section */}
+            <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Demo Account</p>
+                <p className="text-xs text-gray-500">demo@attmark.com</p>
+              </div>
+            </div>
+
+            {/* Mobile Navigation Links */}
+            <div className="space-y-1">
+              <a href="#features" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">Features</a>
+              <a href="#about" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">About</a>
+              <a href="#pricing" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">Pricing</a>
+              <a href="#faq" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">FAQ</a>
+              <a href="#contact" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">Contact</a>
+            </div>
+
+            {/* Mobile Action Buttons */}
+            <div className="pt-3 space-y-2">
+              <button className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all font-medium">
                 Get Started
+              </button>
+              <button className="w-full border border-gray-300 text-gray-700 px-4 py-3 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all">
+                Sign In
               </button>
             </div>
           </div>
-        )}
+        </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <div>
-              <div className="inline-flex items-center bg-blue-50 rounded-full px-4 py-2 mb-6">
-                <Sparkles className="w-4 h-4 text-blue-600 mr-2" />
-                <span className="text-sm font-medium text-blue-600">Introducing Attmark</span>
-              </div>
-              
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Attendance tracking
-                <br />
-                <span className="text-blue-600">made simple</span>
-              </h1>
-              
-              <p className="text-lg text-gray-600 mb-8">
-                Manual entry or QR codes • Generate reports • Export data • 24/7 support
-              </p>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-4 mb-8">
-                <button className="group bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition inline-flex items-center">
-                  Start free
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition" />
-                </button>
-                <button className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:border-blue-600 hover:text-blue-600 transition">
-                  Watch demo
-                </button>
-              </div>
-            </div>
-
-            {/* Right Content */}
-            <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-                alt="Teacher using tablet"
-                className="rounded-lg shadow-xl w-full h-auto relative z-10"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "https://via.placeholder.com/600x400?text=Attmark+Attendance";
-                }}
-              />
-              
-              {/* Decorative Elements */}
-              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-blue-100 rounded-lg -z-10"></div>
-              <div className="absolute -top-4 -left-4 w-32 h-32 bg-blue-50 rounded-lg -z-10"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="relative py-20 bg-white/50 backdrop-blur-sm px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto relative z-10">
+      {/* Hero Section - Simplified */}
+      <section className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
+        <div className="max-w-7xl mx-auto relative z-10 w-full">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              Simple features, powerful results
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Everything you need to manage attendance effectively
+            {/* Heading */}
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6">
+              Track Attendance
+              <br />
+              <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                The Smart Way
+              </span>
+            </h1>
+            
+            {/* Subheading */}
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Manual entry or QR codes • Generate detailed reports • Export data instantly • 
+              24/7 support for teachers
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg border border-gray-200 hover:border-blue-300 transition hover:shadow-lg backdrop-blur-sm">
-                <div className="mb-4">{feature.icon}</div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-sm text-gray-600">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="relative py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            About Attmark
-          </h2>
-          <div className="w-20 h-1 bg-blue-600 mx-auto mb-6"></div>
-          <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-            Attmark was built by teachers who wanted a better way to track attendance. 
-            We're on a mission to simplify classroom management with intuitive tools 
-            that save time and reduce paperwork.
-          </p>
-          <div className="grid md:grid-cols-3 gap-6 mt-12">
-            <div className="p-6 bg-white/50 backdrop-blur-sm rounded-lg border border-gray-200">
-              <div className="text-3xl font-bold text-blue-600 mb-2">🎯</div>
-              <div className="text-sm text-gray-600">Simple & Intuitive</div>
-            </div>
-            <div className="p-6 bg-white/50 backdrop-blur-sm rounded-lg border border-gray-200">
-              <div className="text-3xl font-bold text-blue-600 mb-2">⚡</div>
-              <div className="text-sm text-gray-600">Fast Setup</div>
-            </div>
-            <div className="p-6 bg-white/50 backdrop-blur-sm rounded-lg border border-gray-200">
-              <div className="text-3xl font-bold text-blue-600 mb-2">🛡️</div>
-              <div className="text-sm text-gray-600">Secure & Reliable</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="relative py-20 bg-white/50 backdrop-blur-sm px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              Get started in 3 simple steps
-            </h2>
-            <p className="text-gray-600">
-              No complicated setup, no learning curve
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {steps.map((step, index) => (
-              <div key={index} className="relative text-center">
-                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                  {index + 1}
+          {/* Dashboard Preview Image */}
+          <div className="relative max-w-5xl mx-auto mt-12">
+            {/* Decorative elements around image */}
+            <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10 animate-float"></div>
+            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-cyan-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-r from-blue-200 to-cyan-200 rounded-full blur-3xl opacity-30 -z-10"></div>
+            
+            {/* Main Image Container */}
+            <div className="relative group">
+              {/* Glow effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity"></div>
+              
+              {/* Image with shadow */}
+              <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+                <img 
+                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                  alt="Attmark Dashboard Preview"
+                  className="w-full h-auto object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://via.placeholder.com/1200x600?text=Attmark+Dashboard+Preview";
+                  }}
+                />
+                
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none"></div>
+                
+                {/* Status indicator */}
+                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium text-blue-600 border border-blue-200 shadow-sm flex items-center">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                  Live Preview
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-sm text-gray-600">{step.description}</p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section id="faq" className="relative py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              Frequently asked questions
-            </h2>
-            <p className="text-gray-600">
-              Everything you need to know about Attmark
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {faqs.map((faq, index) => (
-              <div key={index} className="bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg overflow-hidden">
-                <button
-                  className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-white/80 transition"
-                  onClick={() => setActiveFaq(activeFaq === index ? null : index)}
-                >
-                  <span className="font-medium text-gray-900">{faq.q}</span>
-                  <span className="text-xl text-gray-400">{activeFaq === index ? '−' : '+'}</span>
-                </button>
-                {activeFaq === index && (
-                  <div className="px-6 pb-4 text-sm text-gray-600">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="relative py-20 bg-white/50 backdrop-blur-sm px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              Get in touch
-            </h2>
-            <p className="text-gray-600">
-              We'd love to hear from you
-            </p>
-          </div>
-
-          {/* Simple Contact Form */}
-          <form className="bg-white p-8 rounded-lg border border-gray-200 backdrop-blur-sm">
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <input
-                type="text"
-                placeholder="Your name"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 bg-white/80"
-              />
-              <input
-                type="email"
-                placeholder="Your email"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 bg-white/80"
-              />
             </div>
-            <input
-              type="text"
-              placeholder="Subject"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-blue-600 bg-white/80"
-            />
-            <textarea
-              rows="4"
-              placeholder="Your message"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-blue-600 bg-white/80"
-            ></textarea>
-            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-              Send Message
+
+            {/* Caption */}
+            <p className="text-center text-sm text-gray-500 mt-4">
+              *Actual Attmark dashboard interface
+            </p>
+          </div>
+
+          {/* CTA Buttons below dashboard */}
+          <div className="flex flex-wrap gap-4 justify-center mt-12">
+            <button className="group bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-xl hover:shadow-xl hover:shadow-blue-500/30 transition-all transform hover:-translate-y-1 text-lg font-semibold inline-flex items-center">
+              Start tracking free
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </button>
-          </form>
-        </div>
-      </section>
+            <button className="bg-white text-gray-700 px-8 py-4 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all transform hover:-translate-y-1 text-lg font-semibold border-2 border-gray-200">
+              See how it works
+            </button>
+          </div>
 
-      {/* CTA Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Ready to simplify attendance?
-          </h2>
-          <p className="text-gray-600 mb-8">
-            Join Attmark today and start saving time
-          </p>
-          <button className="group bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition inline-flex items-center">
-            Get started now
-            <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition" />
-          </button>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="relative bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-lg font-bold">Attmark</span>
-              </div>
-              <p className="text-gray-400 text-sm">
-                Simple attendance tracking for teachers
-              </p>
+          {/* Trust indicators */}
+          <div className="flex items-center justify-center space-x-6 mt-8">
+            <div className="flex items-center text-sm text-gray-500">
+              <Sparkles className="w-4 h-4 text-blue-600 mr-1" />
+              <span>No credit card required</span>
             </div>
-            <div>
-              <h4 className="font-semibold text-sm mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#features" className="hover:text-white transition">Features</a></li>
-                <li><a href="#about" className="hover:text-white transition">About</a></li>
-                <li><a href="#how-it-works" className="hover:text-white transition">How it Works</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#faq" className="hover:text-white transition">FAQ</a></li>
-                <li><a href="#contact" className="hover:text-white transition">Contact</a></li>
-                <li><a href="#help" className="hover:text-white transition">Help Center</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#privacy" className="hover:text-white transition">Privacy</a></li>
-                <li><a href="#terms" className="hover:text-white transition">Terms</a></li>
-              </ul>
+            <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+            <div className="flex items-center text-sm text-gray-500">
+              <GraduationCap className="w-4 h-4 text-blue-600 mr-1" />
+              <span>Built for teachers</span>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-            <p>&copy; 2024 Attmark. All rights reserved.</p>
-          </div>
         </div>
-      </footer>
+      </section>
 
       <style jsx>{`
         @keyframes float {
@@ -476,17 +304,6 @@ const MainPage = () => {
         }
         .animation-delay-2000 {
           animation-delay: 2s;
-        }
-        @keyframes particle {
-          0% { transform: translate(0, 0) scale(1); opacity: 0; }
-          10% { opacity: 0.2; }
-          90% { opacity: 0.2; }
-          100% { transform: translate(calc(100vw * var(--direction-x, 1)), calc(100vh * var(--direction-y, 1))) scale(0); opacity: 0; }
-        }
-        .animate-particle {
-          animation: particle linear infinite;
-          --direction-x: ${Math.random() > 0.5 ? 1 : -1};
-          --direction-y: ${Math.random() > 0.5 ? 1 : -1};
         }
       `}</style>
     </div>
