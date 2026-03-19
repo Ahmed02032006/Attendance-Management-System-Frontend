@@ -5,7 +5,8 @@ import {
   ArrowRight,
   GraduationCap,
   Sparkles,
-  ChevronDown
+  ChevronDown,
+  LogIn
 } from 'lucide-react';
 
 const MainPage = () => {
@@ -64,7 +65,7 @@ const MainPage = () => {
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            {/* Logo with unique design */}
+            {/* Logo on left */}
             <div className="flex items-center group">
               <div className="relative">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300 shadow-lg">
@@ -82,9 +83,8 @@ const MainPage = () => {
               </div>
             </div>
 
-            {/* Desktop Navigation - Unique Design */}
-            <div className="hidden md:flex items-center space-x-1">
-              {/* Navigation Items with hover effects */}
+            {/* Centered Navigation */}
+            <div className="hidden md:flex items-center absolute left-1/2 transform -translate-x-1/2">
               <div className="flex items-center bg-gray-50/80 backdrop-blur-sm rounded-2xl px-2 py-1.5 border border-gray-200/50 shadow-sm">
                 <a href="#features" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all relative group">
                   Features
@@ -99,7 +99,7 @@ const MainPage = () => {
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
                 </a>
                 
-                {/* Dropdown Menu Example */}
+                {/* Dropdown Menu for More */}
                 <div className="relative group/more">
                   <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all flex items-center">
                     More
@@ -112,13 +112,14 @@ const MainPage = () => {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Primary CTA - Smaller */}
-              <div className="ml-4">
-                <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-xs font-medium">
-                  Get Started
-                </button>
-              </div>
+            {/* Login Button on right */}
+            <div className="hidden md:block">
+              <button className="flex items-center space-x-2 bg-white text-gray-700 px-4 py-2 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all border border-gray-200 text-xs font-medium">
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Login</span>
+              </button>
             </div>
 
             {/* Mobile Menu Button - Unique Design */}
@@ -135,7 +136,7 @@ const MainPage = () => {
           </div>
         </div>
 
-        {/* Mobile Menu - Unique Design */}
+        {/* Mobile Menu */}
         <div className={`md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-xl transition-all duration-500 ${
           isMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-4'
         }`}>
@@ -154,15 +155,16 @@ const MainPage = () => {
               <button className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all font-medium text-sm">
                 Get Started
               </button>
-              <button className="w-full border border-gray-300 text-gray-700 px-4 py-3 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all text-sm">
-                Sign In
+              <button className="w-full border border-gray-300 text-gray-700 px-4 py-3 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all text-sm flex items-center justify-center">
+                <LogIn className="w-4 h-4 mr-2" />
+                Login
               </button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section - Simplified */}
+      {/* Hero Section */}
       <section className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto relative z-10 w-full">
           <div className="text-center mb-8">
@@ -175,7 +177,7 @@ const MainPage = () => {
               </span>
             </h1>
             
-            {/* Subheading - Smaller font */}
+            {/* Subheading */}
             <p className="text-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Manual entry or QR codes • Generate detailed reports • Export data instantly • 
               24/7 support for teachers
@@ -197,7 +199,7 @@ const MainPage = () => {
               {/* Image with shadow */}
               <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
                 <img 
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                  src="https://images.ctfassets.net/dfcvkz6j859j/3yyuVQqgzMOMr2AGytPI4u/85f2a29fa2b977819e36531d96c85fa2/Web-Analytics-Dashboard-Template-Example.png"
                   alt="Attmark Dashboard Preview"
                   className="w-full h-auto object-cover"
                   onError={(e) => {
@@ -223,7 +225,7 @@ const MainPage = () => {
             </p>
           </div>
 
-          {/* CTA Buttons below dashboard - Smaller */}
+          {/* CTA Buttons below dashboard */}
           <div className="flex flex-wrap gap-3 justify-center mt-8">
             <button className="group bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-sm font-semibold inline-flex items-center">
               Start tracking free
@@ -234,7 +236,7 @@ const MainPage = () => {
             </button>
           </div>
 
-          {/* Trust indicators - Smaller */}
+          {/* Trust indicators */}
           <div className="flex items-center justify-center space-x-4 mt-6">
             <div className="flex items-center text-xs text-gray-500">
               <Sparkles className="w-3.5 h-3.5 text-blue-600 mr-1" />
