@@ -195,7 +195,7 @@ const MainPage = () => {
           {/* CTA Buttons and Trust Indicators - Redesigned */}
           <div className="flex flex-col items-center mt-8 space-y-4">
             {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-3 justify-center">
+            {/* <div className="flex flex-wrap gap-3 justify-center">
               <button className="group bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-sm font-semibold inline-flex items-center">
                 Start tracking free
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -203,15 +203,15 @@ const MainPage = () => {
               <button className="bg-white text-gray-700 px-6 py-3 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all transform hover:-translate-y-0.5 text-sm font-semibold border border-gray-200">
                 See how it works
               </button>
-            </div>
+            </div> */}
 
             {/* Trust indicators - Redesigned as chips */}
             <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
-              <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full text-xs text-gray-600 border border-gray-200">
+              <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full text-xs text-gray-600 border border-gray-300">
                 <Sparkles className="w-3.5 h-3.5 text-blue-600 mr-1.5" />
                 <span>No credit card required</span>
               </div>
-              <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full text-xs text-gray-600 border border-gray-200">
+              <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full text-xs text-gray-600 border border-gray-300">
                 <GraduationCap className="w-3.5 h-3.5 text-blue-600 mr-1.5" />
                 <span>Built for teachers</span>
               </div>
