@@ -224,7 +224,7 @@ const MainPage = () => {
         </div>
       </section>
 
-      <style jsx>{`
+      {/* <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translate(0, 0) scale(1); }
           25% { transform: translate(10px, -10px) scale(1.05); }
@@ -237,7 +237,7 @@ const MainPage = () => {
         .animation-delay-2000 {
           animation-delay: 2s;
         }
-      `}</style>
+      `}</style> */}
     </div>
   );
 };
