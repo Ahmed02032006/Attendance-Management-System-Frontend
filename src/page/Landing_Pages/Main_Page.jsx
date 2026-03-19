@@ -100,7 +100,7 @@ const MainPage = () => {
 
             {/* Primary CTA */}
             <div className="hidden md:block">
-              <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-xs font-medium">
+              <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform text-xs font-medium">
                 Get Started
               </button>
             </div>
