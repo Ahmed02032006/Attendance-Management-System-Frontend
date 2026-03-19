@@ -72,9 +72,13 @@ const MainPage = () => {
               </div>
             </div>
 
-            {/* Desktop Navigation - Centered with About, Features, FAQs, Contact */}
+            {/* Desktop Navigation - Centered with Hero, About, Features, FAQs, Contact */}
             <div className="hidden md:flex items-center justify-center flex-1">
               <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-2xl px-2 py-1.5 border border-white/20 shadow-sm">
+                <a href="#hero" className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all relative group">
+                  Hero
+                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
+                </a>
                 <a href="#about" className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all relative group">
                   About
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
@@ -120,6 +124,7 @@ const MainPage = () => {
           }`}>
           <div className="px-4 py-4 space-y-3">
             <div className="space-y-1">
+              <a href="#hero" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">Hero</a>
               <a href="#about" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">About</a>
               <a href="#features" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">Features</a>
               <a href="#faqs" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">FAQs</a>
@@ -137,8 +142,8 @@ const MainPage = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
+      {/* Hero Section with ID for navigation */}
+      <section id="hero" className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto relative z-10 w-full">
           <div className="text-center mb-8">
             {/* Heading */}
@@ -192,20 +197,9 @@ const MainPage = () => {
             </div>
           </div>
 
-          {/* CTA Buttons and Trust Indicators - Redesigned */}
+          {/* Trust Indicators */}
           <div className="flex flex-col items-center mt-4 space-y-4">
-            {/* CTA Buttons */}
-            {/* <div className="flex flex-wrap gap-3 justify-center">
-              <button className="group bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-sm font-semibold inline-flex items-center">
-                Start tracking free
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button className="bg-white text-gray-700 px-6 py-3 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all transform hover:-translate-y-0.5 text-sm font-semibold border border-gray-200">
-                See how it works
-              </button>
-            </div> */}
-
-            {/* Trust indicators - Redesigned as chips */}
+            {/* Trust indicators */}
             <div className="flex flex-wrap items-center justify-center gap-3">
               <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full text-xs text-gray-600 border border-gray-300">
                 <Sparkles className="w-3.5 h-3.5 text-blue-600 mr-1.5" />
