@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import {
   Menu,
   X,
   GraduationCap,
   Sparkles
 } from 'lucide-react';
+import About from '../../components/Landing_Page/About';
+import Features from '../../components/Landing_Page/Features';
+import FAQs from '../../components/Landing_Page/FAQs';
+import Contact from '../../components/Landing_Page/Contact';
+
 
 const MainPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -131,7 +135,12 @@ const MainPage = () => {
               <a href="#contact" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">Contact</a>
             </div>
             <div className="pt-3 space-y-2">
-              <button className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all font-medium text-sm">
+              <button 
+                onClick={() => {
+                  navigate("/auth/register");
+                  setIsMenuOpen(false);
+                }}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all font-medium text-sm">
                 Get Started
               </button>
               <button className="w-full border border-gray-300 text-gray-700 px-4 py-3 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all text-sm">
@@ -143,7 +152,7 @@ const MainPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
+      <section id="hero" className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto relative z-10 w-full">
           <div className="text-center mb-8">
             {/* Heading */}
@@ -176,7 +185,7 @@ const MainPage = () => {
               <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
                 {/* Loading Skeleton */}
                 {!imageLoaded && (
-                  <div className="w-full aspect-[16/9] bg-gray-200 animate-pulse flex items-center justify-center">
+                  <div className="w-full aspect-video bg-gray-200 animate-pulse flex items-center justify-center">
                     <div className="text-gray-400">Loading dashboard preview...</div>
                   </div>
                 )}
@@ -213,6 +222,12 @@ const MainPage = () => {
           </div>
         </div>
       </section>
+
+      {/* All Section Components */}
+      <About />
+      <Features />
+      <FAQs />
+      <Contact />
 
       <style jsx>{`
         @keyframes float {
