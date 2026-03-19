@@ -50,23 +50,23 @@ const MainPage = () => {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
       </div>
 
-      {/* Navbar - Consistent background matching Attmark/University theme */}
-      <nav className="fixed top-0 left-0 right-0 z-50 py-4 bg-gradient-to-r from-blue-600/90 to-cyan-600/90 backdrop-blur-md">
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 py-4 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center group">
+            {/* Logo with same blurry background as navigation */}
+            <div className="flex items-center group bg-white/10 backdrop-blur-sm rounded-2xl px-3 py-1.5 border border-white/20 shadow-sm">
               <div className="relative">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300 shadow-lg">
-                  <GraduationCap className="w-6 h-6 text-blue-600" />
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                  <GraduationCap className="w-5 h-5 text-white" />
                 </div>
-                <div className="absolute -inset-0.5 bg-white rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity"></div>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity"></div>
               </div>
-              <div className="ml-3 overflow-hidden">
-                <span className="text-xl font-bold text-white block leading-tight">
+              <div className="ml-2 overflow-hidden">
+                <span className="text-base font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent block leading-tight">
                   Attmark
                 </span>
-                <span className="text-[10px] font-medium text-white/80 block -mt-1">
+                <span className="text-[8px] font-medium text-gray-500 block -mt-0.5">
                   For University
                 </span>
               </div>
@@ -74,23 +74,23 @@ const MainPage = () => {
 
             {/* Desktop Navigation - Centered */}
             <div className="hidden md:flex items-center justify-center flex-1">
-              <div className="flex items-center bg-white/20 backdrop-blur-sm rounded-2xl px-2 py-1.5 border border-white/30 shadow-sm">
-                <a href="#features" className="px-4 py-2 text-sm font-medium text-white hover:text-white rounded-xl hover:bg-white/20 transition-all relative group">
+              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-2xl px-2 py-1.5 border border-white/20 shadow-sm">
+                <a href="#features" className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all relative group">
                   Features
-                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-1/2 transition-all duration-300"></span>
+                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
                 </a>
-                <a href="#about" className="px-4 py-2 text-sm font-medium text-white hover:text-white rounded-xl hover:bg-white/20 transition-all relative group">
+                <a href="#about" className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all relative group">
                   About
-                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-1/2 transition-all duration-300"></span>
+                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
                 </a>
-                <a href="#pricing" className="px-4 py-2 text-sm font-medium text-white hover:text-white rounded-xl hover:bg-white/20 transition-all relative group">
+                <a href="#pricing" className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all relative group">
                   Pricing
-                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-1/2 transition-all duration-300"></span>
+                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
                 </a>
                 
                 {/* Dropdown Menu */}
                 <div className="relative group/more">
-                  <button className="px-4 py-2 text-sm font-medium text-white hover:text-white rounded-xl hover:bg-white/20 transition-all flex items-center">
+                  <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-xl hover:bg-white/80 transition-all flex items-center">
                     More
                     <ChevronDown className="w-4 h-4 ml-1 group-hover/more:rotate-180 transition-transform" />
                   </button>
@@ -103,16 +103,16 @@ const MainPage = () => {
               </div>
             </div>
 
-            {/* Primary CTA - Right aligned */}
+            {/* Primary CTA */}
             <div className="hidden md:block">
-              <button className="bg-white text-blue-600 px-4 py-2 rounded-xl hover:shadow-lg hover:shadow-white/30 transition-all transform hover:-translate-y-0.5 text-xs font-medium">
+              <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 text-xs font-medium">
                 Get Started
               </button>
             </div>
 
             {/* Mobile Menu Button */}
             <button 
-              className="md:hidden relative w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center group border border-white/30"
+              className="md:hidden relative w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center group"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <div className="absolute inset-0 bg-white rounded-xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
@@ -125,22 +125,22 @@ const MainPage = () => {
         </div>
 
         {/* Mobile Menu */}
-        <div className={`md:hidden absolute top-full left-0 right-0 bg-gradient-to-r from-blue-600 to-cyan-600 backdrop-blur-md border-t border-white/20 shadow-xl transition-all duration-500 ${
+        <div className={`md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-xl transition-all duration-500 ${
           isMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-4'
         }`}>
           <div className="px-4 py-4 space-y-3">
             <div className="space-y-1">
-              <a href="#features" className="block px-4 py-3 text-white hover:bg-white/20 rounded-xl transition-all">Features</a>
-              <a href="#about" className="block px-4 py-3 text-white hover:bg-white/20 rounded-xl transition-all">About</a>
-              <a href="#pricing" className="block px-4 py-3 text-white hover:bg-white/20 rounded-xl transition-all">Pricing</a>
-              <a href="#faq" className="block px-4 py-3 text-white hover:bg-white/20 rounded-xl transition-all">FAQ</a>
-              <a href="#contact" className="block px-4 py-3 text-white hover:bg-white/20 rounded-xl transition-all">Contact</a>
+              <a href="#features" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">Features</a>
+              <a href="#about" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">About</a>
+              <a href="#pricing" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">Pricing</a>
+              <a href="#faq" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">FAQ</a>
+              <a href="#contact" className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">Contact</a>
             </div>
             <div className="pt-3 space-y-2">
-              <button className="w-full bg-white text-blue-600 px-4 py-3 rounded-xl hover:shadow-lg transition-all font-medium text-sm">
+              <button className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all font-medium text-sm">
                 Get Started
               </button>
-              <button className="w-full border border-white text-white px-4 py-3 rounded-xl hover:bg-white/20 transition-all text-sm">
+              <button className="w-full border border-gray-300 text-gray-700 px-4 py-3 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all text-sm">
                 Sign In
               </button>
             </div>
@@ -161,26 +161,24 @@ const MainPage = () => {
               </span>
             </h1>
             
-            {/* Subheading - Balanced description */}
-            <p className="text-sm text-gray-600 max-w-2xl mx-auto">
-              A complete attendance management solution for universities. 
-              Track via QR codes or manual entry, generate reports, and export data instantly.
+            {/* Subheading - Shorter and balanced */}
+            <p className="text-sm text-gray-600 max-w-xl mx-auto leading-relaxed">
+              Simple attendance tracking with manual entry or QR codes. 
+              Generate reports, export data, and get 24/7 support.
             </p>
           </div>
 
           {/* Dashboard Preview Image */}
           <div className="relative max-w-5xl mx-auto mt-8">
-            {/* Decorative elements around image */}
+            {/* Decorative elements */}
             <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10 animate-float"></div>
             <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-cyan-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-r from-blue-200 to-cyan-200 rounded-full blur-3xl opacity-30 -z-10"></div>
             
             {/* Main Image Container */}
             <div className="relative group">
-              {/* Glow effect */}
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity"></div>
               
-              {/* Image with shadow */}
               <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
                 <img 
                   src="https://images.ctfassets.net/dfcvkz6j859j/3yyuVQqgzMOMr2AGytPI4u/85f2a29fa2b977819e36531d96c85fa2/Web-Analytics-Dashboard-Template-Example.png"
@@ -192,12 +190,10 @@ const MainPage = () => {
                   }}
                 />
                 
-                {/* Overlay gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none"></div>
               </div>
             </div>
 
-            {/* Caption */}
             <p className="text-center text-xs text-gray-500 mt-3">
               *Actual Attmark dashboard interface
             </p>
