@@ -370,7 +370,7 @@ const MainPage = () => {
       </div>
 
       {/* Footer */}
-      {/* <Footer /> */}
+      <Footer />
 
       <style jsx>{`
         @keyframes float {
