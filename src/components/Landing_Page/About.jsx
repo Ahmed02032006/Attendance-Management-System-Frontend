@@ -123,15 +123,11 @@ const About = () => {
                 <p className="text-gray-600 text-sm">
                   Simple dashboard interface for quick attendance tracking
                 </p>
-                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
-                  <Clock className="w-3 h-3" />
-                  <span>Real-time updates</span>
-                </div>
               </div>
             </div>
             {/* Decorative elements matching home section */}
             <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10 animate-float"></div>
-            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-cyan-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
+            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-sky-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
           </div>
         </div>
 
