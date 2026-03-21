@@ -128,41 +128,6 @@ const About = () => {
           </div>
         </div>
 
-        {/* Simple Mission & Vision Cards - Clean and Minimal */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-6 border border-blue-100">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <Target className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Our Mission</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Provide universities with a simple, effective attendance management tool that saves time and reduces manual work.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-cyan-50 to-white rounded-xl p-6 border border-cyan-100">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center">
-                  <HeartHandshake className="w-6 h-6 text-cyan-600" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">What We Offer</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  A straightforward platform for tracking attendance, generating reports, and managing student records efficiently.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Simple Footer Note */}
         <div className="mt-12 text-center">
           <p className="text-xs text-gray-400">
