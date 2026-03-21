@@ -91,7 +91,7 @@ const About = () => {
                   <div className="w-3 h-3 rounded-full bg-red-400"></div>
                   <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
                   <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                  <span className="text-xs text-gray-500 ml-2">attmark-dashboard</span>
+                  <span className="text-xs text-gray-500 ml-2">attmark-attendance-page</span>
                 </div>
                 <div className="space-y-3">
                   <div className="h-8 bg-white rounded-lg border border-gray-200 flex items-center px-3">
@@ -102,7 +102,7 @@ const About = () => {
                   <div className="relative">
                     {!imageLoaded && (
                       <div className="w-full aspect-video bg-gray-200 animate-pulse flex items-center justify-center rounded-lg">
-                        <div className="text-gray-400 text-sm">Loading dashboard preview...</div>
+                        <div className="text-gray-400 text-sm">Loading attendance preview...</div>
                       </div>
                     )}
                     <img
@@ -121,7 +121,7 @@ const About = () => {
               </div>
               <div className="p-6 text-center">
                 <p className="text-gray-600 text-sm">
-                  Simple dashboard interface for quick attendance tracking
+                  Simple attendance interface for quick attendance tracking
                 </p>
               </div>
             </div>

@@ -10,6 +10,7 @@ import About from '../../components/Landing_Page/About';
 import Features from '../../components/Landing_Page/Features';
 import FAQs from '../../components/Landing_Page/FAQs';
 import Contact from '../../components/Landing_Page/Contact';
+import Footer from '../../components/Landing_Page/Footer';
 
 const MainPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -115,11 +116,10 @@ const MainPage = () => {
               <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-2xl px-2 py-1.5 border border-white/20 shadow-sm">
                 <button
                   onClick={() => scrollToSection('hero')}
-                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${
-                    activeSection === 'hero'
+                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${activeSection === 'hero'
                       ? 'text-blue-600 bg-white/80'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-white/80'
-                  }`}
+                    }`}
                 >
                   Home
                   {activeSection === 'hero' && (
@@ -131,11 +131,10 @@ const MainPage = () => {
                 </button>
                 <button
                   onClick={() => scrollToSection('about')}
-                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${
-                    activeSection === 'about'
+                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${activeSection === 'about'
                       ? 'text-blue-600 bg-white/80'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-white/80'
-                  }`}
+                    }`}
                 >
                   About
                   {activeSection === 'about' && (
@@ -147,11 +146,10 @@ const MainPage = () => {
                 </button>
                 <button
                   onClick={() => scrollToSection('features')}
-                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${
-                    activeSection === 'features'
+                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${activeSection === 'features'
                       ? 'text-blue-600 bg-white/80'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-white/80'
-                  }`}
+                    }`}
                 >
                   Features
                   {activeSection === 'features' && (
@@ -163,11 +161,10 @@ const MainPage = () => {
                 </button>
                 <button
                   onClick={() => scrollToSection('faqs')}
-                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${
-                    activeSection === 'faqs'
+                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${activeSection === 'faqs'
                       ? 'text-blue-600 bg-white/80'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-white/80'
-                  }`}
+                    }`}
                 >
                   FAQs
                   {activeSection === 'faqs' && (
@@ -179,11 +176,10 @@ const MainPage = () => {
                 </button>
                 <button
                   onClick={() => scrollToSection('contact')}
-                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${
-                    activeSection === 'contact'
+                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${activeSection === 'contact'
                       ? 'text-blue-600 bg-white/80'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-white/80'
-                  }`}
+                    }`}
                 >
                   Contact
                   {activeSection === 'contact' && (
@@ -226,57 +222,52 @@ const MainPage = () => {
             <div className="space-y-1">
               <button
                 onClick={() => scrollToSection('hero')}
-                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${
-                  activeSection === 'hero'
+                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${activeSection === 'hero'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 Home
               </button>
               <button
                 onClick={() => scrollToSection('about')}
-                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${
-                  activeSection === 'about'
+                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${activeSection === 'about'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 About
               </button>
               <button
                 onClick={() => scrollToSection('features')}
-                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${
-                  activeSection === 'features'
+                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${activeSection === 'features'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 Features
               </button>
               <button
                 onClick={() => scrollToSection('faqs')}
-                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${
-                  activeSection === 'faqs'
+                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${activeSection === 'faqs'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 FAQs
               </button>
               <button
                 onClick={() => scrollToSection('contact')}
-                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${
-                  activeSection === 'contact'
+                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${activeSection === 'contact'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 Contact
               </button>
             </div>
             <div className="pt-3 space-y-2">
-              <button 
+              <button
                 onClick={() => {
                   navigate("/auth/register");
                   setIsMenuOpen(false);
@@ -377,6 +368,9 @@ const MainPage = () => {
       <div id="contact">
         <Contact />
       </div>
+
+      {/* Footer */}
+      <Footer />
 
       <style jsx>{`
         @keyframes float {
