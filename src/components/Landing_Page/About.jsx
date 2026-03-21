@@ -108,7 +108,7 @@ const About = () => {
                   </div>
                 </div>
               </div>
-              <div className="p-6 text-center">
+              <div className="px-6 text-center">
                 <p className="text-gray-600 text-sm">
                   Simple dashboard interface for quick attendance tracking
                 </p>
@@ -125,7 +125,7 @@ const About = () => {
         </div>
 
         {/* Simple Footer Note */}
-        <div className="mt-6 text-center">
+        <div className="mt-2 text-center">
           <p className="text-xs text-gray-400">
             Continuously improving to better serve educational institutions
           </p>
