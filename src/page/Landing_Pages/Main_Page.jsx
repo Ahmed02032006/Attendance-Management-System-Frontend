@@ -15,7 +15,7 @@ const MainPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [activeSection, setActiveSection] = useState('hero');
+  const [activeSection, setActiveSection] = useState('home');
 
   const navigate = useNavigate();
 
@@ -39,7 +39,7 @@ const MainPage = () => {
           }
         });
       },
-      { threshold: 0.3 } // Reduced threshold for better detection
+      { threshold: 0.5 } // Trigger when 50% of the section is visible
     );
 
     // Observe all sections
@@ -67,7 +67,7 @@ const MainPage = () => {
 
   return (
     <div className="min-h-screen bg-white relative overflow-x-hidden">
-      {/* Animated Background - Consistent across all sections */}
+      {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div
           className="absolute w-[500px] h-[500px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"
@@ -92,7 +92,7 @@ const MainPage = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 py-4 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            {/* Logo */}
+            {/* Logo with same blurry background as navigation */}
             <div className="flex items-center group bg-white/10 backdrop-blur-sm rounded-2xl px-3 py-1.5 border border-white/20 shadow-sm">
               <div className="relative">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300 shadow-lg">
@@ -110,7 +110,7 @@ const MainPage = () => {
               </div>
             </div>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - Centered with Home, About, Features, FAQs, Contact */}
             <div className="hidden md:flex items-center justify-center flex-1">
               <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-2xl px-2 py-1.5 border border-white/20 shadow-sm">
                 <button
@@ -293,9 +293,10 @@ const MainPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <section id="hero" className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
+      <section id="hero" className="relative pt-24 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto relative z-10 w-full">
-          <div className="text-center mb-8">
+          <div className="text-center mb-4">
+            {/* Heading */}
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4">
               Track Attendance
               <br />
@@ -303,26 +304,34 @@ const MainPage = () => {
                 The Smart Way
               </span>
             </h1>
+
+            {/* Subheading */}
             <p className="text-sm text-gray-600 max-w-xl mx-auto leading-relaxed">
               A complete attendance management solution for universities.
               Track via QR codes or manual entry, generate reports, and export data instantly.
             </p>
           </div>
 
-          {/* Dashboard Preview Image */}
+          {/* Dashboard Preview Image with Loading State */}
           <div className="relative max-w-5xl mx-auto mt-8">
+            {/* Decorative elements */}
             <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10 animate-float"></div>
-            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-cyan-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
+            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-sky-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-r from-blue-200 to-cyan-200 rounded-full blur-3xl opacity-30 -z-10"></div>
 
+            {/* Main Image Container with Loading Skeleton */}
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity"></div>
+
               <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+                {/* Loading Skeleton */}
                 {!imageLoaded && (
                   <div className="w-full aspect-video bg-gray-200 animate-pulse flex items-center justify-center">
                     <div className="text-gray-400">Loading dashboard preview...</div>
                   </div>
                 )}
+
+                {/* Actual Image */}
                 <img
                   src="/Pages-Picture/Attmark-Dashboard_Page.png"
                   alt="Attmark Dashboard Preview"
@@ -340,6 +349,7 @@ const MainPage = () => {
 
           {/* Trust Indicators */}
           <div className="flex flex-col items-center mt-4 space-y-4">
+            {/* Trust indicators */}
             <div className="flex flex-wrap items-center justify-center gap-3">
               <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full text-xs text-gray-600 border border-gray-300">
                 <Sparkles className="w-3.5 h-3.5 text-blue-600 mr-1.5" />
