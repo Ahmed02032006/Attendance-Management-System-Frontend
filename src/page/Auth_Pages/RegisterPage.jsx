@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { registerUser } from '../../store/Auth-Slicer/Auth-Slicer';
+import { FaBadge, FaKey, FaUserPlus, FaUser } from 'react-icons/fa';
+import { MdPersonAdd } from 'react-icons/md';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -112,10 +114,14 @@ const RegisterPage = () => {
             Full Name
           </label>
           <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none"
-              style={{ fontSize: '16px sm:18px', color: getIconColor('userName'), transition: 'color 0.2s ease' }}>
-              person
-            </span>
+            <FaUser
+              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
+              style={{
+                fontSize: '16px',
+                color: getIconColor('userName'),
+                transition: 'color 0.2s ease',
+              }}
+            />
             <input
               type="text" id="name" name="userName"
               value={formData.userName} onChange={handleInputChange}
@@ -133,10 +139,14 @@ const RegisterPage = () => {
             Email Address
           </label>
           <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none"
-              style={{ fontSize: '16px sm:18px', color: getIconColor('userEmail'), transition: 'color 0.2s ease' }}>
-              badge
-            </span>
+            <FaBadge
+              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
+              style={{
+                fontSize: '16px',
+                color: getIconColor('userEmail'),
+                transition: 'color 0.2s ease',
+              }}
+            />
             <input
               type="email" id="email" name="userEmail"
               value={formData.userEmail} onChange={handleInputChange}
@@ -154,10 +164,14 @@ const RegisterPage = () => {
             Password
           </label>
           <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none"
-              style={{ fontSize: '16px sm:18px', color: getIconColor('userPassword'), transition: 'color 0.2s ease' }}>
-              key
-            </span>
+            <FaKey
+              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
+              style={{
+                fontSize: '16px',
+                color: getIconColor('userPassword'),
+                transition: 'color 0.2s ease',
+              }}
+            />
             <input
               type="password" id="password" name="userPassword"
               value={formData.userPassword} onChange={handleInputChange}
@@ -175,14 +189,14 @@ const RegisterPage = () => {
             Confirm Password
           </label>
           <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none"
+            <FaKey
+              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
               style={{
-                fontSize: '16px sm:18px',
+                fontSize: '16px',
                 color: passwordMismatch ? '#EF4444' : getIconColor('confirmPassword'),
                 transition: 'color 0.2s ease',
-              }}>
-              key
-            </span>
+              }}
+            />
             <input
               type="password" id="confirmPassword" name="confirmPassword"
               value={formData.confirmPassword} onChange={handleInputChange}
@@ -219,7 +233,7 @@ const RegisterPage = () => {
           onMouseLeave={e => (e.currentTarget.style.background = BLUE_COLOR)}
         >
           Create Account
-          <span className="material-icons" style={{ fontSize: '16px sm:18px' }}>person_add</span>
+          <MdPersonAdd style={{ fontSize: '18px' }} />
         </button>
       </form>
 

@@ -295,7 +295,7 @@ const MainPage = () => {
       {/* Hero Section */}
       <section id="hero" className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto relative z-10 w-full">
-          <div className="text-center mb-8">
+          <div className="text-center mb-4">
             {/* Heading */}
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4">
               Track Attendance

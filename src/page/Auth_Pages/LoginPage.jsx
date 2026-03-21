@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { loginUser } from '../../store/Auth-Slicer/Auth-Slicer';
+import { FaBadge, FaKey, FaSignInAlt } from 'react-icons/fa';
+import { MdLogin } from 'react-icons/md';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -96,16 +98,14 @@ const LoginPage = () => {
             Staff ID / Email
           </label>
           <div className="relative">
-            <span
-              className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none"
+            <FaBadge
+              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
               style={{
-                fontSize: '16px sm:18px',
+                fontSize: '16px',
                 color: getIconColor('userEmail'),
                 transition: 'color 0.2s ease',
               }}
-            >
-              badge
-            </span>
+            />
             <input
               type="email"
               id="loginEmail"
@@ -128,16 +128,14 @@ const LoginPage = () => {
             </label>
           </div>
           <div className="relative">
-            <span
-              className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none"
+            <FaKey
+              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
               style={{
-                fontSize: '16px sm:18px',
+                fontSize: '16px',
                 color: getIconColor('userPassword'),
                 transition: 'color 0.2s ease',
               }}
-            >
-              key
-            </span>
+            />
             <input
               type="password"
               id="loginPassword"
@@ -177,7 +175,7 @@ const LoginPage = () => {
           onMouseLeave={e => (e.currentTarget.style.background = BLUE_COLOR)}
         >
           Authorize Access
-          <span className="material-icons" style={{ fontSize: '16px sm:18px' }}>login</span>
+          <MdLogin style={{ fontSize: '18px' }} />
         </button>
       </form>
 
