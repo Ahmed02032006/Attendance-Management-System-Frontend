@@ -130,23 +130,8 @@ const About = () => {
             <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-sky-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
           </div>
         </div>
-
       </div>
 
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(10px, -10px) scale(1.05); }
-          50% { transform: translate(20px, 5px) scale(1.1); }
-          75% { transform: translate(-10px, 15px) scale(1.05); }
-        }
-        .animate-float {
-          animation: float 20s ease-in-out infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-      `}</style>
     </section>
   );
 };
