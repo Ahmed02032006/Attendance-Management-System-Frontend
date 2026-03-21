@@ -293,7 +293,7 @@ const MainPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <section id="hero" className="relative pt-24 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
+      <section id="hero" className="relative pt-24 pb-14 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto relative z-10 w-full">
           <div className="text-center mb-4">
             {/* Heading */}
