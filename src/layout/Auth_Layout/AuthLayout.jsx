@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import { Shield } from 'lucide-react';
 import LiveDashboardPreview from '../../components/LiveDashboardPreview';
-import { FaShieldAlt } from 'react-icons/fa';
 
 const AuthLayout = () => {
   return (
@@ -23,7 +23,7 @@ const AuthLayout = () => {
               className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: '#155dfc', boxShadow: '0 6px 18px rgba(21,93,252,0.22)' }}
             >
-              <FaShieldAlt className="text-white text-base sm:text-xl" />
+              <Shield className="text-white w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-extrabold tracking-wider leading-tight" style={{ color: '#155dfc' }}>

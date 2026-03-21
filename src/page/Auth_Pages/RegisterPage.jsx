@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { registerUser } from '../../store/Auth-Slicer/Auth-Slicer';
-import { FaBadge, FaKey, FaUserPlus, FaUser } from 'react-icons/fa';
-import { MdPersonAdd } from 'react-icons/md';
+import { User, Badge, Key, UserPlus } from 'lucide-react';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -114,10 +113,10 @@ const RegisterPage = () => {
             Full Name
           </label>
           <div className="relative">
-            <FaUser
-              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
+            <User
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              size={16}
               style={{
-                fontSize: '16px',
                 color: getIconColor('userName'),
                 transition: 'color 0.2s ease',
               }}
@@ -139,10 +138,10 @@ const RegisterPage = () => {
             Email Address
           </label>
           <div className="relative">
-            <FaBadge
-              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
+            <Badge
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              size={16}
               style={{
-                fontSize: '16px',
                 color: getIconColor('userEmail'),
                 transition: 'color 0.2s ease',
               }}
@@ -164,10 +163,10 @@ const RegisterPage = () => {
             Password
           </label>
           <div className="relative">
-            <FaKey
-              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
+            <Key
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              size={16}
               style={{
-                fontSize: '16px',
                 color: getIconColor('userPassword'),
                 transition: 'color 0.2s ease',
               }}
@@ -189,10 +188,10 @@ const RegisterPage = () => {
             Confirm Password
           </label>
           <div className="relative">
-            <FaKey
-              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
+            <Key
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              size={16}
               style={{
-                fontSize: '16px',
                 color: passwordMismatch ? '#EF4444' : getIconColor('confirmPassword'),
                 transition: 'color 0.2s ease',
               }}
@@ -233,7 +232,7 @@ const RegisterPage = () => {
           onMouseLeave={e => (e.currentTarget.style.background = BLUE_COLOR)}
         >
           Create Account
-          <MdPersonAdd style={{ fontSize: '18px' }} />
+          <UserPlus size={16} className="sm:w-[18px] sm:h-[18px]" />
         </button>
       </form>
 

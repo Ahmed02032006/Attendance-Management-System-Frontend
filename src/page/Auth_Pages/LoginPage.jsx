@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { loginUser } from '../../store/Auth-Slicer/Auth-Slicer';
-import { FaBadge, FaKey, FaSignInAlt } from 'react-icons/fa';
-import { MdLogin } from 'react-icons/md';
+import { Badge, Key, LogIn } from 'lucide-react';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -98,10 +97,10 @@ const LoginPage = () => {
             Staff ID / Email
           </label>
           <div className="relative">
-            <FaBadge
-              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
+            <Badge
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              size={16}
               style={{
-                fontSize: '16px',
                 color: getIconColor('userEmail'),
                 transition: 'color 0.2s ease',
               }}
@@ -128,10 +127,10 @@ const LoginPage = () => {
             </label>
           </div>
           <div className="relative">
-            <FaKey
-              className="absolute left-3 top-1/2 -translate-y-1/2 select-none"
+            <Key
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              size={16}
               style={{
-                fontSize: '16px',
                 color: getIconColor('userPassword'),
                 transition: 'color 0.2s ease',
               }}
@@ -175,7 +174,7 @@ const LoginPage = () => {
           onMouseLeave={e => (e.currentTarget.style.background = BLUE_COLOR)}
         >
           Authorize Access
-          <MdLogin style={{ fontSize: '18px' }} />
+          <LogIn size={16} className="sm:w-[18px] sm:h-[18px]" />
         </button>
       </form>
 
