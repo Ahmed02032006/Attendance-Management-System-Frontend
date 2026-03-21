@@ -83,29 +83,46 @@ const About = () => {
             </div>
           </div>
 
-          {/* Right Side - Dashboard Preview matching home section */}
+          {/* Right Side - Dashboard Image */}
           <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity"></div>
-            <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
-              {/* Loading Skeleton */}
-              {!imageLoaded && (
-                <div className="w-full aspect-video bg-gray-200 animate-pulse flex items-center justify-center">
-                  <div className="text-gray-400">Loading dashboard preview...</div>
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 border-b border-gray-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                  <span className="text-xs text-gray-500 ml-2">attmark-dashboard</span>
                 </div>
-              )}
-              
-              {/* Actual Image */}
-              <img
-                src="/Pages-Picture/Attmark-Dashboard_Page.png"
-                alt="Attmark Dashboard Preview"
-                className={`w-full h-auto object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                onLoad={() => setImageLoaded(true)}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "https://via.placeholder.com/1200x600?text=Attmark+Dashboard+Preview";
-                  setImageLoaded(true);
-                }}
-              />
+                
+                {/* Image Container */}
+                <div className="relative">
+                  {!imageLoaded && (
+                    <div className="w-full aspect-video bg-gray-200 animate-pulse flex items-center justify-center rounded-lg">
+                      <div className="text-gray-400 text-sm">Loading dashboard preview...</div>
+                    </div>
+                  )}
+                  <img
+                    src="/Pages-Picture/Attmark-Dashboard_Page.png"
+                    alt="Attmark Dashboard Preview"
+                    className={`w-full h-auto object-cover rounded-lg transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    onLoad={() => setImageLoaded(true)}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://via.placeholder.com/800x450?text=Attmark+Dashboard+Preview";
+                      setImageLoaded(true);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="p-6 text-center">
+                <p className="text-gray-600 text-sm">
+                  Simple dashboard interface for quick attendance tracking
+                </p>
+                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
+                  <Clock className="w-3 h-3" />
+                  <span>Real-time updates</span>
+                </div>
+              </div>
             </div>
             {/* Decorative elements matching home section */}
             <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10 animate-float"></div>
