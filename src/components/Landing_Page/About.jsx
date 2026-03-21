@@ -1,5 +1,5 @@
 import React from 'react';
-import { QrCode, BarChart, Clock, Sparkles, Target, Zap } from 'lucide-react';
+import { QrCode, BarChart, Clock, Sparkles, Target, Zap, HeartHandshake, TrendingUp } from 'lucide-react';
 
 const About = () => {
   const features = [
@@ -48,7 +48,7 @@ const About = () => {
         </div>
 
         {/* Main Content - Two Column Layout Matching Home */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
           {/* Left Side - Content */}
           <div>
             <div className="mb-8">
@@ -85,22 +85,40 @@ const About = () => {
             </div>
           </div>
 
-          {/* Right Side - Visual/Illustration */}
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity"></div>
-            <div className="relative bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-200">
-              <div className="p-8 text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Sparkles className="w-12 h-12 text-blue-600" />
+          {/* Right Side - Dashboard Preview Style */}
+          <div className="relative">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 border-b border-gray-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                  <span className="text-xs text-gray-500 ml-2">attmark-dashboard</span>
                 </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-3">Simple & Effective</h4>
-                <p className="text-gray-600">
-                  We're continuously improving Attmark to better serve educational institutions.
-                  Your feedback helps us build a better product.
+                <div className="space-y-3">
+                  <div className="h-8 bg-white rounded-lg border border-gray-200 flex items-center px-3">
+                    <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                    <div className="h-2 w-32 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white rounded-lg border border-gray-200 p-3">
+                      <div className="h-2 w-20 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-6 w-16 bg-blue-100 rounded"></div>
+                    </div>
+                    <div className="bg-white rounded-lg border border-gray-200 p-3">
+                      <div className="h-2 w-20 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-6 w-16 bg-cyan-100 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 text-center">
+                <p className="text-gray-600 text-sm">
+                  Simple dashboard interface for quick attendance tracking
                 </p>
-                <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
-                  <Clock className="w-4 h-4" />
-                  <span>Regular updates & improvements</span>
+                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
+                  <Clock className="w-3 h-3" />
+                  <span>Real-time updates</span>
                 </div>
               </div>
             </div>
@@ -110,27 +128,46 @@ const About = () => {
           </div>
         </div>
 
-        {/* Simple Mission & Vision Boxes - Smaller and Decent */}
+        {/* Simple Mission & Vision Cards - Clean and Minimal */}
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200 hover:border-blue-200 transition-all duration-300">
-            <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg mb-3">
-              <Target className="w-5 h-5 text-blue-600" />
+          <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-6 border border-blue-100">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Target className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Our Mission</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Provide universities with a simple, effective attendance management tool that saves time and reduces manual work.
+                </p>
+              </div>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Our Mission</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              To provide universities with a simple, effective attendance management tool that saves time and reduces manual work.
-            </p>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200 hover:border-blue-200 transition-all duration-300">
-            <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg mb-3">
-              <Sparkles className="w-5 h-5 text-blue-600" />
+          <div className="bg-gradient-to-br from-cyan-50 to-white rounded-xl p-6 border border-cyan-100">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center">
+                  <HeartHandshake className="w-6 h-6 text-cyan-600" />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">What We Offer</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  A straightforward platform for tracking attendance, generating reports, and managing student records efficiently.
+                </p>
+              </div>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">What We Offer</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              A straightforward platform for tracking attendance, generating reports, and managing student records efficiently.
-            </p>
           </div>
+        </div>
+
+        {/* Simple Footer Note */}
+        <div className="mt-12 text-center">
+          <p className="text-xs text-gray-400">
+            Continuously improving to better serve educational institutions
+          </p>
         </div>
       </div>
 
