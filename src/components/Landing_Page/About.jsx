@@ -21,7 +21,7 @@ const About = () => {
   ];
 
   return (
-    <section id="about" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
+    <section id="about" className="relative py-6 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
       {/* Background Animation - Matching Home Section */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
@@ -81,7 +81,7 @@ const About = () => {
             </div>
           </div>
 
-          {/* Right Side - Dashboard Preview Style */}
+          {/* Right Side - Dashboard Preview Style matching home section */}
           <div className="relative">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 border-b border-gray-200">
@@ -108,7 +108,7 @@ const About = () => {
                   </div>
                 </div>
               </div>
-              <div className="px-6 text-center">
+              <div className="p-6 text-center">
                 <p className="text-gray-600 text-sm">
                   Simple dashboard interface for quick attendance tracking
                 </p>
@@ -124,12 +124,6 @@ const About = () => {
           </div>
         </div>
 
-        {/* Simple Footer Note */}
-        <div className="mt-2 text-center">
-          <p className="text-xs text-gray-400">
-            Continuously improving to better serve educational institutions
-          </p>
-        </div>
       </div>
 
       <style jsx>{`
