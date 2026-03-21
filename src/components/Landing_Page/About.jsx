@@ -1,5 +1,5 @@
 import React from 'react';
-import { QrCode, BarChart, Clock, Sparkles, Target, Zap, HeartHandshake, TrendingUp } from 'lucide-react';
+import { QrCode, BarChart, Clock, Sparkles, Target, Zap, HeartHandshake } from 'lucide-react';
 
 const About = () => {
   const features = [
@@ -22,7 +22,7 @@ const About = () => {
 
   return (
     <section id="about" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-      {/* Background Animation - Matching Home Section */}
+      {/* Same background as main page - using fixed positioning for consistency */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
         <div className="absolute w-[350px] h-[350px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000 right-0 bottom-0"></div>
@@ -30,7 +30,7 @@ const About = () => {
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Header Section - Matching Home Style */}
+        {/* Header Section */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-200 shadow-sm mb-6">
             <Sparkles className="w-4 h-4 text-blue-600" />
@@ -47,7 +47,7 @@ const About = () => {
           </p>
         </div>
 
-        {/* Main Content - Two Column Layout Matching Home */}
+        {/* Main Content - Two Column Layout */}
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
           {/* Left Side - Content */}
           <div>
@@ -64,7 +64,7 @@ const About = () => {
               </p>
             </div>
 
-            {/* Features List */}
+            {/* Features List - Matching home section styling */}
             <div className="space-y-4">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
@@ -85,7 +85,7 @@ const About = () => {
             </div>
           </div>
 
-          {/* Right Side - Dashboard Preview Style */}
+          {/* Right Side - Dashboard Preview Style matching home section */}
           <div className="relative">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 border-b border-gray-200">
@@ -125,6 +125,41 @@ const About = () => {
             {/* Decorative elements matching home section */}
             <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10 animate-float"></div>
             <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-cyan-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
+          </div>
+        </div>
+
+        {/* Mission Section - Clean and minimal matching home section cards */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-gradient-to-br from-blue-50/80 to-white rounded-xl p-6 border border-blue-100 hover:shadow-lg transition-all duration-300">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Target className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Our Mission</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Provide universities with a simple, effective attendance management tool that saves time and reduces manual work.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-cyan-50/80 to-white rounded-xl p-6 border border-cyan-100 hover:shadow-lg transition-all duration-300">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center">
+                  <HeartHandshake className="w-6 h-6 text-cyan-600" />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">What We Offer</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  A straightforward platform for tracking attendance, generating reports, and managing student records efficiently.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
