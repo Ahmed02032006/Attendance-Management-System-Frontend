@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Plus, Minus } from 'lucide-react';
 
 const FAQs = () => {
   const [openIndex, setOpenIndex] = useState(0);
-  const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const sectionRef = useRef(null);
+  const isInView = useInView(sectionRef, { 
+    once: true, // This ensures animation only happens once when section comes into view
+    amount: 0.1,
+    triggerOnce: true // Additional safety to ensure it only triggers once
+  });
 
   const faqs = [
     {
@@ -52,20 +56,27 @@ const FAQs = () => {
 
   const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
 
-  const fadeUp = (delay = 0) => ({
-    initial: { opacity: 0, y: 20 },
-    animate: isInView ? { opacity: 1, y: 0 } : {},
-    transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] },
-  });
+  // Animation variants for better performance
+  const fadeUpVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (delay = 0) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }
+    })
+  };
 
-  const leftFaqs  = faqs.filter((_, i) => i % 2 === 0);
+  const leftFaqs = faqs.filter((_, i) => i % 2 === 0);
   const rightFaqs = faqs.filter((_, i) => i % 2 !== 0);
 
-  const FAQItem = ({ faq, index }) => {
+  const FAQItem = ({ faq, index, delay }) => {
     const isOpen = openIndex === index;
     return (
       <motion.div
-        {...fadeUp(0.04 * index)}
+        custom={delay}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={fadeUpVariants}
         className={`rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer ${
           isOpen
             ? 'border-blue-200 bg-white shadow-md shadow-blue-50'
@@ -94,7 +105,7 @@ const FAQs = () => {
   return (
     <section
       id="faqs"
-      ref={ref}
+      ref={sectionRef}
       className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
       style={{
         background: 'linear-gradient(140deg, #eef2ff 0%, #e0f2fe 60%, #f0f9ff 100%)',
@@ -108,9 +119,14 @@ const FAQs = () => {
       </div>
 
       <div className="max-w-5xl mx-auto relative z-10">
-
         {/* Header */}
-        <motion.div {...fadeUp(0)} className="text-center mb-12">
+        <motion.div
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          variants={fadeUpVariants}
+          custom={0}
+          className="text-center mb-12"
+        >
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
             Frequently Asked Questions
           </h2>
@@ -123,18 +139,34 @@ const FAQs = () => {
         <div className="grid md:grid-cols-2 gap-3 items-start">
           <div className="space-y-3">
             {leftFaqs.map((faq, i) => (
-              <FAQItem key={i * 2} faq={faq} index={i * 2} />
+              <FAQItem 
+                key={i * 2} 
+                faq={faq} 
+                index={i * 2} 
+                delay={0.04 * i}
+              />
             ))}
           </div>
           <div className="space-y-3">
             {rightFaqs.map((faq, i) => (
-              <FAQItem key={i * 2 + 1} faq={faq} index={i * 2 + 1} />
+              <FAQItem 
+                key={i * 2 + 1} 
+                faq={faq} 
+                index={i * 2 + 1} 
+                delay={0.04 * i + 0.02}
+              />
             ))}
           </div>
         </div>
 
         {/* Bottom CTA */}
-        <motion.div {...fadeUp(0.55)} className="mt-10 text-center">
+        <motion.div
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          variants={fadeUpVariants}
+          custom={0.55}
+          className="mt-10 text-center"
+        >
           <p className="text-sm text-gray-500">
             Still have questions?{' '}
             <a href="#contact" className="text-blue-600 font-semibold hover:underline underline-offset-2">
