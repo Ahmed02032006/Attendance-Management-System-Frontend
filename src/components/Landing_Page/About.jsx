@@ -268,18 +268,13 @@ const About = () => {
                     <MessageCircle className="w-3.5 h-3.5 text-white" />
                   </div>
                   <div className="flex-1">
-                    <div className="bg-white rounded-xl p-2 shadow-sm">
-                      <p className="text-[10px] text-gray-600">How do I create a QR code for my class?</p>
+                    <div className="bg-white rounded-xl p-1.5 shadow-sm">
+                      <p className="text-[7px] text-gray-600">How do I create a QR code for my class?</p>
                     </div>
-                    <div className="mt-1.5 bg-blue-100 rounded-xl p-2 ml-4">
-                      <p className="text-[10px] text-blue-800">Go to Dashboard → Classes → Generate QR Code. It's that simple! 🚀</p>
+                    <div className="mt-1.5 bg-blue-100 rounded-xl p-1.5 ml-4">
+                      <p className="text-[7px] text-blue-800">Go to Attendance Page → Classes → Generate QR Code. It's that simple! 🚀</p>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-blue-100">
-                  <HelpCircle className="w-3 h-3 text-blue-500" />
-                  <span className="text-[9px] text-gray-500">Ask me anything about Attmark</span>
-                  <span className="text-[9px] text-green-500 ml-auto">● Online</span>
                 </div>
               </div>
             </motion.div>
@@ -318,10 +313,10 @@ const About = () => {
 
           {/* BOTTOM BANNER - Smaller Button */}
           <motion.div {...fadeUp(0.3)}
-            className="rounded-3xl bg-white border p-6 text-center"
+            className="rounded-3xl bg-white border p-5 text-center"
             style={{ borderColor: '#ebebeb' }}
           >
-            <p className="text-gray-600 text-sm md:text-base">
+            <p className="text-gray-600 text-sm">
               Create Your Perfect, Effortless Check-in Process with{' '}
               <span className="font-bold text-gray-900">Surveys, Photos, Signatures</span>
               {' '}or{' '}
@@ -330,7 +325,7 @@ const About = () => {
             </p>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-blue-200"
+              className="inline-flex items-center gap-2 mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-blue-200"
             >
               Get Started Free →
             </a>
