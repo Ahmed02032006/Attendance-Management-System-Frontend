@@ -1,4 +1,3 @@
-// MainPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -45,7 +44,7 @@ const MainPage = () => {
     );
 
     // Observe all sections
-    const sections = ['hero', 'about', 'description', 'features', 'faqs', 'contact'];
+    const sections = ['hero', 'about', 'features', 'faqs', 'contact'];
     sections.forEach((sectionId) => {
       const section = document.getElementById(sectionId);
       if (section) observer.observe(section);
@@ -111,7 +110,7 @@ const MainPage = () => {
               </div>
             </div>
 
-            {/* Desktop Navigation - Centered with Home, About, Description, Features, FAQs, Contact */}
+            {/* Desktop Navigation - Centered with Home, About, Features, FAQs, Contact */}
             <div className="hidden md:flex items-center justify-center flex-1">
               <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-2xl px-2 py-1.5 border border-white/20 shadow-sm">
                 <button
@@ -141,21 +140,6 @@ const MainPage = () => {
                     <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-blue-600"></span>
                   )}
                   {activeSection !== 'about' && (
-                    <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
-                  )}
-                </button>
-                <button
-                  onClick={() => scrollToSection('description')}
-                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all relative group ${activeSection === 'description'
-                      ? 'text-blue-600 bg-white/80'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-white/80'
-                    }`}
-                >
-                  Description
-                  {activeSection === 'description' && (
-                    <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-blue-600"></span>
-                  )}
-                  {activeSection !== 'description' && (
                     <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-1/2 transition-all duration-300"></span>
                   )}
                 </button>
@@ -252,15 +236,6 @@ const MainPage = () => {
                   }`}
               >
                 About
-              </button>
-              <button
-                onClick={() => scrollToSection('description')}
-                className={`block w-full text-left px-4 py-3 rounded-xl transition-all ${activeSection === 'description'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                  }`}
-              >
-                Description
               </button>
               <button
                 onClick={() => scrollToSection('features')}
