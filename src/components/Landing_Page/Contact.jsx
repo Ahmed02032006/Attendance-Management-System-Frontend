@@ -85,32 +85,51 @@ const Contact = () => {
           </p>
         </motion.div>
 
-        {/* Info cards row */}
+        {/* Info cards row - Premium Version */}
 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
   {infoCards.map(({ icon: Icon, label, value, sub, color, iconColor }, i) => (
     <motion.div
       key={i}
       {...fadeUp(0.08 * (i + 1))}
-      className="group relative bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+      className="group relative bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
     >
-      {/* Background gradient on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      {/* Gradient border on hover */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl p-[1px]">
+        <div className="absolute inset-[1px] bg-white rounded-2xl"></div>
+      </div>
       
-      <div className="relative">
-        {/* Icon with gradient background */}
-        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-          <Icon className={`w-7 h-7 ${iconColor}`} />
+      <div className="relative p-6">
+        <div className="flex items-start justify-between mb-4">
+          {/* Icon with gradient background and shine effect */}
+          <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300`}>
+            <Icon className={`w-7 h-7 ${iconColor} group-hover:scale-110 transition-transform duration-300`} />
+          </div>
+          
+          {/* Optional mini badge */}
+          <div className="text-right">
+            <div className="text-2xl font-bold text-gray-300 group-hover:text-blue-500 transition-colors duration-300">
+              {i === 0 ? '🏆' : i === 1 ? '📊' : '⚡'}
+            </div>
+          </div>
         </div>
         
-        {/* Content */}
         <div>
-          <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">{label}</p>
-          <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{label}</p>
+          <p className="text-3xl font-bold text-gray-900 mb-2">
+            {value}
+            {sub.includes('%') && <span className="text-lg text-blue-600 ml-1">%</span>}
+            {sub.includes('students') && <span className="text-lg text-gray-400 ml-1">+</span>}
+          </p>
           <p className="text-sm text-gray-500 leading-relaxed">{sub}</p>
         </div>
         
-        {/* Optional decorative element */}
-        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-gray-100 to-transparent rounded-full opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+        {/* Progress bar effect (optional) */}
+        <div className="mt-4 h-1 bg-gray-100 rounded-full overflow-hidden">
+          <div 
+            className={`h-full bg-gradient-to-r ${color} rounded-full transition-all duration-500 group-hover:w-full w-0`}
+            style={{ width: i === 0 ? '85%' : i === 1 ? '92%' : '78%' }}
+          ></div>
+        </div>
       </div>
     </motion.div>
   ))}
