@@ -1,19 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, useInView, useAnimation } from 'framer-motion';
+import React, { useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
 
 const FAQs = () => {
   const [openIndex, setOpenIndex] = useState(0);
-  const sectionRef = useRef(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
-  const controls = useAnimation();
-
-  // Only trigger animation once when section comes into view
-  useEffect(() => {
-    if (isInView) {
-      controls.start('visible');
-    }
-  }, [isInView, controls]);
 
   const faqs = [
     {
@@ -60,22 +49,13 @@ const FAQs = () => {
 
   const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
 
-  const fadeUpVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
-  };
-
   const leftFaqs = faqs.filter((_, i) => i % 2 === 0);
   const rightFaqs = faqs.filter((_, i) => i % 2 !== 0);
 
-  const FAQItem = ({ faq, index, delay }) => {
+  const FAQItem = ({ faq, index }) => {
     const isOpen = openIndex === index;
     return (
-      <motion.div
-        custom={delay}
-        variants={fadeUpVariants}
-        initial="hidden"
-        animate={controls}
+      <div
         className={`rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer ${
           isOpen
             ? 'border-blue-200 bg-white shadow-md shadow-blue-50'
@@ -97,15 +77,14 @@ const FAQs = () => {
         <div className={`px-5 overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-48 pb-5' : 'max-h-0'}`}>
           <p className="text-sm text-gray-500 leading-relaxed">{faq.answer}</p>
         </div>
-      </motion.div>
+      </div>
     );
   };
 
   return (
     <section
       id="faqs"
-      ref={sectionRef}
-      className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="relative py-16 px-4 sm:px-6 lg:px-8 overflow-hidden"
       style={{
         background: 'linear-gradient(140deg, #eef2ff 0%, #e0f2fe 60%, #f0f9ff 100%)',
         fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
@@ -119,59 +98,38 @@ const FAQs = () => {
 
       <div className="max-w-5xl mx-auto relative z-10">
         {/* Header */}
-        <motion.div
-          variants={fadeUpVariants}
-          initial="hidden"
-          animate={controls}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
             Frequently Asked Questions
           </h2>
           <p className="text-gray-500 text-base max-w-md mx-auto">
             Everything you need to know about Attmark. Can't find the answer? Just reach out.
           </p>
-        </motion.div>
+        </div>
 
-        {/* 2-Column grid — matches reference layout */}
+        {/* 2-Column grid */}
         <div className="grid md:grid-cols-2 gap-3 items-start">
           <div className="space-y-3">
             {leftFaqs.map((faq, i) => (
-              <FAQItem 
-                key={i * 2} 
-                faq={faq} 
-                index={i * 2} 
-                delay={0.1 + (i * 0.05)} 
-              />
+              <FAQItem key={i * 2} faq={faq} index={i * 2} />
             ))}
           </div>
           <div className="space-y-3">
             {rightFaqs.map((faq, i) => (
-              <FAQItem 
-                key={i * 2 + 1} 
-                faq={faq} 
-                index={i * 2 + 1} 
-                delay={0.1 + (i * 0.05)} 
-              />
+              <FAQItem key={i * 2 + 1} faq={faq} index={i * 2 + 1} />
             ))}
           </div>
         </div>
 
         {/* Bottom CTA */}
-        <motion.div
-          variants={fadeUpVariants}
-          initial="hidden"
-          animate={controls}
-          transition={{ delay: 0.3 }}
-          className="mt-10 text-center"
-        >
+        <div className="mt-10 text-center">
           <p className="text-sm text-gray-500">
             Still have questions?{' '}
             <a href="#contact" className="text-blue-600 font-semibold hover:underline underline-offset-2">
               Contact our support team →
             </a>
           </p>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
