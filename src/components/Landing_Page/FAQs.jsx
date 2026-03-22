@@ -1,111 +1,144 @@
 import React, { useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { ChevronDown, HelpCircle } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 
 const FAQs = () => {
-  const [openIndex, setOpenIndex] = useState(null);
+  const [openIndex, setOpenIndex] = useState(0);
   const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
 
   const faqs = [
     {
+      question: 'What is Attmark?',
+      answer: 'Attmark is a modern attendance management platform that simplifies tracking for universities. With QR code check-ins, real-time reports, and analytics, it helps you manage attendance efficiently and securely.'
+    },
+    {
+      question: 'What check-in options are available?',
+      answer: 'Attmark supports QR code scanning, manual entry by teachers, and kiosk-based check-ins. Each method ensures accurate, real-time attendance recording.'
+    },
+    {
       question: 'How does QR code attendance work?',
-      answer: 'Teachers generate a unique QR code for each class session. Students scan the code using their devices, and attendance is automatically recorded in real-time. Each QR code refreshes every 30 seconds to prevent sharing or misuse.'
+      answer: 'Teachers generate a unique QR code for each session. Students scan it with their devices and attendance is instantly recorded. Codes refresh every 30 seconds to prevent sharing or misuse.'
+    },
+    {
+      question: 'Can Attmark integrate with existing systems?',
+      answer: 'Yes. Attmark supports integration with LMS platforms, CRMs, Google Sheets, and custom APIs, making it easy to plug into your existing workflows.'
     },
     {
       question: 'Is the platform free to use?',
-      answer: 'We offer a free trial for universities to test the platform. For continued use, we have affordable pricing plans based on the number of students and features required. Contact us for detailed pricing information.'
+      answer: 'We offer a free trial so universities can explore the platform. Paid plans are available based on the number of students and features required. Contact us for pricing details.'
     },
     {
-      question: 'Can I export attendance reports?',
-      answer: 'Yes! You can export attendance reports in multiple formats including PDF, Excel, and CSV. Reports can be filtered by date, class, student, or attendance status.'
+      question: 'How can Attmark help with reporting?',
+      answer: 'Attmark provides detailed analytics and exportable reports in PDF or Excel format. Filter by date, class, student, or status to get exactly the data you need.'
     },
     {
       question: 'Can students mark attendance manually?',
-      answer: 'Yes, teachers have the option to manually mark attendance for students who may have technical issues or forget their devices. This ensures no student misses out.'
+      answer: 'Teachers can manually mark attendance for students with technical issues or forgotten devices, ensuring no student is missed from the record.'
     },
     {
-      question: 'What support do you offer?',
-      answer: 'We provide email support, documentation, and onboarding assistance. For universities, we offer dedicated support to help with implementation and training.'
-    }
+      question: 'What devices does Attmark support?',
+      answer: 'Attmark is fully responsive and works on desktops, tablets, and smartphones. Students and teachers can access it from any modern browser without installing anything.'
+    },
+    {
+      question: 'How quickly can I set up Attmark?',
+      answer: 'Setup takes minutes. Import your student list, create classes, and start tracking attendance the same day. Our onboarding team is available to help you get started.'
+    },
+    {
+      question: 'Is my data secure with Attmark?',
+      answer: 'Absolutely. We use HTTPS encryption, SSO login, encrypted passwords, and Google OAuth to keep your data safe. We never sell your data to third parties.'
+    },
   ];
 
-  const toggleFAQ = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
+  const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
+
+  const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 20 },
+    animate: isInView ? { opacity: 1, y: 0 } : {},
+    transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] },
+  });
+
+  const leftFaqs  = faqs.filter((_, i) => i % 2 === 0);
+  const rightFaqs = faqs.filter((_, i) => i % 2 !== 0);
+
+  const FAQItem = ({ faq, index }) => {
+    const isOpen = openIndex === index;
+    return (
+      <motion.div
+        {...fadeUp(0.04 * index)}
+        className={`rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer ${
+          isOpen
+            ? 'border-blue-200 bg-white shadow-md shadow-blue-50'
+            : 'border-gray-150 bg-white hover:border-blue-100 hover:shadow-sm'
+        }`}
+        style={{ borderColor: isOpen ? '#bfdbfe' : '#ebebeb' }}
+      >
+        <button
+          onClick={() => toggleFAQ(index)}
+          className="w-full px-5 py-4 flex items-start justify-between text-left gap-4"
+        >
+          <span className="text-sm font-semibold leading-snug text-gray-800">{faq.question}</span>
+          <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
+            isOpen ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'
+          }`}>
+            {isOpen ? <Minus className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+          </div>
+        </button>
+        <div className={`px-5 overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-48 pb-5' : 'max-h-0'}`}>
+          <p className="text-sm text-gray-500 leading-relaxed">{faq.answer}</p>
+        </div>
+      </motion.div>
+    );
   };
 
   return (
-    <section id="faqs" className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden" ref={ref}>
-      {/* Background Animation - Lighter */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute w-[350px] h-[350px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000 right-0 bottom-0"></div>
+    <section
+      id="faqs"
+      ref={ref}
+      className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      style={{
+        background: 'linear-gradient(140deg, #eef2ff 0%, #e0f2fe 60%, #f0f9ff 100%)',
+        fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+      }}
+    >
+      {/* Soft blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-200 rounded-full opacity-25 blur-3xl" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-cyan-200 rounded-full opacity-20 blur-3xl" />
       </div>
 
-      <div className="max-w-3xl mx-auto relative z-10">
-        {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-10"
-        >
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-200 shadow-sm mb-4">
-            <HelpCircle className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-semibold text-gray-700">FAQ</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Frequently Asked
-            <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent ml-2">
-              Questions
-            </span>
+      <div className="max-w-5xl mx-auto relative z-10">
+
+        {/* Header */}
+        <motion.div {...fadeUp(0)} className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
+            Frequently Asked Questions
           </h2>
-          <p className="text-gray-600">Find answers to common questions about our platform</p>
+          <p className="text-gray-500 text-base max-w-md mx-auto">
+            Everything you need to know about Attmark. Can't find the answer? Just reach out.
+          </p>
         </motion.div>
 
-        {/* FAQs Accordion */}
-        <div className="space-y-3">
-          {faqs.map((faq, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-white/50 backdrop-blur-sm rounded-xl border border-gray-200 overflow-hidden hover:border-blue-200 transition-all duration-300"
-            >
-              <button
-                onClick={() => toggleFAQ(index)}
-                className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-gray-50/50 transition-colors"
-              >
-                <span className="text-sm font-semibold text-gray-900 pr-4">{faq.question}</span>
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-500 transition-transform duration-300 flex-shrink-0 ${
-                    openIndex === index ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              <div
-                className={`px-5 overflow-hidden transition-all duration-300 ${
-                  openIndex === index ? 'max-h-96 pb-4' : 'max-h-0'
-                }`}
-              >
-                <p className="text-sm text-gray-600 leading-relaxed">{faq.answer}</p>
-              </div>
-            </motion.div>
-          ))}
+        {/* 2-Column grid — matches reference layout */}
+        <div className="grid md:grid-cols-2 gap-3 items-start">
+          <div className="space-y-3">
+            {leftFaqs.map((faq, i) => (
+              <FAQItem key={i * 2} faq={faq} index={i * 2} />
+            ))}
+          </div>
+          <div className="space-y-3">
+            {rightFaqs.map((faq, i) => (
+              <FAQItem key={i * 2 + 1} faq={faq} index={i * 2 + 1} />
+            ))}
+          </div>
         </div>
 
-        {/* Still have questions */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-8 text-center"
-        >
+        {/* Bottom CTA */}
+        <motion.div {...fadeUp(0.55)} className="mt-10 text-center">
           <p className="text-sm text-gray-500">
             Still have questions?{' '}
-            <a href="#contact" className="text-blue-600 font-semibold hover:underline">
-              Contact our support team
+            <a href="#contact" className="text-blue-600 font-semibold hover:underline underline-offset-2">
+              Contact our support team →
             </a>
           </p>
         </motion.div>

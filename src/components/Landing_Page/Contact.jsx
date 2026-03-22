@@ -1,123 +1,198 @@
 import React, { useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Send, MessageSquare } from 'lucide-react';
+import { Send, Mail, Phone, MapPin, MessageSquare, Clock } from 'lucide-react';
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', university: '', message: '' });
+  const [submitted, setSubmitted] = useState(false);
   const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
+
+  const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 22 },
+    animate: isInView ? { opacity: 1, y: 0 } : {},
+    transition: { duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] },
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    alert('Thank you for reaching out! We will get back to you soon.');
-    setFormData({ name: '', email: '', message: '' });
+    setSubmitted(true);
+    setTimeout(() => {
+      setSubmitted(false);
+      setFormData({ name: '', email: '', university: '', message: '' });
+    }, 3000);
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const infoCards = [
+    {
+      icon: Mail,
+      label: 'Email Us',
+      value: 'hello@attmark.com',
+      sub: 'We reply within 24 hours',
+      color: 'bg-blue-50 border-blue-100',
+      iconColor: 'text-blue-600',
+    },
+    {
+      icon: Clock,
+      label: 'Support Hours',
+      value: 'Mon – Fri, 9am–6pm',
+      sub: 'PKT (UTC+5)',
+      color: 'bg-cyan-50 border-cyan-100',
+      iconColor: 'text-cyan-600',
+    },
+    {
+      icon: MapPin,
+      label: 'Based In',
+      value: 'Karachi, Pakistan',
+      sub: 'Serving universities nationwide',
+      color: 'bg-purple-50 border-purple-100',
+      iconColor: 'text-purple-600',
+    },
+  ];
 
   return (
-    <section id="contact" className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden" ref={ref}>
-      {/* Background Animation - Lighter */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute w-[350px] h-[350px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000 right-0 bottom-0"></div>
+    <section
+      id="contact"
+      ref={ref}
+      className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      style={{
+        background: 'linear-gradient(140deg, #eef2ff 0%, #e0f2fe 60%, #f0f9ff 100%)',
+        fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+      }}
+    >
+      {/* Blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-24 -left-20 w-96 h-96 bg-blue-200 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-200 rounded-full opacity-20 blur-3xl" />
       </div>
 
-      <div className="max-w-3xl mx-auto relative z-10">
-        {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-10"
-        >
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-200 shadow-sm mb-4">
+      <div className="max-w-5xl mx-auto relative z-10">
+
+        {/* Header */}
+        <motion.div {...fadeUp(0)} className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm mb-5">
             <MessageSquare className="w-4 h-4 text-blue-600" />
             <span className="text-sm font-semibold text-gray-700">Get in Touch</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Let's Talk About
-            <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent ml-2">
-              Your Needs
-            </span>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
+            Let's Talk About{' '}
+            <span className="text-blue-600">Your Needs</span>
           </h2>
-          <p className="text-gray-600">
-            Have questions about implementing Attmark? We're here to help.
+          <p className="text-gray-500 text-base max-w-md mx-auto">
+            Have questions about implementing Attmark at your university? We're here to help.
           </p>
         </motion.div>
 
-        {/* Contact Form - Centered */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-200"
-        >
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Your Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                placeholder="John Doe"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                placeholder="you@example.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                Message
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                required
-                rows="4"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none resize-none"
-                placeholder="Tell us about your requirements..."
-              ></textarea>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:scale-[1.02] font-medium flex items-center justify-center gap-2"
+        {/* Info cards row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          {infoCards.map(({ icon: Icon, label, value, sub, color, iconColor }, i) => (
+            <motion.div
+              key={i}
+              {...fadeUp(0.08 * (i + 1))}
+              className={`rounded-2xl border p-5 flex items-start gap-4 bg-white ${color}`}
             >
-              <Send className="w-4 h-4" />
-              Send Message
-            </button>
-          </form>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${color} border`}>
+                <Icon className={`w-5 h-5 ${iconColor}`} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">{label}</p>
+                <p className="text-sm font-bold text-gray-800">{value}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{sub}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Contact form card */}
+        <motion.div
+          {...fadeUp(0.3)}
+          className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 md:p-10"
+          style={{ borderColor: '#ebebeb' }}
+        >
+          {submitted ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <Send className="w-7 h-7 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Message Sent!</h3>
+              <p className="text-gray-500 text-sm max-w-xs">Thank you for reaching out. We'll get back to you within 24 hours.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-5">
+              {/* Name */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-gray-700">Your Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  placeholder="John Doe"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all bg-gray-50 focus:bg-white"
+                />
+              </div>
+
+              {/* Email */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-gray-700">Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="you@university.edu"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all bg-gray-50 focus:bg-white"
+                />
+              </div>
+
+              {/* University — full width */}
+              <div className="md:col-span-2 flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-gray-700">University / Institution</label>
+                <input
+                  type="text"
+                  name="university"
+                  value={formData.university}
+                  onChange={handleChange}
+                  placeholder="University of Karachi"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all bg-gray-50 focus:bg-white"
+                />
+              </div>
+
+              {/* Message — full width */}
+              <div className="md:col-span-2 flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-gray-700">Message</label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  rows={4}
+                  placeholder="Tell us about your requirements..."
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all resize-none bg-gray-50 focus:bg-white"
+                />
+              </div>
+
+              {/* Submit */}
+              <div className="md:col-span-2">
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-6 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 hover:shadow-lg hover:shadow-blue-200 active:scale-[0.98]"
+                >
+                  <Send className="w-4 h-4" />
+                  Send Message
+                </button>
+                <p className="text-center text-xs text-gray-400 mt-3">
+                  We respect your privacy. No spam, ever.
+                </p>
+              </div>
+            </form>
+          )}
         </motion.div>
+
       </div>
     </section>
   );

@@ -1,157 +1,243 @@
 import React, { useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { QrCode, BarChart, Clock, Sparkles, Target, Zap, HeartHandshake } from 'lucide-react';
+import { QrCode, BarChart, Zap, CheckCircle, Users, Clock, Smartphone } from 'lucide-react';
 
 const About = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
 
-  const features = [
-    {
-      icon: QrCode,
-      title: 'QR Code Technology',
-      description: 'Quick and easy attendance marking with secure QR codes for your classes'
-    },
-    {
-      icon: BarChart,
-      title: 'Analytics Dashboard',
-      description: 'Visual insights to help you track attendance patterns and trends'
-    },
-    {
-      icon: Zap,
-      title: 'Fast & Efficient',
-      description: 'Built for speed, making attendance tracking quick and hassle-free'
-    }
+  const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 24 },
+    animate: isInView ? { opacity: 1, y: 0 } : {},
+    transition: { duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] },
+  });
+
+  const checkItems = [
+    'Save staff time on manual roll calls',
+    'Find student records instantly',
+    'Send QR passes students scan in seconds',
+    'Keep attendance data private & encrypted',
+    'Make it yours with your university branding',
   ];
 
   return (
-    <section id="about" className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-      {/* Background Animation - Lighter */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute w-[350px] h-[350px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000 right-0 bottom-0"></div>
+    <section
+      id="about"
+      ref={ref}
+      className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      style={{
+        background: 'linear-gradient(140deg, #eef2ff 0%, #e0f2fe 60%, #f0f9ff 100%)',
+        fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+      }}
+    >
+      {/* Blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-200 rounded-full opacity-25 blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-100 rounded-full opacity-25 blur-3xl" />
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10" ref={ref}>
-        {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Simplifying
-            <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent ml-2">
-              Attendance Management
-            </span>
+      <div className="max-w-6xl mx-auto relative z-10">
+
+        {/* Header */}
+        <motion.div {...fadeUp(0)} className="text-center mb-14">
+          <p className="text-blue-600 font-bold text-lg mb-1">No More Manual Work.</p>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+            Just Automated Attendance Tracking
           </h2>
-          <p className="text-sm text-gray-600 max-w-2xl mx-auto">
-            We're building a modern attendance management system to help universities streamline their daily operations.
+          <p className="text-gray-500 text-base max-w-xl mx-auto">
+            If you can upload an Excel sheet, you can automate check-ins with Attmark.
           </p>
         </motion.div>
 
-        {/* Main Content - Two Column Layout */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
-          {/* Left Side - Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <div className="mb-8">
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                Made for Educators,
-                <span className="block bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent text-2xl mt-2">
-                  Built for Simplicity
-                </span>
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Attmark is designed to make attendance tracking easier for teachers and administrators.
-                No complex setup, no unnecessary features - just the tools you need to manage attendance effectively.
-              </p>
-            </div>
+        {/* ── ROW 1: 2-col ── */}
+        <div className="grid md:grid-cols-2 gap-5 mb-5">
 
-            {/* Features List */}
-            <div className="space-y-4">
-              {features.map((feature, index) => {
-                const Icon = feature.icon;
-                return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={isInView ? { opacity: 1, x: 0 } : {}}
-                    transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
-                    className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-300 group"
-                  >
-                    <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Icon className="w-5 h-5 text-blue-600" />
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-1">{feature.title}</h4>
-                      <p className="text-sm text-gray-600">{feature.description}</p>
-                    </div>
-                  </motion.div>
-                );
-              })}
+          {/* QR Code card */}
+          <motion.div {...fadeUp(0.05)}
+            className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 flex flex-col"
+            style={{ borderColor: '#ebebeb' }}
+          >
+            <h3 className="text-lg font-bold text-gray-800 mb-1 leading-snug">
+              Easy{' '}
+              <span className="text-blue-600">QR Code Check-in</span>{' '}
+              Without Form Link Hassle
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Print QR codes for events, meetings, or daily student check-ins in seconds — without complex online forms or external tools.
+            </p>
+
+            {/* QR visual */}
+            <div className="flex-1 flex items-center justify-center py-4">
+              <div className="relative flex items-center justify-center gap-4">
+                {/* Teacher side */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center border border-blue-100">
+                    <QrCode className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Teacher</span>
+                </div>
+                {/* Arrow */}
+                <div className="flex flex-col items-center gap-1 px-2">
+                  <div className="h-0.5 w-12 bg-gradient-to-r from-blue-300 to-blue-500 rounded-full" />
+                  <span className="text-[9px] text-gray-400">Scan instantly</span>
+                </div>
+                {/* Student side */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center border border-green-100">
+                    <Smartphone className="w-8 h-8 text-green-600" />
+                  </div>
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Student</span>
+                </div>
+              </div>
             </div>
           </motion.div>
 
-          {/* Right Side - Dashboard Image */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="relative"
+          {/* iPad Kiosk / Dashboard card */}
+          <motion.div {...fadeUp(0.1)}
+            className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 flex flex-col"
+            style={{ borderColor: '#ebebeb' }}
           >
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 border-b border-gray-200">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                  <span className="text-xs text-gray-500 ml-2">attmark-attendance-page</span>
-                </div>
-                <div className="space-y-3">
-                  <div className="h-8 bg-white rounded-lg border border-gray-200 flex items-center px-3">
-                    <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
-                    <div className="h-2 w-32 bg-gray-200 rounded"></div>
-                  </div>
-                  {/* Image Container */}
-                  <div className="relative">
-                    {!imageLoaded && (
-                      <div className="w-full aspect-video bg-gray-200 animate-pulse flex items-center justify-center rounded-lg">
-                        <div className="text-gray-400 text-sm">Loading attendance preview...</div>
-                      </div>
-                    )}
-                    <img
-                      src="/Pages-Picture/Attmark-Dashboard_Page.png"
-                      alt="Attmark Dashboard Preview"
-                      className={`w-full h-auto object-cover rounded-lg transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                      onLoad={() => setImageLoaded(true)}
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = "https://via.placeholder.com/800x450?text=Attmark+Dashboard+Preview";
-                        setImageLoaded(true);
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="p-6 text-center">
-                <p className="text-gray-600 text-sm">
-                  Simple attendance interface for quick attendance tracking
-                </p>
-              </div>
-            </div>
-            {/* Decorative elements */}
-            <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10"></div>
-            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-sky-100 rounded-2xl -z-10"></div>
+            <h3 className="text-lg font-bold text-gray-800 mb-1 leading-snug">
+              Elevate Your Front-Desk with{' '}
+              <span className="text-blue-600">Analytics Dashboard</span>
+            </h3>
+            <p className="text-sm text-gray-500 mb-5">
+              Powerful visual insights that break down attendance by demographics, dates, and status — all in one place.
+            </p>
+
+            {/* Checklist */}
+            <ul className="space-y-2 mt-auto">
+              {checkItems.map((item, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                  <CheckCircle className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </motion.div>
         </div>
+
+        {/* ── ROW 2: 3-col ── */}
+        <div className="grid md:grid-cols-3 gap-5 mb-5">
+
+          {/* Personalized Passes */}
+          <motion.div {...fadeUp(0.15)}
+            className="bg-white rounded-3xl border border-gray-100 shadow-sm p-7 flex flex-col"
+            style={{ borderColor: '#ebebeb' }}
+          >
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-5 border border-blue-100">
+              <QrCode className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="text-base font-bold text-gray-800 mb-1 leading-snug">
+              Personalized{' '}
+              <span className="text-blue-600">QR Passes</span>
+            </h3>
+            <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+              Create a personalized check-in experience. Export passes students can save to their phones.
+            </p>
+
+            {/* Mini pass cards */}
+            <div className="mt-5 space-y-2">
+              {['Ahmed Khan — CS101', 'Sara Ali — Math202'].map((s, i) => (
+                <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2 border border-gray-100">
+                  <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <div className="w-3 h-3 grid grid-cols-2 gap-px">
+                      {[...Array(4)].map((_, j) => (
+                        <div key={j} className={`rounded-sm ${j % 2 === 0 ? 'bg-blue-700' : 'bg-blue-300'}`} />
+                      ))}
+                    </div>
+                  </div>
+                  <span className="text-[11px] text-gray-600 font-medium">{s}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* One Click for Admins */}
+          <motion.div {...fadeUp(0.2)}
+            className="bg-white rounded-3xl border border-gray-100 shadow-sm p-7 flex flex-col"
+            style={{ borderColor: '#ebebeb' }}
+          >
+            <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mb-5 border border-purple-100">
+              <Users className="w-6 h-6 text-purple-600" />
+            </div>
+            <h3 className="text-base font-bold text-gray-800 mb-1 leading-snug">
+              One Click Check-in{' '}
+              <span className="text-blue-600">for Admins</span>
+            </h3>
+            <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+              Manage classes, import students from Excel, update records, and check-in super fast from the web.
+            </p>
+
+            {/* Mini admin list */}
+            <div className="mt-5 bg-gray-50 rounded-2xl p-3 border border-gray-100 space-y-2">
+              {[
+                { name: 'Bilal Raza', status: 'Present', color: 'bg-green-100 text-green-600' },
+                { name: 'Nadia Hussain', status: 'Absent', color: 'bg-red-100 text-red-500' },
+                { name: 'Usman Tariq', status: 'Late', color: 'bg-yellow-100 text-yellow-600' },
+              ].map((s, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <span className="text-[11px] font-medium text-gray-700">{s.name}</span>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${s.color}`}>{s.status}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Faster check-in for students */}
+          <motion.div {...fadeUp(0.25)}
+            className="bg-white rounded-3xl border border-gray-100 shadow-sm p-7 flex flex-col"
+            style={{ borderColor: '#ebebeb' }}
+          >
+            <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center mb-5 border border-orange-100">
+              <Zap className="w-6 h-6 text-orange-500" />
+            </div>
+            <h3 className="text-base font-bold text-gray-800 mb-1 leading-snug">
+              10x Faster Check-In{' '}
+              <span className="text-blue-600">for Students</span>
+            </h3>
+            <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+              Attmark remembers the student and their last check-in, making every subsequent session even faster.
+            </p>
+
+            {/* Speed meter visual */}
+            <div className="mt-5 bg-gray-50 rounded-2xl p-3 border border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-gray-500">Check-in Speed</span>
+                <span className="text-[10px] font-bold text-green-600">10x faster</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-gradient-to-r from-blue-500 to-green-400 h-2 rounded-full" style={{ width: '90%' }} />
+              </div>
+              <div className="flex justify-between mt-1">
+                <span className="text-[9px] text-gray-400">Manual</span>
+                <span className="text-[9px] text-gray-400">QR Scan</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ── BOTTOM BANNER ── */}
+        <motion.div {...fadeUp(0.3)}
+          className="rounded-3xl bg-white border p-8 text-center"
+          style={{ borderColor: '#ebebeb' }}
+        >
+          <p className="text-gray-600 text-sm md:text-base">
+            Create Your Perfect, Effortless Check-in Process with{' '}
+            <span className="font-bold text-gray-900">Surveys, Photos, Signatures</span>
+            {' '}or{' '}
+            <span className="font-bold text-blue-600">Check-in Codes</span>
+            , Today.
+          </p>
+          <a
+            href="#contact"
+            className="inline-flex items-center gap-2 mt-5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-blue-200"
+          >
+            Get Started Free →
+          </a>
+        </motion.div>
+
       </div>
     </section>
   );
