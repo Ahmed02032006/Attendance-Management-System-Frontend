@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Send, MessageSquare } from 'lucide-react';
 
 const Contact = () => {
@@ -20,22 +21,28 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-      {/* Background Animation */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute w-[350px] h-[350px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000 right-0 bottom-0"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <section id="contact" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
+      {/* Background Animation - Lighter pattern */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute w-[400px] h-[400px] bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
+        <div className="absolute w-[350px] h-[350px] bg-cyan-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000 right-0 bottom-0"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:24px_24px]"></div>
       </div>
 
       <div className="max-w-3xl mx-auto relative z-10">
         {/* Header Section */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-200 shadow-sm mb-4">
-            <MessageSquare className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-semibold text-gray-700">Get in Touch</span>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 rounded-full shadow-lg mb-6">
+            <MessageSquare className="w-4 h-4 text-white" />
+            <span className="text-sm font-semibold text-white">Get in Touch</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
             Let's Talk About
             <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent ml-2">
               Your Needs
@@ -44,11 +51,17 @@ const Contact = () => {
           <p className="text-gray-600">
             Have questions about implementing Attmark? We're here to help.
           </p>
-        </div>
+        </motion.div>
 
         {/* Contact Form - Centered */}
-        <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-200">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
+        >
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Your Name
@@ -97,15 +110,17 @@ const Contact = () => {
               ></textarea>
             </div>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:scale-[1.02] font-medium flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all font-medium flex items-center justify-center gap-2"
             >
               <Send className="w-4 h-4" />
               Send Message
-            </button>
+            </motion.button>
           </form>
-        </div>
+        </motion.div>
       </div>
 
       <style jsx>{`

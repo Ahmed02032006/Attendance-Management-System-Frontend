@@ -1,6 +1,7 @@
 import React from 'react';
 import { GraduationCap, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Github } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -14,123 +15,124 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative bg-white border-t border-gray-200 py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <footer className="relative bg-gradient-to-b from-gray-50 to-white border-t border-gray-200 py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Subtle Background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute w-[300px] h-[300px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float"></div>
-        <div className="absolute w-[250px] h-[250px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float animation-delay-2000 right-0 bottom-0"></div>
+        <div className="absolute w-[300px] h-[300px] bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float"></div>
+        <div className="absolute w-[250px] h-[250px] bg-cyan-100 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float animation-delay-2000 right-0 bottom-0"></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Logo & About */}
-          <div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                <GraduationCap className="w-4 h-4 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
+                <GraduationCap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 Attmark
               </span>
             </div>
-            <p className="text-sm text-gray-600 leading-relaxed mb-4">
+            <p className="text-sm text-gray-600 leading-relaxed mb-4 max-w-sm">
               Simplifying attendance management for universities with modern technology and intuitive design.
             </p>
             <div className="flex gap-3">
-              <a href="#" className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition-all">
-                <Facebook className="w-4 h-4" />
+              <a href="#" className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition-all group">
+                <Facebook className="w-4 h-4 text-gray-600 group-hover:text-blue-600" />
               </a>
-              <a href="#" className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition-all">
-                <Twitter className="w-4 h-4" />
+              <a href="#" className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition-all group">
+                <Twitter className="w-4 h-4 text-gray-600 group-hover:text-blue-600" />
               </a>
-              <a href="#" className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition-all">
-                <Linkedin className="w-4 h-4" />
+              <a href="#" className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition-all group">
+                <Linkedin className="w-4 h-4 text-gray-600 group-hover:text-blue-600" />
               </a>
-              <a href="#" className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition-all">
-                <Github className="w-4 h-4" />
+              <a href="#" className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition-all group">
+                <Github className="w-4 h-4 text-gray-600 group-hover:text-blue-600" />
               </a>
             </div>
-          </div>
+          </motion.div>
 
           {/* Quick Links */}
-          <div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="md:pl-8"
+          >
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Quick Links</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               <li>
-                <button onClick={() => scrollToSection('hero')} className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                <button onClick={() => scrollToSection('hero')} className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-2 group">
+                  <span className="w-1 h-1 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                   Home
                 </button>
               </li>
               <li>
-                <button onClick={() => scrollToSection('about')} className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                <button onClick={() => scrollToSection('about')} className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-2 group">
+                  <span className="w-1 h-1 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                   About Us
                 </button>
               </li>
               <li>
-                <button onClick={() => scrollToSection('features')} className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                <button onClick={() => scrollToSection('features')} className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-2 group">
+                  <span className="w-1 h-1 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                   Features
                 </button>
               </li>
               <li>
-                <button onClick={() => scrollToSection('faqs')} className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                <button onClick={() => scrollToSection('faqs')} className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-2 group">
+                  <span className="w-1 h-1 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                   FAQs
                 </button>
               </li>
               <li>
-                <button onClick={() => scrollToSection('contact')} className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                <button onClick={() => scrollToSection('contact')} className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-2 group">
+                  <span className="w-1 h-1 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                   Contact
                 </button>
               </li>
             </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Contact Info</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-gray-500 mt-0.5" />
-                <a href="mailto:support@attmark.com" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
-                  support@attmark.com
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-gray-500 mt-0.5" />
-                <a href="tel:+1234567890" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
-                  +1 (234) 567-890
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
-                <span className="text-sm text-gray-600">
-                  123 Education Street,<br />
-                  Tech Valley, CA 94043
-                </span>
-              </li>
-            </ul>
-          </div>
+          </motion.div>
 
           {/* Newsletter */}
-          <div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Stay Updated</h3>
-            <p className="text-sm text-gray-600 mb-3">
-              Get the latest updates and news about Attmark.
+            <p className="text-sm text-gray-600 mb-4">
+              Get the latest updates and news about Attmark delivered to your inbox.
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
-                placeholder="Your email"
-                className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                placeholder="Your email address"
+                className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white"
               />
-              <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+              <button className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all hover:scale-105">
                 Subscribe
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 mt-8 border-t border-gray-200 text-center">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="pt-8 mt-8 border-t border-gray-200 text-center"
+        >
           <p className="text-xs text-gray-500">
             © {currentYear} Attmark. All rights reserved. Built for universities and educators.
           </p>
@@ -145,7 +147,7 @@ const Footer = () => {
               Cookie Policy
             </a>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <style jsx>{`

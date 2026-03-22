@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { QrCode, BarChart, Clock, Sparkles, Target, Zap, HeartHandshake } from 'lucide-react';
 
 const About = () => {
@@ -23,17 +24,23 @@ const About = () => {
   ];
 
   return (
-    <section id="about" className="relative py-6 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-      {/* Background Animation - Matching Home Section */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute w-[350px] h-[350px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000 right-0 bottom-0"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <section id="about" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
+      {/* Background Animation - Lighter pattern */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute w-[400px] h-[400px] bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
+        <div className="absolute w-[350px] h-[350px] bg-cyan-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000 right-0 bottom-0"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:24px_24px]"></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Header Section - Matching Home Style */}
-        <div className="text-center mb-16">
+        {/* Header Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Simplifying
             <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent ml-2">
@@ -43,12 +50,17 @@ const About = () => {
           <p className="text-sm text-gray-600 max-w-2xl mx-auto">
             We're building a modern attendance management system to help universities streamline their daily operations.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Main Content - Two Column Layout Matching Home */}
+        {/* Main Content - Two Column Layout */}
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
           {/* Left Side - Content */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
             <div className="mb-8">
               <h3 className="text-3xl font-bold text-gray-900 mb-4">
                 Made for Educators,
@@ -67,24 +79,37 @@ const About = () => {
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
-                  <div key={index} className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-300 group">
+                  <motion.div 
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                    className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-300 group cursor-pointer"
+                  >
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Icon className="w-5 h-5 text-blue-600" />
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Icon className="w-6 h-6 text-blue-600" />
                       </div>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-1">{feature.title}</h4>
                       <p className="text-sm text-gray-600">{feature.description}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Side - Dashboard Image */}
-          <div className="relative">
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative"
+          >
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 border-b border-gray-200">
                 <div className="flex items-center gap-3 mb-4">
@@ -126,12 +151,26 @@ const About = () => {
               </div>
             </div>
             {/* Decorative elements matching home section */}
-            <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10"></div>
-            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-sky-100 rounded-2xl -z-10"></div>
-          </div>
+            <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10 animate-float"></div>
+            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-sky-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
+          </motion.div>
         </div>
       </div>
 
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(10px, -10px) scale(1.05); }
+          50% { transform: translate(20px, 5px) scale(1.1); }
+          75% { transform: translate(-10px, 15px) scale(1.05); }
+        }
+        .animate-float {
+          animation: float 20s ease-in-out infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+      `}</style>
     </section>
   );
 };

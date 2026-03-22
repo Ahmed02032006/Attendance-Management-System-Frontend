@@ -6,6 +6,7 @@ import {
   GraduationCap,
   Sparkles
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import About from '../../components/Landing_Page/About';
 import Features from '../../components/Landing_Page/Features';
 import FAQs from '../../components/Landing_Page/FAQs';
@@ -16,7 +17,7 @@ const MainPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState('hero');
 
   const navigate = useNavigate();
 
@@ -40,7 +41,7 @@ const MainPage = () => {
           }
         });
       },
-      { threshold: 0.5 } // Trigger when 50% of the section is visible
+      { threshold: 0.3 } // Reduced threshold for better detection
     );
 
     // Observe all sections
@@ -68,10 +69,10 @@ const MainPage = () => {
 
   return (
     <div className="min-h-screen bg-white relative overflow-x-hidden">
-      {/* Animated Background */}
+      {/* Animated Background - Lighter pattern */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div
-          className="absolute w-[500px] h-[500px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"
+          className="absolute w-[500px] h-[500px] bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"
           style={{
             left: `${mousePosition.x}%`,
             top: `${mousePosition.y}%`,
@@ -79,14 +80,15 @@ const MainPage = () => {
           }}
         ></div>
         <div
-          className="absolute w-[400px] h-[400px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000"
+          className="absolute w-[400px] h-[400px] bg-cyan-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000"
           style={{
             right: `${100 - mousePosition.x}%`,
             bottom: `${100 - mousePosition.y}%`,
             transform: 'translate(50%, 50%)'
           }}
         ></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        {/* Lighter grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:24px_24px]"></div>
       </div>
 
       {/* Navbar */}
@@ -355,17 +357,17 @@ const MainPage = () => {
         </div>
       </section>
 
-      {/* All Section Components */}
-      <div id="about">
+      {/* All Section Components - Fixed spacing */}
+      <div id="about" className="-mt-8">
         <About />
       </div>
-      <div id="features">
+      <div id="features" className="-mt-8">
         <Features />
       </div>
-      <div id="faqs">
+      <div id="faqs" className="-mt-8">
         <FAQs />
       </div>
-      <div id="contact">
+      <div id="contact" className="-mt-8">
         <Contact />
       </div>
 
