@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { QrCode, BarChart, Zap, CheckCircle, XCircle, Users, Clock, Smartphone } from 'lucide-react';
+import { QrCode, BarChart, Zap, CheckCircle, XCircle, Users, Clock, Smartphone, MessageCircle, HelpCircle, Bot } from 'lucide-react';
 
 const About = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -245,33 +245,42 @@ const About = () => {
               </div>
             </motion.div>
 
-            {/* One Click for Admins */}
+            {/* AI Chatbot Assistant - New Card */}
             <motion.div {...fadeUp(0.2)}
-              className="bg-white rounded-3xl border border-gray-100 shadow-sm p-7 flex flex-col"
+              className="bg-white rounded-3xl border border-gray-100 shadow-sm p-7 flex flex-col hover:shadow-lg transition-all duration-300"
               style={{ borderColor: '#ebebeb' }}
             >
-              <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mb-5 border border-purple-100">
-                <Users className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mb-5 shadow-md">
+                <Bot className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-base font-bold text-gray-800 mb-1 leading-snug">
-                One Click Check-in{' '}
-                <span className="text-blue-600">for Admins</span>
+                AI Assistant{' '}
+                <span className="text-blue-600">Guide & Support</span>
               </h3>
               <p className="text-sm text-gray-500 mt-2 leading-relaxed">
-                Manage classes, import students from Excel, update records, and check-in super fast from the web.
+                24/7 AI-powered chatbot that helps teachers navigate the platform, answer questions, and provide instant guidance.
               </p>
 
-              <div className="mt-5 bg-gray-50 rounded-2xl p-3 border border-gray-100 space-y-2">
-                {[
-                  { name: 'Bilal Raza', status: 'Present', color: 'bg-green-100 text-green-600' },
-                  { name: 'Nadia Hussain', status: 'Absent', color: 'bg-red-100 text-red-500' },
-                  { name: 'Usman Tariq', status: 'Late', color: 'bg-yellow-100 text-yellow-600' },
-                ].map((s, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <span className="text-[11px] font-medium text-gray-700">{s.name}</span>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${s.color}`}>{s.status}</span>
+              {/* Chatbot Preview */}
+              <div className="mt-5 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-3 border border-blue-100">
+                <div className="flex items-start gap-2 mb-3">
+                  <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <MessageCircle className="w-3.5 h-3.5 text-white" />
                   </div>
-                ))}
+                  <div className="flex-1">
+                    <div className="bg-white rounded-xl p-2 shadow-sm">
+                      <p className="text-[10px] text-gray-600">How do I create a QR code for my class?</p>
+                    </div>
+                    <div className="mt-1.5 bg-blue-100 rounded-xl p-2 ml-4">
+                      <p className="text-[10px] text-blue-800">Go to Dashboard → Classes → Generate QR Code. It's that simple! 🚀</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-blue-100">
+                  <HelpCircle className="w-3 h-3 text-blue-500" />
+                  <span className="text-[9px] text-gray-500">Ask me anything about Attmark</span>
+                  <span className="text-[9px] text-green-500 ml-auto">● Online</span>
+                </div>
               </div>
             </motion.div>
 
@@ -307,9 +316,9 @@ const About = () => {
             </motion.div>
           </div>
 
-          {/* BOTTOM BANNER */}
+          {/* BOTTOM BANNER - Smaller Button */}
           <motion.div {...fadeUp(0.3)}
-            className="rounded-3xl bg-white border p-8 text-center"
+            className="rounded-3xl bg-white border p-6 text-center"
             style={{ borderColor: '#ebebeb' }}
           >
             <p className="text-gray-600 text-sm md:text-base">
@@ -321,7 +330,7 @@ const About = () => {
             </p>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 mt-5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-blue-200"
+              className="inline-flex items-center gap-2 mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-blue-200"
             >
               Get Started Free →
             </a>
