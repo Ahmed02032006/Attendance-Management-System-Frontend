@@ -1,15 +1,19 @@
-import React, { useState, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, useInView, useAnimation } from 'framer-motion';
 import { Plus, Minus } from 'lucide-react';
 
 const FAQs = () => {
   const [openIndex, setOpenIndex] = useState(0);
   const sectionRef = useRef(null);
-  const isInView = useInView(sectionRef, { 
-    once: true, // This ensures animation only happens once when section comes into view
-    amount: 0.1,
-    triggerOnce: true // Additional safety to ensure it only triggers once
-  });
+  const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
+  const controls = useAnimation();
+
+  // Only trigger animation once when section comes into view
+  useEffect(() => {
+    if (isInView) {
+      controls.start('visible');
+    }
+  }, [isInView, controls]);
 
   const faqs = [
     {
@@ -56,14 +60,9 @@ const FAQs = () => {
 
   const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
 
-  // Animation variants for better performance
   const fadeUpVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: (delay = 0) => ({
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }
-    })
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
   };
 
   const leftFaqs = faqs.filter((_, i) => i % 2 === 0);
@@ -74,9 +73,9 @@ const FAQs = () => {
     return (
       <motion.div
         custom={delay}
-        initial="hidden"
-        animate={isInView ? "visible" : "hidden"}
         variants={fadeUpVariants}
+        initial="hidden"
+        animate={controls}
         className={`rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer ${
           isOpen
             ? 'border-blue-200 bg-white shadow-md shadow-blue-50'
@@ -121,10 +120,9 @@ const FAQs = () => {
       <div className="max-w-5xl mx-auto relative z-10">
         {/* Header */}
         <motion.div
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
           variants={fadeUpVariants}
-          custom={0}
+          initial="hidden"
+          animate={controls}
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
@@ -143,7 +141,7 @@ const FAQs = () => {
                 key={i * 2} 
                 faq={faq} 
                 index={i * 2} 
-                delay={0.04 * i}
+                delay={0.1 + (i * 0.05)} 
               />
             ))}
           </div>
@@ -153,7 +151,7 @@ const FAQs = () => {
                 key={i * 2 + 1} 
                 faq={faq} 
                 index={i * 2 + 1} 
-                delay={0.04 * i + 0.02}
+                delay={0.1 + (i * 0.05)} 
               />
             ))}
           </div>
@@ -161,10 +159,10 @@ const FAQs = () => {
 
         {/* Bottom CTA */}
         <motion.div
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
           variants={fadeUpVariants}
-          custom={0.55}
+          initial="hidden"
+          animate={controls}
+          transition={{ delay: 0.3 }}
           className="mt-10 text-center"
         >
           <p className="text-sm text-gray-500">
