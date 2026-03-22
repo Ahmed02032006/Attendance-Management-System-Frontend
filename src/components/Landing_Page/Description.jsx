@@ -219,28 +219,6 @@ const Description = () => {
             </motion.div>
           </div>
 
-          {/* Bottom CTA */}
-          <motion.div {...fadeUp(0.5)} className="mt-20 text-center">
-            <p className="text-gray-700 font-semibold text-base mb-5">
-              Know Exactly Who's Where in Real-Time
-            </p>
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-10 py-4 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-blue-200"
-            >
-              Get Started Free
-            </a>
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <div className="flex -space-x-2">
-                {['#3b82f6', '#06b6d4', '#8b5cf6'].map((c, i) => (
-                  <div key={i} className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-white text-[9px] font-bold" style={{ background: c }}>
-                    {['AK', 'SR', 'BR'][i]}
-                  </div>
-                ))}
-              </div>
-              <span className="text-xs text-gray-500 font-medium">Trusted by 50,000+ students</span>
-            </div>
-          </motion.div>
         </div>
       </div>
     </section>
