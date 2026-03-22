@@ -10,52 +10,48 @@ const Home = () => {
     <section id="hero" className="relative pt-24 pb-14 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
       <div className="max-w-7xl mx-auto relative z-10 w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column - Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-left"
-          >
-            {/* Trust Indicators - Now at top left */}
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full text-xs text-gray-600 border border-gray-300">
-                <Sparkles className="w-3.5 h-3.5 text-blue-600 mr-1.5" />
-                <span>No credit card required</span>
+          {/* Left Content - Heading and Trust Indicators */}
+          <div className="text-left">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              {/* Heading */}
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4">
+                Track Attendance
+                <br />
+                <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  The Smart Way
+                </span>
+              </h1>
+
+              {/* Subheading */}
+              <p className="text-sm text-gray-600 max-w-lg leading-relaxed mb-8">
+                A complete attendance management solution for universities.
+                Track via QR codes or manual entry, generate reports, and export data instantly.
+              </p>
+            </motion.div>
+
+            {/* Trust Indicators - Positioned at center left */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex flex-col items-start space-y-3"
+            >
+              <div className="flex items-center bg-gray-50 px-4 py-2 rounded-full text-sm text-gray-600 border border-gray-300 hover:border-blue-300 hover:shadow-md transition-all duration-300">
+                <Sparkles className="w-4 h-4 text-blue-600 mr-2" />
+                <span className="font-medium">No credit card required</span>
               </div>
-              <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full text-xs text-gray-600 border border-gray-300">
-                <GraduationCap className="w-3.5 h-3.5 text-blue-600 mr-1.5" />
-                <span>Built for teachers</span>
+              <div className="flex items-center bg-gray-50 px-4 py-2 rounded-full text-sm text-gray-600 border border-gray-300 hover:border-blue-300 hover:shadow-md transition-all duration-300">
+                <GraduationCap className="w-4 h-4 text-blue-600 mr-2" />
+                <span className="font-medium">Built for teachers</span>
               </div>
-            </div>
+            </motion.div>
+          </div>
 
-            {/* Heading */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4">
-              Track Attendance
-              <br />
-              <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                The Smart Way
-              </span>
-            </h1>
-
-            {/* Subheading */}
-            <p className="text-sm text-gray-600 max-w-xl leading-relaxed mb-8">
-              A complete attendance management solution for universities.
-              Track via QR codes or manual entry, generate reports, and export data instantly.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4">
-              <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:scale-105 font-medium">
-                Get Started Free
-              </button>
-              <button className="border border-gray-300 text-gray-700 px-6 py-3 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all font-medium">
-                Watch Demo
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Right Column - Dashboard Preview Image */}
+          {/* Right Content - Dashboard Preview Image */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
