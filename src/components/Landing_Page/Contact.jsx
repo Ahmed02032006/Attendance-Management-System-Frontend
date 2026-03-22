@@ -86,24 +86,35 @@ const Contact = () => {
         </motion.div>
 
         {/* Info cards row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {infoCards.map(({ icon: Icon, label, value, sub, color, iconColor }, i) => (
-            <motion.div
-              key={i}
-              {...fadeUp(0.08 * (i + 1))}
-              className={`rounded-2xl border p-5 flex items-start gap-4 bg-white ${color}`}
-            >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${color} border`}>
-                <Icon className={`w-5 h-5 ${iconColor}`} />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">{label}</p>
-                <p className="text-sm font-bold text-gray-800">{value}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{sub}</p>
-              </div>
-            </motion.div>
-          ))}
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+  {infoCards.map(({ icon: Icon, label, value, sub, color, iconColor }, i) => (
+    <motion.div
+      key={i}
+      {...fadeUp(0.08 * (i + 1))}
+      className="group relative bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+    >
+      {/* Background gradient on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      
+      <div className="relative">
+        {/* Icon with gradient background */}
+        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+          <Icon className={`w-7 h-7 ${iconColor}`} />
         </div>
+        
+        {/* Content */}
+        <div>
+          <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">{label}</p>
+          <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
+          <p className="text-sm text-gray-500 leading-relaxed">{sub}</p>
+        </div>
+        
+        {/* Optional decorative element */}
+        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-gray-100 to-transparent rounded-full opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+      </div>
+    </motion.div>
+  ))}
+</div>
 
         {/* Contact form card */}
         <motion.div
