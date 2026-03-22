@@ -12,6 +12,7 @@ import Features from '../../components/Landing_Page/Features';
 import FAQs from '../../components/Landing_Page/FAQs';
 import Contact from '../../components/Landing_Page/Contact';
 import Footer from '../../components/Landing_Page/Footer';
+import Description from '../../components/Landing_Page/Description';
 
 const MainPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -373,6 +374,9 @@ const MainPage = () => {
       {/* All Section Components */}
       <div id="about">
         <About />
+      </div>
+      <div id="description">
+        <Description />
       </div>
       <div id="features">
         <Features />
