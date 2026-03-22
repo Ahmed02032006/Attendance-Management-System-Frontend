@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { Send, MessageSquare } from 'lucide-react';
 
 const Contact = () => {
@@ -8,6 +8,8 @@ const Contact = () => {
     email: '',
     message: ''
   });
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -21,28 +23,26 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-      {/* Background Animation - Lighter pattern */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute w-[400px] h-[400px] bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute w-[350px] h-[350px] bg-cyan-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000 right-0 bottom-0"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <section id="contact" className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden" ref={ref}>
+      {/* Background Animation - Lighter */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
+        <div className="absolute w-[350px] h-[350px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000 right-0 bottom-0"></div>
       </div>
 
       <div className="max-w-3xl mx-auto relative z-10">
         {/* Header Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 rounded-full shadow-lg mb-6">
-            <MessageSquare className="w-4 h-4 text-white" />
-            <span className="text-sm font-semibold text-white">Get in Touch</span>
+          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-200 shadow-sm mb-4">
+            <MessageSquare className="w-4 h-4 text-blue-600" />
+            <span className="text-sm font-semibold text-gray-700">Get in Touch</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Let's Talk About
             <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent ml-2">
               Your Needs
@@ -54,14 +54,13 @@ const Contact = () => {
         </motion.div>
 
         {/* Contact Form - Centered */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
+          className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-200"
         >
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Your Name
@@ -110,33 +109,16 @@ const Contact = () => {
               ></textarea>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all font-medium flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:scale-[1.02] font-medium flex items-center justify-center gap-2"
             >
               <Send className="w-4 h-4" />
               Send Message
-            </motion.button>
+            </button>
           </form>
         </motion.div>
       </div>
-
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(10px, -10px) scale(1.05); }
-          50% { transform: translate(20px, 5px) scale(1.1); }
-          75% { transform: translate(-10px, 15px) scale(1.05); }
-        }
-        .animate-float {
-          animation: float 20s ease-in-out infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-      `}</style>
     </section>
   );
 };

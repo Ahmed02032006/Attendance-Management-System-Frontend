@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, useInView } from 'framer-motion';
 import {
   Menu,
   X,
   GraduationCap,
   Sparkles
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import About from '../../components/Landing_Page/About';
 import Features from '../../components/Landing_Page/Features';
 import FAQs from '../../components/Landing_Page/FAQs';
@@ -17,7 +17,7 @@ const MainPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [activeSection, setActiveSection] = useState('hero');
+  const [activeSection, setActiveSection] = useState('home');
 
   const navigate = useNavigate();
 
@@ -41,7 +41,7 @@ const MainPage = () => {
           }
         });
       },
-      { threshold: 0.3 } // Reduced threshold for better detection
+      { threshold: 0.5 } // Trigger when 50% of the section is visible
     );
 
     // Observe all sections
@@ -68,11 +68,11 @@ const MainPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white relative overflow-x-hidden">
-      {/* Animated Background - Lighter pattern */}
+    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50/30 to-cyan-50/20 relative overflow-x-hidden">
+      {/* Animated Background - Lighter Gradient */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div
-          className="absolute w-[500px] h-[500px] bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"
+          className="absolute w-[500px] h-[500px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"
           style={{
             left: `${mousePosition.x}%`,
             top: `${mousePosition.y}%`,
@@ -80,15 +80,13 @@ const MainPage = () => {
           }}
         ></div>
         <div
-          className="absolute w-[400px] h-[400px] bg-cyan-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000"
+          className="absolute w-[400px] h-[400px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float animation-delay-2000"
           style={{
             right: `${100 - mousePosition.x}%`,
             bottom: `${100 - mousePosition.y}%`,
             transform: 'translate(50%, 50%)'
           }}
         ></div>
-        {/* Lighter grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:24px_24px]"></div>
       </div>
 
       {/* Navbar */}
@@ -288,7 +286,12 @@ const MainPage = () => {
       {/* Hero Section */}
       <section id="hero" className="relative pt-24 pb-14 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto relative z-10 w-full">
-          <div className="text-center mb-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-4"
+          >
             {/* Heading */}
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4">
               Track Attendance
@@ -303,10 +306,15 @@ const MainPage = () => {
               A complete attendance management solution for universities.
               Track via QR codes or manual entry, generate reports, and export data instantly.
             </p>
-          </div>
+          </motion.div>
 
           {/* Dashboard Preview Image with Loading State */}
-          <div className="relative max-w-5xl mx-auto mt-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative max-w-5xl mx-auto mt-8"
+          >
             {/* Decorative elements */}
             <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 rounded-2xl -z-10 animate-float"></div>
             <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-sky-100 rounded-2xl -z-10 animate-float animation-delay-2000"></div>
@@ -338,10 +346,15 @@ const MainPage = () => {
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Trust Indicators */}
-          <div className="flex flex-col items-center mt-4 space-y-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex flex-col items-center mt-4 space-y-4"
+          >
             {/* Trust indicators */}
             <div className="flex flex-wrap items-center justify-center gap-3">
               <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full text-xs text-gray-600 border border-gray-300">
@@ -353,21 +366,21 @@ const MainPage = () => {
                 <span>Built for teachers</span>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* All Section Components - Fixed spacing */}
-      <div id="about" className="-mt-8">
+      {/* All Section Components */}
+      <div id="about">
         <About />
       </div>
-      <div id="features" className="-mt-8">
+      <div id="features">
         <Features />
       </div>
-      <div id="faqs" className="-mt-8">
+      <div id="faqs">
         <FAQs />
       </div>
-      <div id="contact" className="-mt-8">
+      <div id="contact">
         <Contact />
       </div>
 
