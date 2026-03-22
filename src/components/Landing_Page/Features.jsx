@@ -14,10 +14,7 @@ import {
   CheckCircle,
   Lock,
   Globe,
-  Key,
-  TrendingUp,
-  Calendar,
-  PieChart
+  Key
 } from 'lucide-react';
 
 const Features = () => {
@@ -99,96 +96,45 @@ const Features = () => {
             </div>
           </motion.div>
 
-          {/* Analytics / Reports — Enhanced with Stats */}
+          {/* Analytics / Reports — card with chart mockup */}
           <motion.div {...fadeUp(0.1)}
-            className="relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-shadow duration-300 p-8 flex flex-col justify-between"
+            className="relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-shadow duration-300 p-8 flex flex-col justify-between min-h-[320px]"
           >
             <div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Analytics & Reports</h3>
-              <p className="text-gray-500 text-sm max-w-xs mb-6">
+              <p className="text-gray-500 text-sm max-w-xs">
                 Powerful reports to break down attendance by demographics, age, dates, status and more.
               </p>
             </div>
-            
-            {/* Enhanced Stats Dashboard */}
-            <div className="space-y-4">
-              {/* Key Stats Row */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 text-center">
-                  <TrendingUp className="w-4 h-4 text-blue-600 mx-auto mb-1" />
+            {/* Chart mockup */}
+            <div className="mt-6 bg-gray-50 rounded-2xl p-4 border border-gray-100">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-gray-700">Attendance Overview</span>
+                <div className="flex gap-1">
+                  <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">Weekly</span>
+                </div>
+              </div>
+              <div className="flex items-end gap-2 h-20">
+                {[65, 80, 55, 90, 72, 88, 60].map((h, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    <div
+                      className="w-full rounded-t-md"
+                      style={{
+                        height: `${h}%`,
+                        background: i === 3 ? 'linear-gradient(to top, #2563eb, #60a5fa)' : '#e5e7eb'
+                      }}
+                    />
+                    <span className="text-[9px] text-gray-400">{['M','T','W','T','F','S','S'][i]}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
+                <div>
+                  <p className="text-xs text-gray-400">Avg. Attendance</p>
                   <p className="text-lg font-bold text-gray-900">87.3%</p>
-                  <p className="text-[10px] text-gray-500">Avg Attendance</p>
                 </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 text-center">
-                  <Users className="w-4 h-4 text-green-600 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-gray-900">156</p>
-                  <p className="text-[10px] text-gray-500">Total Students</p>
-                </div>
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 text-center">
-                  <Calendar className="w-4 h-4 text-purple-600 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-gray-900">24</p>
-                  <p className="text-[10px] text-gray-500">Classes</p>
-                </div>
+                <Download className="w-4 h-4 text-blue-500" />
               </div>
-
-              {/* Chart with labels */}
-              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-semibold text-gray-700">Weekly Attendance Trend</span>
-                  <div className="flex gap-1">
-                    <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">This Week</span>
-                  </div>
-                </div>
-                
-                {/* Bar Chart */}
-                <div className="flex items-end gap-2 h-24 mb-3">
-                  {[
-                    { day: 'Mon', value: 72, color: 'from-blue-400 to-blue-500' },
-                    { day: 'Tue', value: 85, color: 'from-blue-400 to-blue-500' },
-                    { day: 'Wed', value: 68, color: 'from-orange-400 to-orange-500' },
-                    { day: 'Thu', value: 92, color: 'from-green-400 to-green-500' },
-                    { day: 'Fri', value: 88, color: 'from-blue-400 to-blue-500' },
-                    { day: 'Sat', value: 79, color: 'from-blue-400 to-blue-500' },
-                    { day: 'Sun', value: 84, color: 'from-blue-400 to-blue-500' },
-                  ].map((item, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                      <div
-                        className="w-full rounded-t-lg transition-all duration-300 group-hover:scale-105"
-                        style={{
-                          height: `${item.value}%`,
-                          background: `linear-gradient(to top, ${item.color.split(' ')[0]}, ${item.color.split(' ')[1]})`,
-                          opacity: 0.9
-                        }}
-                      />
-                      <span className="text-[9px] text-gray-400 font-medium">{item.day}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Additional Stats */}
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200">
-                  <div>
-                    <p className="text-[10px] text-gray-400">Present Today</p>
-                    <div className="flex items-baseline gap-1">
-                      <p className="text-sm font-bold text-gray-900">128</p>
-                      <p className="text-[10px] text-green-600">+12</p>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-400">Absent Today</p>
-                    <div className="flex items-baseline gap-1">
-                      <p className="text-sm font-bold text-gray-900">28</p>
-                      <p className="text-[10px] text-red-600">-3</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Export Button */}
-              <button className="w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl py-2 transition-all duration-200">
-                <Download className="w-3.5 h-3.5 text-gray-600" />
-                <span className="text-xs font-medium text-gray-700">Export Full Report</span>
-              </button>
             </div>
           </motion.div>
         </div>
