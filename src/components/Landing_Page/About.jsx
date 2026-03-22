@@ -253,7 +253,7 @@ const About = () => {
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mb-5 shadow-md">
                 <Bot className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-base font-bold text-gray-800 mb-1 leading-snug">
+              <h3 className="text-base font-bold text-gray-800 leading-snug">
                 AI Assistant{' '}
                 <span className="text-blue-600">Guide & Support</span>
               </h3>
@@ -316,7 +316,7 @@ const About = () => {
             className="rounded-3xl bg-white border p-5 text-center"
             style={{ borderColor: '#ebebeb' }}
           >
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-600 text-base">
               Create Your Perfect, Effortless Check-in Process with{' '}
               <span className="font-bold text-gray-900">Surveys, Photos, Signatures</span>
               {' '}or{' '}
